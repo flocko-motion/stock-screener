@@ -46,7 +46,7 @@ def watchdog(timeout: int, retries: int):
 					# Successfully completed
 					return result[0]
 
-				time.sleep(0.5)  # Optional delay between retries
+				time.sleep(3)  # Optional delay between retries
 
 			# If all attempts fail, raise the last exception or timeout error
 			if last_exception:

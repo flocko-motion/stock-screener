@@ -15,8 +15,8 @@ indexes = {
     "MEGACAPS": 'https://stockanalysis.com/list/mega-cap-stocks/',
     "LARGECAPS": 'https://stockanalysis.com/list/large-cap-stocks/',
     "MIDCAPS": 'https://stockanalysis.com/list/mid-cap-stocks/',
-    "DEUTSCHEBOERSE": 'https://stockanalysis.com/list/deutsche-boerse-xetra/',
-    "LSE": 'https://stockanalysis.com/list/london-stock-exchange/',
+    # "DEUTSCHEBOERSE": 'https://stockanalysis.com/list/deutsche-boerse-xetra/',
+    # "LSE": 'https://stockanalysis.com/list/london-stock-exchange/',
 }
 
 def stockanalysis_get_constituents() -> dict:
@@ -34,12 +34,17 @@ def get_constituents(index: str) -> dict:
     html_path = get_cache_path(index, "stockanalysis", "html")
     response_text = None
     if not os.path.exists(html_path):
-        response = requests.get(indexes[index])
+        url = indexes[index]
+        print(f"loadin constituents for {index} from {url}")
+        response = requests.get(url)
         response.raise_for_status()  # Ensure the request was successful
+        if response.status_code != 200:
+            raise ValueError(f"Could not fetch data from {url}")
         with open(html_path, "w") as f:
             f.write(response.text)
         response_text = response.text
     else:
+        print(f"loadin constituents for {index} from cache")
         with open(html_path, "r") as f:
             response_text = f.read()
 

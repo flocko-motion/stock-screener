@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Screener</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            cursor: pointer;
+            background-color: #f2f2f2;
+        }
+        th:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Screener</h1>
+    <table id="data-table">
+        <thead>
+            <tr id="table-header"></tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+
+    <script>
+        // Load the CSV file and process it
+        fetch('data.csv')
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.trim().split('\n');
+                const headers = rows[0].split(',');
+                const tableHeader = document.getElementById('table-header');
+                const tableBody = document.getElementById('table-body');
+
+                // Create table headers
+                headers.forEach((header, index) => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    th.addEventListener('click', () => sortTable(index));
+                    tableHeader.appendChild(th);
+                });
+
+                // Create table rows
+                rows.slice(1).forEach(row => {
+                    const tr = document.createElement('tr');
+                    const cells = row.split(',');
+
+                    cells.forEach((cell, index) => {
+                        const td = document.createElement('td');
+                        if (index === headers.length - 1) { // If it's the Plot column
+                            const img = document.createElement('img');
+                            img.src = cell;
+                            img.alt = "Plot";
+                            img.style.maxWidth = "150px";
+                            td.appendChild(img);
+                        } else {
+                            td.textContent = cell;
+                        }
+                        tr.appendChild(td);
+                    });
+
+                    tableBody.appendChild(tr);
+                });
+            });
+
+        // Sort the table by a given column index
+        function sortTable(columnIndex) {
+            const tableBody = document.getElementById('table-body');
+            const rows = Array.from(tableBody.rows);
+            const isNumeric = !isNaN(rows[0].cells[columnIndex].textContent);
+
+            rows.sort((a, b) => {
+                const cellA = a.cells[columnIndex].textContent;
+                const cellB = b.cells[columnIndex].textContent;
+
+                return isNumeric
+                    ? parseFloat(cellA) - parseFloat(cellB)
+                    : cellA.localeCompare(cellB);
+            });
+
+            // Toggle order for repeated clicks
+            if (tableBody.dataset.sortedBy === columnIndex.toString()) {
+                rows.reverse();
+                tableBody.dataset.sortedBy = ""; // Reset
+            } else {
+                tableBody.dataset.sortedBy = columnIndex.toString();
+            }
+
+            tableBody.append(...rows);
+        }
+    </script>
+</body>
+</html>

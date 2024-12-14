@@ -15,13 +15,16 @@ import time
 import os
 from datetime import datetime, timedelta
 import math
-import lib.yahoo_finance as fin_db
+# import lib.yahoo_finance as fin_db
+import lib.financialmodelingprep as fin_db
 
+from matplotlib import dates as mdates
 from matplotlib import patches
 
 date_epoch_start = datetime(2009, 1, 1)
 
 cagr_class_exponent = 1.10
+
 
 class Ticker:
 
@@ -47,12 +50,20 @@ class Ticker:
         self.history_monthly_cache = None
         self.rolling_cagr_df = None
         self.total_cagr_cache = None
+        self.yearly_data_cache = None
 
     def analyze(self):
+        if self.history is None or self.info is None:
+            print("No data - skipping")
+            return
         time_start = time.time()
-        self.history()
+        history = self.history()
         time_end = time.time()
-        print(f"Loading data: {time_end - time_start:.2f} seconds")
+        if history is None:
+            print(f"Loading failed: {time_end - time_start:.2f} seconds")
+            return 
+        else:
+            print(f"Loading data: {time_end - time_start:.2f} seconds")
         self.plot_cagr_histogram()
 
     def history(self):
@@ -70,34 +81,19 @@ class Ticker:
             self.rolling_cagr_df = self.calculate_rolling_cagr()
         return self.rolling_cagr_df
 
-    def info_save(self, info):
-        try:
-            yaml.dump(info, open(self.cache_file_info, "w"))
-            self.info_load()
-        except Exception as e:
-            print(f"Error saving info for {self.ticker}: {e}")
-            raise e
-
-    def info_load(self):
-        self.info = yaml.load(open(self.cache_file_info, "r"), Loader=yaml.FullLoader)
-
-
-
     def load_financial_data(self):
-        print(f"{self.ticker} - loading from Yahoo Finance")
+        print(f"{self.ticker} - loading financial data")
 
-        ticker_info, price_history =fin_db.load_ticker(self.ticker)
-        self.info_save(ticker_info)
+        try:
+            self.info, price_history = fin_db.load_ticker(self.ticker)
+        except Exception as e:
+            raise Exception(f"Error loading {self.ticker} data: {e}")
 
-        if len(price_history) == 0:
-            raise ValueError(f"No data found for the given stock symbol: {self.ticker}")
-
-        price_history.index = pd.to_datetime(price_history.index, errors='coerce', utc=True)
-
-        price_history = price_history.dropna(subset=['Close'])
-        price_history = price_history[price_history.index >= pd.to_datetime(date_epoch_start, utc=True)]
-        for i in ["Open", "High", "Low", "Close"]:
-            price_history[i] = price_history[i] / price_history[i].iloc[0] * 100
+        price_history = price_history[price_history.index >= date_epoch_start]
+        price_zero = price_history.iloc[0]["close"]
+        if price_zero == 0:
+            raise Exception(f"First 'close' for {self.ticker} is 0")
+        price_history["close"] = price_history["close"] * 100 / price_zero
         return price_history
 
     @classmethod
@@ -137,21 +133,90 @@ class Ticker:
 
         return f'#{r_hex:02X}{g_hex:02X}{b_hex:02X}'
 
-    def add_to_html(self):
-        plots_dir = os.path.join(os.path.dirname(__file__), "html", "plots")
-        os.makedirs(plots_dir, exist_ok=True)
-        plot_path = os.path.join(plots_dir, f"{self.ticker}_plot.png")
+    def add_to_html(self, html_dir, df) -> bool:
         if not os.path.exists(self.cache_file_plot):
             print(f"Skipping {self.ticker} - no plot")
-            return
-        shutil.copyfile(self.cache_file_plot, plot_path)
+            return False
+        shutil.copyfile(self.cache_file_plot, self.plot_path(html_dir))
+        self.add_data_to_df(df, html_dir)
+        return True
 
-        html_file_path = os.path.join(os.path.dirname(__file__), "html", "index.html")
-        # Attach the saved plot to index.html
-        with open(html_file_path, "a") as html_file:
-            # Append an <img> tag pointing to the saved plot
-            html_file.write(
-                f'<img src="plots/{self.ticker}_plot.png" alt="{self.ticker} plot" style="width:100%; max-width:600px;">\n')
+    def plot_dir(self, html_dir) -> str :
+        path = os.path.join(html_dir, "plots")
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    def plot_path(self, html_dir = "") -> str:
+        return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_plot.png")
+
+    @classmethod
+    def init_df(cls):
+        df = pd.DataFrame(columns=['Ticker', 'CAGR', 'Age', 'Years in Profit', 'Years in Loss', 'Histogram Stddev', 'Histogram Mean', 'Plot'])
+        df.set_index('Ticker', inplace=True)
+        return df
+
+    def add_data_to_df(self, df, html_dir):
+        df.loc[self.ticker] = [
+            self.get_cagr(),
+            self.get_age(),
+            self.get_years_profit(),
+            self.get_years_loss(),
+            self.get_histogram_stddev(),
+            self.get_histogram_mean(),
+            self.plot_path()
+        ]
+
+    def get_cagr(self) -> float:
+        return self.total_cagr()
+
+    def get_age(self) -> int:
+        years = set(self.get_years())
+        age = 0
+        while (datetime.now().year - age - 1) in years:
+            age += 1
+        return age
+
+    def get_years(self):
+        return self.history().index.year.unique()
+
+    def get_years_profit(self) -> int:
+        yearly_df = self.yearly_data()
+        return (yearly_df['Gain'] > 0).sum()
+
+    def get_years_loss(self) -> int:
+        yearly_df = self.yearly_data()
+        return (yearly_df['Gain'] < 0).sum()
+
+    def get_histogram_stddev(self) -> float:
+        return self.rolling_cagr()["1Y CAGR"].std()
+
+    def get_histogram_mean(self):
+        cagr_values = self.rolling_cagr()["1Y CAGR"]
+        # calculate geometric mean
+        return np.prod(1 + cagr_values) ** (1 / len(cagr_values)) - 1
+
+
+    def yearly_data(self):
+        if not (self.yearly_data_cache is None):
+            return self.yearly_data_cache
+
+        price_history = self.history()
+        df = pd.DataFrame(columns=['Year', 'Gain'])
+        df.set_index('Year', inplace=True)
+
+        for year in self.get_years():
+            yearly_data = price_history[price_history.index.year == year]
+
+            if len(yearly_data) < 2:
+                continue  # Skip years with insufficient data
+
+            # Calculate gain multiplier (end of year divided by start of year)
+            gain = yearly_data.iloc[-1]["close"] / yearly_data.iloc[0]["close"] - 1
+            df.loc[year] =  [ gain ]
+
+        self.yearly_data_cache = df
+        return df
+
 
     @watchdog(10, 3)
     def plot_cagr_histogram(self):
@@ -166,7 +231,7 @@ class Ticker:
         price_history = self.history()
         min_price = 50
         max_price = 100000
-        years = price_history.index.year.unique()  # Get unique years from the price history
+         # Get unique years from the price history
 
         print(f"Rolling CAGR calculation took {time.time() - time_start:.2f} seconds")
 
@@ -186,7 +251,7 @@ class Ticker:
         ax1.axvline(0, color='gray', linestyle='-', linewidth=2, label=f'Zero CAGR')
         ax1.axvline(total_cagr_class, color='black', linestyle='--', linewidth=4,
                     label=f'Total CAGR: {(self.total_cagr() - 1):.2%}')
-        ax1.set_title(f'{self.info["name"]} - CAGR Histogram', fontsize=14)
+        ax1.set_title(f'{self.info.name} - CAGR Histogram', fontsize=14)
         ax1.set_xlabel('CAGR', fontsize=12)
         ax1.set_ylabel('Frequency', fontsize=12)
         ax1.set_xlim(-10, 15)
@@ -203,42 +268,37 @@ class Ticker:
 
         time_start = time.time()
 
-
-        for year in years:
-            yearly_data = price_history[price_history.index.year == year]
-            if len(yearly_data) < 2:
-                continue  # Skip years with insufficient data
-
-            # Calculate gain multiplier (end of year divided by start of year)
-            gain = yearly_data['Close'].iloc[-1] / yearly_data['Close'].iloc[0]
+        df_by_year = self.yearly_data()
+        for year in self.get_years():
+            gain = df_by_year.loc[year]["Gain"]
 
             # Get color for the given year's gain
-            color = self.__class__.gain_to_color(gain)
+            color = self.__class__.gain_to_color(gain + 1)
 
             # Define the rectangle representing the year, using pd.Timedelta for width
-            start_date = yearly_data.index[0]
-            end_date = yearly_data.index[-1]
-            width = (end_date - start_date).days
+            start_date = datetime(year, 1, 1, 0,0 )
+            end_date = datetime(year, 12, 31, 23, 59)
 
-            # Set y to the bottom of the axis and make height cover the full range
             y_min, y_max = ax2.get_ylim()  # Get the current y-axis limits
-
             # Add the rectangle patch to ax2
             ax2.add_patch(patches.Rectangle(
                 (start_date, y_min),  # Starting position (x, y)
-                pd.Timedelta(days=width),  # Width in days
+                (end_date - start_date),  # Width in days
                 height=max_price, # y_max - y_min,  # Full height to cover from y_min to y_max
                 color=color,
                 alpha=0.2,  # Transparency
                 zorder=-1  # Put it in the background
             ))
 
-        ax2.plot(price_history.index, price_history['Close'], color='green', linestyle='-', linewidth=1.5,
+        ax2.plot(price_history.index.to_pydatetime(), price_history['close'], color='green', linestyle='-', linewidth=1.5,
                  label='Price History')
-        ax2.set_title(f'{self.info["name"]} - Price History', fontsize=14)
+
+        ax2.set_title(f'{self.info.name} - Price History', fontsize=14)
         ax2.set_ylabel('Price', fontsize=12)
-        ax2.set_xlabel('Date', fontsize=12)
+        ax2.set_xlabel('Year', fontsize=12)
         ax2.grid(axis='y', linestyle='--', alpha=0.7)
+
+        ax2.xaxis_date()
 
         # Format the x-axis labels to show dates clearly without overlapping
         # ax2.xaxis.set_major_locator(mdates.AutoDateLocator())
@@ -248,7 +308,7 @@ class Ticker:
         # Add a legend to the price history
         ax2.legend(loc='upper right')
         ax2.set_yscale('log')
-
+        #
         # Manually set y-axis ticks for better readability with more labels
         y_ticks = []
         for i in range(int(np.floor(np.log10(min_price))), int(np.ceil(np.log10(max_price))) + 1):
@@ -258,11 +318,19 @@ class Ticker:
 
         ax2.set_yticks(y_ticks)
         ax2.set_ylim(min_price, max_price)
+
+        # Determine the range of years in the data
+        years = sorted(price_history.index.year.unique())
+        ticks = [pd.Timestamp(f'{year}-01-01') for year in years]
+        ticks_numeric = mdates.date2num(ticks)
+        ax2.set_xticks(ticks_numeric)  # Set tick positions
+        ax2.set_xticklabels([str(year) for year in years], rotation=45, ha='right')  # Set tick labels as years
+
+
         ax2.set_xlim(date_epoch_start, datetime.now())
 
         # Set y-axis labels to normal numeric format without exponential notation
         ax2.get_yaxis().set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-
 
         print(f"Price history construction: {time.time() - time_start:.2f} seconds")
 
@@ -273,7 +341,7 @@ class Ticker:
 
         plt.savefig(self.cache_file_plot, dpi=300, bbox_inches='tight')  # Save with high resolution and trimmed whitespace
 
-        plt.show()
+        # plt.show()
 
         plt.close()
 
@@ -287,7 +355,11 @@ class Ticker:
         for i in range(12, len(history)):
             start_price = history.iloc[i - 12]
             end_price = history.iloc[i]
-            cagr = (end_price.Close / start_price.Close)  # we're already in annual - so not much to do here
+            if math.isnan(end_price["close"]) or math.isnan(start_price["close"]):
+                rolling_cagr.append(0)
+                rolling_cagr_class.append(0)
+                continue
+            cagr = (end_price["close"] / start_price["close"])  # we're already in annual - so not much to do here
             rolling_cagr.append(cagr)
             rolling_cagr_class.append(Ticker.cagr_to_class(cagr))
         # Create a DataFrame with the results
@@ -299,22 +371,25 @@ class Ticker:
         return rolling_cagr_df
 
     # Function to calculate total CAGR from start to end
-    def total_cagr(self):
+    def total_cagr(self) -> float:
         if not (self.total_cagr_cache is None):
             return self.total_cagr_cache
         hist = self.history()
-        start_price = hist['Close'].iloc[0]
-        end_price = hist['Close'].iloc[-1]
+        start_price = hist['close'].iloc[0]
+        end_price = hist['close'].iloc[-1]
         num_years = (hist.index[-1] - hist.index[0]).days / 365.25
         self.total_cagr_cache = (end_price / start_price) ** (1 / num_years)
         return self.total_cagr_cache
 
     @classmethod
     def cagr_to_class(cls, cagr, float=False):
-        c = (math.log(cagr) / math.log(cagr_class_exponent))
-        if float:
-            return c
-        return round(c)
+        try:
+            c = (math.log(cagr) / math.log(cagr_class_exponent))
+            if float:
+                return c
+            return round(c)
+        except:
+            raise
 
     @classmethod
     def class_to_cagr(cls, cagr_class):
