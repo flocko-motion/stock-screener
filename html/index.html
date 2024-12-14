@@ -5,21 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Screener</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+    color: #212529;
+}
+
+h1 {
+    text-align: center;
+    color: #343a40;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
         th {
+            background-color: #343a40;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1rem;
+            /* text-transform: uppercase;*/
             cursor: pointer;
-            background-color: #f2f2f2;
+            text-align: center;
         }
+
         th:hover {
-            background-color: #ddd;
+            background-color: #495057;
+        }
+
+        td {
+            font-size: 1.1rem;
+            color: #495057;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f3f5;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -28,11 +74,109 @@
     <table id="data-table">
         <thead>
             <tr id="table-header"></tr>
+            <tr id="filter-min-row"></tr>
+            <tr id="filter-max-row"></tr>
         </thead>
         <tbody id="table-body"></tbody>
     </table>
 
     <script>
+        class Column {
+            constructor(name, format, hint = "") {
+                this.name = name;
+                this.format = format;
+                this.hint = hint;
+                this.index = -1;
+            }
+
+            formatCellContent(value) {
+                if (this.format.startsWith("number")) {
+                    const decimals = parseInt(this.format.split(".")[1] || "0", 10);
+                    return parseFloat(value).toFixed(decimals);
+                } else if (this.format === "image") {
+                    return value;
+                } else {
+                    return value;
+                }
+            }
+        }
+
+        const columns = {
+            "Plot": new Column("PRICE", "image", "Historical price plot"),
+            "Histogram": new Column("GROWTH HISTOGRAM", "image", "Growth histogram"),
+            "Symbol": new Column("Symbol", "text", "Stock Ticker Symbol"),
+            "CAGR": new Column("CAGR", "number.2", "Compound Annual Growth Rate"),
+            "Histogram Stddev": new Column("Hσ", "number.3", "Standard deviation of histogram"),
+            "Histogram Mean": new Column("Hμ", "number.3", "Mean of histogram"),
+            "Age": new Column("Ys", "text", "Years of data"),
+            "Years in Profit": new Column("Ys+", "number", "Number of profitable years"),
+            "Years in Loss": new Column("Ys-", "number", "Number of loss-making years"),
+        };
+
+        // Extend the header with input rows for filtering
+        const filterMinRow = document.getElementById('filter-min-row');
+        const filterMaxRow = document.getElementById('filter-max-row');
+
+        Object.values(columns).forEach(column => {
+            if (column.index !== -1) {
+                const minTd = document.createElement('td');
+                const maxTd = document.createElement('td');
+
+                if (column.format.startsWith("number")) {
+                    const minInput = document.createElement('input');
+                    minInput.type = 'number';
+                    minInput.placeholder = 'Min';
+                    minInput.dataset.columnIndex = column.index;
+                    minInput.addEventListener('input', filterTable);
+                    minTd.appendChild(minInput);
+
+                    const maxInput = document.createElement('input');
+                    maxInput.type = 'number';
+                    maxInput.placeholder = 'Max';
+                    maxInput.dataset.columnIndex = column.index;
+                    maxInput.addEventListener('input', filterTable);
+                    maxTd.appendChild(maxInput);
+                }
+
+                filterMinRow.appendChild(minTd);
+                filterMaxRow.appendChild(maxTd);
+            }
+        });
+
+        // Filter table rows based on user input
+        function filterTable() {
+            const rows = Array.from(document.getElementById('table-body').rows);
+            const minInputs = filterMinRow.querySelectorAll('input');
+            const maxInputs = filterMaxRow.querySelectorAll('input');
+
+            rows.forEach(row => {
+                let visible = true;
+
+                minInputs.forEach((minInput, index) => {
+                    const columnIndex = minInput.dataset.columnIndex;
+                    const cellValue = parseFloat(row.cells[columnIndex].textContent) || 0;
+                    const minValue = parseFloat(minInput.value);
+
+                    if (minInput.value && cellValue < minValue) {
+                        visible = false;
+                    }
+                });
+
+                maxInputs.forEach((maxInput, index) => {
+                    const columnIndex = maxInput.dataset.columnIndex;
+                    const cellValue = parseFloat(row.cells[columnIndex].textContent) || 0;
+                    const maxValue = parseFloat(maxInput.value);
+
+                    if (maxInput.value && cellValue > maxValue) {
+                        visible = false;
+                    }
+                });
+
+                row.style.display = visible ? '' : 'none';
+            });
+        }
+
+
         // Load the CSV file and process it
         fetch('data.csv')
             .then(response => response.text())
@@ -42,12 +186,25 @@
                 const tableHeader = document.getElementById('table-header');
                 const tableBody = document.getElementById('table-body');
 
-                // Create table headers
+                // Assign indices for columns based on CSV headers
                 headers.forEach((header, index) => {
-                    const th = document.createElement('th');
-                    th.textContent = header;
-                    th.addEventListener('click', () => sortTable(index));
-                    tableHeader.appendChild(th);
+                    if (columns[header]) {
+                        columns[header].index = index;
+                    } else {
+                        console.warn(`Column "${header}" not found in columns`);
+                    }
+                });
+
+
+                // Create table headers based on `columns`
+                Object.values(columns).forEach(column => {
+                    if (column.index !== -1) {
+                        const th = document.createElement('th');
+                        th.textContent = column.name;
+                        th.title = column.hint;
+                        th.addEventListener('click', () => sortTable(column.index, column.format));
+                        tableHeader.appendChild(th);
+                    }
                 });
 
                 // Create table rows
@@ -55,18 +212,23 @@
                     const tr = document.createElement('tr');
                     const cells = row.split(',');
 
-                    cells.forEach((cell, index) => {
-                        const td = document.createElement('td');
-                        if (index === headers.length - 1) { // If it's the Plot column
-                            const img = document.createElement('img');
-                            img.src = cell;
-                            img.alt = "Plot";
-                            img.style.maxWidth = "150px";
-                            td.appendChild(img);
-                        } else {
-                            td.textContent = cell;
+                    Object.values(columns).forEach(column => {
+                        if (column.index !== -1) {
+                            const td = document.createElement('td');
+                            const cellValue = cells[column.index];
+
+                            if (column.format === "image") {
+                                const img = document.createElement('img');
+                                img.src = cellValue;
+                                img.alt = column.name;
+                                img.style.minWidth = "300px";
+                                td.appendChild(img);
+                            } else {
+                                td.textContent = column.formatCellContent(cellValue);
+                            }
+
+                            tr.appendChild(td);
                         }
-                        tr.appendChild(td);
                     });
 
                     tableBody.appendChild(tr);
@@ -74,18 +236,19 @@
             });
 
         // Sort the table by a given column index
-        function sortTable(columnIndex) {
+        function sortTable(columnIndex, format) {
             const tableBody = document.getElementById('table-body');
             const rows = Array.from(tableBody.rows);
-            const isNumeric = !isNaN(rows[0].cells[columnIndex].textContent);
 
             rows.sort((a, b) => {
                 const cellA = a.cells[columnIndex].textContent;
                 const cellB = b.cells[columnIndex].textContent;
 
-                return isNumeric
-                    ? parseFloat(cellA) - parseFloat(cellB)
-                    : cellA.localeCompare(cellB);
+                if (format.startsWith("number")) {
+                    return parseFloat(cellA) - parseFloat(cellB);
+                } else {
+                    return cellA.localeCompare(cellB);
+                }
             });
 
             // Toggle order for repeated clicks

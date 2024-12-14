@@ -45,7 +45,8 @@ class Ticker:
         get_cache_time()
         self.cache_file_history = get_cache_path(self.ticker, "history", "csv")
         self.cache_file_info = get_cache_path(self.ticker, "meta", "yaml")
-        self.cache_file_plot = get_cache_path(self.ticker, "plot", "png")
+        self.cache_file_price_history = get_cache_path(self.ticker, "price_history", "png")
+        self.cache_file_cagr_histogram = get_cache_path(self.ticker, "cagr_histogram", "png")
         self.history_cache = None
         self.history_monthly_cache = None
         self.rolling_cagr_df = None
@@ -65,6 +66,7 @@ class Ticker:
         else:
             print(f"Loading data: {time_end - time_start:.2f} seconds")
         self.plot_cagr_histogram()
+        self.plot_price_history()
 
     def history(self):
         if self.history_cache is None:
@@ -97,7 +99,7 @@ class Ticker:
         return price_history
 
     @classmethod
-    def gain_to_color(cls, gain):
+    def gain_to_color(cls, gain, brightness=0.95):
         # Ensure the gain is a float for consistent calculation
         gain = float(gain)
 
@@ -121,10 +123,9 @@ class Ticker:
 
         # Set saturation and value (brightness) high for background visibility
         saturation = 0.9
-        value = 0.95
 
         # Convert HSV to RGB
-        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+        r, g, b = colorsys.hsv_to_rgb(hue, saturation, brightness)
 
         # Convert RGB to hex
         r_hex = int(r * 255)
@@ -134,10 +135,11 @@ class Ticker:
         return f'#{r_hex:02X}{g_hex:02X}{b_hex:02X}'
 
     def add_to_html(self, html_dir, df) -> bool:
-        if not os.path.exists(self.cache_file_plot):
+        if not os.path.exists(self.cache_file_price_history) or not os.path.exists(self.cache_file_cagr_histogram):
             print(f"Skipping {self.ticker} - no plot")
             return False
-        shutil.copyfile(self.cache_file_plot, self.plot_path(html_dir))
+        shutil.copyfile(self.cache_file_price_history, self.html_plot_path(html_dir))
+        shutil.copyfile(self.cache_file_cagr_histogram, self.html_histogram_path(html_dir))
         self.add_data_to_df(df, html_dir)
         return True
 
@@ -146,24 +148,28 @@ class Ticker:
         os.makedirs(path, exist_ok=True)
         return path
 
-    def plot_path(self, html_dir = "") -> str:
+    def html_plot_path(self, html_dir ="") -> str:
         return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_plot.png")
+
+    def html_histogram_path(self, html_dir = "") -> str:
+        return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_hist.png")
 
     @classmethod
     def init_df(cls):
-        df = pd.DataFrame(columns=['Ticker', 'CAGR', 'Age', 'Years in Profit', 'Years in Loss', 'Histogram Stddev', 'Histogram Mean', 'Plot'])
+        df = pd.DataFrame(columns=['Ticker', 'CAGR', 'Age', 'Years in Profit', 'Years in Loss', 'Histogram Stddev', 'Histogram Mean', 'Plot', 'Histogram'])
         df.set_index('Ticker', inplace=True)
         return df
 
     def add_data_to_df(self, df, html_dir):
         df.loc[self.ticker] = [
-            self.get_cagr(),
+            (self.get_cagr() - 1) * 100,
             self.get_age(),
             self.get_years_profit(),
             self.get_years_loss(),
             self.get_histogram_stddev(),
             self.get_histogram_mean(),
-            self.plot_path()
+            self.html_plot_path(),
+            self.html_histogram_path(),
         ]
 
     def get_cagr(self) -> float:
@@ -220,132 +226,159 @@ class Ticker:
 
     @watchdog(10, 3)
     def plot_cagr_histogram(self):
-        if os.path.exists(self.cache_file_plot):
-            print(f"{self.ticker} - plot exists")
+        output_file = f"{self.cache_file_cagr_histogram}"
+        if os.path.exists(output_file):
+            print(f"{self.ticker} - histogram plot exists")
             return
 
-        print(f"plotting {self.ticker}")
+        print(f"Plotting histogram for {self.ticker}")
         time_start = time.time()
+
         rolling_cagr_df = self.rolling_cagr()
-        # Plot the price history on the second axis (ax2)
-        price_history = self.history()
-        min_price = 50
-        max_price = 100000
-         # Get unique years from the price history
-
-        print(f"Rolling CAGR calculation took {time.time() - time_start:.2f} seconds")
-
-        time_start = time.time()
-
-        # Create figure with two subplots, one for histogram and one for price history
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 6), gridspec_kw={'width_ratios': [1, 1]})
-
-        # Plot the histogram on the first axis (ax1)
         custom_bins = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         rolling_cagr_values = rolling_cagr_df['1Y CAGR Class']
-        ax1.hist([rolling_cagr_values[rolling_cagr_values < 0], rolling_cagr_values[rolling_cagr_values >= 0]],
-                 bins=custom_bins, edgecolor='gray', alpha=0.75, stacked=True, color=['red', 'green'])
 
-        # Add vertical lines for zero CAGR and total CAGR
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        ax1.hist(
+            [
+                rolling_cagr_values[rolling_cagr_values < 0],
+                rolling_cagr_values[rolling_cagr_values >= 0],
+            ],
+            bins=custom_bins,
+            edgecolor="#CCCCCC",
+            alpha=0.75,
+            stacked=True,
+            color=['#FFAAAA', '#AAFFAA'],
+        )
+
         total_cagr_class = self.cagr_to_class(self.total_cagr(), float=True)
-        ax1.axvline(0, color='gray', linestyle='-', linewidth=2, label=f'Zero CAGR')
-        ax1.axvline(total_cagr_class, color='black', linestyle='--', linewidth=4,
-                    label=f'Total CAGR: {(self.total_cagr() - 1):.2%}')
+        ax1.axvline(0, color='gray', linestyle=':', linewidth=1, label='Zero CAGR')
+
+        cagr_color = Ticker.gain_to_color(self.total_cagr(), brightness=0.4)
+        ax1.axvline(
+            total_cagr_class,
+            color=Ticker.gain_to_color(self.total_cagr(), brightness=0.4),
+            linestyle='--',
+            linewidth=5,
+            label=f'Total CAGR: {(self.total_cagr() - 1):.2%}',
+        )
+
+        ax1.text(
+            total_cagr_class,
+            ax1.get_ylim()[1] * 0.9,  # Position near the top of the plot
+            f'{(self.total_cagr() -1) * 100:.2f}%',
+            color=cagr_color,
+            fontsize=24,  # Larger font size for emphasis
+            fontweight='bold',
+            ha='center',  # Center the text horizontally on the line
+            va='center',  # Vertically align the text
+            bbox=dict(facecolor='white', alpha=0.8, edgecolor="#AAAAAA")  # Add a white background to the label
+        )
+
         ax1.set_title(f'{self.info.name} - CAGR Histogram', fontsize=14)
         ax1.set_xlabel('CAGR', fontsize=12)
         ax1.set_ylabel('Frequency', fontsize=12)
-        ax1.set_xlim(-10, 15)
+        ax1.set_xlim(-10, 10)
         ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Generate custom labels using a formula
         x_ticks = range(-10, 12)
         x_labels = [f'{Ticker.class_to_cagr_pct(x)}' for x in x_ticks]
         ax1.set_xticks(ticks=x_ticks)
         ax1.set_xticklabels(labels=x_labels)
         ax1.legend(loc='upper left')
 
-        print(f"Histogram construction: {time.time() - time_start:.2f} seconds")
+        plt.tight_layout()
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        # plt.show()
+        plt.close()
 
+        print(f"Histogram plotting took {time.time() - time_start:.2f} seconds")
+
+    @watchdog(10, 3)
+    def plot_price_history(self):
+        output_file = f"{self.cache_file_price_history}"
+        if os.path.exists(output_file):
+            print(f"{self.ticker} - price history plot exists")
+            return
+
+        print(f"Plotting price history for {self.ticker}")
         time_start = time.time()
 
+        price_history = self.history()
+        min_price = 50
+        max_price = 100000
         df_by_year = self.yearly_data()
+
+        fig, ax2 = plt.subplots(figsize=(10, 6))
+
+        from matplotlib.dates import date2num
+
+
         for year in self.get_years():
             gain = df_by_year.loc[year]["Gain"]
-
-            # Get color for the given year's gain
             color = self.__class__.gain_to_color(gain + 1)
 
-            # Define the rectangle representing the year, using pd.Timedelta for width
-            start_date = datetime(year, 1, 1, 0,0 )
+            start_date = datetime(year, 1, 1, 0, 0)
             end_date = datetime(year, 12, 31, 23, 59)
 
-            y_min, y_max = ax2.get_ylim()  # Get the current y-axis limits
-            # Add the rectangle patch to ax2
-            ax2.add_patch(patches.Rectangle(
-                (start_date, y_min),  # Starting position (x, y)
-                (end_date - start_date),  # Width in days
-                height=max_price, # y_max - y_min,  # Full height to cover from y_min to y_max
-                color=color,
-                alpha=0.2,  # Transparency
-                zorder=-1  # Put it in the background
-            ))
+            start_date_num = date2num(start_date)
+            end_date_num = date2num(end_date)
 
-        ax2.plot(price_history.index.to_pydatetime(), price_history['close'], color='green', linestyle='-', linewidth=1.5,
-                 label='Price History')
+            ax2.add_patch(
+                patches.Rectangle(
+                    (start_date_num, min_price),
+                    (end_date - start_date).days,
+                    max_price - min_price,
+                    color=color,
+                    alpha=0.2,
+                    zorder=-1,
+                )
+            )
+
+        ax2.plot(
+            price_history.index.to_pydatetime(),
+            price_history['close'],
+            color='green',
+            linestyle='-',
+            linewidth=1.5,
+            label='Price History',
+        )
 
         ax2.set_title(f'{self.info.name} - Price History', fontsize=14)
         ax2.set_ylabel('Price', fontsize=12)
         ax2.set_xlabel('Year', fontsize=12)
         ax2.grid(axis='y', linestyle='--', alpha=0.7)
-
         ax2.xaxis_date()
+        fig.autofmt_xdate()
 
-        # Format the x-axis labels to show dates clearly without overlapping
-        # ax2.xaxis.set_major_locator(mdates.AutoDateLocator())
-        # ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-        fig.autofmt_xdate()  # Automatically format x labels for better readability
-
-        # Add a legend to the price history
-        ax2.legend(loc='upper right')
-        ax2.set_yscale('log')
-        #
-        # Manually set y-axis ticks for better readability with more labels
         y_ticks = []
         for i in range(int(np.floor(np.log10(min_price))), int(np.ceil(np.log10(max_price))) + 1):
+#            y_ticks.extend([1 * 10 ** i, 1.8 * 10 ** i, 3.2 * 10 ** i, 5.6 * 10 ** i])
+#            y_ticks.extend([1 * 10 ** i, 2.15 * 10 ** i, 4.64 * 10 ** i])
             y_ticks.extend([1 * 10 ** i, 2 * 10 ** i, 5 * 10 ** i])
-        # Filter y_ticks to ensure they lie within the range [min_price, max_price]
         y_ticks = [tick for tick in y_ticks if min_price <= tick <= max_price]
 
-        ax2.set_yticks(y_ticks)
+        ax2.set_yscale('log')
         ax2.set_ylim(min_price, max_price)
+        ax2.set_yticks(y_ticks)
 
-        # Determine the range of years in the data
         years = sorted(price_history.index.year.unique())
         ticks = [pd.Timestamp(f'{year}-01-01') for year in years]
         ticks_numeric = mdates.date2num(ticks)
-        ax2.set_xticks(ticks_numeric)  # Set tick positions
-        ax2.set_xticklabels([str(year) for year in years], rotation=45, ha='right')  # Set tick labels as years
-
+        ax2.set_xticks(ticks_numeric)
+        ax2.set_xticklabels([str(year) for year in years], rotation=45, ha='right')
 
         ax2.set_xlim(date_epoch_start, datetime.now())
-
-        # Set y-axis labels to normal numeric format without exponential notation
         ax2.get_yaxis().set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+        ax2.legend(loc='upper right')
 
-        print(f"Price history construction: {time.time() - time_start:.2f} seconds")
-
-        time_start = time.time()
-
-        # Tight layout to ensure proper spacing between subplots
         plt.tight_layout()
-
-        plt.savefig(self.cache_file_plot, dpi=300, bbox_inches='tight')  # Save with high resolution and trimmed whitespace
-
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
         # plt.show()
-
         plt.close()
 
-        print(f"Plotting: {time.time() - time_start:.2f} seconds")
+
+        print(f"Price history plotting took {time.time() - time_start:.2f} seconds")
 
     # Function to calculate 1-year rolling CAGR
     def calculate_rolling_cagr(self):

@@ -78,12 +78,12 @@ class StockScreener:# write to protocol file
         cls.tickers = lib.stockanalysis_get_constituents()
 
 
-StockScreener.process_single_asset("ARM")
-StockScreener.process_single_asset("AAPL")
-StockScreener.build_html()
-exit(0)
+# StockScreener.process_single_asset("ARM")
+# StockScreener.process_single_asset("AAPL")
+# StockScreener.build_html()
+# exit(0)
 
-# StockScreener.populate_tickers_list()
+StockScreener.populate_tickers_list()
 StockScreener.load()
 StockScreener.analyze()
 StockScreener.build_html()
