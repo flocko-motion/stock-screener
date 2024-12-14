@@ -51,6 +51,7 @@ th, td {
         td {
             font-size: 1rem;
             color: #495057;
+            vertical-align: top;
         }
 
         tr:nth-child(even) {
@@ -62,11 +63,38 @@ th, td {
             transition: background-color 0.3s ease;
         }
 
-        img {
+        td.number, th.number {
+            min-width: 80px; /* Ensure a reasonable minimum width */
+            max-width: 100px; /* Limit the maximum width */
+            padding-right: 10px; /* Add some space for better readability */
+        }
+
+        td.number {
+            text-align: right; /* Align numbers to the right for readability */
+            font-family: monospace; /* Use a monospace font for numbers */
+        }
+
+        td.number input, th.number input {
+            width: 60px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+
+        td img {
             max-width: 100%;
             height: auto;
             border-radius: 4px;
+            min-width: 300px; /* Ensures columns don't collapse */
+            display: block;
         }
+
+        .full-screen {
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -107,16 +135,37 @@ th, td {
             "Histogram": new Column("GROWTH HISTOGRAM", "image", "Growth histogram"),
             "Ticker": new Column("Symbol", "text", "Stock Ticker Symbol"),
             "CAGR": new Column("CAGR", "number.2", "Compound Annual Growth Rate"),
-            "Histogram Stddev": new Column("Hσ", "number.3", "Standard deviation of histogram"),
-            "Histogram Mean": new Column("Hμ", "number.3", "Mean of histogram"),
-            "Age": new Column("Ys", "text", "Years of data"),
-            "Years in Profit": new Column("Ys+", "number", "Number of profitable years"),
-            "Years in Loss": new Column("Ys-", "number", "Number of loss-making years"),
+            "Histogram Stddev": new Column("Hσ", "number.2", "Standard deviation of histogram"),
+            "Histogram Mean": new Column("Hμ", "number.2", "Mean of histogram"),
+            "Age": new Column("Ys", "number", "Years of data"),
+            "Years in Profit": new Column("Ys+", "number.0", "Number of profitable years"),
+            "Years in Loss": new Column("Ys-", "number.0", "Number of loss-making years"),
         };
 
         // Extend the header with input rows for filtering
         const filterMinRow = document.getElementById('filter-min-row');
         const filterMaxRow = document.getElementById('filter-max-row');
+
+        function toggleFullScreen(img) {
+            const isFullScreen = img.classList.contains('full-screen');
+            if (isFullScreen) {
+                img.classList.remove('full-screen');
+                img.style.position = '';
+                img.style.width = '';
+                img.style.height = '';
+                img.style.top = '';
+                img.style.left = '';
+                img.style.zIndex = '';
+            } else {
+                img.classList.add('full-screen');
+                img.style.position = 'fixed';
+                img.style.width = '100vw';
+                img.style.height = '100vh';
+                img.style.top = '0';
+                img.style.left = '0';
+                img.style.zIndex = '1000';
+            }
+        }
 
         function initFilters() {
             console.log("columns:", columns);
@@ -140,6 +189,12 @@ th, td {
                         maxInput.dataset.columnIndex = column.indexHtml;
                         maxInput.addEventListener('input', filterTable);
                         maxTd.appendChild(maxInput);
+
+                        if (column.format.startsWith("number")) {
+                            minTd.classList.add('number');
+                            maxTd.classList.add('number');
+                        }
+
                     }
 
                     filterMinRow.appendChild(minTd);
@@ -213,6 +268,7 @@ th, td {
                         th.title = column.hint;
                         th.addEventListener('click', () => sortTable(column.indexCsv, column.format));
                         tableHeader.appendChild(th);
+                        if (column.format.startsWith("number")) th.classList.add('number');
                     }
                 });
 
@@ -233,9 +289,22 @@ th, td {
                                 img.src = cellValue;
                                 img.alt = column.name;
                                 img.style.minWidth = "300px";
+                                img.addEventListener('click', () => toggleFullScreen(img));
                                 td.appendChild(img);
                             } else {
                                 td.textContent = column.formatCellContent(cellValue);
+                                if (column.name === "Symbol") {
+                                    td.style.fontWeight = "bold";
+                                    // link to trading view chart (https://www.tradingview.com/chart/?symbol=<exchange>:<ticker>)
+                                    const a = document.createElement('a');
+                                    a.href = `https://www.tradingview.com/chart/?symbol=${cellValue}`;
+                                    a.textContent = cellValue;
+                                    a.target = "_blank";
+                                    td.innerHTML = "";
+                                    td.appendChild(a);
+                                }
+                                if (column.format.startsWith("number")) td.classList.add('number');
+
                             }
 
                             tr.appendChild(td);
