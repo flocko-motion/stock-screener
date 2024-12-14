@@ -68,7 +68,7 @@ class StockScreener:# write to protocol file
             
         df = Ticker.init_df()
         cls.for_all_tickers("Build HTML", lambda ticker: ticker.add_to_html(html_dir, df))
-        df.to_csv(os.path.join(html_dir, "data.csv"), index=False)
+        df.to_csv(os.path.join(html_dir, "data.csv"), index=True)
 
 
 

@@ -49,7 +49,7 @@ th, td {
         }
 
         td {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #495057;
         }
 
@@ -86,7 +86,8 @@ th, td {
                 this.name = name;
                 this.format = format;
                 this.hint = hint;
-                this.index = -1;
+                this.indexCsv = -1;
+                this.indexHtml = -1;
             }
 
             formatCellContent(value) {
@@ -104,7 +105,7 @@ th, td {
         const columns = {
             "Plot": new Column("PRICE", "image", "Historical price plot"),
             "Histogram": new Column("GROWTH HISTOGRAM", "image", "Growth histogram"),
-            "Symbol": new Column("Symbol", "text", "Stock Ticker Symbol"),
+            "Ticker": new Column("Symbol", "text", "Stock Ticker Symbol"),
             "CAGR": new Column("CAGR", "number.2", "Compound Annual Growth Rate"),
             "Histogram Stddev": new Column("Hσ", "number.3", "Standard deviation of histogram"),
             "Histogram Mean": new Column("Hμ", "number.3", "Mean of histogram"),
@@ -117,39 +118,45 @@ th, td {
         const filterMinRow = document.getElementById('filter-min-row');
         const filterMaxRow = document.getElementById('filter-max-row');
 
-        Object.values(columns).forEach(column => {
-            if (column.index !== -1) {
-                const minTd = document.createElement('td');
-                const maxTd = document.createElement('td');
+        function initFilters() {
+            console.log("columns:", columns);
+            Object.values(columns).forEach(column => {
+                if (column.indexCsv !== -1) {
+                    const minTd = document.createElement('td');
+                    const maxTd = document.createElement('td');
 
-                if (column.format.startsWith("number")) {
-                    const minInput = document.createElement('input');
-                    minInput.type = 'number';
-                    minInput.placeholder = 'Min';
-                    minInput.dataset.columnIndex = column.index;
-                    minInput.addEventListener('input', filterTable);
-                    minTd.appendChild(minInput);
+                    if (column.format.startsWith("number")) {
+                        console.log("Add filter: ", column.name, column.indexHtml);
+                        const minInput = document.createElement('input');
+                        minInput.type = 'number';
+                        minInput.placeholder = 'Min';
+                        minInput.dataset.columnIndex = column.indexHtml;
+                        minInput.addEventListener('input', filterTable);
+                        minTd.appendChild(minInput);
 
-                    const maxInput = document.createElement('input');
-                    maxInput.type = 'number';
-                    maxInput.placeholder = 'Max';
-                    maxInput.dataset.columnIndex = column.index;
-                    maxInput.addEventListener('input', filterTable);
-                    maxTd.appendChild(maxInput);
+                        const maxInput = document.createElement('input');
+                        maxInput.type = 'number';
+                        maxInput.placeholder = 'Max';
+                        maxInput.dataset.columnIndex = column.indexHtml;
+                        maxInput.addEventListener('input', filterTable);
+                        maxTd.appendChild(maxInput);
+                    }
+
+                    filterMinRow.appendChild(minTd);
+                    filterMaxRow.appendChild(maxTd);
                 }
-
-                filterMinRow.appendChild(minTd);
-                filterMaxRow.appendChild(maxTd);
-            }
-        });
+            });
+        }
 
         // Filter table rows based on user input
         function filterTable() {
+            console.log("filterTable()")
             const rows = Array.from(document.getElementById('table-body').rows);
             const minInputs = filterMinRow.querySelectorAll('input');
             const maxInputs = filterMaxRow.querySelectorAll('input');
 
             rows.forEach(row => {
+                console.log(row);
                 let visible = true;
 
                 minInputs.forEach((minInput, index) => {
@@ -158,6 +165,7 @@ th, td {
                     const minValue = parseFloat(minInput.value);
 
                     if (minInput.value && cellValue < minValue) {
+                        console.log(`cellValue ${cellValue} < minValue ${minValue}`, row.cells, minInput.dataset)
                         visible = false;
                     }
                 });
@@ -189,23 +197,26 @@ th, td {
                 // Assign indices for columns based on CSV headers
                 headers.forEach((header, index) => {
                     if (columns[header]) {
-                        columns[header].index = index;
+                        columns[header].indexCsv = index;
                     } else {
                         console.warn(`Column "${header}" not found in columns`);
                     }
                 });
 
-
                 // Create table headers based on `columns`
+                let i = 0;
                 Object.values(columns).forEach(column => {
-                    if (column.index !== -1) {
+                    column.indexHtml = i++;
+                    if (column.indexCsv !== -1) {
                         const th = document.createElement('th');
                         th.textContent = column.name;
                         th.title = column.hint;
-                        th.addEventListener('click', () => sortTable(column.index, column.format));
+                        th.addEventListener('click', () => sortTable(column.indexCsv, column.format));
                         tableHeader.appendChild(th);
                     }
                 });
+
+                initFilters();
 
                 // Create table rows
                 rows.slice(1).forEach(row => {
@@ -213,9 +224,9 @@ th, td {
                     const cells = row.split(',');
 
                     Object.values(columns).forEach(column => {
-                        if (column.index !== -1) {
+                        if (column.indexCsv !== -1) {
                             const td = document.createElement('td');
-                            const cellValue = cells[column.index];
+                            const cellValue = cells[column.indexCsv];
 
                             if (column.format === "image") {
                                 const img = document.createElement('img');
