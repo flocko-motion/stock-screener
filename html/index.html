@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Screener</title>
+    <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAfegAAQf8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREQARABERERERABEAEREREAAAAAAAEREQAAAAAAABERERABEAEAEREREAEQAQAREREQARABABEREAAAAAAAEREAAAAAAAEREQAQARABERERABABEAEREREAEAEQAREREQAAAAAAABEREAAAAAAAEREREAEQAREREREQARABEREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rel="icon" type="image/x-icon">
     <style>
 body {
     font-family: Arial, sans-serif;
@@ -71,10 +72,11 @@ th, td {
             transition: background-color 0.3s ease;
         }
 
+
         td.number, th.number {
-            min-width: 80px; /* Ensure a reasonable minimum width */
+            min-width: 100px; /* Ensure a reasonable minimum width */
             max-width: 100px; /* Limit the maximum width */
-            padding-right: 10px; /* Add some space for better readability */
+            padding-right: 3px; /* Add some space for better readability */
         }
 
         td.number {
@@ -84,7 +86,7 @@ th, td {
         }
 
         td.number input, th.number input {
-            width: 60px;
+            width: 80px;
             padding: 5px;
             box-sizing: border-box;
         }
@@ -143,10 +145,13 @@ th, td {
             "Ticker": new Column("Symbol", "text", "Stock Ticker Symbol"),
             "CAGR": new Column("CAGR", "number.2", "Compound Annual Growth Rate"),
             "Histogram Stddev": new Column("CAGRσ", "number.2", "Standard deviation of histogram"),
+            "Market Cap": new Column("Σ$", "number.2", "Market capitalization in billion USD"),
+            "Beta": new Column("β", "number.2", "Beta measures a stock's sensitivity to movements of the broader market"),
             // "Histogram Mean": new Column("Hμ", "number.2", "Mean of histogram"),
             "Age": new Column("Ys", "number", "Years of data"),
             "Years in Profit": new Column("Ys+", "number.0", "Number of profitable years"),
             "Years in Loss": new Column("Ys-", "number.0", "Number of loss-making years"),
+            "Sector": new Column("Sector", "text", "Sector and industry"),
         };
 
         // Extend the header with input rows for filtering
@@ -154,7 +159,7 @@ th, td {
         const filterMaxRow = document.getElementById('filter-max-row');
 
         function toggleFullScreen(img) {
-            window.open(img.src, '_blank');
+            window.open(img.src.replace("_thumb.png", "_full.png"), '_blank');
         }
 
         function updateHitsDisplay() {

@@ -29,7 +29,13 @@ def to_ticker_info(fundamentals):
     info = TickerInfo(
         ticker=fundamentals["symbol"],
         name=fundamentals["companyName"],
-        market_cap=int(fundamentals["mktCap"]),
+        exchange=fundamentals["exchange"],
+        currency=fundamentals["currency"],
+        industry=fundamentals["industry"],
+        sector=fundamentals["sector"],
+        country=fundamentals["country"],
+        market_cap=float(fundamentals["mktCap"]),
+        beta=fundamentals["beta"],
         # trailing_pe=fundamentals["trailing_pe"],
         # forward_pe=fundamentals["forward_pe"]
     )

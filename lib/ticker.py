@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 import math
 # import lib.yahoo_finance as fin_db
 import lib.financialmodelingprep as fin_db
+from lib.image_processing import compress_png
 
 from matplotlib import dates as mdates
 from matplotlib import patches
@@ -27,11 +28,10 @@ date_epoch_start = datetime(2009, 1, 1)
 cagr_class_exponent = 1.10
 
 
+
 class Ticker:
 
     tickers = {}
-
-
 
 
     @classmethod
@@ -139,8 +139,17 @@ class Ticker:
         if not os.path.exists(self.cache_file_price_history) or not os.path.exists(self.cache_file_cagr_histogram):
             print(f"Skipping {self.ticker} - no plot")
             return False
-        shutil.copyfile(self.cache_file_price_history, self.html_plot_path(html_dir))
-        shutil.copyfile(self.cache_file_cagr_histogram, self.html_histogram_path(html_dir))
+        plots = {
+            "price": self.cache_file_price_history,
+            "hist": self.cache_file_cagr_histogram,
+        }
+        for plot_name, plot_file in plots.items():
+            shutil.copyfile(plot_file, self.html_image_path(html_dir, plot_name, "full"))
+            if not os.path.exists(self.html_image_path(html_dir, plot_name, "thumb")):
+                compress_png(plot_file, self.html_image_path(html_dir, plot_name, "thumb"), new_width=600)
+        #         return False
+        # shutil.copyfile(self.cache_file_price_history, self.html_image_path(html_dir, "price", "full"))
+        # shutil.copyfile(self.cache_file_cagr_histogram, self.html_image_path(html_dir, "hist", "full"))
         self.add_data_to_df(df, html_dir)
         return True
 
@@ -149,15 +158,13 @@ class Ticker:
         os.makedirs(path, exist_ok=True)
         return path
 
-    def html_plot_path(self, html_dir ="") -> str:
-        return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_plot.png")
+    def html_image_path(self, html_dir, image_name, size="full") -> str:
+        return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_{image_name}_{size}.png")
 
-    def html_histogram_path(self, html_dir = "") -> str:
-        return os.path.join(self.plot_dir(html_dir), f"{self.ticker}_hist.png")
 
     @classmethod
     def init_df(cls):
-        df = pd.DataFrame(columns=['Ticker', 'CAGR', 'Age', 'Years in Profit', 'Years in Loss', 'Histogram Stddev', 'Histogram Mean', 'Plot', 'Histogram'])
+        df = pd.DataFrame(columns=['Ticker', 'CAGR', 'Age', 'Years in Profit', 'Years in Loss', 'Histogram Stddev', 'Histogram Mean', 'Market Cap', 'Beta', 'Plot', 'Histogram', 'Sector'])
         df.set_index('Ticker', inplace=True)
         return df
 
@@ -169,8 +176,11 @@ class Ticker:
             self.get_years_loss(),
             self.get_histogram_stddev(),
             self.get_histogram_mean(),
-            self.html_plot_path(),
-            self.html_histogram_path(),
+            self.info.market_cap / 1_000_000_000,
+            self.info.beta,
+            self.html_image_path("", "price", "thumb"),
+            self.html_image_path("", "hist", "thumb"),
+            self.info.sector + " / " + self.info.industry
         ]
 
     def get_cagr(self) -> float:
@@ -290,7 +300,7 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        self.compress_png(output_file)
+        compress_png(output_file)
         # plt.show()
         plt.close()
 
@@ -376,7 +386,7 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        self.compress_png(output_file)
+        compress_png(output_file)
         # plt.show()
         plt.close()
 
@@ -438,16 +448,6 @@ class Ticker:
     @classmethod
     def dec_to_pct(cls, dec):
         return f"{round((dec -1) * 100)}%"
-
-    def compress_png(self, output_file):
-        try:
-            # Compress the PNG file using pngquant
-            pngquant(output_file, output_file, quality=(65, 80))
-            print(f"Compressed: {output_file}")
-        except Exception as e:
-            # Log or handle exceptions as needed
-            print(f"Failed to compress {output_file}: {e}")
-            raise
 
 
 # ^SPX
