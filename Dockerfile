@@ -18,6 +18,6 @@ WORKDIR /app
 COPY . /app
 
 # Install required Python libraries
-RUN pip install --no-cache-dir pillow requests beautifulsoup4 matplotlib pandas numpy
+RUN pip install --no-cache-dir pillow requests beautifulsoup4 matplotlib pandas numpy yfinance
 
 CMD ["python", "stock-screener.py"]
