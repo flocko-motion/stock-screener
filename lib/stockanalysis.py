@@ -9,12 +9,12 @@ from bs4 import BeautifulSoup
 from lib.cache import get_cache_path
 
 indexes = {
-    # "SPX": 'https://stockanalysis.com/list/sp-500-stocks/',
+    "SPX": 'https://stockanalysis.com/list/sp-500-stocks/',
     "NASDAQ": 'https://stockanalysis.com/list/nasdaq-stocks/',
     "NYSE": 'https://stockanalysis.com/list/nyse-stocks/',
-    # "MEGACAPS": 'https://stockanalysis.com/list/mega-cap-stocks/',
-    # "LARGECAPS": 'https://stockanalysis.com/list/large-cap-stocks/',
-    # "MIDCAPS": 'https://stockanalysis.com/list/mid-cap-stocks/',
+    "MEGACAPS": 'https://stockanalysis.com/list/mega-cap-stocks/',
+    "LARGECAPS": 'https://stockanalysis.com/list/large-cap-stocks/',
+    "MIDCAPS": 'https://stockanalysis.com/list/mid-cap-stocks/',
     # "DEUTSCHEBOERSE": 'https://stockanalysis.com/list/deutsche-boerse-xetra/',
     # "LSE": 'https://stockanalysis.com/list/london-stock-exchange/',
 }

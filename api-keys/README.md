@@ -5,5 +5,5 @@ Put your api keys here - one key per file
 ## Files
 
 ```
-nasdaq_datalink.key
+financialmodelingprep.key
 ``` 

@@ -1,13 +1,8 @@
 # Step 1: Data Loading
 import colorsys
 import shutil
-
-
-from lib.cache import get_cache_time, get_cache_path
-from lib.yahoo_finance import yahoo_ticker
-from lib.watchdog import watchdog
-
-import yaml
+from matplotlib import dates as mdates
+from matplotlib import patches
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -19,9 +14,11 @@ import math
 # import lib.yahoo_finance as fin_db
 import lib.financialmodelingprep as fin_db
 from lib.image_processing import compress_png
+from lib.cache import get_cache_time, get_cache_path
+from lib.yahoo_finance import yahoo_ticker
+from lib.watchdog import watchdog
 
-from matplotlib import dates as mdates
-from matplotlib import patches
+
 
 date_epoch_start = datetime(2009, 1, 1)
 
@@ -300,7 +297,6 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        compress_png(output_file)
         # plt.show()
         plt.close()
 
@@ -386,7 +382,6 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        compress_png(output_file)
         # plt.show()
         plt.close()
 
