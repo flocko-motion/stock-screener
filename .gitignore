@@ -1,2 +1,5 @@
 cache/
+backup/
+html/
 api-keys/*.key
+protocol.log

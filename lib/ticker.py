@@ -2,6 +2,7 @@
 import colorsys
 import shutil
 
+
 from lib.cache import get_cache_time, get_cache_path
 from lib.yahoo_finance import yahoo_ticker
 from lib.watchdog import watchdog
@@ -275,7 +276,7 @@ class Ticker:
             bbox=dict(facecolor='white', alpha=0.8, edgecolor="#AAAAAA")  # Add a white background to the label
         )
 
-        ax1.set_title(f'{self.info.name} - CAGR Histogram', fontsize=14)
+        ax1.set_title(f'{self.ticker} ({self.info.name}) CAGR Histogram', fontsize=14)
         ax1.set_xlabel('CAGR', fontsize=12)
         ax1.set_ylabel('Frequency', fontsize=12)
         ax1.set_xlim(-10, 10)
@@ -289,6 +290,7 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        self.compress_png(output_file)
         # plt.show()
         plt.close()
 
@@ -344,7 +346,7 @@ class Ticker:
             label='Price History',
         )
 
-        ax2.set_title(f'{self.info.name} - Price History', fontsize=14)
+        ax2.set_title(f'{self.ticker} ({self.info.name}) - Price History', fontsize=14)
         ax2.set_ylabel('Price', fontsize=12)
         ax2.set_xlabel('Year', fontsize=12)
         ax2.grid(axis='y', linestyle='--', alpha=0.7)
@@ -374,6 +376,7 @@ class Ticker:
 
         plt.tight_layout()
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        self.compress_png(output_file)
         # plt.show()
         plt.close()
 
@@ -436,6 +439,15 @@ class Ticker:
     def dec_to_pct(cls, dec):
         return f"{round((dec -1) * 100)}%"
 
+    def compress_png(self, output_file):
+        try:
+            # Compress the PNG file using pngquant
+            pngquant(output_file, output_file, quality=(65, 80))
+            print(f"Compressed: {output_file}")
+        except Exception as e:
+            # Log or handle exceptions as needed
+            print(f"Failed to compress {output_file}: {e}")
+            raise
 
 
 # ^SPX

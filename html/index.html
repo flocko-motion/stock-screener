@@ -20,10 +20,18 @@ h1 {
     margin-bottom: 20px;
 }
 
+#hits-display {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: #495057;
+}
+
 table {
-    width: 100%;
+    /*width: 100%;*/
     border-collapse: collapse;
-    margin: 20px 0;
+    margin-left: auto;
+    margin-right: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
 }
@@ -72,6 +80,7 @@ th, td {
         td.number {
             text-align: right; /* Align numbers to the right for readability */
             font-family: monospace; /* Use a monospace font for numbers */
+            font-size: 1.1rem;
         }
 
         td.number input, th.number input {
@@ -82,23 +91,21 @@ th, td {
 
 
         td img {
-            max-width: 100%;
             height: auto;
             border-radius: 4px;
+            width: 300px;
             min-width: 300px; /* Ensures columns don't collapse */
+            max-width: 300px;
             display: block;
         }
 
-        .full-screen {
-            object-fit: contain;
-            background: rgba(0, 0, 0, 0.8);
-            cursor: pointer;
-        }
+
 
     </style>
 </head>
 <body>
     <h1>Stock Screener</h1>
+    <div id="hits-display">Hits: 0</div>
     <table id="data-table">
         <thead>
             <tr id="table-header"></tr>
@@ -135,8 +142,8 @@ th, td {
             "Histogram": new Column("GROWTH HISTOGRAM", "image", "Growth histogram"),
             "Ticker": new Column("Symbol", "text", "Stock Ticker Symbol"),
             "CAGR": new Column("CAGR", "number.2", "Compound Annual Growth Rate"),
-            "Histogram Stddev": new Column("Hσ", "number.2", "Standard deviation of histogram"),
-            "Histogram Mean": new Column("Hμ", "number.2", "Mean of histogram"),
+            "Histogram Stddev": new Column("CAGRσ", "number.2", "Standard deviation of histogram"),
+            // "Histogram Mean": new Column("Hμ", "number.2", "Mean of histogram"),
             "Age": new Column("Ys", "number", "Years of data"),
             "Years in Profit": new Column("Ys+", "number.0", "Number of profitable years"),
             "Years in Loss": new Column("Ys-", "number.0", "Number of loss-making years"),
@@ -147,24 +154,13 @@ th, td {
         const filterMaxRow = document.getElementById('filter-max-row');
 
         function toggleFullScreen(img) {
-            const isFullScreen = img.classList.contains('full-screen');
-            if (isFullScreen) {
-                img.classList.remove('full-screen');
-                img.style.position = '';
-                img.style.width = '';
-                img.style.height = '';
-                img.style.top = '';
-                img.style.left = '';
-                img.style.zIndex = '';
-            } else {
-                img.classList.add('full-screen');
-                img.style.position = 'fixed';
-                img.style.width = '100vw';
-                img.style.height = '100vh';
-                img.style.top = '0';
-                img.style.left = '0';
-                img.style.zIndex = '1000';
-            }
+            window.open(img.src, '_blank');
+        }
+
+        function updateHitsDisplay() {
+            const rows = Array.from(document.getElementById('table-body').rows);
+            const visibleCount = rows.filter(row => row.style.display !== 'none').length;
+            document.getElementById('hits-display').textContent = `Hits: ${visibleCount}`;
         }
 
         function initFilters() {
@@ -205,7 +201,7 @@ th, td {
 
         // Filter table rows based on user input
         function filterTable() {
-            console.log("filterTable()")
+            console.log("filterTable()");
             const rows = Array.from(document.getElementById('table-body').rows);
             const minInputs = filterMinRow.querySelectorAll('input');
             const maxInputs = filterMaxRow.querySelectorAll('input');
@@ -220,7 +216,7 @@ th, td {
                     const minValue = parseFloat(minInput.value);
 
                     if (minInput.value && cellValue < minValue) {
-                        console.log(`cellValue ${cellValue} < minValue ${minValue}`, row.cells, minInput.dataset)
+                        console.log(`cellValue ${cellValue} < minValue ${minValue}`, row.cells, minInput.dataset);
                         visible = false;
                     }
                 });
@@ -237,6 +233,8 @@ th, td {
 
                 row.style.display = visible ? '' : 'none';
             });
+
+            updateHitsDisplay();
         }
 
 
@@ -266,7 +264,7 @@ th, td {
                         const th = document.createElement('th');
                         th.textContent = column.name;
                         th.title = column.hint;
-                        th.addEventListener('click', () => sortTable(column.indexCsv, column.format));
+                        th.addEventListener('click', () => sortTable(column.indexHtml, column.format));
                         tableHeader.appendChild(th);
                         if (column.format.startsWith("number")) th.classList.add('number');
                     }
@@ -313,6 +311,8 @@ th, td {
 
                     tableBody.appendChild(tr);
                 });
+
+                updateHitsDisplay();
             });
 
         // Sort the table by a given column index
@@ -340,6 +340,7 @@ th, td {
             }
 
             tableBody.append(...rows);
+            updateHitsDisplay();
         }
     </script>
 </body>
