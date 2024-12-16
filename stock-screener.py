@@ -59,6 +59,7 @@ class StockScreener:# write to protocol file
 
     @classmethod
     def build_html(cls):
+        assets_dir = os.path.join(os.path.dirname(__file__), "assets")
         html_dir = os.path.join(os.path.dirname(__file__), "html")
         plots_dir = os.path.join(html_dir, "plots")
         if not os.path.exists(html_dir):
@@ -69,6 +70,8 @@ class StockScreener:# write to protocol file
         df = Ticker.init_df()
         cls.for_all_tickers("Build HTML", lambda ticker: ticker.add_to_html(html_dir, df))
         df.to_csv(os.path.join(html_dir, "data.csv"), index=True)
+
+        shutil.copyfile(os.path.join(assets_dir, "index.html"), os.path.join(html_dir, "index.html"))
 
     @classmethod
     def populate_tickers_list(cls):
