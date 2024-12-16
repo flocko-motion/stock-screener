@@ -206,6 +206,8 @@ class Ticker:
 
     def get_histogram_mean(self):
         cagr_values = self.rolling_cagr()["1Y CAGR"]
+        if len(cagr_values) == 0:
+            return 0
         # calculate geometric mean
         return np.prod(1 + cagr_values) ** (1 / len(cagr_values)) - 1
 
