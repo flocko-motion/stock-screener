@@ -107,7 +107,8 @@ th, td {
 </head>
 <body>
     <h1>Stock Screener</h1>
-    <div id="hits-display">Hits: 0</div>
+    <div id="hits-display">Hits: loading..</div>
+    <p>Text search fields allow <i>^startswith</i>, <i>endswith$</i>, <i>contains</i> and <i>"contains words"</i></p>
     <table id="data-table">
         <thead>
             <tr id="table-header"></tr>
@@ -195,7 +196,15 @@ th, td {
                             minTd.classList.add('number');
                             maxTd.classList.add('number');
                         }
-
+                    } else if (column.format === "text") {
+                        console.log("Add text filter: ", column.name, column.indexHtml);
+                        const textInput = document.createElement('input');
+                        textInput.type = 'text';
+                        textInput.placeholder = 'Search';
+                        textInput.dataset.columnIndex = column.indexHtml;
+                        textInput.addEventListener('input', filterTable);
+                        minTd.appendChild(textInput);
+                        maxTd.appendChild(document.createElement('td')); // Empty cell for alignment
                     }
 
                     filterMinRow.appendChild(minTd);
@@ -204,12 +213,27 @@ th, td {
             });
         }
 
+        function tokenize(input) {
+            const regex = /(?:[^\s"]+|"([^"]+)")/g; // Matches non-whitespace sequences or content inside quotes
+            const tokens = [];
+            let match;
+
+            // Loop through all matches
+            while ((match = regex.exec(input)) !== null) {
+                // If it's a quoted token, match[1] will contain the text inside quotes
+                tokens.push(match[1] || match[0]);
+            }
+
+            return tokens;
+        }
+
         // Filter table rows based on user input
         function filterTable() {
             console.log("filterTable()");
             const rows = Array.from(document.getElementById('table-body').rows);
-            const minInputs = filterMinRow.querySelectorAll('input');
-            const maxInputs = filterMaxRow.querySelectorAll('input');
+            const minInputs = filterMinRow.querySelectorAll('input[type="number"]');
+            const maxInputs = filterMaxRow.querySelectorAll('input[type="number"]');
+            const textInputs = filterMinRow.querySelectorAll('input[type="text"]');
 
             rows.forEach(row => {
                 console.log(row);
@@ -233,6 +257,47 @@ th, td {
 
                     if (maxInput.value && cellValue > maxValue) {
                         visible = false;
+                    }
+                });
+
+                textInputs.forEach((textInput) => {
+                    const columnIndex = textInput.dataset.columnIndex;
+                    const cellValue = row.cells[columnIndex].textContent.toLowerCase();
+                    const tokens = tokenize(textInput.value.toLowerCase());
+
+                    for (const token of tokens) {
+                        let isNegation = token.startsWith('!');
+                        let isStart = token.startsWith('^');
+                        let isEnd = token.endsWith('$');
+                        let normalizedToken = token.replace(/^!?\^?/,"").replace(/\$?$/, "");
+
+                        // Determine the matching behavior based on token prefixes/suffixes
+                        if (isNegation) {
+                            if (cellValue.includes(normalizedToken)) {
+                                visible = false;
+                                break;
+                            }
+                        } else {
+                            if (isStart) {
+                                // Token must match the start of the string
+                                if (!cellValue.startsWith(normalizedToken)) {
+                                    visible = false;
+                                    break;
+                                }
+                            } else if (isEnd) {
+                                // Token must match the end of the string
+                                if (!cellValue.endsWith(normalizedToken)) {
+                                    visible = false;
+                                    break;
+                                }
+                            } else {
+                                // Regular token - must match anywhere in the string
+                                if (!cellValue.includes(normalizedToken)) {
+                                    visible = false;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 });
 
