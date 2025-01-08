@@ -41,6 +41,21 @@ def to_ticker_info(fundamentals):
     )
     return info
 
+def api_get(endpoint, params=None):
+    if params is None:
+        params = {}
+    params["apikey"] = API_KEY
+    url = f"https://financialmodelingprep.com/api/v3/{endpoint}"
+    response = requests.get(url, params)
+    data = response.json()
+    return data
+
+def search(query: str):
+    return api_get(f"search", {"query":query})
+
+def etf_holder(ticker: str):
+    return api_get(f"etf-holder/{ticker}")
+
 def load_ticker_fundamentals(ticker: str):
     # Path to cache the fundamentals
     fundamentals_path = get_cache_path(ticker, "fmp_fundamentals", "pkl")
