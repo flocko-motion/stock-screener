@@ -1,1 +1,100 @@
-foo bar
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: "Courier New", Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #terminal {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        #output {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+        #input {
+            display: flex;
+            padding: 10px;
+            background-color: #111;
+        }
+        #cmd {
+            background-color: #000;
+            color: #0f0;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 16px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input">
+            <span>&gt; </span>
+            <input id="cmd" type="text" autocomplete="off" placeholder="Type a command..." />
+        </div>
+    </div>
+    <script>
+        const output = document.getElementById('output');
+        const cmdInput = document.getElementById('cmd');
+
+        const commands = {
+            help: () => {
+                return "Available commands:\n" +
+                    " - help: Show this help message\n" +
+                    " - search <query>: Search for a ticker or symbol\n" +
+                    " - etf_holder <symbol>: Get ETF holder information";
+            },
+            search: async (query) => {
+                if (!query) return "Usage: search <query>";
+                const res = await fetch(`/api/search/${query}`);
+                const data = await res.json();
+                return JSON.stringify(data, null, 2);
+            },
+            etf_holder: async (symbol) => {
+                if (!symbol) return "Usage: etf_holder <symbol>";
+                const res = await fetch(`/api/etf_holder/${symbol}`);
+                const data = await res.json();
+                return JSON.stringify(data, null, 2);
+            }
+        };
+
+        cmdInput.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                const input = cmdInput.value.trim();
+                cmdInput.value = '';
+
+                if (!input) return;
+
+                const [command, ...args] = input.split(' ');
+                const response = commands[command]
+                    ? await commands[command](args.join(' '))
+                    : `Unknown command: ${command}`;
+
+                output.innerHTML += `> ${input}\n${response}\n`;
+                output.scrollTop = output.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

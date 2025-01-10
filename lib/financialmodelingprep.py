@@ -1,12 +1,17 @@
+import hashlib
 import os
 
 import pandas as pd
 import requests
 import json
-
+import threading
+import time
 from lib.cache import get_cache_path
 from lib.ticker_info import TickerInfo
 from lib.watchdog import watchdog
+
+cache_dir = os.path.join(os.path.dirname(__file__), '..', 'cache', 'api')
+os.makedirs(cache_dir, exist_ok=True)
 
 # Read the API key from the file
 key_file_path = os.path.join(os.path.dirname(__file__), '..', 'api-keys', 'financialmodelingprep.key')
@@ -41,17 +46,65 @@ def to_ticker_info(fundamentals):
     )
     return info
 
+
+# Initialize a lock and a variable to store the last request time
+rate_limit_lock = threading.Lock()
+last_request_time = 0
+RATE_LIMIT_INTERVAL = 0.25
+
+endpoint_cache_validity = {
+    "profile": 7 * 24 * 3600,
+    "quote": 24 * 3600,
+    "search": 3600,
+}
+
 def api_get(endpoint, params=None):
+    global last_request_time
     if params is None:
         params = {}
-    params["apikey"] = API_KEY
     url = f"https://financialmodelingprep.com/api/v3/{endpoint}"
-    response = requests.get(url, params)
+
+    cache_validity = endpoint_cache_validity.get(endpoint, 3600)
+    resource = f"{endpoint}_{json.dumps(params)}_{round(time.time() / cache_validity)}"
+    # hash resource with md5
+    resource_hash = str(hashlib.md5(resource.encode()).hexdigest())
+    # check if resource is in cache
+    cache_file = os.path.join(cache_dir, f"{resource_hash}.json")
+    if os.path.exists(cache_file):
+        with open(cache_file, "r") as f:
+            return json.load(f)
+
+    with rate_limit_lock:
+        current_time = time.time()
+        elapsed_time = current_time - last_request_time
+        if elapsed_time < RATE_LIMIT_INTERVAL:
+            time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
+        last_request_time = time.time()
+        params_url_string = "&".join([f"{k}={v}" for k, v in params.items()])
+        print(f"Fetching {url}?{params_url_string}")
+
+    response = requests.get(url, {**params, "apikey": API_KEY})
+    if response.status_code != 200:
+        raise Exception(f"Error fetching data from {url}: {response.json()}")
+
+    with open(cache_file, "w") as f:
+        f.write(json.dumps(response.json()))
+
     data = response.json()
     return data
 
 def search(query: str):
     return api_get(f"search", {"query":query})
+
+def profile(ticker: str):
+    return api_get(f"profile/{ticker}")
+
+def quote(ticker):
+    return api_get(f"quote/{ticker}")
+
+def search_name(query: str):
+    return api_get(f"search-name", {"query":query})
+
 
 def etf_holder(ticker: str):
     return api_get(f"etf-holder/{ticker}")
@@ -123,4 +176,3 @@ def load_ticker_history(ticker: str):
     df.to_pickle(history_path)
     return df
 
-# load_ticker("AAPL")

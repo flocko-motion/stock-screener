@@ -2,6 +2,8 @@ from flask import Flask, jsonify, send_from_directory
 from lib import financialmodelingprep as api
 import os
 
+from lib import datapackaging as data
+
 app = Flask(__name__, static_folder='static')
 
 @app.route("/api/etf_holder/<string:etf>", methods=["GET"])
@@ -16,7 +18,13 @@ def get_etf_holder(etf):
 def search(query):
     try:
         res = api.search(query)
-        return jsonify(res), 200
+        table = data.to_table(res, [
+            data.Col("symbol", "ticker"),
+            data.Col("name", "name"),
+            data.Col("currency", "cur"),
+            data.Col("stockExchange", "exchange")
+        ])
+        return jsonify(table), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -29,8 +37,7 @@ def serve_static(path):
 
 @app.route("/", methods=["GET"])
 def serve_index():
-    """Serve the default index.html for the root route."""
     return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True,  host="0.0.0.0", port=5000, use_reloader=False)
