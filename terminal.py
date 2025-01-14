@@ -13,7 +13,7 @@ persistence = terminal.Persistence()
 while cmd not in ["exit", "quit"]:
 	cmd = input(": ")
 	try:
-		res =terminal.shell(cmd, variables, persistence)
+		res = terminal.shell(cmd, variables, persistence)
 		if res is not None:
 			print(res)
 	except Exception as e:

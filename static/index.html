@@ -11,8 +11,8 @@
             box-sizing: border-box;
         }
         body {
-            background-color: #000;
-            color: #0f0;
+            background-color: #252525;
+            color: #80bfd4;
             font-family: "Courier New", Courier, monospace;
             height: 100vh;
             display: flex;
@@ -36,8 +36,8 @@
             background-color: #111;
         }
         #cmd {
-            background-color: #000;
-            color: #0f0;
+            background-color: #111;
+            color: #80bfd4;
             border: none;
             outline: none;
             font-family: inherit;
@@ -50,34 +50,26 @@
     <div id="terminal">
         <div id="output"></div>
         <div id="input">
-            <span>&gt; </span>
-            <input id="cmd" type="text" autocomplete="off" placeholder="Type a command..." />
+            <span>&gt;&nbsp;</span>
+            <input id="cmd" type="text" autocomplete="off" placeholder="Type a command..." autofocus />
         </div>
     </div>
     <script>
         const output = document.getElementById('output');
         const cmdInput = document.getElementById('cmd');
 
-        const commands = {
-            help: () => {
-                return "Available commands:\n" +
-                    " - help: Show this help message\n" +
-                    " - search <query>: Search for a ticker or symbol\n" +
-                    " - etf_holder <symbol>: Get ETF holder information";
-            },
-            search: async (query) => {
-                if (!query) return "Usage: search <query>";
-                const res = await fetch(`/api/search/${query}`);
+        const queryTerminal = async (query) => {
+                if (!query) return;
+                const res = await fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: query
+                });
                 const data = await res.json();
                 return JSON.stringify(data, null, 2);
-            },
-            etf_holder: async (symbol) => {
-                if (!symbol) return "Usage: etf_holder <symbol>";
-                const res = await fetch(`/api/etf_holder/${symbol}`);
-                const data = await res.json();
-                return JSON.stringify(data, null, 2);
-            }
-        };
+            };
 
         cmdInput.addEventListener('keydown', async (event) => {
             if (event.key === 'Enter') {
@@ -85,11 +77,7 @@
                 cmdInput.value = '';
 
                 if (!input) return;
-
-                const [command, ...args] = input.split(' ');
-                const response = commands[command]
-                    ? await commands[command](args.join(' '))
-                    : `Unknown command: ${command}`;
+                const response = await queryTerminal(input);
 
                 output.innerHTML += `> ${input}\n${response}\n`;
                 output.scrollTop = output.scrollHeight;
