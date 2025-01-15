@@ -2,8 +2,14 @@ import re
 import json
 import threading
 import traceback
+from abc import ABC, abstractmethod
 
 import lib.financialmodelingprep as fmp
+
+class JsonSerializable(ABC):
+    @abstractmethod
+    def to_dict(self):
+        pass
 
 class Variable:
 	def __init__(self, name: str, value):
@@ -11,7 +17,7 @@ class Variable:
 		self.value = value
 
 
-class Symbol:
+class Symbol(JsonSerializable):
 
 	symbols = {}
 
@@ -100,13 +106,37 @@ class Symbol:
 			+ f"{self.type_string()} {self.sector if self.sector is not None else ''} {self.country if self.country is not None else ''} {self.ipo if self.ipo is not None else ''}\n" \
 			+ f"{self.currency} {self.price} (MktCap:  {self.currency} {self.market_cap})"
 
+	def to_dict(self):
+		return {
+			"class": "Symbol",
+			"ticker": self.ticker,
+			"exchange": self.exchange,
+			"currency": self.currency,
+			"name": self.name,
+			"price": self.price,
+			"market_cap": self.market_cap,
+			"beta": self.beta,
+			"sector": self.sector,
+			"country": self.country,
+			"ipo": self.ipo,
+			"is_etf": self.is_etf,
+			"is_fund": self.is_fund,
+			"is_trading": self.is_trading
+		}
 
-class Position:
+
+class Position(JsonSerializable):
 	def __init__(self, symbol: Symbol, quantity: float = 1):
 		self.symbol = symbol
 		self.quantity = quantity
 
-class Portfolio:
+	def to_dict(self):
+		return {
+			"class": "Position",
+			"symbol": self.symbol.to_dict()
+		}
+
+class Portfolio(JsonSerializable):
 	def __init__ (self, positions: [Position]):
 		self.positions = positions
 
@@ -129,6 +159,12 @@ class Portfolio:
 					return f"error formatting position {position}: {e}"
 
 		return out
+
+	def to_dict(self):
+		return {
+			"class": "Portfolio",
+			"positions": [position.to_dict() for position in self.positions]
+		}
 
 	@classmethod
 	def from_tickers(cls, tickers):

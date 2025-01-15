@@ -12,6 +12,8 @@ def query_terminal():
         cmd = request.data.decode('utf-8')
         res = terminal.shell(cmd, variables, persistence)
         if res is not None:
+            if isinstance(res, terminal.JsonSerializable):
+                return jsonify(res.to_dict()), 200
             return jsonify(res), 200
         else:
             return jsonify("[no result]"), 200
