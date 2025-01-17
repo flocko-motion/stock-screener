@@ -44,32 +44,47 @@
             font-size: 16px;
             width: 100%;
         }
+/* Widget layout: horizontal alignment */
+.vis-symbol-widget {
+    display: flex;
+    flex-direction: row;  /* Horizontal alignment */
+    align-items: flex-start;
+    gap: 15px;            /* Space between charts and text */
+    margin-bottom: 15px;
+    flex-wrap: nowrap;
+}
 
-        /* Container for the entire widget */
-        .symbol-widget {
-            display: flex;
-            align-items: center;
-            background-color: #1e1e1e;
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        }
+/* Wrapper for each chart */
+.vis-symbol-chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        /* Left section for text */
-        .symbol-widget__text {
-            margin-right: 20px;
-        }
+/* Chart styling */
+.vis-symbol-chart {
+    width: 300px;
+    height: 178px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #80bfd4;
+}
 
-        /* Styling for images */
-        .symbol-widget__image {
-            width: 150px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
+/* Left-aligned text */
+.vis-symbol-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px;
+    background-color: #111;
+    color: #80bfd4;
+    border: 1px solid #80bfd4;
+    border-radius: 5px;
+    /*min-width: 300px;*/
+    width: 400px;
+    height: 178px;
+}
 
     </style>
 </head>
@@ -85,75 +100,42 @@
         const output = document.getElementById('output');
         const cmdInput = document.getElementById('cmd');
 
-        const fetchWithRetry = async (url) => {
-            for (let i = 0; i < 10; i++) {
-                const response = await fetch(url);
-                if (response.status === 202) {
-                    const retryAfter = response.headers.get('Retry-After') || 3 ;
-                    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-                } else if (response.ok) {
-                    return response.blob();
-                } else {
-                    throw new Error('Failed to fetch resource');
-                }
-            }
-            throw new Error('Max retries reached');
-        };
-
-        const createImageElement = async (className, url, alt) => {
-            const img = document.createElement("img");
-            img.className = className;
-            img.alt = alt;
-            try {
-                const blob = await fetchWithRetry(url);
-                img.src = URL.createObjectURL(blob);
-            } catch (error) {
-                console.error('Error fetching image:', error);
-            }
-            return img;
-        };
-
-
         const visDefault = (res, output) => {
+            console.log("res:", typeof(res));
             const response = JSON.stringify(res, null, 2);
             output.innerHTML += `${response}\n`;
         }
 
+        const chart = (name, symbol, className) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "vis-symbol-chart-wrapper";
+
+            const link = document.createElement("a");
+            link.href = `/api/charts/${name}/${symbol}`;
+            link.target = "_blank";
+
+            const img = document.createElement("img");
+            img.className = className || "vis-symbol-chart";
+            img.src = `/api/charts/${name}/${symbol}`;
+            img.alt = `${symbol} ${name} Chart`;
+
+            link.appendChild(img);
+            wrapper.appendChild(link);
+            return wrapper;
+        };
+
+
         const visSymbol = (symbol, output) => {
-            // API endpoints for images
-            const priceChartURL = `/api/charts/price/${symbol["ticker"]}`;
-            const histogramURL = `/api/charts/histogram/${symbol["ticker"]}`;
-
-            // Create the main widget container
             const widgetContainer = document.createElement("div");
-            widgetContainer.className = "symbol-widget";
+            widgetContainer.className = "vis-symbol-widget";
 
-            // Text Information
             const textContainer = document.createElement("div");
-            textContainer.className = "symbol-widget__text";
-            textContainer.innerHTML = `
-                <strong>Ticker:</strong> ${symbol["ticker"]}<br>
-                <strong>Name:</strong> ${symbol["name"]}<br>
-                <strong>Price:</strong> $${symbol["price"]}<br>
-                <strong>Market Cap:</strong> $${(symbol["market_cap"] / 1e9).toFixed(2)}B
-            `;
+            textContainer.className = "vis-symbol-text";
+            textContainer.innerHTML = `${symbol["ticker"]}<br />${symbol["name"]}<br />USD ${symbol["price"].toFixed(2)}<br />BUSD ${(symbol["market_cap"] / 1e9).toFixed(2)} Market Cap`;
 
-            // Price Chart Image
-            const priceChartImg = document.createElement("img");
-            priceChartImg.className = "symbol-widget__image";
-            priceChartImg.src = priceChartURL;
-            priceChartImg.alt = `${symbol["symbol"]} Price Chart`;
-
-            // Histogram Image
-            const histogramImg = document.createElement("img");
-            histogramImg.className = "symbol-widget__image";
-            histogramImg.src = histogramURL;
-            histogramImg.alt = `${symbol["symbol"]} Histogram`;
-
-            // Assemble the widget
             widgetContainer.appendChild(textContainer);
-            widgetContainer.appendChild(priceChartImg);
-            widgetContainer.appendChild(histogramImg);
+            widgetContainer.appendChild(chart("price", symbol["ticker"], "vis-symbol-chart"));
+            widgetContainer.appendChild(chart("histogram", symbol["ticker"], "vis-symbol-chart"));
 
             // Append to the output
             output.appendChild(widgetContainer);
@@ -181,7 +163,9 @@
                 const response = await queryTerminal(input);
                 output.innerHTML += `> ${input}\n`;
                 console.log(response);
-                switch(response["class"]) {
+                if (typeof(response) === 'string') {
+                    output.innerHTML += `${response}\n`;
+                } else if (typeof(response) === 'object' && "class" in response) switch(response["class"]) {
                     case 'Symbol':
                         visSymbol(response, output);
                         break;
@@ -189,6 +173,7 @@
                         visDefault(response, output);
                         break;
                 }
+
                 output.scrollTop = output.scrollHeight;
             }
         });
