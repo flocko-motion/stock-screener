@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback
 from functools import wraps
 
 
@@ -42,6 +43,8 @@ def watchdog(timeout: int, retries: int):
 					# If an exception occurred within the function, propagate it
 					last_exception = exception[0]
 					print(f"Attempt {attempt + 1} failed with exception: {exception[0]}")
+					# print exception traceback
+					traceback.print_exc()
 				else:
 					# Successfully completed
 					return result[0]

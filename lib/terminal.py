@@ -111,6 +111,7 @@ class Symbol(JsonSerializable):
 			"class": "Symbol",
 			"ticker": self.ticker,
 			"exchange": self.exchange,
+			"identifier": self.ticker + ":" + self.exchange,
 			"currency": self.currency,
 			"name": self.name,
 			"price": self.price,

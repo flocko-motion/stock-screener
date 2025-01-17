@@ -1,6 +1,9 @@
 # Step 1: Data Loading
 import colorsys
+import concurrent.futures
 import shutil
+import tempfile
+
 from matplotlib import dates as mdates
 from matplotlib import patches
 import pandas as pd
@@ -17,7 +20,7 @@ from lib.image_processing import compress_png
 from lib.cache import get_cache_time, get_cache_path
 from lib.yahoo_finance import yahoo_ticker
 from lib.watchdog import watchdog
-
+import threading
 
 
 date_epoch_start = datetime(2009, 1, 1)
@@ -29,6 +32,8 @@ cagr_class_exponent = 1.10
 class Ticker:
 
     tickers = {}
+    _analyze_all_lock = threading.Lock()
+    _analyze_all_running = False
 
 
     @classmethod
@@ -37,24 +42,55 @@ class Ticker:
             cls.tickers[ticker] = cls(ticker)
         return cls.tickers[ticker]
 
+    @classmethod
+    def analyze_all(cls):
+        processed_tickers = set()
+        while True:
+            tickers_to_process = set(cls.tickers.keys()) - processed_tickers
+            if not tickers_to_process:
+                break
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                futures = [executor.submit(cls.get(ticker).analyze) for ticker in tickers_to_process]
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        print(f"Error analyzing ticker: {e}")
+            processed_tickers.update(tickers_to_process)
+            time.sleep(0.1)
+        with cls._analyze_all_lock:
+            cls._analyze_all_running = False
+        print("analyze_all finished")
+
+    @classmethod
+    def analyze_all_async(cls):
+        with cls._analyze_all_lock:
+            if cls._analyze_all_running:
+                print("analyze_all is already running.")
+                return
+            cls._analyze_all_running = True
+        threading.Thread(target=cls.analyze_all).start()
+
     def __init__(self, ticker: str):
         self.ticker = ticker
         self.info = None
         get_cache_time()
         self.cache_file_history = get_cache_path(self.ticker, "history", "csv")
         self.cache_file_info = get_cache_path(self.ticker, "meta", "yaml")
-        self.cache_file_price_history = get_cache_path(self.ticker, "price_history", "png")
-        self.cache_file_cagr_histogram = get_cache_path(self.ticker, "cagr_histogram", "png")
         self.history_cache = None
         self.history_monthly_cache = None
         self.rolling_cagr_df = None
         self.total_cagr_cache = None
         self.yearly_data_cache = None
 
+    def cache_path_chart_price(self):
+        return get_cache_path(self.ticker, "price_history", "png")
+
+    def cache_path_chart_cagr_histogram(self):
+        return get_cache_path(self.ticker, "cagr_histogram", "png")
+
     def analyze(self):
-        if self.history is None or self.info is None:
-            print("No data - skipping")
-            return
+        print(f"Analyzing {self.ticker}")
         time_start = time.time()
         history = self.history()
         time_end = time.time()
@@ -133,12 +169,12 @@ class Ticker:
         return f'#{r_hex:02X}{g_hex:02X}{b_hex:02X}'
 
     def add_to_html(self, html_dir, df) -> bool:
-        if not os.path.exists(self.cache_file_price_history) or not os.path.exists(self.cache_file_cagr_histogram):
+        if not os.path.exists(self.cache_path_chart_price()) or not os.path.exists(self.cache_path_chart_cagr_histogram()):
             print(f"Skipping {self.ticker} - no plot")
             return False
         plots = {
-            "price": self.cache_file_price_history,
-            "hist": self.cache_file_cagr_histogram,
+            "price": self.cache_path_chart_price(),
+            "hist": self.cache_path_chart_cagr_histogram(),
         }
         for plot_name, plot_file in plots.items():
             shutil.copyfile(plot_file, self.html_image_path(html_dir, plot_name, "full"))
@@ -211,6 +247,26 @@ class Ticker:
         # calculate geometric mean
         return np.prod(1 + cagr_values) ** (1 / len(cagr_values)) - 1
 
+    def get_chart(self, name):
+        if name == "price":
+            return self.get_chart_price()
+        elif name == "histogram":
+            return self.get_chart_cagr_histogram()
+        raise Exception(f"Unknown chart name: {name}")
+
+    def get_chart_price(self):
+        path = self.cache_path_chart_price()
+        if not os.path.exists(path):
+            self.__class__.analyze_all_async()
+            return path
+        return path
+
+    def get_chart_cagr_histogram(self):
+        path = self.cache_path_chart_cagr_histogram()
+        if not os.path.exists(path):
+            self.__class__.analyze_all_async()
+            return path
+        return path
 
     def yearly_data(self):
         if not (self.yearly_data_cache is None):
@@ -236,7 +292,7 @@ class Ticker:
 
     @watchdog(10, 3)
     def plot_cagr_histogram(self):
-        output_file = f"{self.cache_file_cagr_histogram}"
+        output_file = f"{self.cache_path_chart_cagr_histogram()}"
         if os.path.exists(output_file):
             print(f"{self.ticker} - histogram plot exists")
             return
@@ -298,7 +354,9 @@ class Ticker:
         ax1.legend(loc='upper left')
 
         plt.tight_layout()
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        temp_file_name = tempfile.mktemp(suffix=".png")
+        plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
+        os.rename(temp_file_name, output_file)
         # plt.show()
         plt.close()
 
@@ -306,7 +364,7 @@ class Ticker:
 
     @watchdog(10, 3)
     def plot_price_history(self):
-        output_file = f"{self.cache_file_price_history}"
+        output_file = f"{self.cache_path_chart_price()}"
         if os.path.exists(output_file):
             print(f"{self.ticker} - price history plot exists")
             return
@@ -383,10 +441,12 @@ class Ticker:
         ax2.legend(loc='upper right')
 
         plt.tight_layout()
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        # generate temp filename
+        temp_file_name = tempfile.mktemp(suffix=".png")
+        plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
+        os.rename(temp_file_name, output_file)
         # plt.show()
         plt.close()
-
 
         print(f"Price history plotting took {time.time() - time_start:.2f} seconds")
 
