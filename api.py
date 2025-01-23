@@ -35,7 +35,7 @@ def generate_chart_stream(path_chart, timeout=120, check_interval=0.5):
         time.sleep(check_interval)
         elapsed_time += check_interval
 
-    # If timeout, yield an empty PNG or error image
+    # If timeout, yield an empty PNG or error imagehel
     yield b''
 
 @app.route("/api/charts/<chart_name>/<symbol>", methods=["GET"])
