@@ -81,10 +81,59 @@
     color: #80bfd4;
     border: 1px solid #80bfd4;
     border-radius: 5px;
-    /*min-width: 300px;*/
-    width: 400px;
-    height: 178px;
+    width: 600px;
+    height: auto;  /* Allow height to adjust to content */
+    white-space: normal;  /* Fix whitespace handling */
 }
+/* Align labels and values side by side */
+.vis-symbol-text div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* Fixed width for labels */
+.vis-symbol-text strong {
+    display: inline-block;
+    width: 120px;
+    text-align: left;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+/* Portfolio Table Styling */
+.portfolio-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #111;
+    color: #80bfd4;
+    border: 1px solid #80bfd4;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Table Header Styling */
+.portfolio-table th {
+    background-color: #1e1e1e;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #80bfd4;
+}
+
+/* Table Data Cell Styling */
+.portfolio-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+/* Row Hover Effect */
+.portfolio-table tr:hover {
+    background-color: #333;
+}
+
+
 
     </style>
 </head>
@@ -96,87 +145,211 @@
             <input id="cmd" type="text" autocomplete="off" placeholder="Type a command..." autofocus />
         </div>
     </div>
-    <script>
-        const output = document.getElementById('output');
-        const cmdInput = document.getElementById('cmd');
 
-        const visDefault = (res, output) => {
-            console.log("res:", typeof(res));
-            const response = JSON.stringify(res, null, 2);
-            output.innerHTML += `${response}\n`;
+<script>
+const output = document.getElementById('output');
+const cmdInput = document.getElementById('cmd');
+
+const chart = (name, symbol, className) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "vis-symbol-chart-wrapper";
+
+    const link = document.createElement("a");
+    link.href = `/api/charts/${name}/${symbol}`;
+    link.target = "_blank";
+
+    const img = document.createElement("img");
+    img.className = className || "vis-symbol-chart";
+    img.src = `/api/charts/${name}/${symbol}`;
+    img.alt = `${symbol} ${name} Chart`;
+
+    link.appendChild(img);
+    wrapper.appendChild(link);
+    return wrapper;
+};
+
+
+const symbolAssetType = (symbol) => {
+    let assetType = "Equity";
+    if (symbol["is_etf"] && symbol["is_fund"]) {
+        assetType = "Hybrid Fund/ETF";
+    } else if (symbol["is_etf"]) {
+        assetType = "Exchange-Traded Fund (ETF)";
+    } else if (symbol["is_fund"]) {
+        assetType = "Mutual Fund";
+    }
+    return assetType;
+}
+
+const nullNA = (value, fixed = 2) => {
+    return value !== null ? value : "N/A";
+}
+
+const visDefault = (res, output) => {
+    console.log("res:", typeof(res));
+    const response = JSON.stringify(res, null, 2);
+    output.innerHTML += `${response}\n`;
+}
+const visPortfolio = (portfolio, output) => {
+    // Create the table
+    const table = document.createElement("table");
+    table.className = "portfolio-table";
+
+    // Add "Charts" as the first column header
+    const headerRow = document.createElement("tr");
+    const headers = ["Charts", "Ticker", "Name", "Price", "Currency", "Market Cap (B)", "Sector", "Beta"];
+
+    headers.forEach(headerText => {
+        const th = document.createElement("th");
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+
+    table.appendChild(headerRow);
+
+    // Populate the table with portfolio data
+    portfolio.positions.forEach(position => {
+        const symbol = position.symbol;
+
+        const row = document.createElement("tr");
+
+        // Helper for handling null or undefined values
+        const formatValue = (value, decimals = 2) =>
+            value !== null && value !== undefined
+                ? (typeof value === "number" ? value.toFixed(decimals) : value)
+                : "N/A";
+
+        // 📊 Insert the two charts in the first column
+        const chartsCell = document.createElement("td");
+        const chartWrapper = document.createElement("div");
+        chartWrapper.style.display = "flex";
+        chartWrapper.style.flexDirection = "column";
+        chartWrapper.style.gap = "5px";
+
+        // Append the price and histogram charts
+        chartWrapper.appendChild(chart("price", symbol["ticker"], "vis-symbol-chart"));
+        chartWrapper.appendChild(chart("histogram", symbol["ticker"], "vis-symbol-chart"));
+        chartsCell.appendChild(chartWrapper);
+
+        row.appendChild(chartsCell);  // Add charts as the first column
+
+        // Add the rest of the data columns
+        const columns = [
+            symbol["identifier"],
+            symbol["name"],
+            formatValue(symbol["price"]),
+            symbol["currency"],
+            formatValue(symbol["market_cap"] / 1e9),  // Convert to billions
+            symbol["sector"] || "N/A",
+            formatValue(symbol["beta"])
+        ];
+
+        columns.forEach(colText => {
+            const td = document.createElement("td");
+            td.textContent = colText;
+            row.appendChild(td);
+        });
+
+        table.appendChild(row);
+    });
+
+    // Append the table to the output
+    output.appendChild(table);
+};
+
+
+const visSymbol = (symbol, output) => {
+    const widgetContainer = document.createElement("div");
+    widgetContainer.className = "vis-symbol-widget";
+    const textContainer = document.createElement("div");
+    textContainer.className = "vis-symbol-text";
+
+    textContainer.innerHTML = `
+        <div><strong>Ticker:</strong> ${symbol["identifier"]}</div>
+        <div><strong>Name:</strong> ${symbol["name"]}</div>
+         <div><strong>Info:</strong>${symbol["country"]} ${symbolAssetType(symbol)} ${symbol["sector"]}${symbol["ipo"] ? ", IPO " + symbol["ipo"] : ""}</div>
+        <div><strong>Price:</strong> ${symbol["price"].toFixed(2)} ${symbol["currency"]}</div>
+        <div><strong>MCap:</strong>${(symbol["market_cap"] / 1e9).toFixed(2)}B ${symbol["currency"]}</div>
+        <div><strong>Beta:</strong> ${nullNA(symbol["beta"], 2)}</div>
+    `;
+
+    widgetContainer.appendChild(textContainer);
+    widgetContainer.appendChild(chart("price", symbol["ticker"], "vis-symbol-chart"));
+    widgetContainer.appendChild(chart("histogram", symbol["ticker"], "vis-symbol-chart"));
+
+    output.appendChild(widgetContainer);
+};
+
+const queryTerminal = async (query) => {
+    if (!query) return;
+    const res = await fetch('/api/terminal', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain'
+        },
+        body: query
+    });
+    return await res.json();
+};
+
+// Add input history and pointer
+let inputHistory = [];
+let historyIndex = -1;
+
+cmdInput.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter') {
+        const input = cmdInput.value.trim();
+        if (!input) return;
+
+        // Save the input into history
+        inputHistory.push(input);
+        historyIndex = inputHistory.length;  // Reset index to the latest entry
+
+        cmdInput.value = '';  // Clear input
+
+        if (input === 'clear') {
+            output.innerHTML = '';
+            return;
         }
 
-        const chart = (name, symbol, className) => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "vis-symbol-chart-wrapper";
+        // Fetch and handle the response
+        const response = await queryTerminal(input);
+        output.innerHTML += `> ${input}\n`;
 
-            const link = document.createElement("a");
-            link.href = `/api/charts/${name}/${symbol}`;
-            link.target = "_blank";
+        if (typeof(response) === 'string') {
+            output.innerHTML += `${response}\n`;
+        } else if (typeof(response) === 'object' && "class" in response) switch(response["class"]) {
+            case 'Symbol':
+                visSymbol(response, output);
+                break;
+            case 'Portfolio':
+                visPortfolio(response, output);
+                break;
+            default:
+                visDefault(response, output);
+                break;
+        }
 
-            const img = document.createElement("img");
-            img.className = className || "vis-symbol-chart";
-            img.src = `/api/charts/${name}/${symbol}`;
-            img.alt = `${symbol} ${name} Chart`;
+        output.scrollTop = output.scrollHeight;
 
-            link.appendChild(img);
-            wrapper.appendChild(link);
-            return wrapper;
-        };
+    } else if (event.key === 'ArrowUp') {
+        // Navigate to the previous command
+        if (historyIndex > 0) {
+            historyIndex--;
+            cmdInput.value = inputHistory[historyIndex];
+        }
+    } else if (event.key === 'ArrowDown') {
+        // Navigate to the next command
+        if (historyIndex < inputHistory.length - 1) {
+            historyIndex++;
+            cmdInput.value = inputHistory[historyIndex];
+        } else {
+            historyIndex = inputHistory.length;
+            cmdInput.value = '';  // Clear input if at the latest entry
+        }
+    }
+});
 
-
-        const visSymbol = (symbol, output) => {
-            const widgetContainer = document.createElement("div");
-            widgetContainer.className = "vis-symbol-widget";
-
-            const textContainer = document.createElement("div");
-            textContainer.className = "vis-symbol-text";
-            textContainer.innerHTML = `${symbol["ticker"]}<br />${symbol["name"]}<br />USD ${symbol["price"].toFixed(2)}<br />BUSD ${(symbol["market_cap"] / 1e9).toFixed(2)} Market Cap`;
-
-            widgetContainer.appendChild(textContainer);
-            widgetContainer.appendChild(chart("price", symbol["ticker"], "vis-symbol-chart"));
-            widgetContainer.appendChild(chart("histogram", symbol["ticker"], "vis-symbol-chart"));
-
-            // Append to the output
-            output.appendChild(widgetContainer);
-        };
-
-        const queryTerminal = async (query) => {
-                if (!query) return;
-                const res = await fetch('/api/terminal', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
-                    body: query
-                });
-                return await res.json();
-            };
-
-
-        cmdInput.addEventListener('keydown', async (event) => {
-            if (event.key === 'Enter') {
-                const input = cmdInput.value.trim();
-                cmdInput.value = '';
-
-                if (!input) return;
-                const response = await queryTerminal(input);
-                output.innerHTML += `> ${input}\n`;
-                console.log(response);
-                if (typeof(response) === 'string') {
-                    output.innerHTML += `${response}\n`;
-                } else if (typeof(response) === 'object' && "class" in response) switch(response["class"]) {
-                    case 'Symbol':
-                        visSymbol(response, output);
-                        break;
-                    default:
-                        visDefault(response, output);
-                        break;
-                }
-
-                output.scrollTop = output.scrollHeight;
-            }
-        });
-    </script>
+</script>
 </body>
 </html>

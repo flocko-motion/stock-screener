@@ -4,7 +4,8 @@ import traceback
 # for side effect: enable arrow key history in input()
 import readline
 
-from lib import terminal
+
+from lib import terminal, Ticker
 
 cmd = None
 variables = terminal.Variables()

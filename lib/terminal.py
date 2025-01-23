@@ -301,12 +301,13 @@ def f_search(a, b):
 	return res
 
 def f_search_name(a, b):
+	min_len = 2
 	if a is not None:
 		raise ValueError("Unexpected argument")
 	if b is None:
 		raise ValueError("Missing argument")
-	if len(b) < 3:
-		raise ValueError("Search query must be at least 3 characters long.")
+	if len(b) < min_len:
+		raise ValueError(f"Search query must be at least {min_len} characters long.")
 	res = fmp.search_name(b)
 	if len(res) > 0:
 		print(f"Found {len(res)} results.")

@@ -19,7 +19,7 @@ with open(key_file_path, 'r') as file:
     API_KEY = file.read().strip()
 
 def load_ticker(ticker: str):
-    ticker = ticker.replace(".", "-")
+    # ticker = ticker.replace(".", "-")
     fundamentals_raw = load_ticker_fundamentals(ticker)
     if fundamentals_raw is None:
         raise ValueError(f"No fundamentals data found for ticker '{ticker}'.")
@@ -54,6 +54,7 @@ RATE_LIMIT_INTERVAL = 0.25
 
 endpoint_cache_validity = {
     "profile": 7 * 24 * 3600,
+    "historical-price-full": 7 * 24 * 3600,
     "quote": 24 * 3600,
     "search": 3600,
 }
@@ -64,15 +65,20 @@ def api_get(endpoint, params=None):
         params = {}
     url = f"https://financialmodelingprep.com/api/v3/{endpoint}"
 
-    cache_validity = endpoint_cache_validity.get(endpoint, 3600)
-    resource = f"{endpoint}_{json.dumps(params)}_{round(time.time() / cache_validity)}"
+    cache_validity = endpoint_cache_validity.get(endpoint.split("/")[0], 3600)
+    resource = f"{endpoint}_{json.dumps(params)}"
     # hash resource with md5
     resource_hash = str(hashlib.md5(resource.encode()).hexdigest())
     # check if resource is in cache
     cache_file = os.path.join(cache_dir, f"{resource_hash}.json")
     if os.path.exists(cache_file):
-        with open(cache_file, "r") as f:
-            return json.load(f)
+        current_time = time.time()
+        file_mod_time = os.path.getmtime(cache_file)
+        if current_time > file_mod_time:
+            os.remove(cache_file) # purge old cache files
+        else:
+            with open(cache_file, "r") as f:
+                return json.load(f)
 
     with rate_limit_lock:
         current_time = time.time()
@@ -90,6 +96,9 @@ def api_get(endpoint, params=None):
     with open(cache_file, "w") as f:
         f.write(json.dumps(response.json()))
 
+    expiry_time = time.time() + cache_validity
+    os.utime(cache_file, (expiry_time, expiry_time))
+
     data = response.json()
     return data
 
@@ -105,41 +114,21 @@ def quote(ticker):
 def search_name(query: str):
     return api_get(f"search-name", {"query":query})
 
+def tradeable_symbols():
+    return api_get(f"available-traded/list")
 
 def etf_holder(ticker: str):
     return api_get(f"etf-holder/{ticker}")
 
 def load_ticker_fundamentals(ticker: str):
-    # Path to cache the fundamentals
-    fundamentals_path = get_cache_path(ticker, "fmp_fundamentals", "pkl")
-    if os.path.exists(fundamentals_path):
-        print(f"Loading {ticker} fundamentals from cache..")
-        return pd.read_pickle(fundamentals_path)
-
-    # Fetch fundamentals
-    url = f"https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey={API_KEY}"
-    response = requests.get(url)
-    fundamentals_data = response.json()
-    if response.status_code != 200:
-        print(f"Error fetching fundamentals data for {ticker}: {fundamentals_data}")
-        return None
-
-    if not fundamentals_data:
-        print(f"No fundamentals data found for {ticker}.")
-        return None
-
-    # Convert to DataFrame for easier caching and usage
-    df = None
+    fundamentals_data = api_get(f"profile/{ticker}")
     try:
-        df = pd.DataFrame(fundamentals_data)
+        return pd.DataFrame(fundamentals_data)
     except Exception as e:
         print(f"Error converting fundamentals data to DataFrame: {e}")
         print(fundamentals_data)
         raise e
 
-    # Cache the data
-    df.to_pickle(fundamentals_path)
-    return df
 
 @watchdog(timeout=10, retries=3)
 def load_ticker_history(ticker: str):
@@ -156,12 +145,10 @@ def load_ticker_history(ticker: str):
     }
 
     # Fetch historical prices
-    prices_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{ticker}?apikey={API_KEY}"
-    prices_response = requests.get(prices_url, params)
-    prices_data = prices_response.json().get("historical", [])
-    if prices_response.status_code != 200:
-        print(f"Error data for {ticker} from {prices_url}")
-        raise Exception(prices_data)
+    # prices_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{ticker}?apikey={API_KEY}"
+    # prices_response = requests.get(prices_url, params)
+    prices_response = api_get(f"historical-price-full/{ticker}", params)
+    prices_data = prices_response.get("historical", [])
 
     prices_df = pd.DataFrame(prices_data)
     prices_df["date"] = pd.to_datetime(prices_df["date"])

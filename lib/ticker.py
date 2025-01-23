@@ -14,11 +14,10 @@ import time
 import os
 from datetime import datetime, timedelta
 import math
-# import lib.yahoo_finance as fin_db
-import lib.financialmodelingprep as fin_db
+import lib.financialmodelingprep as fin_api
+from lib import cache
 from lib.image_processing import compress_png
-from lib.cache import get_cache_time, get_cache_path
-from lib.yahoo_finance import yahoo_ticker
+from lib.cache import get_cache_path
 from lib.watchdog import watchdog
 import threading
 
@@ -37,6 +36,13 @@ class Ticker:
 
 
     @classmethod
+    def load_all_data(cls):
+        symbols: dict = fin_api.tradeable_symbols()
+        for symbol in symbols:
+            cls.get(symbol["symbol"])
+        cls.analyze_all()
+
+    @classmethod
     def get(cls, ticker: str):
         if ticker not in cls.tickers:
             cls.tickers[ticker] = cls(ticker)
@@ -49,15 +55,35 @@ class Ticker:
             tickers_to_process = set(cls.tickers.keys()) - processed_tickers
             if not tickers_to_process:
                 break
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            time_start = time.time()
+            counter = 0
+            with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+                futures = [executor.submit(cls.get(ticker).history) for ticker in tickers_to_process]
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        counter += 1
+                        time_projection = (time.time() - time_start) / counter * (len(tickers_to_process) - counter)
+                        time_projection_formatted = str(timedelta(seconds=int(time_projection)))
+                        print(f"*** Fetched {counter}/{len(tickers_to_process)} symbols, Remaining time: {time_projection_formatted} ***")
+                        future.result()
+                    except Exception as e:
+                        print(f"Error fetching ticker: {e}")
+
+            time_start = time.time()
+            counter = 0
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 futures = [executor.submit(cls.get(ticker).analyze) for ticker in tickers_to_process]
                 for future in concurrent.futures.as_completed(futures):
                     try:
+                        counter += 1
+                        time_projection = (time.time() - time_start) / counter * (len(tickers_to_process) - counter)
+                        time_projection_formatted = str(timedelta(seconds=int(time_projection)))
+                        print(f"*** Analyzed {counter}/{len(tickers_to_process)} symbols, {len(plt.get_fignums())} open matplotlib figures. Remaining time: {time_projection_formatted} ***")
                         future.result()
                     except Exception as e:
                         print(f"Error analyzing ticker: {e}")
             processed_tickers.update(tickers_to_process)
-            time.sleep(0.1)
+
         with cls._analyze_all_lock:
             cls._analyze_all_running = False
         print("analyze_all finished")
@@ -74,7 +100,6 @@ class Ticker:
     def __init__(self, ticker: str):
         self.ticker = ticker
         self.info = None
-        get_cache_time()
         self.cache_file_history = get_cache_path(self.ticker, "history", "csv")
         self.cache_file_info = get_cache_path(self.ticker, "meta", "yaml")
         self.history_cache = None
@@ -121,7 +146,7 @@ class Ticker:
         print(f"{self.ticker} - loading financial data")
 
         try:
-            self.info, price_history = fin_db.load_ticker(self.ticker)
+            self.info, price_history = fin_api.load_ticker(self.ticker)
         except Exception as e:
             raise Exception(f"Error loading {self.ticker} data: {e}")
 
@@ -289,10 +314,10 @@ class Ticker:
         self.yearly_data_cache = df
         return df
 
-
     @watchdog(10, 3)
     def plot_cagr_histogram(self):
         output_file = f"{self.cache_path_chart_cagr_histogram()}"
+        cache.delete_if_not_from_this_month(output_file)
         if os.path.exists(output_file):
             print(f"{self.ticker} - histogram plot exists")
             return
@@ -305,66 +330,69 @@ class Ticker:
         rolling_cagr_values = rolling_cagr_df['1Y CAGR Class']
 
         fig, ax1 = plt.subplots(figsize=(10, 6))
-        ax1.hist(
-            [
-                rolling_cagr_values[rolling_cagr_values < 0],
-                rolling_cagr_values[rolling_cagr_values >= 0],
-            ],
-            bins=custom_bins,
-            edgecolor="#CCCCCC",
-            alpha=0.75,
-            stacked=True,
-            color=['#FFAAAA', '#AAFFAA'],
-        )
+        try:
+            ax1.hist(
+                [
+                    rolling_cagr_values[rolling_cagr_values < 0],
+                    rolling_cagr_values[rolling_cagr_values >= 0],
+                ],
+                bins=custom_bins,
+                edgecolor="#CCCCCC",
+                alpha=0.75,
+                stacked=True,
+                color=['#FFAAAA', '#AAFFAA'],
+            )
 
-        total_cagr_class = self.cagr_to_class(self.total_cagr(), float=True)
-        ax1.axvline(0, color='gray', linestyle=':', linewidth=1, label='Zero CAGR')
+            total_cagr_class = self.cagr_to_class(self.total_cagr(), float=True)
+            ax1.axvline(0, color='gray', linestyle=':', linewidth=1, label='Zero CAGR')
 
-        cagr_color = Ticker.gain_to_color(self.total_cagr(), brightness=0.4)
-        ax1.axvline(
-            total_cagr_class,
-            color=Ticker.gain_to_color(self.total_cagr(), brightness=0.4),
-            linestyle='--',
-            linewidth=5,
-            label=f'Total CAGR: {(self.total_cagr() - 1):.2%}',
-        )
+            cagr_color = Ticker.gain_to_color(self.total_cagr(), brightness=0.4)
+            ax1.axvline(
+                total_cagr_class,
+                color=Ticker.gain_to_color(self.total_cagr(), brightness=0.4),
+                linestyle='--',
+                linewidth=5,
+                label=f'Total CAGR: {(self.total_cagr() - 1):.2%}',
+            )
 
-        ax1.text(
-            total_cagr_class,
-            ax1.get_ylim()[1] * 0.9,  # Position near the top of the plot
-            f'{(self.total_cagr() -1) * 100:.2f}%',
-            color=cagr_color,
-            fontsize=24,  # Larger font size for emphasis
-            fontweight='bold',
-            ha='center',  # Center the text horizontally on the line
-            va='center',  # Vertically align the text
-            bbox=dict(facecolor='white', alpha=0.8, edgecolor="#AAAAAA")  # Add a white background to the label
-        )
+            ax1.text(
+                total_cagr_class,
+                ax1.get_ylim()[1] * 0.9,  # Position near the top of the plot
+                f'{(self.total_cagr() -1) * 100:.2f}%',
+                color=cagr_color,
+                fontsize=24,  # Larger font size for emphasis
+                fontweight='bold',
+                ha='center',  # Center the text horizontally on the line
+                va='center',  # Vertically align the text
+                bbox=dict(facecolor='white', alpha=0.8, edgecolor="#AAAAAA")  # Add a white background to the label
+            )
 
-        ax1.set_title(f'{self.ticker} ({self.info.name}) CAGR Histogram', fontsize=14)
-        ax1.set_xlabel('CAGR', fontsize=12)
-        ax1.set_ylabel('Frequency', fontsize=12)
-        ax1.set_xlim(-10, 10)
-        ax1.grid(axis='y', linestyle='--', alpha=0.7)
+            ax1.set_title(f'{self.ticker} ({self.info.name}) CAGR Histogram', fontsize=14)
+            ax1.set_xlabel('CAGR', fontsize=12)
+            ax1.set_ylabel('Frequency', fontsize=12)
+            ax1.set_xlim(-10, 10)
+            ax1.grid(axis='y', linestyle='--', alpha=0.7)
 
-        x_ticks = range(-10, 12)
-        x_labels = [f'{Ticker.class_to_cagr_pct(x)}' for x in x_ticks]
-        ax1.set_xticks(ticks=x_ticks)
-        ax1.set_xticklabels(labels=x_labels)
-        ax1.legend(loc='upper left')
+            x_ticks = range(-10, 12)
+            x_labels = [f'{Ticker.class_to_cagr_pct(x)}' for x in x_ticks]
+            ax1.set_xticks(ticks=x_ticks)
+            ax1.set_xticklabels(labels=x_labels)
+            ax1.legend(loc='upper left')
 
-        plt.tight_layout()
-        temp_file_name = tempfile.mktemp(suffix=".png")
-        plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
-        os.rename(temp_file_name, output_file)
-        # plt.show()
-        plt.close()
+            plt.tight_layout()
+            temp_file_name = tempfile.mktemp(suffix=".png")
+            plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
+            os.rename(temp_file_name, output_file)
+            cache.valid_until_end_of_month(output_file)            # plt.show()
+        finally:
+            plt.close()
 
         print(f"Histogram plotting took {time.time() - time_start:.2f} seconds")
 
     @watchdog(10, 3)
     def plot_price_history(self):
         output_file = f"{self.cache_path_chart_price()}"
+        cache.delete_if_not_from_this_month(output_file)
         if os.path.exists(output_file):
             print(f"{self.ticker} - price history plot exists")
             return
@@ -378,75 +406,78 @@ class Ticker:
         df_by_year = self.yearly_data()
 
         fig, ax2 = plt.subplots(figsize=(10, 6))
+        try:
 
-        from matplotlib.dates import date2num
+            from matplotlib.dates import date2num
 
 
-        for year in self.get_years():
-            gain = df_by_year.loc[year]["Gain"]
-            color = self.__class__.gain_to_color(gain + 1)
+            for year in self.get_years():
+                gain = df_by_year.loc[year]["Gain"]
+                color = self.__class__.gain_to_color(gain + 1)
 
-            start_date = datetime(year, 1, 1, 0, 0)
-            end_date = datetime(year, 12, 31, 23, 59)
+                start_date = datetime(year, 1, 1, 0, 0)
+                end_date = datetime(year, 12, 31, 23, 59)
 
-            start_date_num = date2num(start_date)
-            end_date_num = date2num(end_date)
+                start_date_num = date2num(start_date)
+                end_date_num = date2num(end_date)
 
-            ax2.add_patch(
-                patches.Rectangle(
-                    (start_date_num, min_price),
-                    (end_date - start_date).days,
-                    max_price - min_price,
-                    color=color,
-                    alpha=0.2,
-                    zorder=-1,
+                ax2.add_patch(
+                    patches.Rectangle(
+                        (start_date_num, min_price),
+                        (end_date - start_date).days,
+                        max_price - min_price,
+                        color=color,
+                        alpha=0.2,
+                        zorder=-1,
+                    )
                 )
+
+            ax2.plot(
+                price_history.index.to_pydatetime(),
+                price_history['close'],
+                color='green',
+                linestyle='-',
+                linewidth=1.5,
+                label='Price History',
             )
 
-        ax2.plot(
-            price_history.index.to_pydatetime(),
-            price_history['close'],
-            color='green',
-            linestyle='-',
-            linewidth=1.5,
-            label='Price History',
-        )
+            ax2.set_title(f'{self.ticker} ({self.info.name}) - Price History', fontsize=14)
+            ax2.set_ylabel('Price', fontsize=12)
+            ax2.set_xlabel('Year', fontsize=12)
+            ax2.grid(axis='y', linestyle='--', alpha=0.7)
+            ax2.xaxis_date()
+            fig.autofmt_xdate()
 
-        ax2.set_title(f'{self.ticker} ({self.info.name}) - Price History', fontsize=14)
-        ax2.set_ylabel('Price', fontsize=12)
-        ax2.set_xlabel('Year', fontsize=12)
-        ax2.grid(axis='y', linestyle='--', alpha=0.7)
-        ax2.xaxis_date()
-        fig.autofmt_xdate()
+            y_ticks = []
+            for i in range(int(np.floor(np.log10(min_price))), int(np.ceil(np.log10(max_price))) + 1):
+    #            y_ticks.extend([1 * 10 ** i, 1.8 * 10 ** i, 3.2 * 10 ** i, 5.6 * 10 ** i])
+    #            y_ticks.extend([1 * 10 ** i, 2.15 * 10 ** i, 4.64 * 10 ** i])
+                y_ticks.extend([1 * 10 ** i, 2 * 10 ** i, 5 * 10 ** i])
+            y_ticks = [tick for tick in y_ticks if min_price <= tick <= max_price]
 
-        y_ticks = []
-        for i in range(int(np.floor(np.log10(min_price))), int(np.ceil(np.log10(max_price))) + 1):
-#            y_ticks.extend([1 * 10 ** i, 1.8 * 10 ** i, 3.2 * 10 ** i, 5.6 * 10 ** i])
-#            y_ticks.extend([1 * 10 ** i, 2.15 * 10 ** i, 4.64 * 10 ** i])
-            y_ticks.extend([1 * 10 ** i, 2 * 10 ** i, 5 * 10 ** i])
-        y_ticks = [tick for tick in y_ticks if min_price <= tick <= max_price]
+            ax2.set_yscale('log')
+            ax2.set_ylim(min_price, max_price)
+            ax2.set_yticks(y_ticks)
 
-        ax2.set_yscale('log')
-        ax2.set_ylim(min_price, max_price)
-        ax2.set_yticks(y_ticks)
+            years = sorted(price_history.index.year.unique())
+            ticks = [pd.Timestamp(f'{year}-01-01') for year in years]
+            ticks_numeric = mdates.date2num(ticks)
+            ax2.set_xticks(ticks_numeric)
+            ax2.set_xticklabels([str(year) for year in years], rotation=45, ha='right')
 
-        years = sorted(price_history.index.year.unique())
-        ticks = [pd.Timestamp(f'{year}-01-01') for year in years]
-        ticks_numeric = mdates.date2num(ticks)
-        ax2.set_xticks(ticks_numeric)
-        ax2.set_xticklabels([str(year) for year in years], rotation=45, ha='right')
+            ax2.set_xlim(date_epoch_start, datetime.now())
+            ax2.get_yaxis().set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+            ax2.legend(loc='upper right')
 
-        ax2.set_xlim(date_epoch_start, datetime.now())
-        ax2.get_yaxis().set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-        ax2.legend(loc='upper right')
-
-        plt.tight_layout()
-        # generate temp filename
-        temp_file_name = tempfile.mktemp(suffix=".png")
-        plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
-        os.rename(temp_file_name, output_file)
-        # plt.show()
-        plt.close()
+            plt.tight_layout()
+            # generate temp filename
+            temp_file_name = tempfile.mktemp(suffix=".png")
+            plt.savefig(temp_file_name, dpi=300, bbox_inches='tight')
+            os.rename(temp_file_name, output_file)
+            cache.valid_until_end_of_month(output_file)            # plt.show()
+            # plt.show()
+        finally:
+            plt.close()
 
         print(f"Price history plotting took {time.time() - time_start:.2f} seconds")
 
