@@ -7,9 +7,9 @@ from abc import ABC, abstractmethod
 import lib.financialmodelingprep as fmp
 
 class JsonSerializable(ABC):
-    @abstractmethod
-    def to_dict(self):
-        pass
+	@abstractmethod
+	def to_dict(self):
+		pass
 
 class Variable:
 	def __init__(self, name: str, value):
@@ -231,8 +231,8 @@ def shell(cmd: str, variables: Variables, persistence: Persistence):
 		return f"{type(e).__name__}: {e}"
 
 def is_ticker_name(token):
-    pattern = r'^\^?[A-Z]+(:[A-Z]+)?$'
-    return re.match(pattern, token) is not None
+	pattern = r'^\^?[A-Z0-9]+(.[A-Z0-9]+)?$'
+	return re.match(pattern, token) is not None
 
 def parse(tokens, variables, persistence, result=None):
 	op_left = None

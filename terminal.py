@@ -13,21 +13,21 @@ persistence = terminal.Persistence()
 
 
 def vis_symbol(symbol):
-    def format_optional(value, prefix="", precision=2):
-        return f"{prefix}{value:.{precision}f}" if value is not None else "N/A"
+	def format_optional(value, prefix="", precision=2):
+		return f"{prefix}{value:.{precision}f}" if value is not None else "N/A"
 
-    symbol_info = {
-        "Ticker": symbol.get("identifier", "N/A"),
-        "Name": symbol.get("name", "N/A"),
-        "Info": f"{symbol.get('country', 'N/A')} {symbol.get('asset_type', 'N/A')} "
-                f"{symbol.get('sector', 'N/A')}"
-                + (f", IPO {symbol['ipo']}" if symbol.get("ipo") else ""),
-        "Price": f"{symbol.get('price', 0):.2f} {symbol.get('currency', 'N/A')}",
-        "MCap": f"{symbol.get('market_cap', 0) / 1e9:.2f}B {symbol.get('currency', 'N/A')}",
-        "Beta": format_optional(symbol.get("beta"))
-    }
+	symbol_info = {
+		"Ticker": symbol.get("identifier", "N/A"),
+		"Name": symbol.get("name", "N/A"),
+		"Info": f"{symbol.get('country', 'N/A')} {symbol.get('asset_type', 'N/A')} "
+				f"{symbol.get('sector', 'N/A')}"
+				+ (f", IPO {symbol['ipo']}" if symbol.get("ipo") else ""),
+		"Price": f"{symbol.get('price', 0):.2f} {symbol.get('currency', 'N/A')}",
+		"MCap": 'N/A' if symbol.get('market_cap', 0) is None else f"{symbol.get('market_cap', 0) / 1e9:.2f}B {symbol.get('currency', 'N/A')}",
+		"Beta": format_optional(symbol.get("beta"))
+	}
 
-    print("\n".join([f"{key}: {value}" for key, value in symbol_info.items()]))
+	print("\n".join([f"{key}: {value}" for key, value in symbol_info.items()]))
 
 
 printers = {
@@ -42,7 +42,11 @@ while cmd not in ["exit", "quit"]:
 			d = res.to_dict()
 			if "class" in d:
 				if d["class"] in printers:
-					printers[d["class"]](d)
+					try:
+						printers[d["class"]](d)
+					except Exception as e:
+						print(f"Error printing {d['class']}: {e}")
+						traceback.print_exc()
 				else:
 					print("unknown class:", d["class"])
 					print(d)
