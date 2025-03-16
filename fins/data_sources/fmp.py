@@ -154,7 +154,8 @@ def load_ticker_history(ticker: str):
         df = pd.read_pickle(history_path)
         return df
 
-    prices_response = api_get(f"historical-price-full/{ticker}", params)
+    # Fetch full history without date parameters
+    prices_response = api_get(f"historical-price-full/{ticker}", {})
     prices_data = prices_response.get("historical", [])
 
     prices_df = pd.DataFrame(prices_data)
@@ -163,9 +164,7 @@ def load_ticker_history(ticker: str):
 
     df = prices_df[["date", "adjClose"]]
     df = df.rename(columns={"adjClose": "close"})
-    # first_close = df["close"].iloc[0]
-    # df["close"] = df["close"] / first_close * 100
-    # set the date as the index
+    # Use actual prices instead of normalizing
     df.set_index("date", inplace=True)
     df.to_pickle(history_path)
     

@@ -212,12 +212,15 @@ class TestFMPClient(unittest.TestCase):
         result = fmp.load_ticker_history("AAPL")
 
         # Verify the API was called with the correct parameters
-        mock_api_get.assert_called_once_with("historical-price-full/AAPL", {"from": "2000-01-01"})
-
-        # Verify the result was processed correctly
-        self.assertIsInstance(result, pd.DataFrame)
-        self.assertEqual(result.index.name, "date")
-        self.assertTrue("close" in result.columns)
+        # No parameters expected now that we're fetching full history
+        mock_api_get.assert_called_once_with("historical-price-full/AAPL", {})
+        
+        # Verify the result has the expected structure
+        self.assertIn("close", result.columns)
+        self.assertEqual(len(result), 3)
+        
+        # Verify the prices are not normalized (actual prices are used)
+        self.assertEqual(result.iloc[0]["close"], 125.0)
 
 
 if __name__ == "__main__":
