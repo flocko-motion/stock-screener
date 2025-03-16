@@ -8,11 +8,19 @@ from typing import List, Dict, Any, Union, Optional
 
 from .ast_transformer import AstTransformer
 from .output import Output
-from .command_functions import (
-    sort_basket, filter_basket, union_baskets, difference_baskets, 
-    intersection_baskets, spread_symbol, create_basket, get_variable,
-    add_column, get_info, lock_variable, unlock_variable, define_function
-)
+from .token import Token
+from .commands.command import Command, CommandArgs
+from .commands.sort import SortColumnCommand
+from .commands.filter import FilterCommand
+from .commands.union import UnionCommand
+from .commands.difference import DifferenceCommand
+from .commands.intersection import IntersectionCommand
+from .commands.spread import SpreadCommand
+from .commands.create import CreateBasketCommand
+from .commands.variable import VariableCommand
+from .commands.column import AddColumnCommand
+from .commands.info import InfoCommand
+from .commands.define import DefineFunctionCommand
 
 # Load the grammar from external file "parser.lark"
 grammar_file = os.path.join(os.path.dirname(__file__), "parser.lark")
@@ -41,18 +49,19 @@ class FinsParser:
             "function_definition": self._handle_function_definition,
         }
         
-        # Action handlers dictionary for command actions
-        self.action_handlers = {
-            "sort": sort_basket,
-            "filter": filter_basket,
-            "union": union_baskets,
-            "difference": difference_baskets,
-            "intersection": intersection_baskets,
-            "spread": spread_symbol,
-            "add_column": add_column,
-            "info": get_info,
-            "lock": self._handle_lock,
-            "unlock": self._handle_unlock,
+        # Command instances for executing commands
+        self.commands = {
+            "sort": SortColumnCommand(),
+            "filter": FilterCommand(),
+            "union": UnionCommand(),
+            "difference": DifferenceCommand(),
+            "intersection": IntersectionCommand(),
+            "spread": SpreadCommand(),
+            "create": CreateBasketCommand(),
+            "variable": VariableCommand(),
+            "column": AddColumnCommand(),
+            "info": InfoCommand(),
+            "define": DefineFunctionCommand(),
         }
 
     def parse(self, command_str):
@@ -90,68 +99,169 @@ class FinsParser:
     
     def _handle_basket(self, command):
         """
-        Handle basket creation commands.
+        Handle a basket command.
         
         Args:
             command: The basket command to handle
             
         Returns:
-            Output: The created basket wrapped in an Output instance
+            Output: The result of executing the basket command
         """
         symbols = command.get("symbols", [])
-        basket = create_basket(symbols)
-        return Output(basket, metadata={"symbol_count": len(symbols)})
+        
+        # Convert symbols to tokens
+        right_tokens = []
+        for symbol in symbols:
+            if isinstance(symbol, str):
+                right_tokens.append(Token(symbol, is_reference=False))
+            elif isinstance(symbol, dict) and symbol.get("type") == "symbol":
+                right_tokens.append(Token(symbol.get("ticker"), is_reference=False))
+        
+        # Create command args
+        args = CommandArgs(
+            implicit_input=None,
+            left_input=None,
+            right_tokens=right_tokens
+        )
+        
+        # Execute the command
+        result = self.commands["create"].execute_with_output(args)
+        
+        return result
     
     def _handle_variable(self, command):
-        """Handle variable commands."""
-        name = command.get("name")
-        action = command.get("action")
+        """
+        Handle a variable command.
         
-        try:
-            # If no action is specified, assume we're retrieving the variable
-            if not action:
-                if name in self.variables:
-                    return Output(self.variables[name], metadata={"variable": name})
-                result = get_variable(name)
-                return Output(result, metadata={"variable": name})
+        Args:
+            command: The variable command to handle
             
-            if action == "get":
-                if name in self.variables:
-                    return Output(self.variables[name], metadata={"variable": name})
-                result = get_variable(name)
-                return Output(result, metadata={"variable": name})
-            elif action == "lock":
-                result = lock_variable(name)
-                return Output(result, metadata={"variable": name, "action": "lock"})
-            elif action == "unlock":
-                result = unlock_variable(name)
-                return Output(result, metadata={"variable": name, "action": "unlock"})
+        Returns:
+            Output: The result of executing the variable command
+        """
+        name = command.get("name")
+        action = command.get("action", "get")
+        
+        # Convert variable name to token
+        var_token = Token(name, is_reference=True)
+        
+        # Create right tokens based on action
+        right_tokens = []
+        if action != "get":
+            right_tokens.append(Token(action, is_reference=False))
+        right_tokens.append(var_token)
+        
+        # Create command args
+        args = CommandArgs(
+            implicit_input=None,
+            left_input=None,
+            right_tokens=right_tokens
+        )
+        
+        # Execute the command
+        result = self.commands["variable"].execute_with_output(args)
+        
+        # If this is a variable assignment, store the result
+        if action == "set" and name not in self.locked_variables:
+            self.variables[name] = result.data
             
-            return Output(f"Unknown variable action: {action}", output_type="error")
-        except Exception as e:
-            return Output(e, output_type="error")
+        return result
     
     def _handle_function_definition(self, command):
-        """Handle function definition commands."""
+        """
+        Handle a function definition command.
+        
+        Args:
+            command: The function definition command to handle
+            
+        Returns:
+            Output: The result of executing the function definition command
+        """
         name = command.get("name")
         function_command = command.get("command")
-        result = define_function(name, function_command)
-        return Output(result, metadata={"function": name})
+        
+        # Convert function name and command to tokens
+        name_token = Token(name, is_reference=False)
+        equals_token = Token("=", is_reference=False)
+        command_token = Token(function_command, is_reference=False)
+        
+        # Create command args
+        args = CommandArgs(
+            implicit_input=None,
+            left_input=None,
+            right_tokens=[name_token, equals_token, command_token]
+        )
+        
+        # Execute the command
+        result = self.commands["define"].execute_with_output(args)
+        
+        # Store the function
+        self.functions[name] = function_command
+        
+        return result
     
-    def _handle_lock(self, current_basket, **kwargs):
-        """Handle lock action"""
+    def _handle_lock(self, basket, **kwargs):
+        """
+        Handle a lock command.
+        
+        Args:
+            basket: The basket to lock
+            **kwargs: Additional arguments
+                - variable: The variable to lock
+                
+        Returns:
+            Output: The result of executing the lock command
+        """
         var_name = kwargs.get("variable")
         self.locked_variables.add(var_name)
-        result = lock_variable(var_name)
-        return Output(result, metadata={"variable": var_name, "action": "lock"})
+        
+        # Convert variable name to token
+        var_token = Token(var_name, is_reference=True)
+        action_token = Token("lock", is_reference=False)
+        
+        # Create command args
+        args = CommandArgs(
+            implicit_input=None,
+            left_input=None,
+            right_tokens=[action_token, var_token]
+        )
+        
+        # Execute the command
+        result = self.commands["variable"].execute_with_output(args)
+        
+        return result
     
-    def _handle_unlock(self, current_basket, **kwargs):
-        """Handle unlock action"""
+    def _handle_unlock(self, basket, **kwargs):
+        """
+        Handle an unlock command.
+        
+        Args:
+            basket: The basket to unlock
+            **kwargs: Additional arguments
+                - variable: The variable to unlock
+                
+        Returns:
+            Output: The result of executing the unlock command
+        """
         var_name = kwargs.get("variable")
         if var_name in self.locked_variables:
             self.locked_variables.remove(var_name)
-        result = unlock_variable(var_name)
-        return Output(result, metadata={"variable": var_name, "action": "unlock"})
+            
+        # Convert variable name to token
+        var_token = Token(var_name, is_reference=True)
+        action_token = Token("unlock", is_reference=False)
+        
+        # Create command args
+        args = CommandArgs(
+            implicit_input=None,
+            left_input=None,
+            right_tokens=[action_token, var_token]
+        )
+        
+        # Execute the command
+        result = self.commands["variable"].execute_with_output(args)
+        
+        return result
             
     def _execute_command(self, command):
         """Execute a command and return the result wrapped in an Output instance."""
@@ -164,17 +274,35 @@ class FinsParser:
                 return self.command_handlers[command_type](command)
             
             # Handle action commands
-            if action in self.action_handlers:
+            if action in self.commands:
                 basket = command.get("basket")
                 # Extract all other arguments from the command
                 kwargs = {k: v for k, v in command.items() if k not in ["type", "action", "basket"]}
-                result = self.action_handlers[action](basket, **kwargs)
-                return Output(result, metadata={"action": action, **kwargs})
+                
+                # Convert arguments to tokens
+                right_tokens = []
+                for key, value in kwargs.items():
+                    if isinstance(value, str):
+                        right_tokens.append(Token(value, is_reference=False))
+                    else:
+                        right_tokens.append(Token(str(value), is_reference=False))
+                
+                # Create command args
+                args = CommandArgs(
+                    implicit_input=basket,
+                    left_input=None,
+                    right_tokens=right_tokens
+                )
+                
+                # Execute the command
+                result = self.commands[action].execute_with_output(args)
+                
+                return result
             
             # Handle unknown commands
             return Output(f"Unknown command: {command}", output_type="error")
         except Exception as e:
-            return Output(e, output_type="error")
+            return Output(str(e), output_type="error")
 
     def _execute_command_chain(self, command_chain, initial_basket=None):
         """
@@ -192,14 +320,25 @@ class FinsParser:
         commands = command_chain["commands"]
         
         try:
+            # Create an initial Output object to collect logs
+            chain_output = Output(None, "basket")
+            chain_output.add_log("Starting command chain execution")
+            
             for i, command in enumerate(commands):
+                # Update the basket in the command
+                if i > 0 and current_basket is not None:
+                    command["basket"] = current_basket
+                
+                # Execute the command
                 result = self._execute_command(command)
                 
-                # If result is an Output instance, extract the data
+                # Merge logs from this command's output
                 if isinstance(result, Output):
+                    chain_output.merge_logs(result)
                     current_basket = result.data
                 else:
                     current_basket = result
+                    chain_output.add_log("Command returned non-Output result")
                 
                 # If the last command in the chain is a variable assignment, store the result
                 if i == len(commands) - 1 and command["type"] == "variable":
@@ -207,15 +346,20 @@ class FinsParser:
                     if var_name not in self.locked_variables:
                         # Store the data, not the Output instance
                         self.variables[var_name] = current_basket
+                        chain_output.add_log(f"Stored result in variable '{var_name}'")
             
-            # If result isn't already an Output instance, wrap it
-            if not isinstance(result, Output):
-                result = Output(result)
-                
-            return result
+            # Set the final data and metadata in our chain output
+            if isinstance(result, Output):
+                chain_output.data = result.data
+                chain_output.output_type = result.output_type
+                chain_output.metadata = result.metadata
+            else:
+                chain_output.data = result
+            
+            return chain_output
             
         except Exception as e:
-            return Output(e, output_type="error")
+            return Output(str(e), output_type="error")
 
 if __name__ == "__main__":
     # Test with a simple command chain

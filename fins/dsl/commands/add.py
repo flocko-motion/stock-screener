@@ -8,9 +8,9 @@ from typing import Type
 from ...storage.entity import Entity
 from ...entities.basket import Basket
 from ...entities.symbol import Symbol
-from ..command import Command, CommandArgs
+from .command import Command, CommandArgs
 
-class AddColumnCommand(Command):
+class AddCommand(Command):
     """
     Command to add symbols to a basket.
     

@@ -9,7 +9,7 @@ This module provides a unified approach to commands that:
 from typing import Type, Optional, Any, Callable
 from ...storage.entity import Entity
 from ...entities.basket import Basket
-from ..command import Command, CommandArgs
+from .command import Command, CommandArgs
 from ..token import Token
 
 class ColumnCommand(Command):

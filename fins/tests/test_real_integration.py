@@ -10,7 +10,8 @@ from typing import List, Dict, Any, Optional
 from ..dsl.parser import FinsParser
 from ..entities.basket import Basket
 from ..entities.symbol import Symbol
-from ..storage.entity import Entity
+from ..entities.entity import Entity
+from ..dsl.output import Output
 
 class RealIntegrationTest(unittest.TestCase):
     """Base class for real integration tests."""
@@ -19,7 +20,7 @@ class RealIntegrationTest(unittest.TestCase):
         """Set up the test environment."""
         self.parser = FinsParser()
         
-    def execute_flow(self, command_str: str) -> Entity:
+    def execute_flow(self, command_str: str) -> Output:
         """
         Execute a FINS command flow.
         
@@ -30,6 +31,25 @@ class RealIntegrationTest(unittest.TestCase):
             The result of the command execution
         """
         return self.parser.parse(command_str)
+        
+    def get_basket_from_output(self, output: Output) -> Basket:
+        """
+        Extract a basket from an Output object.
+        
+        Args:
+            output: The Output object
+            
+        Returns:
+            The basket contained in the output
+            
+        Raises:
+            AssertionError: If the output does not contain a basket
+        """
+        self.assertEqual(output.output_type, "basket", 
+                        f"Expected output type 'basket', got '{output.output_type}'")
+        self.assertIsInstance(output.data, Basket, 
+                             f"Expected data to be a Basket, got {type(output.data)}")
+        return output.data
         
     def assert_basket_contains_symbols(self, basket: Basket, expected_symbols: List[str]):
         """
@@ -94,19 +114,21 @@ class BasicFlowTests(RealIntegrationTest):
     
     def test_create_simple_basket(self):
         """Test creating a simple basket of stocks."""
-        result = self.execute_flow("AAPL MSFT")
+        output = self.execute_flow("AAPL MSFT")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT"])
-        self.assert_basket_size(result, 2)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT"])
+        self.assert_basket_size(basket, 2)
         
     def test_add_symbol_to_basket(self):
         """Test adding a symbol to a basket."""
-        result = self.execute_flow("AAPL MSFT -> + GOOGL")
+        output = self.execute_flow("AAPL MSFT -> + GOOGL")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_size(result, 3)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_size(basket, 3)
         
     def test_explicit_add_syntax(self):
         """Test the explicit add syntax."""
@@ -114,11 +136,12 @@ class BasicFlowTests(RealIntegrationTest):
         self.execute_flow("AAPL MSFT -> $tech")
         
         # Then add GOOGL using explicit syntax
-        result = self.execute_flow("$tech + GOOGL")
+        output = self.execute_flow("$tech + GOOGL")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_size(result, 3)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_size(basket, 3)
 
 
 class ColumnCommandTests(RealIntegrationTest):
@@ -126,23 +149,25 @@ class ColumnCommandTests(RealIntegrationTest):
     
     def test_add_pe_column(self):
         """Test adding a PE column to a basket."""
-        result = self.execute_flow("AAPL MSFT GOOGL -> pe")
+        output = self.execute_flow("AAPL MSFT GOOGL -> pe")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_has_column(result, "pe")
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_has_column(basket, "pe")
         
     def test_filter_by_pe(self):
         """Test filtering a basket by PE ratio."""
         # This test assumes that at least one of the stocks has a PE < 30
-        result = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30")
+        output = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_has_column(result, "pe")
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_has_column(basket, "pe")
         
         # Check that all symbols in the result have PE < 30
-        for symbol in result.symbols:
-            pe = result.columns["pe"].get(symbol)
+        for symbol in basket.symbols:
+            pe = basket.columns["pe"].get(symbol)
             if pe is not None:  # Some symbols might not have PE data
                 self.assertLess(pe, 30, f"Symbol {symbol.name} has PE {pe} which is not < 30")
 
@@ -152,11 +177,12 @@ class SortCommandTests(RealIntegrationTest):
     
     def test_sort_by_market_cap(self):
         """Test sorting a basket by market cap."""
-        result = self.execute_flow("AAPL MSFT GOOGL -> sort mcap desc")
+        output = self.execute_flow("AAPL MSFT GOOGL -> sort mcap desc")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_sorted_by(result, "mcap", ascending=False)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_sorted_by(basket, "mcap", ascending=False)
         
     def test_explicit_sort_syntax(self):
         """Test the explicit sort syntax."""
@@ -164,11 +190,12 @@ class SortCommandTests(RealIntegrationTest):
         self.execute_flow("AAPL MSFT GOOGL -> $tech")
         
         # Then sort using explicit syntax
-        result = self.execute_flow("$tech sort pe")
+        output = self.execute_flow("$tech sort pe")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_contains_symbols(result, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_sorted_by(result, "pe", ascending=True)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_contains_symbols(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_sorted_by(basket, "pe", ascending=True)
 
 
 class ComplexFlowTests(RealIntegrationTest):
@@ -176,29 +203,31 @@ class ComplexFlowTests(RealIntegrationTest):
     
     def test_filter_then_sort(self):
         """Test filtering a basket and then sorting it."""
-        result = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30 -> sort mcap desc")
+        output = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30 -> sort mcap desc")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_has_column(result, "pe")
-        self.assert_basket_sorted_by(result, "mcap", ascending=False)
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_has_column(basket, "pe")
+        self.assert_basket_sorted_by(basket, "mcap", ascending=False)
         
         # Check that all symbols in the result have PE < 30
-        for symbol in result.symbols:
-            pe = result.columns["pe"].get(symbol)
+        for symbol in basket.symbols:
+            pe = basket.columns["pe"].get(symbol)
             if pe is not None:  # Some symbols might not have PE data
                 self.assertLess(pe, 30, f"Symbol {symbol.name} has PE {pe} which is not < 30")
     
     def test_multiple_columns_and_filter(self):
         """Test adding multiple columns and filtering."""
-        result = self.execute_flow("AAPL MSFT GOOGL -> pe -> div_yield > 1%")
+        output = self.execute_flow("AAPL MSFT GOOGL -> pe -> div_yield > 0.01")
         
-        self.assertIsInstance(result, Basket)
-        self.assert_basket_has_column(result, "pe")
-        self.assert_basket_has_column(result, "div_yield")
+        self.assertIsInstance(output, Output)
+        basket = self.get_basket_from_output(output)
+        self.assert_basket_has_column(basket, "pe")
+        self.assert_basket_has_column(basket, "div_yield")
         
         # Check that all symbols in the result have div_yield > 1%
-        for symbol in result.symbols:
-            div_yield = result.columns["div_yield"].get(symbol)
+        for symbol in basket.symbols:
+            div_yield = basket.columns["div_yield"].get(symbol)
             if div_yield is not None:  # Some symbols might not have dividend data
                 self.assertGreater(div_yield, 0.01, 
                                   f"Symbol {symbol.name} has div_yield {div_yield} which is not > 1%")

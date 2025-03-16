@@ -27,8 +27,9 @@ Example:
 
 from abc import ABC, abstractmethod
 from typing import Type, Optional, Dict, Any, NamedTuple, List, Sequence
-from ..storage.entity import Entity
-from .token import Token
+from ...storage.entity import Entity
+from ..token import Token
+from ..output import Output
 
 class CommandArgs(NamedTuple):
     """
@@ -157,4 +158,26 @@ class Command(ABC):
             TypeError: If input is not of the required type
             ValueError: If arguments are invalid
         """
-        pass 
+        pass
+        
+    def execute_with_output(self, args: CommandArgs) -> Output:
+        """
+        Execute the command and wrap the result in an Output object.
+        
+        Args:
+            args: The command arguments
+            
+        Returns:
+            Output object containing the result of the command execution
+        """
+        result = self.execute(args)
+        
+        # Create a descriptive log message based on the command
+        command_name = self.__class__.__name__.replace('Command', '').lower()
+        log_message = f"Executed {command_name} command"
+        
+        # Create output with log message and metadata
+        output = Output(result, "basket", metadata={"command": command_name})
+        output.add_log(log_message)
+        
+        return output 
