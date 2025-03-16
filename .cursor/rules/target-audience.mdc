@@ -1,0 +1,15 @@
+---
+description: target-audience
+globs: 
+alwaysApply: false
+---
+This project is personal, it's a one-man-project, it's private. 
+
+I'm not intending to have contributors, I'm not intending publishing, I'm not intending making a product of this. So we require almost no documentation, tutorials, licenses, etc. The goal is to have a powerful financial analytics tool for myself and to use it every day. 
+
+I'm using Financial Modelling Prep (FMP) as a data service and I'm not intending to add more sources. 
+
+The caching system is raw, but there's no intention to optimize for performance any further, because it's a non-commercial single user system, so there won't be any problems  with system costs. 
+
+Unit tests are important! The system is supposed to be rock-solid. The /fins directory contains the python code for the FINS server and terminal - that's core functionality that needs to be reliable. 
+

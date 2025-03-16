@@ -4,7 +4,7 @@ FINS (Financial Insights and Notation System) is a powerful terminal-based tool 
 
 ## Command Syntax
 
-FINS commands follow a functional programming inspired syntax with a pipeline approach. Commands are chained together using the arrow operator (`->`).
+FINS commands follow a functional programming inspired syntax with a pipeline approach. Commands are chained together using the arrow operator (`->`), creating a _flow_ (= pipeline).
 
 ### Basic Syntax
 
@@ -14,7 +14,7 @@ COMMAND1 -> COMMAND2 -> COMMAND3 -> ...
 
 ### Creating Baskets
 
-A basket is a collection of financial symbols (stocks, ETFs, indices).
+A basket is a collection of financial symbols (stocks, ETFs, indices) - optionally with weights.
 
 ```
 AAPL MSFT GOOGL                  # Create a basket with three symbols
@@ -30,8 +30,10 @@ Variables store baskets for later use. There are two types of variables:
 ```
 AAPL MSFT GOOGL -> $tech_basket  # Store in a session variable
 AAPL MSFT GOOGL -> /tech_basket  # Store in a persistent variable
+AAPL MSFT GOOGL -> /foo/bar      # Store in a persistent variable
 $tech_basket                     # Retrieve a session variable
 /tech_basket                     # Retrieve a persistent variable
+/foo/bar                        # Retrieve a persistent variable
 ```
 
 ### Modifying Baskets
@@ -246,53 +248,100 @@ $basket -> add_source fmp -> add_source yahoo -> add_source nasdaq
 
 ### Custom Calculations
 
+# Command Syntax and Flow
+
+## Basic Command Structure
+
+Commands in FINS follow a consistent structure and can be invoked in two ways:
+
+### Implicit (Pipeline) Syntax
 ```
-# Define a custom calculation
-def peg_ratio = "pe / (cagr_5y * 100)"
-
-# Apply it to a basket
-$tech_stocks -> cagr 5y -> pe -> peg_ratio
-```
-
-### Exporting Data
-
-```
-# Export to CSV
-$analysis_result -> export csv "analysis.csv"
-
-# Export to Excel
-$analysis_result -> export excel "analysis.xlsx"
+[inputs] -> command [arguments]
 ```
 
-### Importing Data
-
+### Explicit Syntax
 ```
-# Import from CSV
-import csv "symbols.csv" -> $imported_basket
+[input] command [arguments]
 ```
 
-## Command Line Usage
-
+For example:
 ```
-# Run a single command
-fins "AAPL MSFT GOOGL -> sort mcap desc"
+# Implicit syntax
+AAPL MSFT GOOGL -> sort mcap desc
+$tech_stocks -> pe < 20
 
-# Run commands from a file
-fins -f commands.fins
-
-# Start interactive mode
-fins -i
+# Explicit syntax
+$tech_stocks + NFLX
+$tech_stocks sort pe
 ```
 
-## API Usage
+## Command Types
 
-```python
-from fins import FinsParser
+FINS supports several command types:
 
-# Create a parser instance
-parser = FinsParser()
+1. **Column Commands**: Add data columns and optionally filter
+   - Analysis columns: `basket -> pe` (adds a PE column)
+   - Filters: `basket -> pe < 20` (adds PE column and filters)
+   - The same command can do both operations
 
-# Execute a command
-result = parser.parse("AAPL MSFT GOOGL -> sort mcap desc")
-print(result)
-``` 
+2. **Manipulation Commands**: Transform baskets
+   - Sort: `basket -> sort mcap desc`
+   - Set operations: `$tech_stocks + NFLX`
+
+## Command Flow
+
+Each command in FINS processes inputs and produces an output that can be used by the next command:
+
+1. **Inputs**: Can come from:
+   - Previous command's output (automatically passed)
+   - Direct symbol lists (AAPL MSFT GOOGL)
+   - Variables ($tech_stocks)
+   - Multiple inputs separated by spaces
+
+2. **Arguments**: Follow the command name and can be:
+   - Column names (mcap, pe)
+   - Sort orders (asc, desc)
+   - Numbers (100, 1000B)
+   - Comparison operators (>, <, =)
+   - Variables ($min_pe)
+
+## Examples
+
+### Analysis Columns and Filters
+```
+# Add PE column to basket
+AAPL MSFT GOOGL -> pe
+
+# Add PE column and filter to PE < 20
+AAPL MSFT GOOGL -> pe < 20
+
+# Equivalent explicit syntax
+$stocks pe < 20
+```
+
+### Symbol Addition
+```
+# Add NFLX to tech stocks (implicit syntax)
+$tech_stocks -> + NFLX
+
+# Equivalent explicit syntax
+$tech_stocks + NFLX
+```
+
+### Multiple Operations and Storage
+```
+# Filter by PE, add to variable, then sort by market cap
+$all_stocks -> pe < 20 -> $value_stocks -> sort mcap desc
+```
+
+## Command Output
+
+Every command produces an output that can be:
+- Used as input to the next command
+- Stored in a variable
+- Displayed in the terminal
+
+The output format depends on:
+- The command type (e.g., sort produces a sorted basket)
+- Whether JSON output is requested (--json flag)
+- Whether the result is being stored (-> $var) 

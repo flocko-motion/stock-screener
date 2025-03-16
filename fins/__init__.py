@@ -14,8 +14,9 @@ from fins.data_sources import cache
 
 # Import and expose the DSL parser
 from fins.dsl import FinsParser
+from fins.dsl.output import Output
 
 # Import and expose the storage module
 from fins.storage import Storage, EntityStore
 
-__all__ = ['FinsParser', 'Storage', 'EntityStore']
+__all__ = ['FinsParser', 'Storage', 'EntityStore', 'Output']

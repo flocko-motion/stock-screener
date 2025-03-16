@@ -1,0 +1,8 @@
+---
+description: path structure
+globs: 
+alwaysApply: false
+---
+This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root. 
+For now you can ignore all code outside the "fins/" directory.
+

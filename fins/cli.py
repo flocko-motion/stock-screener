@@ -7,11 +7,13 @@ This module serves as the main entry point for the FINS application.
 import sys
 import argparse
 from pathlib import Path
+from typing import Tuple, Any, List, Optional
 
 # Add the parent directory to the path to allow imports from the fins package
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fins.dsl import FinsParser
+from fins.dsl.output import Output
 
 
 def main():
@@ -41,6 +43,11 @@ def main():
         action="store_true", 
         help="Show version information"
     )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output results in JSON format"
+    )
 
     args = parser.parse_args()
 
@@ -54,24 +61,56 @@ def main():
     fins_parser = FinsParser()
 
     if args.interactive:
-        run_interactive_mode(fins_parser)
+        run_interactive_mode(fins_parser, json_output=args.json)
     elif args.file:
-        exit_code, _ = run_file_mode(args.file, fins_parser)
+        exit_code, _ = run_file_mode(args.file, fins_parser, json_output=args.json)
         return exit_code
     elif args.command:
-        exit_code, _ = run_command_mode(args.command, fins_parser)
+        exit_code, _ = run_command_mode(args.command, fins_parser, json_output=args.json)
         return exit_code
     else:
         parser.print_help()
         return 1
 
 
-def run_interactive_mode(fins_parser):
+def format_output(output: Output, json_output: bool = False) -> str:
+    """
+    Format an Output instance for display.
+    
+    Args:
+        output: The Output instance to format
+        json_output: Whether to output in JSON format
+        
+    Returns:
+        str: The formatted output string
+    """
+    if json_output:
+        return str(output)  # Uses Output.__str__ which returns JSON
+        
+    if output.output_type == "error":
+        return f"Error: {str(output.data)}"
+    elif output.output_type == "void":
+        return ""
+    elif output.output_type == "basket":
+        # Format basket data with metadata
+        result = str(output.data)
+        if output.metadata:
+            result += f"\nMetadata: {output.metadata}"
+        return result
+    else:
+        return str(output.data)  # Just the data, not the full JSON
+
+
+def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> int:
     """
     Run FINS in interactive mode, accepting commands from stdin.
     
     Args:
         fins_parser: An instance of FinsParser
+        json_output: Whether to output in JSON format
+        
+    Returns:
+        int: Exit code (0 for success)
     """
     print(f"FINS Interactive Mode. Type 'exit' or 'quit' to exit.")
     while True:
@@ -83,7 +122,7 @@ def run_interactive_mode(fins_parser):
                 continue
                 
             result = fins_parser.parse(command)
-            print(result)
+            print(format_output(result, json_output))
         except KeyboardInterrupt:
             print("\nExiting...")
             break
@@ -92,13 +131,14 @@ def run_interactive_mode(fins_parser):
     return 0
 
 
-def run_file_mode(file_path, fins_parser):
+def run_file_mode(file_path: str, fins_parser: FinsParser, json_output: bool = False) -> Tuple[int, List[Output]]:
     """
     Execute FINS commands from a file.
     
     Args:
         file_path: Path to the file containing FINS commands
         fins_parser: An instance of FinsParser
+        json_output: Whether to output in JSON format
         
     Returns:
         tuple: (exit_code, results) where exit_code is 0 for success, non-zero for failure
@@ -111,39 +151,40 @@ def run_file_mode(file_path, fins_parser):
         results = []
         for command in commands:
             result = fins_parser.parse(command)
-            print(result)
+            print(format_output(result, json_output))
             results.append(result)
             
         return 0, results
     except FileNotFoundError:
-        error_msg = f"Error: File '{file_path}' not found"
-        print(error_msg)
-        return 1, error_msg
+        error = Output(f"File '{file_path}' not found", output_type="error")
+        print(format_output(error, json_output))
+        return 1, [error]
     except Exception as e:
-        error_msg = f"Error: {e}"
-        print(error_msg)
-        return 1, error_msg
+        error = Output(e, output_type="error")
+        print(format_output(error, json_output))
+        return 1, [error]
 
 
-def run_command_mode(command, fins_parser):
+def run_command_mode(command: str, fins_parser: FinsParser, json_output: bool = False) -> Tuple[int, Output]:
     """
     Execute a single FINS command.
     
     Args:
         command: FINS command to execute
         fins_parser: An instance of FinsParser
+        json_output: Whether to output in JSON format
         
     Returns:
-        int: Exit code (0 for success, non-zero for failure)
+        tuple: (exit_code, result) where exit_code is 0 for success, non-zero for failure
     """
     try:
         result = fins_parser.parse(command)
-        print(result)
+        print(format_output(result, json_output))
         return 0, result
     except Exception as e:
-        error_msg = f"Error: {e}"
-        print(error_msg)
-        return 1, error_msg
+        error = Output(e, output_type="error")
+        print(format_output(error, json_output))
+        return 1, error
 
 
 if __name__ == "__main__":
