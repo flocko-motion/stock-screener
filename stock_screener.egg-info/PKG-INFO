@@ -1,0 +1,12 @@
+Metadata-Version: 2.2
+Name: stock-screener
+Version: 0.1
+Requires-Dist: pillow
+Requires-Dist: requests
+Requires-Dist: beautifulsoup4
+Requires-Dist: matplotlib
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: yfinance
+Requires-Dist: lark-parser
+Dynamic: requires-dist

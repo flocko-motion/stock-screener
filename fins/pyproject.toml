@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "fins"
+version = "0.1.0"
+description = "Financial Insights and Notation System - A terminal-based tool for financial analysis"
+authors = ["Florian Metzger-Noel <fnoel@ik.me>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+lark = "^1.1.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+flake8 = "^6.0.0"
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+fins = "cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--verbose --cov=. --cov-report=term --cov-report=html"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+include = '\.pyi?$' 
