@@ -5,7 +5,7 @@ This command adds symbols to a basket.
 """
 
 from typing import Type
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from ...entities.symbol import Symbol
 from .command import Command, CommandArgs

@@ -5,7 +5,7 @@ This command filters a basket of symbols based on a specified condition.
 """
 
 from typing import Type, Dict
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from .command import Command, CommandArgs
 

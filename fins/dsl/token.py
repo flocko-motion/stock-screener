@@ -6,7 +6,7 @@ Tokens can be literals (strings, numbers) or references to other entities.
 """
 
 from typing import Any, Union
-from ..storage.entity import Entity
+from ..entities.entity import Entity
 
 class Token(Entity):
     """

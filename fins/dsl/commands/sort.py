@@ -5,7 +5,7 @@ This command sorts a basket of symbols based on a specified column.
 """
 
 from typing import Type
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from .command import Command, CommandArgs
 

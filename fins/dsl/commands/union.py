@@ -5,7 +5,7 @@ This command combines two baskets using set union.
 """
 
 from typing import Type, Dict
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from ...entities.symbol import Symbol
 from .command import Command, CommandArgs

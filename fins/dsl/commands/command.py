@@ -27,7 +27,7 @@ Example:
 
 from abc import ABC, abstractmethod
 from typing import Type, Optional, Dict, Any, NamedTuple, List, Sequence
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ..token import Token
 from ..output import Output
 

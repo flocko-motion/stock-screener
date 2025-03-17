@@ -6,7 +6,7 @@ It can be used both as an analysis column and as a filter.
 """
 
 from typing import Any
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from .command import Command, CommandArgs
 from .function import ColumnCommand

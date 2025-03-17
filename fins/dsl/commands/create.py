@@ -5,7 +5,7 @@ This command creates a new basket from a list of symbols.
 """
 
 from typing import Type, Dict, List, Optional
-from ...storage.entity import Entity
+from ...entities.entity import Entity
 from ...entities.basket import Basket
 from ...entities.symbol import Symbol
 from .command import Command, CommandArgs
