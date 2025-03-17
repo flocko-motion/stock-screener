@@ -129,7 +129,7 @@ class Command(ABC):
             TypeError: If input is not of the required type
             ValueError: If arguments are invalid
         """
-        input_entity = args.effective_input
+        input_entity = args.left_operands
         if input_entity is not None and not isinstance(input_entity, self.input_type):
             raise TypeError(
                 f"{self.__class__.__name__} requires input of type {self.input_type.__name__}, "
