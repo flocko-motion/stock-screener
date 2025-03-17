@@ -143,7 +143,7 @@ class Portfolio(JsonSerializable):
 
 	def __str__(self):
 		out = ""
-		if all(position.quantity == 1 for position in self.positions):
+		if all(position.amount == 1 for position in self.positions):
 			sorted_positions = sorted(self.positions, key=lambda position: position.symbol.ticker)
 			for position in sorted_positions:
 				try:
@@ -152,10 +152,10 @@ class Portfolio(JsonSerializable):
 					return f"error formatting position {position}: {e}"
 		else:
 
-			sorted_positions = sorted(self.positions, key=lambda position: position.quantity, reverse=True)
+			sorted_positions = sorted(self.positions, key=lambda position: position.amount, reverse=True)
 			for position in sorted_positions:
 				try:
-					out += f"{position.quantity:>10.2f}  {position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol.name:<20}\n"
+					out += f"{position.amount:>10.2f}  {position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol.name:<20}\n"
 				except Exception as e:
 					return f"error formatting position {position}: {e}"
 

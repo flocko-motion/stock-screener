@@ -14,23 +14,23 @@ class BasketItem(JsonSerializable):
     
     Attributes:
         symbol (Symbol): The symbol of the financial instrument
-        quantity (float): The quantity of the item
+        amount (float): The quantity of the item
     """
     
-    def __init__(self, symbol: Symbol, quantity: float = 1):
+    def __init__(self, symbol: Symbol, amount: float = 1):
         """
         Initialize a basket item.
         
         Args:
             symbol: The symbol of the financial instrument
-            quantity: The quantity of the item (default: 1)
+            amount: The quantity of the item (default: 1)
         """
         self.symbol = symbol
-        self.quantity = quantity
+        self.amount = amount
     
     def __str__(self) -> str:
         """Return the string representation of the basket item."""
-        return f"{self.quantity} x {self.symbol}"
+        return f"{self.amount} x {self.symbol}"
     
     def to_dict(self):
         """
@@ -42,5 +42,5 @@ class BasketItem(JsonSerializable):
         return {
             "class": "BasketItem",
             "symbol": self.symbol.to_dict(),
-            "quantity": self.quantity
+            "quantity": self.amount
         } 

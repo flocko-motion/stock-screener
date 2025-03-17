@@ -293,7 +293,7 @@ class Trade(Note):
         total = 0.0
         for item in self.bought_basket.items:
             price = item.symbol.get_data('price', 0.0)
-            total += item.quantity * price
+            total += item.amount * price
         return total
     
     @property
@@ -307,7 +307,7 @@ class Trade(Note):
         total = 0.0
         for item in self.sold_basket.items:
             price = item.symbol.get_data('price', 0.0)
-            total += item.quantity * price
+            total += item.amount * price
         return total
     
     @property

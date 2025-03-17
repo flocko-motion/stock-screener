@@ -52,18 +52,18 @@ class Basket(JsonSerializable):
     def __str__(self) -> str:
         """Return the string representation of the basket."""
         out = ""
-        if all(item.quantity == 1 for item in self.items):
+        if all(item.amount == 1 for item in self.items):
             sorted_items = sorted(self.items, key=lambda item: item.symbol.ticker)
             for item in sorted_items:
                 try:
-                    out += f"{item.symbol.ticker:<14} {item.symbol.exchange:<10} {item.symbol.name:<20}\n"
+                    out += f"{item.symbol.ticker:<14} {str(item.symbol.exchange):<10} {str(item.symbol.name):<20}\n"
                 except Exception as e:
                     return f"error formatting item {item}: {e}"
         else:
-            sorted_items = sorted(self.items, key=lambda item: item.quantity, reverse=True)
+            sorted_items = sorted(self.items, key=lambda item: item.amount, reverse=True)
             for item in sorted_items:
                 try:
-                    out += f"{item.quantity:>10.2f}  {item.symbol.ticker:<14} {item.symbol.exchange:<10} {item.symbol.name:<20}\n"
+                    out += f"{item.amount:>10.2f}  {item.symbol.ticker:<14} {str(item.symbol.exchange):<10} {str(item.symbol.name):<20}\n"
                 except Exception as e:
                     return f"error formatting item {item}: {e}"
         
@@ -96,7 +96,7 @@ class Basket(JsonSerializable):
         for existing_item in self.items:
             if existing_item.symbol == item.symbol:
                 # Update the quantity
-                existing_item.quantity += item.quantity
+                existing_item.amount += item.amount
                 return
         
         # If the symbol doesn't exist, add the new item
@@ -224,11 +224,11 @@ class Basket(JsonSerializable):
         
         # Add all items from this basket
         for item in self.items:
-            result.add_item(BasketItem(item.symbol, item.quantity))
+            result.add_item(BasketItem(item.symbol, item.amount))
         
         # Add all items from the other basket
         for item in other.items:
-            result.add_item(BasketItem(item.symbol, item.quantity))
+            result.add_item(BasketItem(item.symbol, item.amount))
         
         # Merge columns
         result.columns = self.columns.copy()
@@ -262,7 +262,7 @@ class Basket(JsonSerializable):
             # Find the item in the other basket
             other_item = next(item for item in other.items if item.symbol == symbol)
             # Use the minimum quantity
-            quantity = min(this_item.quantity, other_item.quantity)
+            quantity = min(this_item.amount, other_item.amount)
             result.add_item(BasketItem(symbol, quantity))
         
         # Include columns from both baskets
@@ -294,7 +294,7 @@ class Basket(JsonSerializable):
         for symbol in diff_symbols:
             # Find the item in this basket
             this_item = next(item for item in self.items if item.symbol == symbol)
-            result.add_item(BasketItem(symbol, this_item.quantity))
+            result.add_item(BasketItem(symbol, this_item.amount))
         
         # Include only columns from this basket
         result.columns = self.columns.copy()
@@ -313,7 +313,7 @@ class Basket(JsonSerializable):
             'ticker': [item.symbol.ticker for item in self.items],
             'name': [item.symbol.name for item in self.items],
             'exchange': [item.symbol.exchange for item in self.items],
-            'quantity': [item.quantity for item in self.items]
+            'quantity': [item.amount for item in self.items]
         }
         
         # Add data from each symbol
