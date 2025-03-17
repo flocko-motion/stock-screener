@@ -6,10 +6,7 @@ This command creates a new basket from a list of symbols.
 
 from typing import Type, Dict, List, Optional
 
-from ..token import Token
-from ...entities.entity import Entity
-from ...entities.basket import Basket
-from ...entities.symbol import Symbol
+from ...entities import Entity, Basket, Symbol, Token
 from .command import Command, CommandArgs
 
 class CreateBasketCommand(Command):
@@ -62,7 +59,7 @@ class CreateBasketCommand(Command):
         # This command doesn't require input, so we don't call super().validate_input()
         
         # Validate right tokens
-        if not args.right_input:
+        if not args.right_operands:
             raise ValueError("Create basket command requires at least one symbol")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -84,7 +81,7 @@ class CreateBasketCommand(Command):
         
         # Convert args to Symbol objects
         symbol_objects = []
-        for arg in args.right_input:
+        for arg in args.right_operands:
             if isinstance(arg, Token):
                 if arg.is_literal:
                     symbol_objects.append(Symbol(arg.as_literal()))
@@ -93,4 +90,4 @@ class CreateBasketCommand(Command):
             elif isinstance(arg, Symbol):
                 symbol_objects.append(arg)
 
-        return Basket.from_symbols(symbol_objects)
+        return Basket.from_tickers(symbol_objects)

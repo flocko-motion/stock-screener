@@ -28,7 +28,6 @@ Example:
 from abc import ABC, abstractmethod
 from typing import Type, Optional, Dict, Any, NamedTuple, List, Sequence
 from ...entities.entity import Entity
-from ..token import Token
 from ..output import Output
 
 class CommandArgs(NamedTuple):
@@ -36,18 +35,12 @@ class CommandArgs(NamedTuple):
     Container for command arguments.
     
     Attributes:
-        implicit_input: Input from previous command (if using -> syntax)
-        left_input: Explicit left-hand input (if using direct syntax)
-        right_input: Right-hand tokens after the command
+        left_operands: Explicit left-hand input (if using direct syntax)
+        right_operands: Right-hand tokens after the command
     """
-    implicit_input: Optional[Entity]
-    left_input: Optional[Entity]
-    right_input: Sequence[Entity]
+    left_operands: Sequence[Entity]
+    right_operands: Sequence[Entity]
     
-    @property
-    def effective_input(self) -> Optional[Entity]:
-        """Returns the effective input (explicit takes precedence over implicit)."""
-        return self.left_input if self.left_input is not None else self.implicit_input
 
 class Command(ABC):
     """

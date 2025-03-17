@@ -6,7 +6,7 @@ Tokens can be literals (strings, numbers) or references to other entities.
 """
 
 from typing import Any, Union
-from ..entities.entity import Entity
+from .entity import Entity
 
 class Token(Entity):
     """
@@ -25,6 +25,7 @@ class Token(Entity):
         Args:
             value: The token's value
         """
+        super().__init__()
         self.value = value
         
     def __str__(self) -> str:

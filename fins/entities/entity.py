@@ -7,11 +7,27 @@ for all entities in the FINS system, with a focus on persistence and metadata.
 
 import json
 import uuid
+from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Any, List, Optional, ClassVar, Type
+from typing import Dict, Any, List, Optional, ClassVar
 
-from .json_serializable import JsonSerializable
+class JsonSerializable(ABC):
+    """
+    Abstract base class for entities that can be serialized to JSON.
 
+    All entities that need to be serialized to JSON should inherit from this class
+    and implement the to_dict method.
+    """
+
+    @abstractmethod
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert the entity to a dictionary that can be serialized to JSON.
+
+        Returns:
+            A dictionary representation of the entity
+        """
+        pass
 
 class Entity(JsonSerializable):
     """

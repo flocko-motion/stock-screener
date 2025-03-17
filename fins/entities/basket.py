@@ -5,19 +5,18 @@ This module defines the Basket class, which represents a collection of financial
 with associated data and analysis columns.
 """
 
-from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Set, Iterator
 import pandas as pd
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
-from .json_serializable import JsonSerializable
+from .entity import Entity
 from .symbol import Symbol
 from .basket_item import BasketItem
 from .column import Column
 
 
-class Basket(JsonSerializable):
+class Basket(Entity):
     """
     Represents a collection of financial symbols with associated data and analysis columns.
     
@@ -32,22 +31,18 @@ class Basket(JsonSerializable):
     def __init__(self, items: List[BasketItem] = None, name: Optional[str] = None, note: str = ""):
         """
         Initialize a basket.
-        
+
         Args:
             items: The items in the basket
             name: The name of the basket
             note: A free text note associated with the basket
         """
+        super().__init__()
         self.items = items or []
         self.name = name
         self.note = note
         self.columns = {}
         self.data = None
-
-    @classmethod
-    def from_symbols(cls, symbol_objects, name: Optional[str] = None, note: str = ""):
-        basket_items = [BasketItem(symbol) for symbol in symbol_objects]
-        return Basket(items=basket_items, name=name, note=note)
 
     def __str__(self) -> str:
         """Return the string representation of the basket."""
@@ -56,14 +51,14 @@ class Basket(JsonSerializable):
             sorted_items = sorted(self.items, key=lambda item: item.symbol.ticker)
             for item in sorted_items:
                 try:
-                    out += f"{item.symbol.ticker:<14} {str(item.symbol.exchange):<10} {str(item.symbol.name):<20}\n"
+                    out += f"{item.ticker:<14}\n"
                 except Exception as e:
                     return f"error formatting item {item}: {e}"
         else:
             sorted_items = sorted(self.items, key=lambda item: item.amount, reverse=True)
             for item in sorted_items:
                 try:
-                    out += f"{item.amount:>10.2f}  {item.symbol.ticker:<14} {str(item.symbol.exchange):<10} {str(item.symbol.name):<20}\n"
+                    out += f"{item.amount:>10.2f}  {item.ticker:<14}\n"
                 except Exception as e:
                     return f"error formatting item {item}: {e}"
         

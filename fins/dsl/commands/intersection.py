@@ -64,7 +64,7 @@ class IntersectionCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if not args.right_input:
+        if not args.right_operands:
             raise ValueError("Intersection command requires an operand")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -87,7 +87,7 @@ class IntersectionCommand(Command):
         basket = args.effective_input
         
         # Get operand
-        operand_token = args.right_input[0]
+        operand_token = args.right_operands[0]
         operand = operand_token.as_literal() if operand_token.is_literal else operand_token.get_reference_name()
         
         # Get symbols from operand

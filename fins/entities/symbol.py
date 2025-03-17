@@ -4,11 +4,8 @@ Symbol Entity
 This module defines the Symbol class, which represents a financial symbol such as a stock, ETF, or index.
 """
 
-from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, ClassVar
-import traceback
-
-from .json_serializable import JsonSerializable
+from .entity import JsonSerializable
 
 
 class Symbol(JsonSerializable):
@@ -56,6 +53,7 @@ class Symbol(JsonSerializable):
         Args:
             ticker: The ticker symbol
         """
+        super().__init__()
         if not isinstance(ticker, str):
             raise ValueError(f"Invalid ticker value: {ticker}")
         

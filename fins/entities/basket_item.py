@@ -4,33 +4,31 @@ BasketItem Entity
 This module defines the BasketItem class, which represents an item in a financial basket.
 """
 
-from .json_serializable import JsonSerializable
-from .symbol import Symbol
-
+from .entity import JsonSerializable
 
 class BasketItem(JsonSerializable):
     """
     Represents an item in a financial basket.
     
     Attributes:
-        symbol (Symbol): The symbol of the financial instrument
+        ticker (str): The ticker of the financial instrument
         amount (float): The quantity of the item
     """
     
-    def __init__(self, symbol: Symbol, amount: float = 1):
+    def __init__(self, ticker: str, amount: float = 1):
         """
         Initialize a basket item.
         
         Args:
-            symbol: The symbol of the financial instrument
+            ticker: The ticker of the financial instrument
             amount: The quantity of the item (default: 1)
         """
-        self.symbol = symbol
+        self.ticker = ticker
         self.amount = amount
     
     def __str__(self) -> str:
         """Return the string representation of the basket item."""
-        return f"{self.amount} x {self.symbol}"
+        return f"{self.amount} x {self.ticker}"
     
     def to_dict(self):
         """
@@ -41,6 +39,6 @@ class BasketItem(JsonSerializable):
         """
         return {
             "class": "BasketItem",
-            "symbol": self.symbol.to_dict(),
-            "quantity": self.amount
+            "ticker": self.ticker,
+            "amount": self.amount
         } 

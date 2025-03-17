@@ -8,10 +8,10 @@ from typing import List, Dict, Any, Union, Optional
 
 from numpy.random.mtrand import Sequence
 
-from fins.entities import Symbol, Entity
+from fins.entities import Symbol, Basket
 from .ast_transformer import AstTransformer
 from .output import Output
-from .token import Token
+from ..entities import Token
 from .commands.command import Command, CommandArgs
 from .commands.sort import SortColumnCommand
 from .commands.filter import FilterCommand
@@ -124,16 +124,15 @@ class FinsParser:
 
         # Create command args
         args = CommandArgs(
-            implicit_input=None,
-            left_input=None,
-            right_input=right_input,  # right_input is already a list of Symbol objects which satisfies Sequence[Entity]
+            left_operands=[],
+            right_operands=right_input,  # right_input is already a list of Symbol objects which satisfies Sequence[Entity]
         )
         
         # Execute the command
-        result = self.commands["create"].execute_with_output(args)
+        return self.commands["create"].execute_with_output(args)
         
-        return result
-    
+
+
     def _handle_variable(self, command):
         """
         Handle a variable command.
@@ -285,25 +284,25 @@ class FinsParser:
                 kwargs = {k: v for k, v in command.items() if k not in ["type", "action", "basket"]}
                 
                 # Convert arguments to tokens
-                right_tokens = []
+                right_operands = []
                 for key, value in kwargs.items():
-                    if isinstance(value, str):
-                        right_tokens.append(Token(value))
+                    if value.get("type") == "symbol":
+                        right_operands.append(Symbol(value.get("ticker")))
+                    elif value.get("type") == "basket":
+                        symbols = [Symbol(s["ticker"]) for s in value.get("symbols", [])]
+                        right_operands.append(Basket.from_tickers(symbols))
                     else:
-                        right_tokens.append(Token(str(value)))
+                        raise ValueError("Unknown toke type {}".format(value.get("type")))
                 
                 # Create command args
                 args = CommandArgs(
-                    implicit_input=basket,
-                    left_input=None,
-                    right_input=right_tokens,
+                    left_operands=[basket, ] if basket else [],
+                    right_operands=right_operands,
                 )
                 
                 # Execute the command
-                result = self.commands[action].execute_with_output(args)
-                
-                return result
-            
+                return self.commands[action].execute_with_output(args)
+
             # Handle unknown commands
             return Output(f"Unknown command: {command}", output_type="error")
         except Exception as e:

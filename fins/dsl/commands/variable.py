@@ -65,7 +65,7 @@ class VariableCommand(Command):
         # This command doesn't require input, so we don't call super().validate_input()
         
         # Validate right tokens
-        if not args.right_input:
+        if not args.right_operands:
             raise ValueError("Variable command requires a variable name")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -88,17 +88,17 @@ class VariableCommand(Command):
         action = "get"  # Default action
         variable_name = None
         
-        if len(args.right_input) == 1:
+        if len(args.right_operands) == 1:
             # Just the variable name
-            token = args.right_input[0]
+            token = args.right_operands[0]
             if token.is_literal:
                 variable_name = token.as_literal()
             else:
                 variable_name = token.get_reference_name()
         else:
             # Action and variable name
-            action_token = args.right_input[0]
-            variable_token = args.right_input[1]
+            action_token = args.right_operands[0]
+            variable_token = args.right_operands[1]
             
             if action_token.is_literal:
                 action = action_token.as_literal()

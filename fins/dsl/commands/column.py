@@ -65,7 +65,7 @@ class AddColumnCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if not args.right_input:
+        if not args.right_operands:
             raise ValueError("Add column command requires a column type")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -88,15 +88,15 @@ class AddColumnCommand(Command):
         basket = args.effective_input
         
         # Get column type
-        column_type_token = args.right_input[0]
+        column_type_token = args.right_operands[0]
         if not column_type_token.is_literal:
             raise ValueError("Column type must be a literal value")
         column_type = column_type_token.as_literal()
         
         # Get column name (defaults to column type)
         column_name = column_type
-        if len(args.right_input) > 1:
-            column_name_token = args.right_input[1]
+        if len(args.right_operands) > 1:
+            column_name_token = args.right_operands[1]
             if not column_name_token.is_literal:
                 raise ValueError("Column name must be a literal value")
             column_name = column_name_token.as_literal()

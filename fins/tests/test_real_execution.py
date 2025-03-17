@@ -31,6 +31,15 @@ class RealIntegrationTest(unittest.TestCase):
             The result of the command execution
         """
         return self.parser.parse(command_str)
+
+    def assert_no_error(self, output: Output):
+        """
+        Assert that an output does not contain an error.
+
+        Args:
+            output: The Output object to check
+        """
+        self.assertNotEqual(output.output_type, "error", f"Output contains an error: {output.data}")
         
     def basket_from_output(self, output: Output) -> Basket:
         """
@@ -45,7 +54,8 @@ class RealIntegrationTest(unittest.TestCase):
         Raises:
             AssertionError: If the output does not contain a basket
         """
-        self.assertEqual(output.output_type, "basket", 
+        self.assert_no_error(output)
+        self.assertEqual(output.output_type, "basket",
                         f"Expected output type 'basket', got '{output.output_type}'")
         self.assertIsInstance(output.data, Basket, 
                              f"Expected data to be a Basket, got {type(output.data)}")
