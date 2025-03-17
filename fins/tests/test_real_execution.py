@@ -67,12 +67,12 @@ class RealIntegrationTest(unittest.TestCase):
             basket: The basket to check
             expected: List of symbol names that should be in the basket
         """
-        actual_symbols = [item.symbol.ticker for item in basket.items]
-        self.assertSetEqual(set(expected.keys()), set(actual_symbols), f"Basket does not contain expected symbols, got {actual_symbols}, expected {expected}")
+        actual_items = [item.ticker for item in basket.items]
+        self.assertSetEqual(set(expected.keys()), set(actual_items), f"Basket does not contain expected symbols, got {actual_items}, expected {expected}")
         for item in basket.items:
-            expected_value = expected.get(item.symbol.ticker, None)
-            self.assertIsNotNone(expected_value, f"Basket does not contain expected symbol {item.symbol.ticker}")
-            self.assertEqual(item.amount, expected_value, f"Symbol {item.symbol} has weight {item.amount}, expected {expected_value}")
+            expected_value = expected.get(item.ticker, None)
+            self.assertIsNotNone(expected_value, f"Basket does not contain expected symbol {item.ticker}")
+            self.assertEqual(item.amount, expected_value, f"Basket item {item.ticker} has weight {item.amount}, expected {expected_value}")
 
         
     def assert_basket_has_column(self, basket: Basket, column_name: str):

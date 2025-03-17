@@ -78,16 +78,5 @@ class CreateBasketCommand(Command):
             ValueError: If no symbols are specified
         """
         self.validate_input(args)
-        
-        # Convert args to Symbol objects
-        symbol_objects = []
-        for arg in args.right_operands:
-            if isinstance(arg, Token):
-                if arg.is_literal:
-                    symbol_objects.append(Symbol(arg.as_literal()))
-                else:
-                    raise NotImplemented("reference not implemented")
-            elif isinstance(arg, Symbol):
-                symbol_objects.append(arg)
 
-        return Basket.from_tickers(symbol_objects)
+        return Basket(args.right_operands)

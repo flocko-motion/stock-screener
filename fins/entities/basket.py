@@ -47,7 +47,7 @@ class Basket(Entity):
         """Return the string representation of the basket."""
         out = ""
         if all(item.amount == 1 for item in self.items):
-            sorted_items = sorted(self.items, key=lambda item: item.symbol.ticker)
+            sorted_items = sorted(self.items, key=lambda item: item.ticker)
             for item in sorted_items:
                 try:
                     out += f"{item.ticker:<14}\n"
