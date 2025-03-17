@@ -6,6 +6,9 @@ import os
 from lark import Lark
 from typing import List, Dict, Any, Union, Optional
 
+from numpy.random.mtrand import Sequence
+
+from fins.entities import Symbol, Entity
 from .ast_transformer import AstTransformer
 from .output import Output
 from .token import Token
@@ -107,21 +110,23 @@ class FinsParser:
         Returns:
             Output: The result of executing the basket command
         """
+
+        # Get list of symbol names as stated in the command
         symbols = command.get("symbols", [])
         
-        # Convert symbols to tokens
-        right_tokens = []
+        # Convert symbol names to Token objects (Token is the most generic type of entity - it's basically an unparsed value)
+        right_input = []
         for symbol in symbols:
             if isinstance(symbol, str):
-                right_tokens.append(Token(symbol, is_reference=False))
+                right_input.append(Symbol(symbol))
             elif isinstance(symbol, dict) and symbol.get("type") == "symbol":
-                right_tokens.append(Token(symbol.get("ticker"), is_reference=False))
-        
+                right_input.append(Symbol(symbol.get("ticker")))
+
         # Create command args
         args = CommandArgs(
             implicit_input=None,
             left_input=None,
-            right_tokens=right_tokens
+            right_input=right_input,  # right_input is already a list of Symbol objects which satisfies Sequence[Entity]
         )
         
         # Execute the command
@@ -283,15 +288,15 @@ class FinsParser:
                 right_tokens = []
                 for key, value in kwargs.items():
                     if isinstance(value, str):
-                        right_tokens.append(Token(value, is_reference=False))
+                        right_tokens.append(Token(value))
                     else:
-                        right_tokens.append(Token(str(value), is_reference=False))
+                        right_tokens.append(Token(str(value)))
                 
                 # Create command args
                 args = CommandArgs(
                     implicit_input=basket,
                     left_input=None,
-                    right_tokens=right_tokens
+                    right_input=right_tokens,
                 )
                 
                 # Execute the command
@@ -321,7 +326,7 @@ class FinsParser:
         
         try:
             # Create an initial Output object to collect logs
-            chain_output = Output(None, "basket")
+            chain_output = Output(None, "none")
             chain_output.add_log("Starting command chain execution")
             
             for i, command in enumerate(commands):

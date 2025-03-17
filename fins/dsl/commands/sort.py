@@ -65,11 +65,11 @@ class SortColumnCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if not args.right_tokens:
+        if not args.right_input:
             raise ValueError("Column must be specified for sorting")
             
-        if len(args.right_tokens) > 1:
-            order_token = args.right_tokens[1]
+        if len(args.right_input) > 1:
+            order_token = args.right_input[1]
             if not order_token.is_literal:
                 raise ValueError("Sort order must be a literal value")
             order = order_token.as_literal()
@@ -96,15 +96,15 @@ class SortColumnCommand(Command):
         basket = args.effective_input
         
         # Get column name
-        column_token = args.right_tokens[0]
+        column_token = args.right_input[0]
         if not column_token.is_literal:
             raise ValueError("Column name must be a literal value")
         column = column_token.as_literal()
         
         # Get sort order
         order = "asc"
-        if len(args.right_tokens) > 1:
-            order_token = args.right_tokens[1]
+        if len(args.right_input) > 1:
+            order_token = args.right_input[1]
             order = order_token.as_literal()
         
         # Sort the basket

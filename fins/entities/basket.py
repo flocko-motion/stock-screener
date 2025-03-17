@@ -42,8 +42,13 @@ class Basket(JsonSerializable):
         self.name = name
         self.note = note
         self.columns = {}
-        self.data = pd.DataFrame()
-    
+        self.data = None
+
+    @classmethod
+    def from_symbols(cls, symbol_objects, name: Optional[str] = None, note: str = ""):
+        basket_items = [BasketItem(symbol) for symbol in symbol_objects]
+        return Basket(items=basket_items, name=name, note=note)
+
     def __str__(self) -> str:
         """Return the string representation of the basket."""
         out = ""
@@ -407,4 +412,5 @@ class Basket(JsonSerializable):
                 column = Column.from_dict(column_data)
                 basket.columns[name] = column
         
-        return basket 
+        return basket
+

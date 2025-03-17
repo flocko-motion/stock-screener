@@ -62,11 +62,11 @@ class DefineFunctionCommand(Command):
         # This command doesn't require input, so we don't call super().validate_input()
         
         # Validate right tokens
-        if len(args.right_tokens) < 3:  # name, =, command
+        if len(args.right_input) < 3:  # name, =, command
             raise ValueError("Define function command requires a name and command")
             
         # Validate equals sign
-        equals_token = args.right_tokens[1]
+        equals_token = args.right_input[1]
         if not equals_token.is_literal or equals_token.as_literal() != "=":
             raise ValueError("Define function command requires an equals sign between name and command")
         
@@ -87,13 +87,13 @@ class DefineFunctionCommand(Command):
         self.validate_input(args)
         
         # Get function name
-        name_token = args.right_tokens[0]
+        name_token = args.right_input[0]
         if not name_token.is_literal:
             raise ValueError("Function name must be a literal value")
         name = name_token.as_literal()
         
         # Get function command (everything after the equals sign)
-        command_tokens = args.right_tokens[2:]
+        command_tokens = args.right_input[2:]
         command = " ".join(str(token.as_literal()) if token.is_literal else token.get_reference_name() 
                           for token in command_tokens)
         

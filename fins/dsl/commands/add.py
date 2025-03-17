@@ -63,7 +63,7 @@ class AddCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if not args.right_tokens:
+        if not args.right_input:
             raise ValueError("At least one symbol must be specified")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -87,7 +87,7 @@ class AddCommand(Command):
         
         # Get symbols to add
         new_symbols = []
-        for token in args.right_tokens:
+        for token in args.right_input:
             if not token.is_literal:
                 raise ValueError(f"Symbol '{token}' must be a literal value")
                 

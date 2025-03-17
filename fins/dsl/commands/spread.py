@@ -64,7 +64,7 @@ class SpreadCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if not args.right_tokens:
+        if not args.right_input:
             raise ValueError("Spread command requires a symbol to expand")
         
     def execute(self, args: CommandArgs) -> Entity:
@@ -86,7 +86,7 @@ class SpreadCommand(Command):
         self.validate_input(args)
         
         # Get symbol name
-        symbol_token = args.right_tokens[0]
+        symbol_token = args.right_input[0]
         symbol_name = symbol_token.as_literal() if symbol_token.is_literal else symbol_token.get_reference_name()
         
         # In a real implementation, this would fetch the constituents

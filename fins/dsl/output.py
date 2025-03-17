@@ -82,7 +82,10 @@ class Output:
         """
         if other_output and hasattr(other_output, 'log'):
             self.log.extend(other_output.log)
-            
+
+    def has_error(self) -> bool:
+        return self.output_type == "error"
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert the output to a dictionary representation."""
         return {

@@ -67,11 +67,11 @@ class FilterCommand(Command):
         super().validate_input(args)
         
         # Validate right tokens
-        if len(args.right_tokens) < 3:
+        if len(args.right_input) < 3:
             raise ValueError("Filter command requires attribute, operator, and value")
             
         # Validate operator
-        operator_token = args.right_tokens[1]
+        operator_token = args.right_input[1]
         if not operator_token.is_literal:
             raise ValueError("Operator must be a literal value")
         operator = operator_token.as_literal()
@@ -98,17 +98,17 @@ class FilterCommand(Command):
         basket = args.effective_input
         
         # Get attribute name
-        attribute_token = args.right_tokens[0]
+        attribute_token = args.right_input[0]
         if not attribute_token.is_literal:
             raise ValueError("Attribute name must be a literal value")
         attribute = attribute_token.as_literal()
         
         # Get operator
-        operator_token = args.right_tokens[1]
+        operator_token = args.right_input[1]
         operator = operator_token.as_literal()
         
         # Get value
-        value_token = args.right_tokens[2]
+        value_token = args.right_input[2]
         value = value_token.as_literal() if value_token.is_literal else value_token.get_reference_name()
         
         # Define comparison functions

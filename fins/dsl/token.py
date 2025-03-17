@@ -10,7 +10,7 @@ from ..entities.entity import Entity
 
 class Token(Entity):
     """
-    Entity representing a single command line token.
+    Entity representing a single command line token. This is a very generic entity that contains literals or yet unparsed values.
     
     A token can be:
     - A literal string ("asc", "desc", etc.)

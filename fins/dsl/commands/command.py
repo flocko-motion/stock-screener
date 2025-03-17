@@ -38,11 +38,11 @@ class CommandArgs(NamedTuple):
     Attributes:
         implicit_input: Input from previous command (if using -> syntax)
         left_input: Explicit left-hand input (if using direct syntax)
-        right_tokens: Right-hand tokens after the command
+        right_input: Right-hand tokens after the command
     """
     implicit_input: Optional[Entity]
     left_input: Optional[Entity]
-    right_tokens: Sequence[Token]
+    right_input: Sequence[Entity]
     
     @property
     def effective_input(self) -> Optional[Entity]:

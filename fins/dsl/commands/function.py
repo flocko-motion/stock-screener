@@ -81,11 +81,11 @@ class ColumnCommand(Command):
         super().validate_input(args)
         
         # If we have tokens, validate comparison
-        if args.right_tokens:
-            if len(args.right_tokens) != 2:
+        if args.right_input:
+            if len(args.right_input) != 2:
                 raise ValueError("Must provide both comparison operator and value")
                 
-            op_token = args.right_tokens[0]
+            op_token = args.right_input[0]
             if not op_token.is_literal:
                 raise ValueError("Comparison operator must be a literal")
             op = op_token.as_literal()
@@ -143,9 +143,9 @@ class ColumnCommand(Command):
         basket.add_column(self.column_name, values)
         
         # If we have comparison tokens, filter the basket
-        if args.right_tokens:
-            op = args.right_tokens[0].as_literal()
-            target = args.right_tokens[1].as_literal()
+        if args.right_input:
+            op = args.right_input[0].as_literal()
+            target = args.right_input[1].as_literal()
             
             # Filter symbols that match the comparison
             filtered_symbols = [

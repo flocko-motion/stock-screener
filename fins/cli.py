@@ -165,26 +165,19 @@ def run_file_mode(file_path: str, fins_parser: FinsParser, json_output: bool = F
         return 1, [error]
 
 
-def run_command_mode(command: str, fins_parser: FinsParser, json_output: bool = False) -> Tuple[int, Output]:
+def run_command_mode(command: str, fins_parser: FinsParser) -> Output:
     """
     Execute a single FINS command.
     
     Args:
         command: FINS command to execute
         fins_parser: An instance of FinsParser
-        json_output: Whether to output in JSON format
-        
+
     Returns:
-        tuple: (exit_code, result) where exit_code is 0 for success, non-zero for failure
+        Output wrapper object that contains result object and runtime info (logs)
     """
-    try:
-        result = fins_parser.parse(command)
-        print(format_output(result, json_output))
-        return 0, result
-    except Exception as e:
-        error = Output(e, output_type="error")
-        print(format_output(error, json_output))
-        return 1, error
+    result: Output = fins_parser.parse(command)
+    return result
 
 
 if __name__ == "__main__":
