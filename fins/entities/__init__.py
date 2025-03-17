@@ -1,10 +1,9 @@
 """
 FINS Entities
 
-This package contains the core domain entities used throughout the FINS system.
+This package contains the core domain entities used throughout the FINS system, which can be managed and manipulated by the DSL commands.
 """
 
-from .symbol import Symbol
 from .basket_item import BasketItem
 from .basket import Basket
 from .column import Column
@@ -14,7 +13,6 @@ from .token import Token
 
 __all__ = [
     'JsonSerializable',
-    'Symbol',
     'BasketItem',
     'Basket',
     'Column',

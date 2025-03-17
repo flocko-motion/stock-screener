@@ -4,9 +4,10 @@ BasketItem Entity
 This module defines the BasketItem class, which represents an item in a financial basket.
 """
 
-from .entity import JsonSerializable
+from .entity import Entity
 
-class BasketItem(JsonSerializable):
+
+class BasketItem(Entity):
     """
     Represents an item in a financial basket.
     
@@ -23,6 +24,7 @@ class BasketItem(JsonSerializable):
             ticker: The ticker of the financial instrument
             amount: The quantity of the item (default: 1)
         """
+        super().__init__()
         self.ticker = ticker
         self.amount = amount
     

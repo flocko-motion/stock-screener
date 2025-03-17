@@ -8,9 +8,7 @@ that complete command flows work as expected.
 import unittest
 from typing import List, Dict, Any, Optional
 from ..dsl.parser import FinsParser
-from ..entities.basket import Basket
-from ..entities.symbol import Symbol
-from ..entities.entity import Entity
+from ..entities import Entity, Basket, BasketItem
 from ..dsl.output import Output
 
 class RealIntegrationTest(unittest.TestCase):

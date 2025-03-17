@@ -6,7 +6,7 @@ This command creates a new basket from a list of symbols.
 
 from typing import Type, Dict, List, Optional
 
-from ...entities import Entity, Basket, Symbol, Token
+from ...entities import Entity, Basket, BasketItem, Token
 from .command import Command, CommandArgs
 
 class CreateBasketCommand(Command):

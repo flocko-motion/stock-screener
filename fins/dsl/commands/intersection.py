@@ -5,9 +5,7 @@ This command finds common elements between two baskets using set intersection.
 """
 
 from typing import Type, Dict
-from ...entities.entity import Entity
-from ...entities.basket import Basket
-from ...entities.symbol import Symbol
+from ...entities import Entity, Basket, BasketItem
 from .command import Command, CommandArgs
 
 class IntersectionCommand(Command):

@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Union, Optional
 
 from numpy.random.mtrand import Sequence
 
-from fins.entities import Symbol, Basket
+from fins.entities import Basket, BasketItem
 from .ast_transformer import AstTransformer
 from .output import Output
 from ..entities import Token
@@ -112,20 +112,20 @@ class FinsParser:
         """
 
         # Get list of symbol names as stated in the command
-        symbols = command.get("symbols", [])
+        tickers = command.get("symbols", [])
         
         # Convert symbol names to Token objects (Token is the most generic type of entity - it's basically an unparsed value)
-        right_input = []
-        for symbol in symbols:
-            if isinstance(symbol, str):
-                right_input.append(Symbol(symbol))
-            elif isinstance(symbol, dict) and symbol.get("type") == "symbol":
-                right_input.append(Symbol(symbol.get("ticker")))
+        right_operands = []
+        for ticker in tickers:
+            if isinstance(ticker, dict) and ticker.get("type") == "symbol":
+                right_operands.append(BasketItem(ticker.get("ticker"), 1))
+            else:
+                raise ValueError(f"Unknown token type {ticker.get('type')}")
 
         # Create command args
         args = CommandArgs(
             left_operands=[],
-            right_operands=right_input,  # right_input is already a list of Symbol objects which satisfies Sequence[Entity]
+            right_operands=right_operands,  # right_input is already a list of Symbol objects which satisfies Sequence[Entity]
         )
         
         # Execute the command
@@ -287,10 +287,10 @@ class FinsParser:
                 right_operands = []
                 for key, value in kwargs.items():
                     if value.get("type") == "symbol":
-                        right_operands.append(Symbol(value.get("ticker")))
+                        right_operands.append(BasketItem(value.get("ticker")))
                     elif value.get("type") == "basket":
-                        symbols = [Symbol(s["ticker"]) for s in value.get("symbols", [])]
-                        right_operands.append(Basket.from_tickers(symbols))
+                        items = [BasketItem(s["ticker"]) for s in value.get("symbols", [])]
+                        right_operands.append(Basket(items))
                     else:
                         raise ValueError("Unknown toke type {}".format(value.get("type")))
                 

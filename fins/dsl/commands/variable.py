@@ -5,9 +5,7 @@ This command handles variable operations (get, lock, unlock).
 """
 
 from typing import Type, Dict, Optional
-from ...entities.entity import Entity
-from ...entities.basket import Basket
-from ...entities.symbol import Symbol
+from ...entities import Entity, Basket, BasketItem
 from .command import Command, CommandArgs
 
 class VariableCommand(Command):

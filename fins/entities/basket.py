@@ -11,7 +11,6 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from .entity import Entity
-from .symbol import Symbol
 from .basket_item import BasketItem
 from .column import Column
 
@@ -72,14 +71,10 @@ class Basket(Entity):
         """Return an iterator over the items in the basket."""
         return iter(self.items)
     
-    def __contains__(self, symbol) -> bool:
+    def __contains__(self, ticker: str) -> bool:
         """Check if a symbol is in the basket."""
-        if isinstance(symbol, Symbol):
-            return any(item.symbol == symbol for item in self.items)
-        if isinstance(symbol, str):
-            return any(item.symbol.ticker == symbol for item in self.items)
-        return False
-    
+        return any(item.ticker == ticker for item in self.items)
+
     def add_item(self, item: BasketItem) -> None:
         """
         Add an item to the basket.
@@ -96,25 +91,15 @@ class Basket(Entity):
         
         # If the symbol doesn't exist, add the new item
         self.items.append(item)
-    
-    def add_symbol(self, symbol: Symbol, quantity: float = 1) -> None:
+
+    def remove_item(self, ticker: str) -> None:
         """
-        Add a symbol to the basket.
+        Remove an item from the basket.
         
         Args:
-            symbol: The symbol to add
-            quantity: The quantity to add (default: 1)
+            ticker: The ticker of the item to remove
         """
-        self.add_item(BasketItem(symbol, quantity))
-    
-    def remove_symbol(self, symbol: Symbol) -> None:
-        """
-        Remove a symbol from the basket.
-        
-        Args:
-            symbol: The symbol to remove
-        """
-        self.items = [item for item in self.items if item.symbol != symbol]
+        self.items = [item for item in self.items if item.ticker != ticker]
     
     def add_column(self, column: Column) -> None:
         """
@@ -136,19 +121,7 @@ class Basket(Entity):
             The column if found, None otherwise
         """
         return self.columns.get(name)
-    
-    def get_symbols_by_attribute(self, attribute: str, value: Any) -> List[Symbol]:
-        """
-        Get symbols that have a specific attribute value.
-        
-        Args:
-            attribute: The attribute to check
-            value: The value to match
-            
-        Returns:
-            A list of symbols with the matching attribute value
-        """
-        return [item.symbol for item in self.items if item.symbol.get_data(attribute) == value]
+
     
     def sort_by(self, attribute: str, ascending: bool = True) -> 'Basket':
         """
@@ -339,38 +312,9 @@ class Basket(Entity):
             "items": [item.to_dict() for item in self.items],
             "columns": {name: column.to_dict() for name, column in self.columns.items()}
         }
-    
+
     @classmethod
-    def from_tickers(cls, tickers: List[str], name: Optional[str] = None, note: str = "") -> 'Basket':
-        """
-        Create a basket from a list of ticker symbols.
-        
-        Args:
-            tickers: A list of ticker symbols
-            name: The name of the basket
-            note: A free text note associated with the basket
-            
-        Returns:
-            A new basket containing the specified symbols
-        """
-        # Pre-fetch tickers
-        def fetch_symbol(ticker):
-            try:
-                symbol = Symbol.get(ticker)
-                return BasketItem(symbol, 1)
-            except Exception as e:
-                # Print stack trace
-                traceback.print_exc()
-                raise Exception(f"Error fetching symbol {ticker}: {e}")
-        
-        items = None
-        with ThreadPoolExecutor() as executor:
-            items = list(executor.map(fetch_symbol, tickers))
-        
-        return Basket(items, name=name, note=note)
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Basket':
+    def from_dict(cls, data: Dict[str, float]) -> 'Basket':
         """
         Create a basket from a dictionary.
         
@@ -385,14 +329,9 @@ class Basket(Entity):
         for item_data in data.get('items', []):
             if isinstance(item_data, dict) and item_data.get('class') == 'BasketItem':
                 from .basket_item import BasketItem
-                from .symbol import Symbol
-                
-                symbol_data = item_data.get('symbol', {})
-                if symbol_data and symbol_data.get('class') == 'Symbol':
-                    symbol = Symbol.from_dict(symbol_data)
-                    quantity = item_data.get('quantity', 1)
-                    items.append(BasketItem(symbol, quantity))
-        
+                raise NotImplementedError("BasketItem.from_dict")
+
+
         # Create the basket
         basket = cls(
             items=items,

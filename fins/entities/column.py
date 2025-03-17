@@ -6,10 +6,11 @@ This module defines the Column class, which represents an analysis column in a b
 
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List, Callable
+from .entity import Entity
 
 
 @dataclass
-class Column:
+class Column(Entity):
     """
     Represents an analysis column in a basket.
     
