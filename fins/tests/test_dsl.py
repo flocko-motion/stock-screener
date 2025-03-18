@@ -167,6 +167,50 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1})
 
+    def test_basket_to_file(self):
+        # First create a basket with AAPL and MSFT
+        self.empty_storage()
+
+        # write first file
+        output = self.execute_flow("AAPL -> /a/b/c")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1})
+
+        # write another file with another name
+        output = self.execute_flow("MSFT -> /d/e")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"MSFT":1})
+
+        # retrieve first file
+        output = self.execute_flow("/a/b/c")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1})
+
+    def test_basket_to_file_overwrite(self):
+        # First create a basket with AAPL and MSFT
+        self.empty_storage()
+
+        # write first file
+        output = self.execute_flow("AAPL -> /a/b/c")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1})
+
+        # overwrite file
+        output = self.execute_flow("MSFT -> /a/b/c")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"MSFT":1})
+
+        # retrieve
+        output = self.execute_flow("/a/b/c")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"MSFT":1})
+
     def test_add_variable_and_basket(self):
         # First create a basket with AAPL and MSFT
         self.empty_storage()
@@ -178,7 +222,7 @@ class BasicFlowTests(DslTests):
         self.assert_basket_items(basket, {"AAPL": 1})
 
         # addition
-        output = self.execute_flow("$a + MSFT")
+        output = self.execute_flow("$a -> + MSFT")
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
