@@ -7,6 +7,8 @@ that complete command flows work as expected.
 
 import unittest
 from typing import Any, Optional
+
+from ..storage import Storage
 from ..dsl.parser import FinsParser
 from ..entities import Entity, Basket, BasketItem
 from ..dsl.output import Output
@@ -16,7 +18,10 @@ class DslTests(unittest.TestCase):
     
     def setUp(self):
         """Set up the test environment."""
-        self.parser = FinsParser()
+        self.parser = FinsParser(Storage.temp())
+
+    def empty_storage(self):
+        self.parser.set_storage(Storage.temp())
         
     def execute_flow(self, command_str: str) -> Output:
         """
@@ -148,16 +153,35 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL": 1, "GOOGL": 1})
 
-    def test_explicit_add_syntax(self):
+    def test_basket_to_variable(self):
         # First create a basket with AAPL and MSFT
-        self.execute_flow("AAPL MSFT -> $tech")
-        
-        # Then add GOOGL using explicit syntax
-        output = self.execute_flow("$tech + GOOGL")
-        
+        self.empty_storage()
+
+        output = self.execute_flow("AAPL -> $a")
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_items(basket, {"AAPL":1})
+
+        output = self.execute_flow("$a")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1})
+
+    def test_add_variable_and_basket(self):
+        # First create a basket with AAPL and MSFT
+        self.empty_storage()
+
+        # prepare variable
+        output = self.execute_flow("AAPL -> $a")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1})
+
+        # addition
+        output = self.execute_flow("$a + MSFT")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
 
 
 class ColumnCommandTests(DslTests):

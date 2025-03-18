@@ -5,6 +5,7 @@ Parser for FINS (Financial Insights Script)
 import os
 from lark import Lark
 
+from ..storage import Storage
 from fins.entities import Basket, BasketItem
 from .ast_transformer import AstTransformer
 from .output import Output
@@ -36,12 +37,10 @@ class FinsParser:
     This class encapsulates the parsing logic and provides methods for executing commands.
     """
 
-    def __init__(self):
-        """Initialize the FINS parser."""
-        self.variables = {}  # Store variables (baskets)
-        self.functions = {}  # Store functions
-        self.locked_variables = set()  # Track locked variables
-        
+    def __init__(self, storage: Storage):
+        # the storage instance persists variables and functions across command chains
+        self.storage = storage
+
         # Command handlers dictionary for dispatch
         self.command_handlers = {
             "basket": self._handle_basket,
@@ -141,33 +140,19 @@ class FinsParser:
             Output: The result of executing the variable command
         """
         name = command.get("name")
-        action = command.get("action", "get")
-        
-        # Convert variable name to token
-        var_token = Token(name, is_reference=True)
-        
-        # Create right tokens based on action
-        right_tokens = []
-        if action != "get":
-            right_tokens.append(Token(action, is_reference=False))
-        right_tokens.append(var_token)
-        
-        # Create command args
-        args = CommandArgs(
-            implicit_input=None,
-            left_input=None,
-            right_tokens=right_tokens
-        )
-        
-        # Execute the command
-        result = self.commands["variable"].execute_with_output(args)
-        
-        # If this is a variable assignment, store the result
-        if action == "set" and name not in self.locked_variables:
-            self.variables[name] = result.data
-            
-        return result
-    
+        basket = command.get("basket")
+
+        if basket is None:
+            value = self.storage.get(name)
+            if value is None:
+                raise RuntimeError(f"no variable '{name}'")
+            return Output(value)
+
+        self.storage.set(name, basket)
+
+        return Output(basket)
+
+
     def _handle_function_definition(self, command):
         """
         Handle a function definition command.
@@ -340,15 +325,7 @@ class FinsParser:
                 else:
                     current_basket = result
                     chain_output.add_log("Command returned non-Output result")
-                
-                # If the last command in the chain is a variable assignment, store the result
-                if i == len(commands) - 1 and command["type"] == "variable":
-                    var_name = command["name"]
-                    if var_name not in self.locked_variables:
-                        # Store the data, not the Output instance
-                        self.variables[var_name] = current_basket
-                        chain_output.add_log(f"Stored result in variable '{var_name}'")
-            
+
             # Set the final data and metadata in our chain output
             if isinstance(result, Output):
                 chain_output.data = result.data
@@ -361,6 +338,10 @@ class FinsParser:
             
         except Exception as e:
             return Output(str(e), output_type="error")
+
+    def set_storage(self, storage: Storage):
+        self.storage = storage
+
 
 if __name__ == "__main__":
     # Test with a simple command chain

@@ -12,6 +12,7 @@ Path formats:
 
 import os
 import json
+import tempfile
 from typing import Dict, Any, Optional, List, Protocol, runtime_checkable
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -573,4 +574,10 @@ class Storage:
             True if the value is locked, False otherwise
         """
         storage_value = self.get_storage_value(path)
-        return storage_value.is_locked if storage_value else False 
+        return storage_value.is_locked if storage_value else False
+
+    @classmethod
+    def temp(cls):
+        """Create a new storage instance with a temporary directory."""
+        temp_dir = tempfile.mkdtemp()
+        return cls(temp_dir)
