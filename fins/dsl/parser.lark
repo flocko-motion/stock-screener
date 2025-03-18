@@ -5,10 +5,7 @@ command_chain: command ("->" command)*
 
 ?command: sort_command
         | filter_command
-        | basket
-        | variable
-        | set_operation
-        | direct_operation
+        | expression
         | column_command
         | info_command
         | lock_command
@@ -18,25 +15,14 @@ command_chain: command ("->" command)*
 sort_command: "sort" ATTRIBUTE ORDER
 filter_command: ATTRIBUTE COMPARISON_OPERATOR NUMBER
 
-// Basket creation
-basket: symbol+
+// Generic expression handling
+?expression: operand+ | operand (operator operand)*
+?operand: WEIGHT? (symbol | variable)
+?operator: "+" | "-" | "&"
 
 // Variables and symbols
 variable: VARIABLE
 symbol: STOCK_SYMBOL | ETF_SYMBOL | INDEX_SYMBOL
-
-// Set operations
-set_operation: union_op | difference_op | intersection_op | spread_op
-union_op: "+" (basket | variable)
-difference_op: "-" (basket | variable)
-intersection_op: "&" (basket | variable)
-spread_op: ".." symbol
-
-// Direct operations (alternative syntax)
-direct_operation: variable (direct_union | direct_difference | direct_intersection)
-direct_union: "+" ((WEIGHT? symbol)+ | variable)
-direct_difference: "-" ((WEIGHT? symbol)+ | variable)
-direct_intersection: "&" ((WEIGHT? symbol)+ | variable)
 
 // Column addition
 column_command: [column_name] column_type [time_range] [period]

@@ -25,6 +25,9 @@ AAPL MSFT GOOGL -> $tech_basket  # Create a basket and store it in a variable
 2 AAPL 1 MSFT 3 GOOGL           # Integer weights (2:1:3 ratio)
 0.5 AAPL 1.5 MSFT 0.8 GOOGL     # Decimal weights
 2x AAPL 0.5x MSFT 3x GOOGL      # Alternative 'x' syntax, works with decimals too
+
+# Mix variables, symbols and weights (implicit union)
+$tech_basket MSFT 0.7 NFLX $finance  # Combine everything with + operator implied
 ```
 
 ### Variables
@@ -62,6 +65,10 @@ $tech_basket - MSFT              # Remove symbol
 # Multiple symbols with weights
 $tech_basket + 0.785 MSFT 17.8 NFLX    # Precise decimal weights
 $tech_basket + 2x AAPL 0.5x MSFT       # Mix integers and decimals
+
+# Implicit union (+ operator is optional)
+$tech_basket MSFT 2.5 NFLX            # Same as $tech_basket + MSFT + 2.5 NFLX
+$a MSFT 0.7 NFLX $b -> $c            # Combine multiple baskets and symbols
 ```
 
 ### Set Operations
