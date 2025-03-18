@@ -1,10 +1,8 @@
-import hashlib
 import os
 import sys
 
 import pandas as pd
 import requests
-import json
 import threading
 import time
 from .cache import (
@@ -13,7 +11,6 @@ from .cache import (
     is_cache_valid, 
     set_cache_expiry
 )
-from lib.ticker_info import TickerInfo
 from .watchdog import watchdog
 
 
@@ -34,33 +31,33 @@ except Exception as e:
     print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}")
     sys.exit(1)
 
-def load_ticker(ticker: str):
-    # ticker = ticker.replace(".", "-")
-    fundamentals_raw = load_ticker_fundamentals(ticker)
-    if fundamentals_raw is None:
-        raise ValueError(f"No fundamentals data found for ticker '{ticker}'.")
-    fundamentals = to_ticker_info(fundamentals_raw)
-    history = load_ticker_history(ticker)
-    return fundamentals, history
+# def load_ticker(ticker: str):
+#     # ticker = ticker.replace(".", "-")
+#     fundamentals_raw = load_ticker_fundamentals(ticker)
+#     if fundamentals_raw is None:
+#         raise ValueError(f"No fundamentals data found for ticker '{ticker}'.")
+#     fundamentals = to_ticker_info(fundamentals_raw)
+#     history = load_ticker_history(ticker)
+#     return fundamentals, history
 
-def to_ticker_info(fundamentals):
-    if len(fundamentals) == 0:
-        raise ValueError("No fundamentals data found.")
-    fundamentals = fundamentals.iloc[0]
-    info = TickerInfo(
-        ticker=fundamentals["symbol"],
-        name=str(fundamentals["companyName"]),
-        exchange=str(fundamentals["exchange"]),
-        currency=str(fundamentals["currency"]),
-        industry=str(fundamentals["industry"]),
-        sector=str(fundamentals["sector"]),
-        country=str(fundamentals["country"]),
-        market_cap=float(fundamentals["mktCap"]),
-        beta=fundamentals["beta"],
-        # trailing_pe=fundamentals["trailing_pe"],
-        # forward_pe=fundamentals["forward_pe"]
-    )
-    return info
+# def to_ticker_info(fundamentals):
+#     if len(fundamentals) == 0:
+#         raise ValueError("No fundamentals data found.")
+#     fundamentals = fundamentals.iloc[0]
+#     info = TickerInfo(
+#         ticker=fundamentals["symbol"],
+#         name=str(fundamentals["companyName"]),
+#         exchange=str(fundamentals["exchange"]),
+#         currency=str(fundamentals["currency"]),
+#         industry=str(fundamentals["industry"]),
+#         sector=str(fundamentals["sector"]),
+#         country=str(fundamentals["country"]),
+#         market_cap=float(fundamentals["mktCap"]),
+#         beta=fundamentals["beta"],
+#         # trailing_pe=fundamentals["trailing_pe"],
+#         # forward_pe=fundamentals["forward_pe"]
+#     )
+#     return info
 
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()

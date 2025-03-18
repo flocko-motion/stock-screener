@@ -4,9 +4,6 @@ Parser for FINS (Financial Insights Script)
 
 import os
 from lark import Lark
-from typing import List, Dict, Any, Union, Optional
-
-from numpy.random.mtrand import Sequence
 
 from fins.entities import Basket, BasketItem
 from .ast_transformer import AstTransformer
