@@ -26,8 +26,8 @@ Example:
 """
 
 from abc import ABC, abstractmethod
-from typing import Type, Optional, Dict, Any, NamedTuple, List, Sequence
-from ...entities.entity import Entity
+from typing import Type, Optional, Any, NamedTuple, Sequence
+from ...entities import Entity
 from ..output import Output
 
 class CommandArgs(NamedTuple):
@@ -54,13 +54,13 @@ class Command(ABC):
     
     @property
     @abstractmethod
-    def input_type(self) -> Type[Entity]:
+    def input_type(self) -> Type[Entity] | Type[Sequence[Entity]] | Type[Sequence[Entity]] | Type[Optional[Entity]] | None:
         """The type of Entity this command expects as input."""
         pass
         
     @property
     @abstractmethod
-    def output_type(self) -> Type[Entity]:
+    def output_type(self)  -> Type[Entity] | Type[Sequence[Entity]] | Type[Sequence[Entity]] | Type[Optional[Entity]] | None:
         """The type of Entity this command produces as output."""
         pass
         
@@ -76,12 +76,12 @@ class Command(ABC):
         pass
         
     @property
-    def right_tokens(self) -> Dict[str, str]:
+    def right_tokens(self) -> dict[str, str]:
         """Description of right-hand tokens."""
         return {}
         
     @property
-    def examples(self) -> Dict[str, str]:
+    def examples(self) -> dict[str, str]:
         """Example usages of this command."""
         return {}
         
@@ -127,15 +127,13 @@ class Command(ABC):
             
         Raises:
             TypeError: If input is not of the required type
-            ValueError: If arguments are invalid
         """
-        input_entity = args.left_operands
-        if input_entity is not None and not isinstance(input_entity, self.input_type):
+        if not isinstance(args.left_operands, self.input_type):
             raise TypeError(
                 f"{self.__class__.__name__} requires input of type {self.input_type.__name__}, "
-                f"got {type(input_entity).__name__}"
+                f"got {type(args.left_operands).__name__}"
             )
-            
+
     @abstractmethod
     def execute(self, args: CommandArgs) -> Entity:
         """
@@ -163,6 +161,7 @@ class Command(ABC):
         Returns:
             Output object containing the result of the command execution
         """
+        self.validate_input(args)
         result = self.execute(args)
         
         # Create a descriptive log message based on the command

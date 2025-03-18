@@ -4,7 +4,7 @@ Create basket command for FINS.
 This command creates a new basket from a list of symbols.
 """
 
-from typing import Type, Dict, List, Optional
+from typing import Type, Optional
 
 from ...entities import Entity, Basket, BasketItem, Token
 from .command import Command, CommandArgs
@@ -34,13 +34,13 @@ class CreateBasketCommand(Command):
         return "Create a new basket from a list of symbols"
         
     @property
-    def right_tokens(self) -> Dict[str, str]:
+    def right_tokens(self) -> dict[str, str]:
         return {
             "symbols": "List of symbols to include in the basket"
         }
         
     @property
-    def examples(self) -> Dict[str, str]:
+    def examples(self) -> dict[str, str]:
         return {
             "AAPL MSFT GOOGL": "Create a basket with Apple, Microsoft, and Google",
             "SPY QQQ IWM": "Create a basket with major ETFs"
@@ -56,20 +56,16 @@ class CreateBasketCommand(Command):
         Raises:
             ValueError: If no symbols are specified
         """
-        # This command doesn't require input, so we don't call super().validate_input()
-        
-        # Validate right tokens
-        if not args.right_operands:
-            raise ValueError("Create basket command requires at least one symbol")
+        if not args.right_operands or len(args.right_operands) == 0:
+            raise ValueError("Create basket command requires at least one ticker")
         
     def execute(self, args: CommandArgs) -> Entity:
         """
         Create a new basket from a list of symbols.
-        As args we accept both generic Token objects or Symbol objects.
-        
+
         Args:
             args: The command arguments containing:
-                - right_tokens: List of symbols
+                - right_operands: List of ticker names
             
         Returns:
             The created basket
@@ -77,6 +73,10 @@ class CreateBasketCommand(Command):
         Raises:
             ValueError: If no symbols are specified
         """
-        self.validate_input(args)
+        items = list[BasketItem]()
+        for ticker in args.right_operands:
+            if not isinstance(ticker, BasketItem):
+                raise ValueError(f"Invalid ticker: {ticker}, expected BasketItem, got {type(ticker)}")
+            items.append(ticker)
 
-        return Basket(args.right_operands)
+        return Basket(items)

@@ -3,8 +3,8 @@ Union command for FINS.
 
 This command combines two baskets using set union.
 """
-
-from typing import Type, Dict
+from collections.abc import Sequence
+from typing import Type, Optional
 from ...entities import Entity, Basket, BasketItem
 from .command import Command, CommandArgs
 
@@ -22,11 +22,11 @@ class UnionCommand(Command):
     """
     
     @property
-    def input_type(self) -> Type[Entity]:
-        return Basket
+    def input_type(self):
+        return Sequence[Entity]
         
     @property
-    def output_type(self) -> Type[Entity]:
+    def output_type(self):
         return Basket
         
     @property
@@ -34,36 +34,18 @@ class UnionCommand(Command):
         return "Combine two baskets using set union"
         
     @property
-    def right_tokens(self) -> Dict[str, str]:
+    def right_tokens(self) -> dict[str, str]:
         return {
             "operand": "The second basket to combine with"
         }
         
     @property
-    def examples(self) -> Dict[str, str]:
+    def examples(self) -> dict[str, str]:
         return {
             "basket1 -> + basket2": "Combine basket1 and basket2",
             "$tech_stocks + $finance_stocks": "Combine tech stocks and finance stocks",
             "AAPL MSFT -> + GOOGL": "Add GOOGL to a basket containing AAPL and MSFT"
         }
-        
-    def validate_input(self, args: CommandArgs) -> None:
-        """
-        Validate command input and arguments.
-        
-        Args:
-            args: The command arguments to validate
-            
-        Raises:
-            TypeError: If input is not a Basket
-            ValueError: If operand is not specified
-        """
-        # First validate input type
-        super().validate_input(args)
-        
-        # Validate right tokens
-        if not args.right_operands:
-            raise ValueError("Union command requires an operand")
         
     def execute(self, args: CommandArgs) -> Entity:
         """

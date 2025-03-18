@@ -5,10 +5,8 @@ This module defines the Basket class, which represents a collection of financial
 with associated data and analysis columns.
 """
 
-from typing import List, Dict, Any, Optional, Set, Iterator
+from typing import Any, Optional, Iterator
 import pandas as pd
-import traceback
-from concurrent.futures import ThreadPoolExecutor
 
 from .entity import Entity
 from .basket_item import BasketItem
@@ -27,7 +25,7 @@ class Basket(Entity):
         note (str): A free text note associated with the basket
     """
     
-    def __init__(self, items: List[BasketItem] = None, name: Optional[str] = None, note: str = ""):
+    def __init__(self, items: list[BasketItem] = None, name: Optional[str] = None, note: str = ""):
         """
         Initialize a basket.
 
@@ -314,7 +312,7 @@ class Basket(Entity):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, float]) -> 'Basket':
+    def from_dict(cls, data: dict[str, float]) -> 'Basket':
         """
         Create a basket from a dictionary.
         

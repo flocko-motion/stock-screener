@@ -6,12 +6,12 @@ that complete command flows work as expected.
 """
 
 import unittest
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 from ..dsl.parser import FinsParser
 from ..entities import Entity, Basket, BasketItem
 from ..dsl.output import Output
 
-class RealIntegrationTest(unittest.TestCase):
+class DslTests(unittest.TestCase):
     """Base class for real integration tests."""
     
     def setUp(self):
@@ -59,7 +59,7 @@ class RealIntegrationTest(unittest.TestCase):
                              f"Expected data to be a Basket, got {type(output.data)}")
         return output.data
         
-    def assert_basket_items(self, basket: Basket, expected: Dict[str, float]):
+    def assert_basket_items(self, basket: Basket, expected: dict[str, float]):
         """
         Assert that a basket contains the expected symbols.
         
@@ -95,7 +95,7 @@ class RealIntegrationTest(unittest.TestCase):
             ascending: Whether the sort should be ascending (True) or descending (False)
         """
         values = []
-        for symbol in basket.symbols:
+        for symbol in basket.items:
             if column in basket.columns:
                 values.append(basket.columns[column].get(symbol))
             else:
@@ -110,7 +110,7 @@ class RealIntegrationTest(unittest.TestCase):
                          f"Basket is not sorted by {column} in {'ascending' if ascending else 'descending'} order")
 
 
-class BasicFlowTests(RealIntegrationTest):
+class BasicFlowTests(DslTests):
     """Tests for basic FINS command flows."""
     
     def test_create_simple_basket(self):
@@ -142,7 +142,7 @@ class BasicFlowTests(RealIntegrationTest):
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
 
 
-class ColumnCommandTests(RealIntegrationTest):
+class ColumnCommandTests(DslTests):
     """Tests for column commands."""
     
     def test_add_pe_column(self):
@@ -151,7 +151,7 @@ class ColumnCommandTests(RealIntegrationTest):
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, ["AAPL", "MSFT", "GOOGL"])
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "pe")
         
     def test_filter_by_pe(self):
@@ -170,7 +170,7 @@ class ColumnCommandTests(RealIntegrationTest):
                 self.assertLess(pe, 30, f"Symbol {symbol.name} has PE {pe} which is not < 30")
 
 
-class SortCommandTests(RealIntegrationTest):
+class SortCommandTests(DslTests):
     """Tests for sort commands."""
     
     def test_sort_by_market_cap(self):
@@ -196,7 +196,7 @@ class SortCommandTests(RealIntegrationTest):
         self.assert_basket_sorted_by(basket, "pe", ascending=True)
 
 
-class ComplexFlowTests(RealIntegrationTest):
+class ComplexFlowTests(DslTests):
     """Tests for complex command flows."""
     
     def test_filter_then_sort(self):
