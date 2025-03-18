@@ -34,9 +34,9 @@ spread_op: ".." symbol
 
 // Direct operations (alternative syntax)
 direct_operation: variable (direct_union | direct_difference | direct_intersection)
-direct_union: "+" (symbol+ | variable)
-direct_difference: "-" (symbol+ | variable)
-direct_intersection: "&" (symbol+ | variable)
+direct_union: "+" ((WEIGHT? symbol)+ | variable)
+direct_difference: "-" ((WEIGHT? symbol)+ | variable)
+direct_intersection: "&" ((WEIGHT? symbol)+ | variable)
 
 // Column addition
 column_command: [column_name] column_type [time_range] [period]
@@ -61,7 +61,8 @@ NAME: /[a-zA-Z][a-zA-Z0-9_]*/
 ATTRIBUTE: /[a-zA-Z_][a-zA-Z0-9_]*/
 ORDER: "asc" | "desc"
 COMPARISON_OPERATOR: ">" | "<" | "="
-NUMBER: /[0-9]+([KMBTkmbt])?/
+WEIGHT: /[0-9]+(\.[0-9]+)?/ | /[0-9]+(\.[0-9]+)?x/  // Support both "2.5" and "2.5x" formats
+NUMBER: /[0-9]+(\.[0-9]+)?([KMBTkmbt])?/
 YEAR: /[0-9]{4}/
 STRING: /"[^"]*"/
 

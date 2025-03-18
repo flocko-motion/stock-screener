@@ -17,8 +17,14 @@ COMMAND1 -> COMMAND2 -> COMMAND3 -> ...
 A basket is a collection of financial symbols (stocks, ETFs, indices) - optionally with weights.
 
 ```
+# Simple baskets (equal weights = 1.0)
 AAPL MSFT GOOGL                  # Create a basket with three symbols
 AAPL MSFT GOOGL -> $tech_basket  # Create a basket and store it in a variable
+
+# Weighted baskets
+2 AAPL 1 MSFT 3 GOOGL           # Integer weights (2:1:3 ratio)
+0.5 AAPL 1.5 MSFT 0.8 GOOGL     # Decimal weights
+2x AAPL 0.5x MSFT 3x GOOGL      # Alternative 'x' syntax, works with decimals too
 ```
 
 ### Variables
@@ -41,8 +47,21 @@ $tech_basket                     # Retrieve a session variable
 Add or remove symbols from a basket:
 
 ```
-$tech_basket -> + NFLX           # Add NFLX to the basket
-$tech_basket -> - MSFT           # Remove MSFT from the basket
+# Pipeline syntax
+$tech_basket -> + NFLX           # Add one symbol (weight=1)
+$tech_basket -> + 2.5 NFLX       # Add with weight=2.5
+$tech_basket -> + 0.5x NFLX      # Same as 0.5 NFLX
+$tech_basket -> - MSFT           # Remove symbol
+
+# Shorthand syntax (same effect)
+$tech_basket + NFLX              # Add one symbol (weight=1)
+$tech_basket + 2.5 NFLX          # Add with weight=2.5
+$tech_basket + 0.5x NFLX         # Same as 0.5 NFLX
+$tech_basket - MSFT              # Remove symbol
+
+# Multiple symbols with weights
+$tech_basket + 0.785 MSFT 17.8 NFLX    # Precise decimal weights
+$tech_basket + 2x AAPL 0.5x MSFT       # Mix integers and decimals
 ```
 
 ### Set Operations
@@ -50,9 +69,18 @@ $tech_basket -> - MSFT           # Remove MSFT from the basket
 Perform set operations between baskets:
 
 ```
+# Pipeline syntax
 $tech_basket -> + $finance_basket  # Union (combine baskets)
 $tech_basket -> & $sp500_basket    # Intersection (common symbols)
-$tech_basket -> - $exclude_basket  # Difference (remove symbols)
+$tech_basket -> - $exclude_basket  # Subtraction (remove symbols)
+
+# Shorthand syntax (same effect)
+$tech_basket + $finance_basket     # Union
+$tech_basket & $sp500_basket      # Intersection
+$tech_basket - $exclude_basket    # Subtraction
+
+# Mix and match with symbols
+$tech_basket + AAPL MSFT $finance_basket  # Add multiple symbols and another basket
 ```
 
 ### Sorting
@@ -149,202 +177,4 @@ unlock $tech_basket                # Unlock a variable
 ### Analysis Columns
 - `COLUMN_TYPE` - Add a column of the specified type
 - `COLUMN_TYPE [START_YEAR:END_YEAR]` - Add a column with a time range
-- `COLUMN_TYPE as COLUMN_NAME` - Add a column with a custom name
-- `COLUMN_TYPE quarterly` - Add a column with quarterly data
-- `COLUMN_TYPE annual` - Add a column with annual data
-
-### Variable Management
-- `lock $variable_name` - Lock a variable to prevent modification
-- `unlock $variable_name` - Unlock a variable to allow modification
-
-### Function Management
-- `def FUNCTION_NAME = "COMMAND_STRING"` - Define a function
-- `FUNCTION_NAME` - Call a function
-
-## Common Attributes
-
-- `mcap` - Market capitalization
-- `pe` - Price-to-earnings ratio
-- `pb` - Price-to-book ratio
-- `ps` - Price-to-sales ratio
-- `div_yield` - Dividend yield
-- `revenue` - Revenue
-- `eps` - Earnings per share
-- `debt_to_equity` - Debt-to-equity ratio
-- `roe` - Return on equity
-- `roa` - Return on assets
-
-## Common Column Types
-
-- `cagr` - Compound annual growth rate
-- `pe` - Price-to-earnings ratio
-- `pb` - Price-to-book ratio
-- `ps` - Price-to-sales ratio
-- `div_yield` - Dividend yield
-- `revenue` - Revenue
-- `eps` - Earnings per share
-- `debt_to_equity` - Debt-to-equity ratio
-- `roe` - Return on equity
-- `roa` - Return on assets
-
-## Examples
-
-### Basic Basket Creation and Filtering
-
-```
-# Create a basket of tech stocks
-AAPL MSFT GOOGL AMZN META -> $tech_stocks
-
-# Add a symbol to a basket
-$a + MSFT -> $b
-
-# Filter to include only those with market cap > 1 trillion
-$tech_stocks -> mcap > 1000B -> $trillion_club
-
-# Add a 5-year CAGR column and sort by it
-$trillion_club -> cagr 5y -> sort cagr_5y desc
-```
-
-### Sector Comparison
-
-```
-# Create baskets for different sectors
-AAPL MSFT GOOGL AMZN -> $tech
-JPM BAC GS MS -> $finance
-XOM CVX BP -> $energy
-
-# Add P/E ratio column to each
-$tech -> pe -> $tech_pe
-$finance -> pe -> $finance_pe
-$energy -> pe -> $energy_pe
-
-# Compare average P/E ratios
-$tech_pe -> avg pe
-$finance_pe -> avg pe
-$energy_pe -> avg pe
-```
-
-### Complex Analysis
-
-```
-# Start with S&P 500 ETF and expand to constituents
-SPY -> spread -> $sp500
-
-# Filter to include only dividend aristocrats with yield > 2%
-$sp500 -> div_aristocrat == true -> div_yield > 2% -> $dividend_aristocrats
-
-# Add analysis columns
-$dividend_aristocrats -> div_growth 10y -> payout_ratio -> $dividend_analysis
-
-# Sort by dividend growth rate
-$dividend_analysis -> sort div_growth_10y desc
-```
-
-## Advanced Usage
-
-### Combining Multiple Data Sources
-
-```
-# Get data from multiple sources
-$basket -> add_source fmp -> add_source yahoo -> add_source nasdaq
-```
-
-### Custom Calculations
-
-# Command Syntax and Flow
-
-## Basic Command Structure
-
-Commands in FINS follow a consistent structure and can be invoked in two ways:
-
-### Implicit (Pipeline) Syntax
-```
-[inputs] -> command [arguments]
-```
-
-### Explicit Syntax
-```
-[input] command [arguments]
-```
-
-For example:
-```
-# Implicit syntax
-AAPL MSFT GOOGL -> sort mcap desc
-$tech_stocks -> pe < 20
-
-# Explicit syntax
-$tech_stocks + NFLX
-$tech_stocks sort pe
-```
-
-## Command Types
-
-FINS supports several command types:
-
-1. **Column Commands**: Add data columns and optionally filter
-   - Analysis columns: `basket -> pe` (adds a PE column)
-   - Filters: `basket -> pe < 20` (adds PE column and filters)
-   - The same command can do both operations
-
-2. **Manipulation Commands**: Transform baskets
-   - Sort: `basket -> sort mcap desc`
-   - Set operations: `$tech_stocks + NFLX`
-
-## Command Flow
-
-Each command in FINS processes inputs and produces an output that can be used by the next command:
-
-1. **Inputs**: Can come from:
-   - Previous command's output (automatically passed)
-   - Direct symbol lists (AAPL MSFT GOOGL)
-   - Variables ($tech_stocks)
-   - Multiple inputs separated by spaces
-
-2. **Arguments**: Follow the command name and can be:
-   - Column names (mcap, pe)
-   - Sort orders (asc, desc)
-   - Numbers (100, 1000B)
-   - Comparison operators (>, <, =)
-   - Variables ($min_pe)
-
-## Examples
-
-### Analysis Columns and Filters
-```
-# Add PE column to basket
-AAPL MSFT GOOGL -> pe
-
-# Add PE column and filter to PE < 20
-AAPL MSFT GOOGL -> pe < 20
-
-# Equivalent explicit syntax
-$stocks pe < 20
-```
-
-### Symbol Addition
-```
-# Add NFLX to tech stocks (implicit syntax)
-$tech_stocks -> + NFLX
-
-# Equivalent explicit syntax
-$tech_stocks + NFLX
-```
-
-### Multiple Operations and Storage
-```
-# Filter by PE, add to variable, then sort by market cap
-$all_stocks -> pe < 20 -> $value_stocks -> sort mcap desc
-```
-
-## Command Output
-
-Every command produces an output that can be:
-- Used as input to the next command
-- Stored in a variable
-- Displayed in the terminal
-
-The output format depends on:
-- The command type (e.g., sort produces a sorted basket)
-- Whether JSON output is requested (--json flag)
-- Whether the result is being stored (-> $var) 
+- `COLUMN_TYPE as COLUMN_NAME`
