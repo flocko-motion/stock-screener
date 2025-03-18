@@ -227,6 +227,22 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
 
+    def test_add_variable_and_basket_short(self):
+        # First create a basket with AAPL and MSFT
+        self.empty_storage()
+
+        # prepare variable
+        output = self.execute_flow("AAPL -> $a")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1})
+
+        # addition
+        output = self.execute_flow("$a + MSFT")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
+
 
 class ColumnCommandTests(DslTests):
     """Tests for column commands."""

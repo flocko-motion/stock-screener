@@ -52,7 +52,7 @@ Perform set operations between baskets:
 ```
 $tech_basket -> + $finance_basket  # Union (combine baskets)
 $tech_basket -> & $sp500_basket    # Intersection (common symbols)
-$tech_basket -> - $exclude_basket  # Subtraction (remove symbols)
+$tech_basket -> - $exclude_basket  # Difference (remove symbols)
 ```
 
 ### Sorting
@@ -194,6 +194,9 @@ unlock $tech_basket                # Unlock a variable
 ```
 # Create a basket of tech stocks
 AAPL MSFT GOOGL AMZN META -> $tech_stocks
+
+# Add a symbol to a basket
+$a + MSFT -> $b
 
 # Filter to include only those with market cap > 1 trillion
 $tech_stocks -> mcap > 1000B -> $trillion_club

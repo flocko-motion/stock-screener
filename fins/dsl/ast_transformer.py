@@ -44,6 +44,20 @@ class AstTransformer(Transformer):
 
     def set_operation(self, items):
         return items[0]
+
+    def direct_operation(self, items):
+        var, operation = items
+        operation["basket"] = var
+        return operation
+
+    def direct_union(self, items):
+        return {"type": "command", "action": "union", "operand": items[0]}
+
+    def direct_difference(self, items):
+        return {"type": "command", "action": "difference", "operand": items[0]}
+
+    def direct_intersection(self, items):
+        return {"type": "command", "action": "intersection", "operand": items[0]}
     
     def column_command(self, items):
         result = {"type": "command", "action": "add_column"}

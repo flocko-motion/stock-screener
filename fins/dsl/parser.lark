@@ -8,6 +8,7 @@ command_chain: command ("->" command)*
         | basket
         | variable
         | set_operation
+        | direct_operation
         | column_command
         | info_command
         | lock_command
@@ -30,6 +31,12 @@ union_op: "+" (basket | variable)
 difference_op: "-" (basket | variable)
 intersection_op: "&" (basket | variable)
 spread_op: ".." symbol
+
+// Direct operations (alternative syntax)
+direct_operation: variable (direct_union | direct_difference | direct_intersection)
+direct_union: "+" (symbol | variable)
+direct_difference: "-" (symbol | variable)
+direct_intersection: "&" (symbol | variable)
 
 // Column addition
 column_command: [column_name] column_type [time_range] [period]
