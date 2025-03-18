@@ -51,12 +51,18 @@ class AstTransformer(Transformer):
         return operation
 
     def direct_union(self, items):
+        if isinstance(items[0], list):  # Multiple symbols
+            return {"type": "command", "action": "union", "operand": {"type": "basket", "symbols": items[0]}}
         return {"type": "command", "action": "union", "operand": items[0]}
 
     def direct_difference(self, items):
+        if isinstance(items[0], list):  # Multiple symbols
+            return {"type": "command", "action": "difference", "operand": {"type": "basket", "symbols": items[0]}}
         return {"type": "command", "action": "difference", "operand": items[0]}
 
     def direct_intersection(self, items):
+        if isinstance(items[0], list):  # Multiple symbols
+            return {"type": "command", "action": "intersection", "operand": {"type": "basket", "symbols": items[0]}}
         return {"type": "command", "action": "intersection", "operand": items[0]}
     
     def column_command(self, items):

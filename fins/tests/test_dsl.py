@@ -243,6 +243,11 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
 
+        # addition of multiple items
+        output = self.execute_flow("$a + MSFT NFLX")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
 
 class ColumnCommandTests(DslTests):
     """Tests for column commands."""
