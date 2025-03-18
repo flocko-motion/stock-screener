@@ -29,6 +29,8 @@ from abc import ABC, abstractmethod
 from typing import Type, Optional, Any, NamedTuple, Sequence
 from ...entities import Entity
 from ..output import Output
+from collections.abc import Sequence
+from typing import get_origin
 
 class CommandArgs(NamedTuple):
     """
@@ -54,8 +56,10 @@ class Command(ABC):
     
     @property
     @abstractmethod
-    def input_type(self) -> Type[Entity] | Type[Sequence[Entity]] | Type[Sequence[Entity]] | Type[Optional[Entity]] | None:
-        """The type of Entity this command expects as input."""
+    def input_type(self):
+        """
+        The type of Entity this command expects as input.
+        """
         pass
         
     @property
@@ -127,12 +131,18 @@ class Command(ABC):
             
         Raises:
             TypeError: If input is not of the required type
+
+        TODO: Implement a generic input types checking system. This could be based on a type-checking class
+        that contains a list of types and alternatives and allowed repetitions and omissions..
+        As this is not crucial to the functionality of this program, we might just never need it and
+        rely on the functions execution block to throw errors where invalid values are found.
         """
-        if not isinstance(args.left_operands, self.input_type):
-            raise TypeError(
-                f"{self.__class__.__name__} requires input of type {self.input_type.__name__}, "
-                f"got {type(args.left_operands).__name__}"
-            )
+
+    def validate_output(self, output):
+        if isinstance(output, self.output_type):
+            return
+        else:
+            raise ValueError(f"output '{output}' is not of expected type '{self.output_type}'")
 
     @abstractmethod
     def execute(self, args: CommandArgs) -> Entity:
@@ -163,8 +173,8 @@ class Command(ABC):
         """
         self.validate_input(args)
         result = self.execute(args)
+        self.validate_output(result)
         
-        # Create a descriptive log message based on the command
         command_name = self.__class__.__name__.replace('Command', '').lower()
         log_message = f"Executed {command_name} command"
         

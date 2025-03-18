@@ -80,14 +80,11 @@ class Basket(Entity):
         Args:
             item: The item to add
         """
-        # Check if the symbol already exists in the basket
         for existing_item in self.items:
-            if existing_item.symbol == item.symbol:
-                # Update the quantity
+            if existing_item.ticker == item.ticker:
                 existing_item.amount += item.amount
                 return
         
-        # If the symbol doesn't exist, add the new item
         self.items.append(item)
 
     def remove_item(self, ticker: str) -> None:
@@ -134,7 +131,7 @@ class Basket(Entity):
         """
         sorted_items = sorted(
             self.items,
-            key=lambda item: item.symbol.get_data(attribute, 0),
+            key=lambda item: item.ticker.get_data(attribute, 0),
             reverse=not ascending
         )
         
@@ -190,11 +187,11 @@ class Basket(Entity):
         
         # Add all items from this basket
         for item in self.items:
-            result.add_item(BasketItem(item.symbol, item.amount))
+            result.add_item(BasketItem(item.ticker, item.amount))
         
         # Add all items from the other basket
         for item in other.items:
-            result.add_item(BasketItem(item.symbol, item.amount))
+            result.add_item(BasketItem(item.ticker, item.amount))
         
         # Merge columns
         result.columns = self.columns.copy()

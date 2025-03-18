@@ -114,23 +114,41 @@ class BasicFlowTests(DslTests):
     """Tests for basic FINS command flows."""
     
     def test_create_simple_basket(self):
-        """Test creating a simple basket of stocks."""
         output = self.execute_flow("AAPL MSFT")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
 
-    def test_add_symbol_to_basket(self):
-        """Test adding a symbol to a basket."""
+    def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
 
+    def test_add_duplicate_items_to_basket(self):
+        output = self.execute_flow("AAPL MSFT GOOGL -> + GOOGL")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 2})
+
+    def test_add_overlapping_items_to_basket(self):
+        output = self.execute_flow("AAPL MSFT GOOGL -> + GOOGL NFLX")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 2, "NFLX": 1})
+
+    def test_remove_items_from_basket(self):
+        output = self.execute_flow("AAPL MSFT GOOGL -> - MSFT")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "GOOGL": 1})
+
     def test_explicit_add_syntax(self):
-        """Test the explicit add syntax."""
         # First create a basket with AAPL and MSFT
         self.execute_flow("AAPL MSFT -> $tech")
         
@@ -232,4 +250,4 @@ class ComplexFlowTests(DslTests):
 
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()

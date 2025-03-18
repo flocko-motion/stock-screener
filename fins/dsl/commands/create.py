@@ -22,11 +22,11 @@ class CreateBasketCommand(Command):
     """
     
     @property
-    def input_type(self) -> Optional[Type[Entity]]:
+    def input_type(self):
         return None  # This command doesn't require input
         
     @property
-    def output_type(self) -> Type[Entity]:
+    def output_type(self):
         return Basket
         
     @property
@@ -56,9 +56,8 @@ class CreateBasketCommand(Command):
         Raises:
             ValueError: If no symbols are specified
         """
-        if not args.right_operands or len(args.right_operands) == 0:
-            raise ValueError("Create basket command requires at least one ticker")
-        
+        return
+
     def execute(self, args: CommandArgs) -> Entity:
         """
         Create a new basket from a list of symbols.
