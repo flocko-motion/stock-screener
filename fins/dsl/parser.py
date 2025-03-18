@@ -13,7 +13,7 @@ from .commands.command import Command, CommandArgs
 from .commands.sort import SortColumnCommand
 from .commands.filter import FilterCommand
 from .commands.union import UnionCommand
-from .commands.difference import DifferenceCommand
+from .commands.subtraction import SubtractionCommand
 from .commands.intersection import IntersectionCommand
 from .commands.spread import SpreadCommand
 from .commands.create import CreateBasketCommand
@@ -54,7 +54,7 @@ class FinsParser:
             "sort": SortColumnCommand(),
             "filter": FilterCommand(),
             "union": UnionCommand(),
-            "difference": DifferenceCommand(),
+            "difference": SubtractionCommand(),
             "intersection": IntersectionCommand(),
             "spread": SpreadCommand(),
             "create": CreateBasketCommand(),

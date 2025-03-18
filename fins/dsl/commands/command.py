@@ -137,6 +137,7 @@ class Command(ABC):
         As this is not crucial to the functionality of this program, we might just never need it and
         rely on the functions execution block to throw errors where invalid values are found.
         """
+        return
 
     def validate_output(self, output):
         if isinstance(output, self.output_type):

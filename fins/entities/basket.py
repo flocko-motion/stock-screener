@@ -236,7 +236,7 @@ class Basket(Entity):
         
         return result
     
-    def difference(self, other: 'Basket') -> 'Basket':
+    def subtract(self, other: 'Basket') -> 'Basket':
         """
         Create a new basket that is the difference of this basket and another.
         
@@ -247,21 +247,15 @@ class Basket(Entity):
             A new basket containing only items that are in this basket but not in the other
         """
         result = Basket(name=self.name, note=self.note)
-        
-        # Find symbols that are in this basket but not in the other
-        this_symbols = {item.symbol for item in self.items}
-        other_symbols = {item.symbol for item in other.items}
-        diff_symbols = this_symbols.difference(other_symbols)
-        
-        # Add items for different symbols
-        for symbol in diff_symbols:
-            # Find the item in this basket
-            this_item = next(item for item in self.items if item.symbol == symbol)
-            result.add_item(BasketItem(symbol, this_item.amount))
-        
-        # Include only columns from this basket
-        result.columns = self.columns.copy()
-        
+
+        # Add all items from this basket
+        for item in self.items:
+            result.add_item(BasketItem(item.ticker, item.amount))
+
+        # Add all items from the other basket
+        for item in other.items:
+            result.remove_item(item.ticker)
+
         return result
     
     def to_dataframe(self) -> pd.DataFrame:

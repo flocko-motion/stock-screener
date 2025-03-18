@@ -52,7 +52,7 @@ Perform set operations between baskets:
 ```
 $tech_basket -> + $finance_basket  # Union (combine baskets)
 $tech_basket -> & $sp500_basket    # Intersection (common symbols)
-$tech_basket -> - $exclude_basket  # Difference (remove symbols)
+$tech_basket -> - $exclude_basket  # Subtraction (remove symbols)
 ```
 
 ### Sorting
@@ -131,8 +131,8 @@ unlock $tech_basket                # Unlock a variable
 - `+ SYMBOL` - Add a symbol to the basket
 - `- SYMBOL` - Remove a symbol from the basket
 - `+ $other_basket` - Union with another basket
+- `- $other_basket` - Subtraction (remove symbols from first basket that appear in second basket)
 - `& $other_basket` - Intersection with another basket
-- `- $other_basket` - Difference with another basket
 
 ### Sorting
 - `sort ATTRIBUTE asc` - Sort by attribute in ascending order
