@@ -214,16 +214,16 @@ class Basket(Entity):
         result = Basket(name=self.name, note=self.note)
         
         # Find symbols that are in both baskets
-        this_symbols = {item.symbol for item in self.items}
-        other_symbols = {item.symbol for item in other.items}
+        this_symbols = {item.ticker for item in self.items}
+        other_symbols = {item.ticker for item in other.items}
         common_symbols = this_symbols.intersection(other_symbols)
         
         # Add items for common symbols
         for symbol in common_symbols:
             # Find the item in this basket
-            this_item = next(item for item in self.items if item.symbol == symbol)
+            this_item = next(item for item in self.items if item.ticker == symbol)
             # Find the item in the other basket
-            other_item = next(item for item in other.items if item.symbol == symbol)
+            other_item = next(item for item in other.items if item.ticker == symbol)
             # Use the minimum quantity
             quantity = min(this_item.amount, other_item.amount)
             result.add_item(BasketItem(symbol, quantity))
@@ -247,15 +247,21 @@ class Basket(Entity):
             A new basket containing only items that are in this basket but not in the other
         """
         result = Basket(name=self.name, note=self.note)
-
-        # Add all items from this basket
-        for item in self.items:
-            result.add_item(BasketItem(item.ticker, item.amount))
-
-        # Add all items from the other basket
-        for item in other.items:
-            result.remove_item(item.ticker)
-
+        
+        # Find symbols that are in this basket but not in the other
+        this_symbols = {item.ticker for item in self.items}
+        other_symbols = {item.ticker for item in other.items}
+        diff_symbols = this_symbols - other_symbols
+        
+        # Add items for different symbols
+        for symbol in diff_symbols:
+            # Find the item in this basket
+            this_item = next(item for item in self.items if item.ticker == symbol)
+            result.add_item(BasketItem(symbol, this_item.amount))
+        
+        # Include columns from this basket
+        result.columns = self.columns.copy()
+        
         return result
     
     def to_dataframe(self) -> pd.DataFrame:

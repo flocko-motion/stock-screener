@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: repairing execution flows based to satisfy unit tests">
-      <change beforePath="$PROJECT_DIR$/.cursor/rules/paths.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/paths.mdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.cursor/rules/test-driven.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/test-driven.mdc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/fins/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/commands/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_expression.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.lark" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.lark" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -227,7 +219,7 @@
       <workItem from="1742289905359" duration="609000" />
       <workItem from="1742323747044" duration="19042000" />
       <workItem from="1742413185685" duration="152000" />
-      <workItem from="1742413431740" duration="628000" />
+      <workItem from="1742413431740" duration="1386000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -325,7 +317,23 @@
       <option name="project" value="LOCAL" />
       <updated>1742372753701</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="fix: repairing execution flows based to satisfy unit tests">
+      <option name="closed" value="true" />
+      <created>1742414433907</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1742414433907</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fix: repairing execution flows based to satisfy unit tests">
+      <option name="closed" value="true" />
+      <created>1742414714049</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1742414714049</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -377,11 +385,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>37</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
           <line>42</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
@@ -392,12 +395,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/command.py</url>
-          <line>226</line>
+          <line>224</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/command.py</url>
-          <line>229</line>
+          <line>227</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
@@ -405,7 +408,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1742335292307" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1742413937456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1742414754290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1742376810303" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

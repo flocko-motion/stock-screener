@@ -39,7 +39,7 @@ from typing import get_origin
 class CommandArgs:
     """Arguments for command execution."""
     tree: Tree
-    previous_output: Output
+    previous_output: Output | None
 
 class Command(ABC):
     """
