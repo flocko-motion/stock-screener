@@ -1,8 +1,14 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: path structure
 globs: 
 alwaysApply: false
 ---
-This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root. 
-For now you can ignore all code outside the "fins/" directory.
+This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root - full path: /r/priv/stock-screener/fins/ 
+For now you can ignore all code outside the "/r/priv/stock-screener/fins/" directory tree.
+
 

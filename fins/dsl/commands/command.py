@@ -26,18 +26,20 @@ Example:
 """
 
 from abc import ABC, abstractmethod
-from typing import Type, Optional, Any, NamedTuple, Sequence
+from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar
+from dataclasses import dataclass
+from lark import Tree, Token
 
-from lark import Tree
-
-from ...entities import Entity
+from ...entities import Entity, Basket
 from ..output import Output
 from collections.abc import Sequence
 from typing import get_origin
 
-class CommandArgs(NamedTuple):
+@dataclass
+class CommandArgs:
+    """Arguments for command execution."""
     tree: Tree
-    
+    previous_output: Output
 
 class Command(ABC):
     """
@@ -49,18 +51,53 @@ class Command(ABC):
     - Help text describing its usage
     """
     
+    # Class-level registry of all commands
+    _registry: ClassVar[Dict[str, Type['Command']]] = {}
+    
+    # Instance-level command cache
+    _instances: ClassVar[Dict[str, 'Command']] = {}
+    
+    def __init__(self):
+        self.storage = None
+    
+    @classmethod
+    def register(cls, command_type: str):
+        """Class decorator to register a command type."""
+        def decorator(command_cls: Type['Command']):
+            cls._registry[command_type] = command_cls
+            return command_cls
+        return decorator
+    
+    @classmethod
+    def get_command(cls, command_type: str) -> 'Command':
+        """Get or create a command instance for the given type."""
+        if command_type not in cls._instances:
+            if command_type not in cls._registry:
+                raise SyntaxError(f"Unknown command type: {command_type}")
+            cls._instances[command_type] = cls._registry[command_type]()
+        return cls._instances[command_type]
+    
+    @classmethod
+    def initialize_all(cls, storage):
+        """Initialize all registered commands with storage."""
+        for command_type in cls._registry:
+            command = cls.get_command(command_type)
+            command.set_storage(storage)
+    
+    def set_storage(self, storage):
+        """Set the storage instance for this command."""
+        self.storage = storage
+    
     @property
     @abstractmethod
-    def input_type(self):
-        """
-        The type of Entity this command expects as input.
-        """
+    def input_type(self) -> str:
+        """Get the type of input this command expects."""
         pass
         
     @property
     @abstractmethod
-    def output_type(self)  -> Type[Entity] | Type[Sequence[Entity]] | Type[Sequence[Entity]] | Type[Optional[Entity]] | None:
-        """The type of Entity this command produces as output."""
+    def output_type(self) -> str:
+        """Get the type of output this command produces."""
         pass
         
     @property
@@ -71,7 +108,7 @@ class Command(ABC):
     @property
     @abstractmethod
     def description(self) -> str:
-        """A short description of what this command does."""
+        """Get a description of what this command does."""
         pass
         
     @property
@@ -91,8 +128,8 @@ class Command(ABC):
             "",
             self.description,
             "",
-            f"Input: {self.input_type.__name__}",
-            f"Output: {self.output_type.__name__}",
+            f"Input: {self.input_type}",
+            f"Output: {self.output_type}",
             "",
             "Syntax:",
             f"  {self.__class__.__name__.lower()} [right_tokens]  # Implicit input",
@@ -141,20 +178,8 @@ class Command(ABC):
             raise ValueError(f"output '{output}' is not of expected type '{self.output_type}'")
 
     @abstractmethod
-    def execute(self, args: CommandArgs) -> Entity:
-        """
-        Execute the command.
-        
-        Args:
-            args: The command arguments
-            
-        Returns:
-            The output entity (usually the modified input)
-            
-        Raises:
-            TypeError: If input is not of the required type
-            ValueError: If arguments are invalid
-        """
+    def execute(self, args: CommandArgs) -> Optional['Output']:
+        """Execute the command with the given arguments."""
         pass
         
     def execute_with_output(self, args: CommandArgs) -> Output:
@@ -178,4 +203,37 @@ class Command(ABC):
         output = Output(result, "basket", metadata={"command": command_name})
         output.add_log(log_message)
         
-        return output 
+        return output
+
+    def execute_command_tree(self, tree: Tree, previous_output: Output) -> 'Output':
+        """Execute a command based on its tree structure."""
+        command_type = tree.data
+        handler = self.get_command(command_type)
+        return handler.execute(CommandArgs(tree=tree, previous_output=previous_output))
+        
+    def _execute_subcommand(self, command_type: str, tree: Tree) -> 'Output':
+        """Execute a subcommand of this command."""
+        handler = self.get_command(command_type)
+        return handler.execute(CommandArgs(tree=tree))
+        
+    def execute_chain(self, command_chain: Tree, initial_basket=None) -> 'Output':
+        """Execute a chain of commands, passing results between them."""
+
+        
+        chain_output = Output(initial_basket, "none")
+        chain_output.add_log("Starting command chain execution")
+
+        for command in command_chain.children:
+            if not isinstance(command, Tree):
+                raise RuntimeError(f"Command in chain is not of type '{command_chain.__name__}' but '{type(command)}'")
+
+            step_output = self.execute_command_tree(command, chain_output)
+            if not isinstance(step_output, Output):
+                raise RuntimeError(f"Command step returned {type(step_output)}, expected Output")
+
+            chain_output.merge_logs(step_output)
+            chain_output.data = step_output.data
+            chain_output.output_type = step_output.output_type
+            chain_output.metadata = step_output.metadata
+
+        return chain_output 

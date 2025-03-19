@@ -1,6 +1,13 @@
 ---
-description: test driven approach with many git commits
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: style guide
 globs: 
 alwaysApply: false
 ---
 Let's work test driven. Before we implement a new feature or refactor anything, we have to make sure, that all tests are successful - only then do we start a new work. After adding a feature and having succesful tests again, make a git commit - use conventional commits format to describe the changes to the code. Commit often and make explanatory commit messages, so that the progress is transparent. 
+
+Don't use deep if..else..if..if... blocks - instead try to keep code relatively flat. Not as radical as in clean-code, but rather flat. Extract functions where appropriate to avoid long functions. 

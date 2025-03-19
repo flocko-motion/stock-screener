@@ -1,4 +1,4 @@
-.PHONY: test test-cov lint format clean install test-parser test-elementary test-terminal test-integration
+.PHONY: test test-cov lint format clean install test-parser test-elementary test-terminal test-integration test-basic-flows
 
 # Default target
 all: test
@@ -10,6 +10,10 @@ install:
 # Run all tests
 test:
 	poetry run python -m unittest discover
+
+# Run basic flow tests
+test-basic-flows:
+	poetry run pytest tests/test_dsl.py -v -k BasicFlowTests
 
 # Run parser tests
 test-parser:
