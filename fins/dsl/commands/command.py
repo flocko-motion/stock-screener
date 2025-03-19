@@ -27,21 +27,16 @@ Example:
 
 from abc import ABC, abstractmethod
 from typing import Type, Optional, Any, NamedTuple, Sequence
+
+from lark import Tree
+
 from ...entities import Entity
 from ..output import Output
 from collections.abc import Sequence
 from typing import get_origin
 
 class CommandArgs(NamedTuple):
-    """
-    Container for command arguments.
-    
-    Attributes:
-        left_operands: Explicit left-hand input (if using direct syntax)
-        right_operands: Right-hand tokens after the command
-    """
-    left_operands: Sequence[Entity]
-    right_operands: Sequence[Entity]
+    tree: Tree
     
 
 class Command(ABC):

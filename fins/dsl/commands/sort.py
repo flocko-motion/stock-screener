@@ -5,6 +5,8 @@ This command sorts a basket of symbols based on a specified column.
 """
 
 from typing import Type
+
+from ..output import Output
 from ...entities.entity import Entity
 from ...entities.basket import Basket
 from .command import Command, CommandArgs
@@ -76,7 +78,7 @@ class SortColumnCommand(Command):
             if not isinstance(order, str) or order not in ("asc", "desc"):
                 raise ValueError("Order must be 'asc' or 'desc'")
         
-    def execute(self, args: CommandArgs) -> Entity:
+    def execute(self, args: CommandArgs) -> Output:
         """
         Sort the input basket by the specified column.
         
@@ -122,4 +124,4 @@ class SortColumnCommand(Command):
         for name, values in basket.columns.items():
             result.add_column(name, values)
             
-        return result 
+        return Output(result)

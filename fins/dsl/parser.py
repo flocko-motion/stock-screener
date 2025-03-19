@@ -20,11 +20,12 @@ from .commands.variable import VariableCommand
 from .commands.column import AddColumnCommand
 from .commands.info import InfoCommand
 from .commands.define import DefineFunctionCommand
-from .commands.expression import ExpressionCommand
-from .commands.operation import OperationCommand
-from .commands.sequence import SequenceCommand
-from .commands.basket import BasketCommand
-from .commands.function_definition import FunctionDefinitionCommand
+from .commands.syntax_expression import ExpressionCommand
+from .commands.syntax_operation import OperationCommand
+from .commands.syntax_sequence import SequenceCommand
+from .commands.syntax_basket import BasketCommand
+from .commands.syntax_function_definition import FunctionDefinitionCommand
+from .commands.syntax_operand_group import OperandGroupCommand
 
 # Load the grammar from external file "parser.lark"
 grammar_file = os.path.join(os.path.dirname(__file__), "parser.lark")
@@ -65,6 +66,7 @@ class FinsParser:
             "expression": ExpressionCommand(),
             "operation_command": OperationCommand(),
             "sequence": SequenceCommand(),
+            "operand_group": OperandGroupCommand(),
         }
 
     def parse(self, flow: str) -> Output:
@@ -79,18 +81,13 @@ class FinsParser:
         except Exception as e:
             return Output(str(e), output_type="error")
             
-    def _execute_command(self, command):
-        """Execute a command and return the result wrapped in an Output instance."""
-        try:
-            command_type = command.data
-            if command_type in self.commands:
-                handler = self.commands[command_type]
-                result = handler.execute(CommandArgs(command_tree=command))
-                return Output(result) if result is not None else Output(None, "none")
-            
-            return Output(f"Unknown command type: {command_type}", output_type="error")
-        except Exception as e:
-            return Output(str(e), output_type="error")
+    def _execute_command(self, tree: Tree) -> Output:
+        command_type = tree.data
+        if command_type in self.commands:
+            handler = self.commands[command_type]
+            return handler.execute(CommandArgs(tree=tree))
+
+        raise SyntaxError(f"Unknown command type: {command_type}")
 
     def _execute_command_chain(self, command_chain, initial_basket: Basket | None =None) -> Output:
         """Execute a chain of commands, passing results between them."""
