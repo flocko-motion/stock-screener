@@ -10,19 +10,27 @@ command_chain: command ("->" command)*
         | info_command
         | lock_command
         | unlock_command
+        | operation_command
 
 // Basic commands
 sort_command: "sort" ATTRIBUTE ORDER
 filter_command: ATTRIBUTE COMPARISON_OPERATOR NUMBER
 
+// Operation command (for pipeline operations)
+operation_command: OPERATOR operand_group
+
 // Generic expression handling
-?expression: operand+ | operand (operator operand)*
+?expression: sequence
+?sequence: operand_group (OPERATOR operand_group)*
+?operand_group: operand+
 ?operand: WEIGHT? (symbol | variable)
-?operator: "+" | "-" | "&"
 
 // Variables and symbols
 variable: VARIABLE
 symbol: STOCK_SYMBOL | ETF_SYMBOL | INDEX_SYMBOL
+
+// Operators
+OPERATOR: "+" | "-" | "&"
 
 // Column addition
 column_command: [column_name] column_type [time_range] [period]

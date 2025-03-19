@@ -119,11 +119,11 @@ class BasicFlowTests(DslTests):
     """Tests for basic FINS command flows."""
     
     def test_create_simple_basket(self):
-        output = self.execute_flow("AAPL MSFT")
+        output = self.execute_flow("AAPL 3x MSFT 2.1 NFLX + 7 GOOG AMZN 0.002 TPL -> $a -> + 2x V")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
 
     def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL")
