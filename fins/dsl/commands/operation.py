@@ -5,6 +5,18 @@ from ...entities import Basket, BasketItem
 class OperationCommand(Command):
     """Handles operation commands like + MSFT, - AAPL, etc."""
     
+    @property
+    def description(self) -> str:
+        return "Performs set operations (+, -, &) on baskets in a pipeline"
+        
+    @property
+    def input_type(self) -> str:
+        return "basket"  # Requires a basket from the pipeline
+        
+    @property
+    def output_type(self) -> str:
+        return "basket"
+    
     def execute(self, args: CommandArgs) -> Basket:
         """Execute the operation command."""
         command = args.command_tree

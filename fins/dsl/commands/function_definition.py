@@ -5,6 +5,18 @@ from ...entities import Token
 class FunctionDefinitionCommand(Command):
     """Handles function definition commands."""
     
+    @property
+    def description(self) -> str:
+        return "Defines a new function for later use"
+        
+    @property
+    def input_type(self) -> str:
+        return "none"
+        
+    @property
+    def output_type(self) -> str:
+        return "none"
+    
     def execute(self, args: CommandArgs) -> None:
         """Execute the function definition command."""
         command = args.command_tree

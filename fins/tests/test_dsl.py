@@ -6,7 +6,6 @@ that complete command flows work as expected.
 """
 
 import unittest
-from typing import Any, Optional
 
 from ..storage import Storage
 from ..dsl.parser import FinsParser
@@ -18,11 +17,11 @@ class DslTests(unittest.TestCase):
     
     def setUp(self):
         """Set up the test environment."""
+        self.new_parser()
+
+    def new_parser(self ):
         self.parser = FinsParser(Storage.temp())
 
-    def empty_storage(self):
-        self.parser.set_storage(Storage.temp())
-        
     def execute_flow(self, command_str: str) -> Output:
         """
         Execute a FINS command flow.
@@ -117,13 +116,13 @@ class DslTests(unittest.TestCase):
 
 class BasicFlowTests(DslTests):
     """Tests for basic FINS command flows."""
-    
-    def test_create_simple_basket(self):
-        output = self.execute_flow("AAPL 3x MSFT 2.1 NFLX + 7 GOOG AMZN 0.002 TPL -> $a -> + 2x V")
-        
+
+    def test_simple_basket_creation(self):
+        output = self.execute_flow("AAPL MSFT GOOGL")
+
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
 
     def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL")
@@ -155,7 +154,7 @@ class BasicFlowTests(DslTests):
 
     def test_basket_to_variable(self):
         # First create a basket with AAPL and MSFT
-        self.empty_storage()
+        self.new_parser()
 
         output = self.execute_flow("AAPL -> $a")
         self.assertIsInstance(output, Output)
@@ -169,7 +168,7 @@ class BasicFlowTests(DslTests):
 
     def test_basket_to_file(self):
         # First create a basket with AAPL and MSFT
-        self.empty_storage()
+        self.new_parser()
 
         # write first file
         output = self.execute_flow("AAPL -> /a/b/c")
@@ -191,7 +190,7 @@ class BasicFlowTests(DslTests):
 
     def test_basket_to_file_overwrite(self):
         # First create a basket with AAPL and MSFT
-        self.empty_storage()
+        self.new_parser()
 
         # write first file
         output = self.execute_flow("AAPL -> /a/b/c")
@@ -213,7 +212,7 @@ class BasicFlowTests(DslTests):
 
     def test_add_variable_and_basket(self):
         # First create a basket with AAPL and MSFT
-        self.empty_storage()
+        self.new_parser()
 
         # prepare variable
         output = self.execute_flow("AAPL -> $a")
@@ -229,7 +228,7 @@ class BasicFlowTests(DslTests):
 
     def test_add_variable_and_basket_short(self):
         # First create a basket with AAPL and MSFT
-        self.empty_storage()
+        self.new_parser()
 
         # prepare variable
         output = self.execute_flow("AAPL -> $a")
@@ -248,6 +247,14 @@ class BasicFlowTests(DslTests):
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
+
+    def test_complex_basket_operation(self):
+        output = self.execute_flow("AAPL 3x MSFT 2.1 NFLX + 7 GOOG AMZN 0.002 TPL -> $a -> + 2x V")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "NFLX": 1})
+
 
 class ColumnCommandTests(DslTests):
     """Tests for column commands."""

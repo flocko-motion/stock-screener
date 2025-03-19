@@ -5,6 +5,18 @@ from ...entities import Basket, BasketItem
 class ExpressionCommand(Command):
     """Handles expression commands that combine operands with operators."""
     
+    @property
+    def description(self) -> str:
+        return "Combines operands (symbols and variables) with operators (+, -, &) to create or modify baskets"
+        
+    @property
+    def input_type(self) -> str:
+        return "none"  # Can start fresh or use injected basket
+        
+    @property
+    def output_type(self) -> str:
+        return "basket"
+    
     def execute(self, args: CommandArgs) -> Basket:
         """Execute the expression command."""
         expr_tree = args.command_tree
