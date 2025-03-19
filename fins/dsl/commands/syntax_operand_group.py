@@ -21,13 +21,11 @@ class OperandGroupCommand(Command):
         return "basket"
     
     def execute(self, args: CommandArgs) -> Output:
-        """Execute the operand group command."""
-        group_node = args.tree
         items = []
-        
-        for node in group_node.children:
+        for node in args.tree.children:
             if not isinstance(node, Tree):
-                continue
+                raise RuntimeError("Why? What is this? Invalid operand group structure")
+                # continue
                 
             if node.data == "operand":
                 weight = 1.0

@@ -21,10 +21,12 @@ class CommandChainCommand(Command):
     def execute(self, args: CommandArgs) -> Output:
         chain_output = args.previous_output
 
-        for command in args.tree.children:
-            if not isinstance(command, Tree):
+        for tree in args.tree.children:
+            if not isinstance(tree, Tree):
                 # what are these items that we are skipping here?
-                continue
-            chain_output = self.execute_command_tree(command, chain_output)
+                raise RuntimeError("Invalid command chain structure")
+                # continue
+            executor = Command.get_command(tree.data)
+            chain_output = executor.execute(CommandArgs(tree=tree, previous_output=chain_output))
 
         return chain_output
