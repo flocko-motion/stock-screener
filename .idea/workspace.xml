@@ -7,7 +7,8 @@
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: repairing execution flows based to satisfy unit tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/commands/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -219,7 +220,7 @@
       <workItem from="1742289905359" duration="609000" />
       <workItem from="1742323747044" duration="19042000" />
       <workItem from="1742413185685" duration="152000" />
-      <workItem from="1742413431740" duration="1386000" />
+      <workItem from="1742413431740" duration="1804000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -333,7 +334,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742414714049</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="fix: repairing execution flows based to satisfy unit tests">
+      <option name="closed" value="true" />
+      <created>1742415689508</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1742415689508</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -394,14 +403,9 @@
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/command.py</url>
-          <line>224</line>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/command.py</url>
-          <line>227</line>
-          <option name="timeStamp" value="25" />
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py</url>
+          <line>26</line>
+          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

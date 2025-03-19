@@ -37,7 +37,7 @@ class FinsParser:
         try:
             tree: Tree = parser.parse(flow)
             executor = Command.get_command(tree.data)
-            return executor.execute(CommandArgs(tree=tree, previous_output=None))
+            return executor.execute(CommandArgs(tree=tree, previous_output=Output(None)))
         except Exception as e:
             traceback.print_exc()
             return Output(str(e), output_type="error")
