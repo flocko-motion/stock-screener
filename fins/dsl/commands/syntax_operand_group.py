@@ -47,6 +47,8 @@ class OperandGroupCommand(Command):
                     items.extend(self._get_weighted_var_items(var_name, weight))
             elif node.data == "symbol":
                 # Handle direct symbols (without weight)
+                if len(node.children) != 1:
+                    raise RuntimeError("Invalid symbol node structure")
                 items.append(BasketItem(node.children[0].value, 1.0))
             elif node.data == "variable":
                 # Handle direct variables (without weight)
