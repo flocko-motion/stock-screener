@@ -36,8 +36,8 @@ class FinsParser:
         """Parse and execute a FINS command or command chain."""
         try:
             tree: Tree = parser.parse(flow)
-            executor = Command.get_command("sequence")
-            return executor.execute_command_tree(tree, Output(None))
+            executor = Command.get_command(tree.data)
+            return executor.execute(CommandArgs(tree=tree, previous_output=None))
         except Exception as e:
             traceback.print_exc()
             return Output(str(e), output_type="error")

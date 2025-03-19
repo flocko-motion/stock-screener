@@ -24,6 +24,10 @@ class SequenceCommand(Command):
         sequence_tree = args.tree
         result_basket = self._find_existing_basket(sequence_tree)
         
+        # If no basket found in the sequence, check previous output
+        if result_basket is None and args.previous_output and args.previous_output.output_type == "basket":
+            result_basket = args.previous_output.data
+        
         # Process operand groups and operators
         i = 0
         while i < len(sequence_tree.children):
@@ -55,6 +59,49 @@ class SequenceCommand(Command):
                 return self._process_basket_node(node)
         return None
 
+    def _process_basket_node(self, basket_node) -> Basket:
+        """Process a basket node into a Basket object."""
+        items = []
+        for child in basket_node.children:
+            if isinstance(child, Tree):
+                if child.data == "symbol":
+                    # Get the STOCK_SYMBOL token value
+                    symbol_token = child.children[0]
+                    if isinstance(symbol_token, Token):
+                        items.append(BasketItem(symbol_token.value, 1.0))
+                    elif isinstance(symbol_token, str):
+                        items.append(BasketItem(symbol_token, 1.0))
+                    elif isinstance(symbol_token, Tree):
+                        symbol_value = symbol_token.children[0]
+                        if isinstance(symbol_value, Token):
+                            items.append(BasketItem(symbol_value.value, 1.0))
+                        else:
+                            items.append(BasketItem(str(symbol_value), 1.0))
+                elif child.data == "operand":
+                    weight = 1.0
+                    symbol = None
+                    
+                    for operand_child in child.children:
+                        if isinstance(operand_child, Tree):
+                            if operand_child.data == "weight":
+                                weight = float(operand_child.children[0].value.rstrip('x'))
+                            elif operand_child.data == "symbol":
+                                symbol_token = operand_child.children[0]
+                                if isinstance(symbol_token, Token):
+                                    symbol = symbol_token.value
+                                elif isinstance(symbol_token, str):
+                                    symbol = symbol_token
+                                elif isinstance(symbol_token, Tree):
+                                    symbol_value = symbol_token.children[0]
+                                    if isinstance(symbol_value, Token):
+                                        symbol = symbol_value.value
+                                    else:
+                                        symbol = str(symbol_value)
+                    
+                    if symbol:
+                        items.append(BasketItem(symbol, weight))
+        return Basket(items)
+
     def _process_operand_group(self, node: Tree, result_basket: Basket) -> Basket:
         """Process an operand group node."""
         operand_output = self._execute_subcommand("operand_group", node)
@@ -80,30 +127,3 @@ class SequenceCommand(Command):
         if operation:
             return operation(result_basket, operand_output.data)
         return result_basket
-
-    def _process_basket_node(self, basket_node) -> Basket:
-        """Process a basket node into a Basket object."""
-        items = []
-        for child in basket_node.children:
-            if isinstance(child, Tree):
-                if child.data == "symbol":
-                    # Get the STOCK_SYMBOL token value
-                    symbol_token = child.children[0]
-                    if isinstance(symbol_token, Token):
-                        items.append(BasketItem(symbol_token.value, 1.0))
-                    else:
-                        items.append(BasketItem(symbol_token.children[0].value, 1.0))
-                elif child.data == "operand":
-                    weight = 1.0
-                    symbol = None
-                    
-                    for operand_child in child.children:
-                        if isinstance(operand_child, Tree):
-                            if operand_child.data == "weight":
-                                weight = float(operand_child.children[0].value.rstrip('x'))
-                            elif operand_child.data == "symbol":
-                                symbol = operand_child.children[0].value
-                    
-                    if symbol:
-                        items.append(BasketItem(symbol, weight))
-        return Basket(items)

@@ -214,18 +214,16 @@ class Command(ABC):
     def _execute_subcommand(self, command_type: str, tree: Tree) -> 'Output':
         """Execute a subcommand of this command."""
         handler = self.get_command(command_type)
-        return handler.execute(CommandArgs(tree=tree))
+        return handler.execute(CommandArgs(tree=tree, previous_output=None))
         
     def execute_chain(self, command_chain: Tree, initial_basket=None) -> 'Output':
         """Execute a chain of commands, passing results between them."""
-
-        
-        chain_output = Output(initial_basket, "none")
+        chain_output = Output(initial_basket, "basket" if initial_basket else "none")
         chain_output.add_log("Starting command chain execution")
 
         for command in command_chain.children:
             if not isinstance(command, Tree):
-                raise RuntimeError(f"Command in chain is not of type '{command_chain.__name__}' but '{type(command)}'")
+                continue
 
             step_output = self.execute_command_tree(command, chain_output)
             if not isinstance(step_output, Output):

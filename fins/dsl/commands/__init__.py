@@ -16,4 +16,5 @@ from .syntax_operation import OperationCommand
 from .syntax_sequence import SequenceCommand
 from .syntax_basket import BasketCommand
 from .syntax_function_definition import FunctionDefinitionCommand
-from .syntax_operand_group import OperandGroupCommand 
+from .syntax_operand_group import OperandGroupCommand
+from .syntax_command_chain import CommandChainCommand 
