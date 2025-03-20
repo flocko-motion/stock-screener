@@ -54,7 +54,7 @@ class OperandGroupCommand(Command):
                 # Handle direct variables (without weight)
                 items.extend(self._get_weighted_var_items(node.children[0].value, 1.0))
         
-        return Output(Basket(items), output_type="basket")
+        return Output(Basket(items), previous=args.previous_output)
 
     def _parse_weight(self, weight_str: str) -> float:
         """Parse weight string into float value."""

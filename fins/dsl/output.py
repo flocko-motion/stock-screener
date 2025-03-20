@@ -24,11 +24,11 @@ class Output:
         log: List of log messages describing what happened during execution
     """
     
-    def __init__(self, 
-                 data: Any, 
+    def __init__(self,
+                 data: Any,
                  metadata: Optional[Dict[str, Any]] = None,
                  log: Optional[List[str]] = None,
-                 previous_output: Optional['Output'] = None):
+                 previous: Optional['Output'] = None):
         """
         Initialize an Output instance.
         

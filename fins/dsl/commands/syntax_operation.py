@@ -37,14 +37,14 @@ class OperationCommand(Command):
         operand_result = executor.execute(CommandArgs(tree=operand, previous_output=args.previous_output))
 
         if not isinstance(args.previous_output, Output) or not isinstance(args.previous_output.data, Basket):
-            return Output(RuntimeError(f"expected 'Basket' as left input, got '{args.previous_output}"), previous_output=args.previous_output)
+            return Output(RuntimeError(f"expected 'Basket' as left input, got '{args.previous_output}"), previous=args.previous_output)
         left_basket: Basket = args.previous_output.data
 
         if not isinstance(operand_result.data, Basket):
-            return Output(RuntimeError(f"expected 'Basket' as right input, got '{operand_result.data}"), previous_output=args.previous_output)
+            return Output(RuntimeError(f"expected 'Basket' as right input, got '{operand_result.data}"), previous=args.previous_output)
         right_basket: Basket = operand_result.data
 
-        result = Output(left_basket.operation(right_basket, operator), previous_output=args.previous_output)
+        result = Output(left_basket.operation(right_basket, operator), previous=args.previous_output)
         return result
 
 
