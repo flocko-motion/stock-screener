@@ -39,7 +39,7 @@ class Output:
             log: Optional list of log messages
         """
         self.data = data
-        self.output_type = output_type or self._infer_type()
+        self.output_type = self._infer_type()
         self.metadata = metadata or {}
         self.log = log or []
         

@@ -24,37 +24,52 @@ class OperandGroupCommand(Command):
         items = []
         for node in args.tree.children:
             if not isinstance(node, Tree):
-                raise RuntimeError("Why? What is this? Invalid operand group structure")
-                # continue
-                
-            if node.data == "operand":
-                weight = 1.0
-                symbol = None
-                var_name = None
-                
-                for child in node.children:
-                    if isinstance(child, Tree):
-                        if child.data == "weight":
-                            weight = self._parse_weight(child.children[0].value)
-                        elif child.data == "symbol":
-                            symbol = child.children[0].value
-                        elif child.data == "variable":
-                            var_name = child.children[0].value
-                
-                if symbol:
-                    items.append(BasketItem(symbol, weight))
-                elif var_name:
-                    items.extend(self._get_weighted_var_items(var_name, weight))
-            elif node.data == "symbol":
-                # Handle direct symbols (without weight)
-                if len(node.children) != 1:
-                    raise RuntimeError("Invalid symbol node structure")
-                items.append(BasketItem(node.children[0].value, 1.0))
-            elif node.data == "variable":
-                # Handle direct variables (without weight)
-                items.extend(self._get_weighted_var_items(node.children[0].value, 1.0))
+                raise RuntimeError("Invalid operand group structure")
+            
+            items.extend(self._process_node(node))
         
         return Output(Basket(items), previous=args.previous_output)
+
+    def _process_node(self, node: Tree) -> list[BasketItem]:
+        """Process a single node and return resulting basket items."""
+        if node.data == "operand":
+            return self._process_operand_node(node)
+        elif node.data in ("symbol", "variable"):
+            return self._process_direct_node(node)
+        return []
+
+    def _process_operand_node(self, node: Tree) -> list[BasketItem]:
+        """Process an operand node with potential weights."""
+        weight = 1.0
+        symbol = None
+        var_name = None
+        
+        for child in node.children:
+            if not isinstance(child, Tree):
+                continue
+                
+            if child.data == "weight":
+                weight = self._parse_weight(child.children[0].value)
+            elif child.data == "symbol":
+                symbol = child.children[0].value
+            elif child.data == "variable":
+                var_name = child.children[0].value
+        
+        if symbol:
+            return [BasketItem(symbol, weight)]
+        elif var_name:
+            return self._get_weighted_var_items(var_name, weight)
+        return []
+
+    def _process_direct_node(self, node: Tree) -> list[BasketItem]:
+        """Process a direct symbol or variable node."""
+        if len(node.children) != 1:
+            raise RuntimeError("Invalid node structure")
+            
+        value = node.children[0].value
+        if node.data == "symbol":
+            return [BasketItem(value, 1.0)]
+        return self._get_weighted_var_items(value, 1.0)
 
     def _parse_weight(self, weight_str: str) -> float:
         """Parse weight string into float value."""
@@ -68,5 +83,4 @@ class OperandGroupCommand(Command):
         if var_basket is None:
             return []
             
-        # Apply weight to all items in the variable basket
         return [BasketItem(item.symbol, item.weight * weight) for item in var_basket.items] 
