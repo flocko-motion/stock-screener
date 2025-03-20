@@ -26,9 +26,9 @@ class Output:
     
     def __init__(self, 
                  data: Any, 
-                 output_type: str = None,
                  metadata: Optional[Dict[str, Any]] = None,
-                 log: Optional[List[str]] = None):
+                 log: Optional[List[str]] = None,
+                 previous_output: Optional['Output'] = None):
         """
         Initialize an Output instance.
         
@@ -46,7 +46,7 @@ class Output:
         # If data is a string and output_type is not error, add it to the log
         if isinstance(data, str) and self.output_type != "error":
             self.add_log(data)
-        
+
     def _infer_type(self) -> str:
         """Infer the output type from the data."""
         if isinstance(self.data, Basket):
@@ -118,4 +118,5 @@ class Output:
         
     def __repr__(self) -> str:
         """Return a detailed string representation."""
-        return f"Output(type={self.output_type}, data={self.data}, metadata={self.metadata}, log={self.log})" 
+        return f"Output(type={self.output_type}, data={self.data}, metadata={self.metadata}, log={self.log})"
+

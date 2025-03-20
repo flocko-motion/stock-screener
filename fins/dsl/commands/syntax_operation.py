@@ -20,83 +20,74 @@ class OperationCommand(Command):
         return "basket"
     
     def execute(self, args: CommandArgs) -> Output:
-        """Execute the operation command."""
-        command = args.tree
-        
-        # Find the operator and operand group
         operator = None
-        operand_group = None
-        left_basket = None
+        operand = None
+
+        for tree in args.tree.children:
+            if isinstance(tree, Token) and tree.type == 'OPERATOR':
+                operator = tree.value
+            elif isinstance(tree, Tree):
+                if tree.data == "operand_group":
+                    operand = tree
         
-        for child in command.children:
-            if isinstance(child, Token) and child.type == 'OPERATOR':
-                operator = child.value
-            elif isinstance(child, Tree):
-                if child.data == "operand_group":
-                    operand_group = child
-                elif child.data == "basket":
-                    left_basket = self._process_basket_node(child)
-        
-        if operator is None or operand_group is None:
+        if operator is None or operand is None:
             return Output("Invalid operation command structure", output_type="error")
-            
-        operand_output = self._execute_subcommand("operand_group", operand_group)
-        result = self._apply_operation(left_basket, operand_output.data, operator)
-        return Output(result, output_type="basket")
 
-    def _process_basket_node(self, basket_node) -> Basket:
-        """Process a basket node into a Basket object."""
-        items = []
-        for child in basket_node.children:
-            if isinstance(child, Tree):
-                if child.data == "symbol":
-                    # Get the STOCK_SYMBOL token value
-                    symbol_token = child.children[0]
-                    if isinstance(symbol_token, Token):
-                        items.append(BasketItem(symbol_token.value, 1.0))
-                    elif isinstance(symbol_token, str):
-                        items.append(BasketItem(symbol_token, 1.0))
-                    elif isinstance(symbol_token, Tree):
-                        symbol_value = symbol_token.children[0]
-                        if isinstance(symbol_value, Token):
-                            items.append(BasketItem(symbol_value.value, 1.0))
-                        else:
-                            items.append(BasketItem(str(symbol_value), 1.0))
-                elif child.data == "operand":
-                    weight = 1.0
-                    symbol = None
-                    
-                    for operand_child in child.children:
-                        if isinstance(operand_child, Tree):
-                            if operand_child.data == "weight":
-                                weight = float(operand_child.children[0].value.rstrip('x'))
-                            elif operand_child.data == "symbol":
-                                symbol_token = operand_child.children[0]
-                                if isinstance(symbol_token, Token):
-                                    symbol = symbol_token.value
-                                elif isinstance(symbol_token, str):
-                                    symbol = symbol_token
-                                elif isinstance(symbol_token, Tree):
-                                    symbol_value = symbol_token.children[0]
-                                    if isinstance(symbol_value, Token):
-                                        symbol = symbol_value.value
-                                    else:
-                                        symbol = str(symbol_value)
-                    
-                    if symbol:
-                        items.append(BasketItem(symbol, weight))
-        return Basket(items)
+        executor = Command.get_command(operand.data)
+        operand_result = executor.execute(CommandArgs(tree=operand, previous_output=args.previous_output))
 
-    def _apply_operation(self, left_basket, right_basket, operator) -> Basket:
-        """Apply the specified operation between two baskets."""
-        if left_basket is None:
-            return right_basket
-            
-        if operator == "+":
-            return left_basket.union(right_basket)
-        elif operator == "-":
-            return left_basket.subtract(right_basket)
-        elif operator == "&":
-            return left_basket.intersection(right_basket)
-        else:
-            raise ValueError(f"Unknown operator: {operator}") 
+        if not isinstance(args.previous_output, Output) or not isinstance(args.previous_output.data, Basket):
+            return Output(RuntimeError(f"expected 'Basket' as left input, got '{args.previous_output}"), previous_output=args.previous_output)
+        left_basket: Basket = args.previous_output.data
+
+        if not isinstance(operand_result.data, Basket):
+            return Output(RuntimeError(f"expected 'Basket' as right input, got '{operand_result.data}"), previous_output=args.previous_output)
+        right_basket: Basket = operand_result.data
+
+        result = Output(left_basket.operation(right_basket, operator), previous_output=args.previous_output)
+        return result
+
+
+    #
+    # def _process_basket_node(self, basket_node) -> Basket:
+    #     """Process a basket node into a Basket object."""
+    #     items = []
+    #     for child in basket_node.children:
+    #         if isinstance(child, Tree):
+    #             if child.data == "symbol":
+    #                 # Get the STOCK_SYMBOL token value
+    #                 symbol_token = child.children[0]
+    #                 if isinstance(symbol_token, Token):
+    #                     items.append(BasketItem(symbol_token.value, 1.0))
+    #                 elif isinstance(symbol_token, str):
+    #                     items.append(BasketItem(symbol_token, 1.0))
+    #                 elif isinstance(symbol_token, Tree):
+    #                     symbol_value = symbol_token.children[0]
+    #                     if isinstance(symbol_value, Token):
+    #                         items.append(BasketItem(symbol_value.value, 1.0))
+    #                     else:
+    #                         items.append(BasketItem(str(symbol_value), 1.0))
+    #             elif child.data == "operand":
+    #                 weight = 1.0
+    #                 symbol = None
+    #
+    #                 for operand_child in child.children:
+    #                     if isinstance(operand_child, Tree):
+    #                         if operand_child.data == "weight":
+    #                             weight = float(operand_child.children[0].value.rstrip('x'))
+    #                         elif operand_child.data == "symbol":
+    #                             symbol_token = operand_child.children[0]
+    #                             if isinstance(symbol_token, Token):
+    #                                 symbol = symbol_token.value
+    #                             elif isinstance(symbol_token, str):
+    #                                 symbol = symbol_token
+    #                             elif isinstance(symbol_token, Tree):
+    #                                 symbol_value = symbol_token.children[0]
+    #                                 if isinstance(symbol_value, Token):
+    #                                     symbol = symbol_value.value
+    #                                 else:
+    #                                     symbol = str(symbol_value)
+    #
+    #                 if symbol:
+    #                     items.append(BasketItem(symbol, weight))
+    #     return Basket(items)

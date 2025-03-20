@@ -172,7 +172,17 @@ class Basket(Entity):
         result = Basket(filtered_items, name=self.name, note=self.note)
         result.columns = self.columns.copy()
         return result
-    
+
+    def operation(self, other: 'Basket', operator: str) -> 'Basket':
+        if operator == "+":
+            return self.union(other)
+        elif operator == "-":
+            return self.subtract(other)
+        elif operator == "&":
+            return self.intersection(other)
+        else:
+            raise ValueError(f"Unknown operator: {operator}")
+
     def union(self, other: 'Basket') -> 'Basket':
         """
         Create a new basket that is the union of this basket and another.
