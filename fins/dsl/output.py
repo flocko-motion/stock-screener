@@ -63,7 +63,10 @@ class Output:
             return "void"
         else:
             return "unknown"
-            
+
+    def has_data(self):
+        return not self.is_void() and not self.has_error()
+
     def add_log(self, message: str) -> None:
         """
         Add a log message to the output.
@@ -85,6 +88,9 @@ class Output:
 
     def has_error(self) -> bool:
         return self.output_type == "error"
+
+    def is_void(self) -> bool:
+        return self.output_type == "void"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the output to a dictionary representation."""
@@ -119,4 +125,17 @@ class Output:
     def __repr__(self) -> str:
         """Return a detailed string representation."""
         return f"Output(type={self.output_type}, data={self.data}, metadata={self.metadata}, log={self.log})"
+
+    def is_type(self, output_type) -> bool:
+        if isinstance(output_type, str):
+            return self.output_type == output_type
+        return isinstance(self.data, output_type)
+
+    def assert_type(self, output_type) -> bool:
+        if not self.is_type(output_type):
+            raise TypeError(f"Expected output type '{output_type}', got '{self.output_type}'")
+        return True
+
+
+
 

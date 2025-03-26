@@ -21,21 +21,28 @@ class OperandGroupCommand(Command):
         return "basket"
     
     def execute(self, args: CommandArgs) -> Output:
+        if len(args.tree.children) == 1 and args.tree.children[0].data == "variable":
+            # the whole tree is a single variable name => store the previous output in the variable (if it exists) and return var value
+            return Output(self._process_single_variable(args.tree.children[0], args.previous_output), previous=args.previous_output)
+
+        # process all nodes in the tree to compute the operation
         items = []
         for node in args.tree.children:
             if not isinstance(node, Tree):
                 raise RuntimeError("Invalid operand group structure")
             
-            items.extend(self._process_node(node))
+            items.extend(self._process_node(node, previous_output=args.previous_output))
         
         return Output(Basket(items), previous=args.previous_output)
 
-    def _process_node(self, node: Tree) -> list[BasketItem]:
+    def _process_node(self, node: Tree, previous_output: Output) -> list[BasketItem]:
         """Process a single node and return resulting basket items."""
         if node.data == "operand":
             return self._process_operand_node(node)
-        elif node.data in ("symbol", "variable"):
+        elif node.data == "symbol":
             return self._process_direct_node(node)
+        elif node.data == "variable":
+            return self._process_variable_node(node, previous_output)
         return []
 
     def _process_operand_node(self, node: Tree) -> list[BasketItem]:
@@ -65,11 +72,42 @@ class OperandGroupCommand(Command):
         """Process a direct symbol or variable node."""
         if len(node.children) != 1:
             raise RuntimeError("Invalid node structure")
-            
-        value = node.children[0].value
-        if node.data == "symbol":
-            return [BasketItem(value, 1.0)]
-        return self._get_weighted_var_items(value, 1.0)
+
+        ticker = node.children[0].value
+        return [BasketItem(ticker, 1.0)]
+
+    def _process_variable_node(self, node: Tree, previous_output: Output | None) -> list[BasketItem]:
+        """Process a direct symbol or variable node."""
+        if len(node.children) != 1:
+            raise RuntimeError("Invalid node structure")
+
+        variable_name = node.children[0].value
+
+        if previous_output is not None:
+            if not isinstance(previous_output, Output):
+                raise RuntimeError("Expected Output as previous output")
+            self.storage.set(variable_name, previous_output)
+
+        return self.storage.get(variable_name)
+
+    def _process_single_variable(self, node: Tree, previous_output: Output | None) -> Basket:
+        """Process a direct symbol or variable node."""
+        if len(node.children) != 1:
+            raise RuntimeError("Invalid node structure")
+
+        variable_name = node.children[0].value
+
+        if (previous_output is not None) and (not previous_output.is_void()) and previous_output.assert_type(Basket):
+            self.storage.set(variable_name, previous_output.data)
+
+        val = self.storage.get(variable_name)
+        if val is None:
+            return Basket()
+        elif isinstance(val, Basket):
+            return val
+        else:
+            raise RuntimeError("Expected Basket as variable value")
+
 
     def _parse_weight(self, weight_str: str) -> float:
         """Parse weight string into float value."""
