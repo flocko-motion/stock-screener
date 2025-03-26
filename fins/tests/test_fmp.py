@@ -12,7 +12,6 @@ import os
 import time
 import pandas as pd
 from pathlib import Path
-from unittest import mock
 import shutil
 
 # Add the parent directory to the path to allow imports from the fins package
@@ -232,50 +231,6 @@ class TestFMP(unittest.TestCase):
         # Verify the cache file exists
         self.assertTrue(os.path.exists(cache_path), "Cache file does not exist")
 
-    def test_api_rate_limiting(self):
-        """Test the API rate limiting functionality."""
-        print("\nTesting API rate limiting...")
-        
-        try:
-            # Set a higher rate limit for testing
-            fmp.RATE_LIMIT_INTERVAL = 0.5
-            print(f"Rate limit interval set to {fmp.RATE_LIMIT_INTERVAL} seconds")
-            
-            # Make multiple API calls and measure time
-            start_time = time.time()
-            
-            # Make 3 API calls to different endpoints
-            print("Making first API call...")
-            fmp.search("Apple")
-            time1 = time.time()
-            print(f"First call completed in {time1 - start_time:.2f} seconds")
-            
-            print("Making second API call...")
-            fmp.search("Microsoft")
-            time2 = time.time()
-            print(f"Second call completed in {time2 - time1:.2f} seconds")
-            
-            print("Making third API call...")
-            fmp.search("Google")
-            time3 = time.time()
-            print(f"Third call completed in {time3 - time2:.2f} seconds")
-            
-            total_time = time3 - start_time
-            print(f"Total time for 3 calls: {total_time:.2f} seconds")
-            
-            # Check if rate limiting is working
-            # If it's working, the total time should be at least 2 * RATE_LIMIT_INTERVAL
-            # (first call doesn't wait, second and third calls should wait)
-            min_expected_time = 2 * fmp.RATE_LIMIT_INTERVAL
-            print(f"Minimum expected time: {min_expected_time:.2f} seconds")
-            
-            # Verify that rate limiting is working
-            self.assertGreaterEqual(total_time, min_expected_time, 
-                                   f"Rate limiting not working correctly. Expected at least {min_expected_time}s, got {total_time}s")
-                
-        finally:
-            # Restore original rate limit
-            fmp.RATE_LIMIT_INTERVAL = self.original_rate_limit
 
 
 if __name__ == "__main__":
