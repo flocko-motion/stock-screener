@@ -52,15 +52,22 @@ class OperandGroupCommand(Command):
         var_name = None
         
         for child in node.children:
-            if not isinstance(child, Tree):
-                continue
-                
-            if child.data == "weight":
-                weight = self._parse_weight(child.children[0].value)
-            elif child.data == "symbol":
-                symbol = child.children[0].value
-            elif child.data == "variable":
-                var_name = child.children[0].value
+            if isinstance(child, Token):
+                token: Token = child
+                if token.type == "WEIGHT":
+                    weight = self._parse_weight(token.value)
+                else:
+                    raise RuntimeError(f"Unexpected token {token}")
+            elif isinstance(child, Tree):
+                tree: Tree = child
+                if tree.data == "weight":
+                    weight = self._parse_weight(tree.children[0].value)
+                elif tree.data == "symbol":
+                    symbol = tree.children[0].value
+                elif tree.data == "variable":
+                    var_name = tree.children[0].value
+                else:
+                    raise RuntimeError(f"Unexpected tree {tree}")
         
         if symbol:
             return [BasketItem(symbol, weight)]

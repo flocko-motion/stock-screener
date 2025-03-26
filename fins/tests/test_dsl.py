@@ -124,6 +124,13 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
 
+    def test_simple_weighted_basket_creation(self):
+        output = self.execute_flow("3x AAPL 2 MSFT 1.7111x GOOGL AMZN 1.25723 NFLX")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 3, "MSFT": 2, "GOOGL": 1.7111, "AMZN": 1, "NFLX": 1.25723})
+
     def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL")
         
@@ -253,7 +260,7 @@ class BasicFlowTests(DslTests):
 
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "NFLX": 1})
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 3, "NFLX": 2.1, "GOOG": 7, "AMZN": 1, "TPL": 0.002, "V": 2})
 
 
 class ColumnCommandTests(DslTests):
