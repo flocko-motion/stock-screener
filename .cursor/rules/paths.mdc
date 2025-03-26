@@ -8,4 +8,8 @@ For now you can ignore all code outside the "/r/priv/stock-screener/fins/" direc
 
 To run the CLI application use 'fins' in 'fins/'. That's the normative runner.
 
+Example run command:
+./fins -c "AAPL + MSFT + 7x GOOG"
 
+Architecture: 
+Dependencies follow a DAG. On the root are the entities. DSL and its operators build on top of entities. Formatters build on top of entities. Clients (e.g. CLI or API) build on top of formatters and DSL.

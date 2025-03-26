@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from fins.dsl import FinsParser
 from fins.dsl.output import Output
 from fins.storage import Storage
+from fins.formatting.formatters import TextBasketFormatter
 
 
 def setup_storage_path() -> Path:
@@ -122,8 +123,9 @@ def format_output(output: Output, json_output: bool = False) -> str:
     elif output.output_type == "void":
         return ""
     elif output.output_type == "basket":
-        # Format basket data with metadata
-        result = str(output.data)
+        # Format basket data with metadata using the text formatter
+        formatter = TextBasketFormatter()
+        result = formatter.format(output.data)
         if output.metadata:
             result += f"\nMetadata: {output.metadata}"
         return result

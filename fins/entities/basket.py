@@ -47,7 +47,7 @@ class Basket(Entity):
             return ""
             
         # Simple text representation preserving order
-        return "\n".join(f"{item.amount:g}x {item.ticker}" for item in self.items)
+        return "\n".join(f"{item.amount:g}x {item.ticker}" for item in sorted(self.items, key=lambda x: (-x.amount, x.ticker)))
     
     def __len__(self) -> int:
         """Return the number of items in the basket."""

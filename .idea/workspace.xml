@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: CLI app now executes">
+      <change afterPath="$PROJECT_DIR$/fins/fins" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fins/formatting/formatters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/cli.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
@@ -59,9 +61,11 @@
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor": "Run",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
     "Python tests.pytest in test_cache.py.executor": "Run",
+    "Python tests.pytest in test_dsl.py.executor": "Run",
     "Python tests.pytest in test_fmp.py.executor": "Run",
     "Python tests.pytest in test_watchdog.py.executor": "Run",
     "Python tests.pytest in tests.executor": "Run",
@@ -83,7 +87,7 @@
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
   </component>
-  <component name="RunManager" selected="Python tests.pytest in tests">
+  <component name="RunManager" selected="Python tests.pytest in test_dsl.py">
     <configuration name="cli" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -123,7 +127,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_cache.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for tests.test_dsl.BasicFlowTests" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -137,17 +141,17 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/fins/tests/test_cache.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_fmp.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest in test_dsl.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -155,7 +159,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/fins/tests/test_fmp.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/fins/tests/test_dsl.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
@@ -198,18 +202,18 @@
     <list>
       <item itemvalue="Python.cli" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
-      <item itemvalue="Python tests.pytest in test_cache.py" />
-      <item itemvalue="Python tests.pytest in test_fmp.py" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests" />
+      <item itemvalue="Python tests.pytest in test_dsl.py" />
       <item itemvalue="Python tests.pytest in test_watchdog.py" />
       <item itemvalue="Python tests.pytest in tests" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest in test_dsl.py" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests" />
         <item itemvalue="Python tests.pytest in tests" />
         <item itemvalue="Python.cli" />
         <item itemvalue="Python tests.pytest in test_watchdog.py" />
-        <item itemvalue="Python tests.pytest in test_cache.py" />
-        <item itemvalue="Python tests.pytest in test_fmp.py" />
       </list>
     </recent_temporary>
   </component>
@@ -236,7 +240,7 @@
       <workItem from="1742413431740" duration="5348000" />
       <workItem from="1742459361416" duration="5787000" />
       <workItem from="1743019444229" duration="4087000" />
-      <workItem from="1743023628818" duration="2274000" />
+      <workItem from="1743023628818" duration="2588000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -579,12 +583,14 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_cache_py.coverage" NAME="pytest in test_cache.py Coverage Results" MODIFIED="1743024501480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1743019503676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_operation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation Coverage Results" MODIFIED="1743024206573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1743027274302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743024214691" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1743024422441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_create_simple_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket Coverage Results" MODIFIED="1742368419860" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742287209103" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1743022526200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743027268739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_overlapping_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket Coverage Results" MODIFIED="1743019510299" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$command.coverage" NAME="command Coverage Results" MODIFIED="1742285005110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/dsl/commands" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_duplicate_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket Coverage Results" MODIFIED="1743019506785" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
