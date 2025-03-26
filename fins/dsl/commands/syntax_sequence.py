@@ -31,26 +31,38 @@ class SequenceCommand(Command):
         # Process operand groups and operators
         i = 0
         while i < len(sequence_tree.children):
-            node = sequence_tree.children[i]
-            if not isinstance(node, Tree):
-                i += 1
+            node: Tree | Token = sequence_tree.children[i]
+            if isinstance(node, Token):
+                token = node
+                if token.type == "OPERATOR":
+                    # Get the next operand group and skip it in the next iteration
+                    next_node = sequence_tree.children[i + 1] if i + 1 < len(sequence_tree.children) else None
+                    result_basket = self._process_operator(token.value, next_node, result_basket)
+                    i += 2  # Skip the next node since we processed it
+                else:
+                    raise RuntimeError(f"Unexpected token {token}")
                 continue
                 
-            if node.data == "operand_group":
-                result_basket = self._process_operand_group(node, result_basket)
-                i += 1
-            elif node.data == "OPERATOR":
-                # Get the next operand group and skip it in the next iteration
-                next_node = sequence_tree.children[i + 1] if i + 1 < len(sequence_tree.children) else None
-                result_basket = self._process_operator(node, next_node, result_basket)
-                i += 2  # Skip the next node since we processed it
-            else:
-                i += 1
+            elif isinstance(node, Tree):
+                tree = node
+                if tree.data == "OPERATOR":
+                    # Get the next operand group and skip it in the next iteration
+                    next_node = sequence_tree.children[i + 1] if i + 1 < len(sequence_tree.children) else None
+                    result_basket = self._process_operator(tree.data, next_node, result_basket)
+                    i += 2  # Skip the next node since we processed it
+                elif tree.data == "operand_group":
+                    result_basket = self._process_operand_group(tree, result_basket)
+                    i += 1
+                else:
+                    i += 1
+                continue
+
+            raise RuntimeError(f"Unexpected node {node}")
         
         if result_basket is None:
             result_basket = Basket([])
             
-        return Output(result_basket, output_type="basket")
+        return Output(result_basket, previous=args.previous_output)
 
     def _find_existing_basket(self, sequence_tree: Tree) -> Basket:
         """Find any existing basket from the pipeline."""
@@ -109,12 +121,11 @@ class SequenceCommand(Command):
             return operand_output.data
         return result_basket.union(operand_output.data)
 
-    def _process_operator(self, operator_node: Tree, next_node: Tree, result_basket: Basket) -> Basket:
+    def _process_operator(self, operator: str, next_node: Tree, result_basket: Basket) -> Basket:
         """Process an operator and its following operand group."""
         if not next_node or next_node.data != "operand_group" or result_basket is None:
             return result_basket
 
-        operator = operator_node.value
         operand_output = self._execute_subcommand("operand_group", next_node)
         
         operations = {
