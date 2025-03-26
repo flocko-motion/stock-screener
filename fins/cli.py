@@ -9,6 +9,8 @@ import argparse
 from pathlib import Path
 from typing import Tuple, Any, List, Optional
 import os
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
 
 # Add the parent directory to the path to allow imports from the fins package
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -29,6 +31,19 @@ def setup_storage_path() -> Path:
     storage_path = Path.home() / ".fins" / "persistence"
     storage_path.mkdir(parents=True, exist_ok=True)
     return storage_path
+
+
+def setup_history_file() -> Path:
+    """
+    Set up the command history file at ~/.fins/history.
+    Creates the directory if it doesn't exist.
+    
+    Returns:
+        Path: The history file path
+    """
+    history_dir = Path.home() / ".fins"
+    history_dir.mkdir(parents=True, exist_ok=True)
+    return history_dir / "history"
 
 
 def main():
@@ -128,9 +143,14 @@ def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> 
         int: Exit code (0 for success)
     """
     print(f"FINS Interactive Mode. Type 'exit' or 'quit' to exit.")
+    
+    # Set up prompt session with history
+    history_file = setup_history_file()
+    session = PromptSession(history=FileHistory(str(history_file)))
+    
     while True:
         try:
-            command = input("fins> ")
+            command = session.prompt("fins> ")
             if command.lower() in ("exit", "quit"):
                 break
             if not command.strip():
@@ -140,6 +160,8 @@ def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> 
             print(format_output(result, json_output))
         except KeyboardInterrupt:
             print("\nExiting...")
+            break
+        except EOFError:
             break
         except Exception as e:
             print(f"Error: {e}")

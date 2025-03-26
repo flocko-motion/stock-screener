@@ -5,7 +5,7 @@ This module defines the Basket class, which represents a collection of financial
 with associated data and analysis columns.
 """
 
-from typing import Any, Optional, Iterator
+from typing import Any, Optional, Iterator, Dict
 import pandas as pd
 
 from .entity import Entity
@@ -19,7 +19,7 @@ class Basket(Entity):
     
     Attributes:
         name (Optional[str]): The name of the basket
-        items (List[BasketItem]): The items in the basket
+        items (List[BasketItem]): The items in the basket, order is significant and preserved
         columns (Dict[str, Column]): The analysis columns associated with the basket
         data (pd.DataFrame): The data frame containing symbol data and analysis results
         note (str): A free text note associated with the basket
@@ -30,7 +30,7 @@ class Basket(Entity):
         Initialize a basket.
 
         Args:
-            items: The items in the basket
+            items: The items in the basket (order will be preserved)
             name: The name of the basket
             note: A free text note associated with the basket
         """
@@ -43,23 +43,11 @@ class Basket(Entity):
 
     def __str__(self) -> str:
         """Return the string representation of the basket."""
-        out = ""
-        if all(item.amount == 1 for item in self.items):
-            sorted_items = sorted(self.items, key=lambda item: item.ticker)
-            for item in sorted_items:
-                try:
-                    out += f"{item.ticker:<14}\n"
-                except Exception as e:
-                    return f"error formatting item {item}: {e}"
-        else:
-            sorted_items = sorted(self.items, key=lambda item: item.amount, reverse=True)
-            for item in sorted_items:
-                try:
-                    out += f"{item.amount:>10.2f}  {item.ticker:<14}\n"
-                except Exception as e:
-                    return f"error formatting item {item}: {e}"
-        
-        return out
+        if not self.items:
+            return ""
+            
+        # Simple text representation preserving order
+        return "\n".join(f"{item.amount:g}x {item.ticker}" for item in self.items)
     
     def __len__(self) -> int:
         """Return the number of items in the basket."""
@@ -117,62 +105,6 @@ class Basket(Entity):
         """
         return self.columns.get(name)
 
-    
-    def sort_by(self, attribute: str, ascending: bool = True) -> 'Basket':
-        """
-        Sort the basket by a specific attribute.
-        
-        Args:
-            attribute: The attribute to sort by
-            ascending: Whether to sort in ascending order
-            
-        Returns:
-            A new basket with the sorted items
-        """
-        sorted_items = sorted(
-            self.items,
-            key=lambda item: item.ticker.get_data(attribute, 0),
-            reverse=not ascending
-        )
-        
-        result = Basket(sorted_items, name=self.name, note=self.note)
-        result.columns = self.columns.copy()
-        return result
-    
-    def filter_by(self, attribute: str, operator: str, value: Any) -> 'Basket':
-        """
-        Filter the basket by a specific attribute.
-        
-        Args:
-            attribute: The attribute to filter by
-            operator: The comparison operator ('>', '<', '>=', '<=', '==', '!=')
-            value: The value to compare against
-            
-        Returns:
-            A new basket with the filtered items
-        """
-        operators = {
-            '>': lambda a, b: a > b,
-            '<': lambda a, b: a < b,
-            '>=': lambda a, b: a >= b,
-            '<=': lambda a, b: a <= b,
-            '==': lambda a, b: a == b,
-            '!=': lambda a, b: a != b
-        }
-        
-        if operator not in operators:
-            raise ValueError(f"Invalid operator: {operator}")
-        
-        compare = operators[operator]
-        filtered_items = [
-            item for item in self.items 
-            if item.symbol.get_data(attribute) is not None and compare(item.symbol.get_data(attribute), value)
-        ]
-        
-        result = Basket(filtered_items, name=self.name, note=self.note)
-        result.columns = self.columns.copy()
-        return result
-
     def operation(self, other: 'Basket', operator: str) -> 'Basket':
         if operator == "+":
             return self.union(other)
@@ -228,15 +160,12 @@ class Basket(Entity):
         other_symbols = {item.ticker for item in other.items}
         common_symbols = this_symbols.intersection(other_symbols)
         
-        # Add items for common symbols
-        for symbol in common_symbols:
-            # Find the item in this basket
-            this_item = next(item for item in self.items if item.ticker == symbol)
-            # Find the item in the other basket
-            other_item = next(item for item in other.items if item.ticker == symbol)
-            # Use the minimum quantity
-            quantity = min(this_item.amount, other_item.amount)
-            result.add_item(BasketItem(symbol, quantity))
+        # Add items for common symbols in this basket's order
+        for item in self.items:
+            if item.ticker in common_symbols:
+                other_item = next(i for i in other.items if i.ticker == item.ticker)
+                quantity = min(item.amount, other_item.amount)
+                result.add_item(BasketItem(item.ticker, quantity))
         
         # Include columns from both baskets
         result.columns = self.columns.copy()
@@ -258,16 +187,11 @@ class Basket(Entity):
         """
         result = Basket(name=self.name, note=self.note)
         
-        # Find symbols that are in this basket but not in the other
-        this_symbols = {item.ticker for item in self.items}
+        # Add items that aren't in other basket, preserving this basket's order
         other_symbols = {item.ticker for item in other.items}
-        diff_symbols = this_symbols - other_symbols
-        
-        # Add items for different symbols
-        for symbol in diff_symbols:
-            # Find the item in this basket
-            this_item = next(item for item in self.items if item.ticker == symbol)
-            result.add_item(BasketItem(symbol, this_item.amount))
+        for item in self.items:
+            if item.ticker not in other_symbols:
+                result.add_item(BasketItem(item.ticker, item.amount))
         
         # Include columns from this basket
         result.columns = self.columns.copy()
