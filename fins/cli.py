@@ -8,12 +8,27 @@ import sys
 import argparse
 from pathlib import Path
 from typing import Tuple, Any, List, Optional
+import os
 
 # Add the parent directory to the path to allow imports from the fins package
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fins.dsl import FinsParser
 from fins.dsl.output import Output
+from fins.storage import Storage
+
+
+def setup_storage_path() -> Path:
+    """
+    Set up the default storage path at ~/.fins/persistence.
+    Creates the directory if it doesn't exist.
+    
+    Returns:
+        Path: The storage directory path
+    """
+    storage_path = Path.home() / ".fins" / "persistence"
+    storage_path.mkdir(parents=True, exist_ok=True)
+    return storage_path
 
 
 def main():
@@ -25,18 +40,12 @@ def main():
         description="FINS: Financial Insights and Notation System"
     )
     parser.add_argument(
-        "command", 
-        nargs="?", 
-        help="FINS command to execute (e.g., 'AAPL MSFT -> sort mcap desc')"
+        "-c", "--command",
+        help="Execute a single FINS command (e.g., 'AAPL MSFT -> sort mcap desc')"
     )
     parser.add_argument(
         "-f", "--file", 
         help="Execute commands from a file"
-    )
-    parser.add_argument(
-        "-i", "--interactive", 
-        action="store_true", 
-        help="Start interactive mode"
     )
     parser.add_argument(
         "-v", "--version", 
@@ -48,6 +57,11 @@ def main():
         action="store_true",
         help="Output results in JSON format"
     )
+    parser.add_argument(
+        "--storage",
+        help="Custom storage path (default: ~/.fins/persistence)",
+        type=Path
+    )
 
     args = parser.parse_args()
 
@@ -58,19 +72,20 @@ def main():
         print(f"FINS version {__version__}")
         return 0
 
-    fins_parser = FinsParser()
+    # Set up storage path and create Storage instance
+    storage_path = args.storage if args.storage else setup_storage_path()
+    storage = Storage(storage_path)
+    fins_parser = FinsParser(storage)
 
-    if args.interactive:
-        run_interactive_mode(fins_parser, json_output=args.json)
+    if args.command:
+        exit_code, _ = run_command_mode(args.command, fins_parser, json_output=args.json)
+        return exit_code
     elif args.file:
         exit_code, _ = run_file_mode(args.file, fins_parser, json_output=args.json)
         return exit_code
-    elif args.command:
-        exit_code, _ = run_command_mode(args.command, fins_parser, json_output=args.json)
-        return exit_code
     else:
-        parser.print_help()
-        return 1
+        # Interactive mode is now the default
+        return run_interactive_mode(fins_parser, json_output=args.json)
 
 
 def format_output(output: Output, json_output: bool = False) -> str:
@@ -165,19 +180,26 @@ def run_file_mode(file_path: str, fins_parser: FinsParser, json_output: bool = F
         return 1, [error]
 
 
-def run_command_mode(command: str, fins_parser: FinsParser) -> Output:
+def run_command_mode(command: str, fins_parser: FinsParser, json_output: bool = False) -> Tuple[int, Output]:
     """
     Execute a single FINS command.
     
     Args:
         command: FINS command to execute
         fins_parser: An instance of FinsParser
+        json_output: Whether to output in JSON format
 
     Returns:
-        Output wrapper object that contains result object and runtime info (logs)
+        tuple: (exit_code, result) where exit_code is 0 for success, non-zero for failure
     """
-    result: Output = fins_parser.parse(command)
-    return result
+    try:
+        result = fins_parser.parse(command)
+        print(format_output(result, json_output))
+        return 0, result
+    except Exception as e:
+        error = Output(e, output_type="error")
+        print(format_output(error, json_output))
+        return 1, error
 
 
 if __name__ == "__main__":
