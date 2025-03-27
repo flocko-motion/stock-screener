@@ -4,10 +4,11 @@ Parser for FINS (Financial Insights Script)
 
 import os
 import traceback
+from typing import Type, Dict
 from lark import Lark, Tree
 
 from ..storage import Storage
-from fins.entities import Basket
+from fins.entities import Basket, Column, Entity
 from .output import Output
 from .commands.command import Command, CommandArgs
 
@@ -22,6 +23,33 @@ with open(grammar_file, "r") as f:
 # Initialize the parser using Earley
 parser = Lark(grammar, parser='earley')
 
+class ColumnCommand(Command):
+    """Base command for all column functions."""
+    
+    def __init__(self, column_class: Type[Column]):
+        """Initialize with column class."""
+        super().__init__()
+        self.column_class = column_class
+        
+    @property
+    def input_type(self) -> Type[Entity]:
+        return Basket
+        
+    @property
+    def output_type(self) -> Type[Entity]:
+        return Basket
+        
+    def execute(self, args: CommandArgs) -> Output:
+        """Execute by creating and adding column."""
+        self.validate_input(args)
+        basket = args.effective_input
+        
+        # Create column instance
+        column = self.column_class()
+        basket.add_column(column)
+        
+        return Output(basket)
+
 class FinsParser:
     """
     FINS Parser class that provides a high-level interface for parsing FINS commands.
@@ -31,6 +59,14 @@ class FinsParser:
     def __init__(self, storage: Storage):
         """Initialize the parser with storage for commands."""
         Command.initialize_all(storage)
+        self._register_column_commands()
+        
+    def _register_column_commands(self):
+        """Register all column classes as commands."""
+        for col_class in Column.list():
+            name = str(col_class())  # Get default name from instance
+            cmd = ColumnCommand(col_class)
+            Command.register(name, cmd)
 
     def parse(self, flow: str) -> Output:
         """Parse and execute a FINS command or command chain."""

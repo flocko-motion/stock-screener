@@ -1,5 +1,5 @@
 // FINS grammar
-?start: command_chain | function_definition
+?start: command_chain | function_definition | help_command
 
 command_chain: command ("->" command)*
 
@@ -8,13 +8,28 @@ command_chain: command ("->" command)*
         | sequence
         | column_command
         | info_command
-        | lock_command
-        | unlock_command
         | operation_command
+        | drop_command
 
-// Basic commands
-sort_command: "sort" ATTRIBUTE ORDER
-filter_command: ATTRIBUTE COMPARISON_OPERATOR NUMBER
+// Help system
+help_command: "?" [help_topic]
+help_topic: NAME | "." NAME | "." | "*" | "operators" | "syntax" | "functions" | "persistence" | "variables"
+
+// Column operations
+column_command: [column_assignment] column_function
+column_assignment: "." NAME "=" WS*
+column_function: "." NAME "(" [arg_list] ")"
+drop_command: "drop" "(" column_ref ("," WS* column_ref)* ")"
+
+// Operation commands (like sort)
+sort_command: "sort" "(" column_ref ("," WS* named_arg)* ")"
+filter_command: "filter" "(" column_ref ("," WS* named_arg)* ")"
+
+// Arguments
+arg_list: named_arg ("," WS* named_arg)*
+named_arg: NAME "=" value
+value: NUMBER | STRING | NAME | column_ref
+column_ref: "." NAME
 
 // Operation command (for pipeline operations)
 operation_command: OPERATOR operand_group
@@ -31,37 +46,15 @@ symbol: STOCK_SYMBOL | ETF_SYMBOL | INDEX_SYMBOL
 // Operators
 OPERATOR: "+" | "-" | "&"
 
-// Column addition
-column_command: [column_name] column_type [time_range] [period]
-column_name: "|" NAME
-column_type: "cagr" | "dividend" | "pe" | NAME
-time_range: "[" YEAR ":" YEAR "]"
-period: /[0-9]+[ymd]/
-
-// Info command
-info_command: ":" (symbol | variable)
-
-// Function definition
-function_definition: "DEFINE" FUNCTION_VARIABLE "=" STRING
-
 // Terminal symbols
 STOCK_SYMBOL: /[A-Z][A-Z0-9]*/
 ETF_SYMBOL: /[A-Z][A-Z0-9]*/
 INDEX_SYMBOL: /\^[A-Z][A-Z0-9]*/
 VARIABLE: /[\$\/][a-zA-Z0-9_\/]+/
 WEIGHT: /[0-9]+(\.[0-9]+)?x?/
-ATTRIBUTE: /[a-z_]+/
-ORDER: "asc" | "desc"
-COMPARISON_OPERATOR: ">" | "<" | ">=" | "<=" | "==" | "!="
-NUMBER: /[0-9]+(\.[0-9]+)?[KMBT]?/
-YEAR: /[0-9]{4}/
-NAME: /[a-zA-Z_][a-zA-Z0-9_]*/
-FUNCTION_VARIABLE: /[a-zA-Z_][a-zA-Z0-9_]*/
+NUMBER: /[0-9]+(\.[0-9]+)?[KMBT%]?/
 STRING: /"[^"]*"/
-
-// Variable management
-lock_command: "lock" VARIABLE
-unlock_command: "unlock" VARIABLE
+NAME: /[a-zA-Z_][a-zA-Z0-9_]*/
 
 // Ignore whitespace and comments
 %ignore /[ \t\f\r\n]+/

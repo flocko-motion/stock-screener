@@ -1,101 +1,139 @@
 """
 Column Entity
 
-This module defines the Column class, which represents an analysis column in a basket.
+Base class for all column types in FINS.
 """
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, List, Callable
-from .entity import Entity
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Type, ClassVar
+import inspect
+import importlib
+import pkgutil
+from pathlib import Path
 
 
-@dataclass
-class Column(Entity):
-    """
-    Represents an analysis column in a basket.
-    
-    Attributes:
-        name (str): The name of the column
-        column_type (str): The type of column (e.g., 'cagr', 'pe', 'dividend_yield')
-        start_year (Optional[int]): The start year for time-based columns
-        end_year (Optional[int]): The end year for time-based columns
-        period (Optional[str]): The period for time-based columns (e.g., 'annual', 'quarterly')
-        data_source (Optional[str]): The source of the data
-        calculator (Optional[Callable]): A function to calculate the column values
-        metadata (Dict[str, Any]): Additional metadata for the column
-    """
-    
-    name: str
-    column_type: str
-    start_year: Optional[int] = None
-    end_year: Optional[int] = None
-    period: Optional[str] = None
-    data_source: Optional[str] = None
-    calculator: Optional[Callable] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
+class Column(ABC):
+    """Base class for all column types."""
+
+    # Class-level registry of all column types
+    _registry: ClassVar[Dict[str, Type['Column']]] = {}
+
+    @classmethod
+    def register(cls, column_class: Type['Column']) -> None:
+        """Register a column type."""
+        name = str(column_class())  # Use the __str__ representation as key
+        cls._registry[name] = column_class
+
+    @classmethod
+    def get(cls, name: str) -> Type['Column']:
+        """Get a column type by name."""
+        if name not in cls._registry:
+            raise ValueError(f"Unknown column type: {name}")
+        return cls._registry[name]
+
+    @classmethod
+    def list(cls) -> list[Type['Column']]:
+        """Get all available column types, sorted by name."""
+        return sorted(cls._registry.values(), key=lambda c: str(c()))
+
+    @classmethod
+    def scan(cls) -> None:
+        """
+        Scan the columns directory for Column subclasses and register them.
+        This is called automatically when the module is imported.
+        """
+        # Get the directory containing column implementations
+        columns_dir = Path(__file__).parent / 'columns'
+        
+        # Import all modules in the columns directory
+        for module_info in pkgutil.iter_modules([str(columns_dir)]):
+            if not module_info.name.startswith('_'):  # Skip __init__ etc
+                module = importlib.import_module(f'..columns.{module_info.name}', __package__)
+                
+                # Find and register Column subclasses
+                for item_name in dir(module):
+                    item = getattr(module, item_name)
+                    if (isinstance(item, type) and 
+                        issubclass(item, Column) and 
+                        item != Column):
+                        cls.register(item)
+
+    @abstractmethod
+    def value(self, ticker: str) -> Any:
+        """
+        Get the column value for a ticker.
+        Must be implemented by each column type.
+        
+        The actual data fetching/symbol resolution happens in a deeper layer.
+        """
+        pass
+
     def __str__(self) -> str:
-        """Return the string representation of the column."""
-        if self.start_year and self.end_year:
-            return f"{self.name} ({self.column_type} {self.start_year}-{self.end_year})"
-        return f"{self.name} ({self.column_type})"
-    
-    def calculate(self, symbol_data: Dict[str, Any]) -> Any:
+        """String representation of the column."""
+        return self.__class__.__name__.lower().replace('column', '')
+
+    @classmethod
+    def help(cls) -> Dict[str, Any]:
         """
-        Calculate the column value for a symbol.
+        Get column usage information through reflection.
+        Returns dict with name, description, parameters and their types.
+        """
+        sig = inspect.signature(cls.__init__)
+        doc = inspect.getdoc(cls)
         
-        Args:
-            symbol_data: The data for the symbol
-            
-        Returns:
-            The calculated value
-        """
-        if self.calculator:
-            return self.calculator(symbol_data, self)
-        return None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the column to a dictionary.
-        
-        Returns:
-            A dictionary representation of the column
-        """
-        result = {
-            'name': self.name,
-            'type': self.column_type
+        # Get parameter info from constructor
+        params = {
+            name: {
+                'type': param.annotation,
+                'default': param.default if param.default != param.empty else None,
+                'required': param.default == param.empty
+            }
+            for name, param in sig.parameters.items()
+            if name != 'self'
         }
         
-        if self.start_year:
-            result['start_year'] = self.start_year
-        if self.end_year:
-            result['end_year'] = self.end_year
-        if self.period:
-            result['period'] = self.period
-        if self.data_source:
-            result['data_source'] = self.data_source
-        if self.metadata:
-            result['metadata'] = self.metadata
+        # Extract parameter docs from constructor docstring
+        if cls.__init__.__doc__:
+            param_docs = {}
+            current_param = None
+            for line in cls.__init__.__doc__.split('\n'):
+                if ':param' in line:
+                    current_param = line.split(':param')[1].split(':')[0].strip()
+                    param_docs[current_param] = line.split(':', 2)[2].strip()
+                elif current_param and line.strip():
+                    param_docs[current_param] += ' ' + line.strip()
             
-        return result
-    
+            # Add docs to params
+            for name, param_doc in param_docs.items():
+                if name in params:
+                    params[name]['doc'] = param_doc
+
+        return {
+            'name': str(cls()),  # Use __str__ to get name
+            'description': doc,
+            'parameters': params
+        }
+
+    def __init__(self, alias: str = None):
+        """Initialize column with optional alias."""
+        self._alias = alias
+
+    def alias(self) -> str:
+        """Get column name/alias."""
+        return self._alias or str(self)
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary."""
+        return {
+            "class": self.__class__.__name__,
+            "alias": self._alias
+        }
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Column':
-        """
-        Create a column from a dictionary.
-        
-        Args:
-            data: The dictionary containing column data
-            
-        Returns:
-            A new Column instance
-        """
-        return cls(
-            name=data.get('name'),
-            column_type=data.get('type'),
-            start_year=data.get('start_year'),
-            end_year=data.get('end_year'),
-            period=data.get('period'),
-            data_source=data.get('data_source'),
-            metadata=data.get('metadata', {})
-        ) 
+    def from_dict(cls, data: dict) -> 'Column':
+        """Create from dictionary."""
+        return cls(alias=data.get('alias'))
+
+
+# Scan for column implementations when this module is imported
+Column.scan() 
