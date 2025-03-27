@@ -3,10 +3,12 @@ description:
 globs: 
 alwaysApply: true
 ---
+Paths:
 This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root - full path: /r/priv/stock-screener/fins/ 
 For now you can ignore all code outside the "/r/priv/stock-screener/fins/" directory tree.
 
-To run the CLI application use 'fins' in 'fins/'. That's the normative runner.
+Before executing anything, make sure to be in the project root /r/priv/stock-screener/fins/
+To run the CLI application use 'fins' in '/r/priv/stock-screener/fins/'. That's the normative runner.
 
 Example run command:
 ./fins -c "AAPL + MSFT + 7x GOOG"
