@@ -12,6 +12,9 @@ from fins.entities import Basket, Column, Entity
 from .output import Output
 from .commands.command import Command, CommandArgs
 from .commands.column import ColumnCommand
+from .commands.operator_union import UnionCommand
+from .commands.operator_difference import DifferenceCommand
+from .commands.operator_intersection import IntersectionCommand
 
 # Import commands to trigger registration
 from . import commands
@@ -35,13 +38,19 @@ class FinsParser:
         """Initialize the parser with storage for commands."""
         Command.initialize_all(storage)
         self._register_column_commands()
+        self._register_operator_commands()
         
     def _register_column_commands(self):
         """Register all column classes as commands."""
         for col_class in Column.list():
             name = str(col_class())  # Get default name from instance
-            cmd = ColumnCommand(col_class)
-            Command.register_command(name, cmd)
+            Command.register_command(name, ColumnCommand)  # Register the class, not an instance
+            
+    def _register_operator_commands(self):
+        """Register operator commands."""
+        Command.register_command("+", UnionCommand)  # Register the class, not an instance
+        Command.register_command("-", DifferenceCommand)
+        Command.register_command("&", IntersectionCommand)
 
     def parse(self, flow: str) -> Output:
         """Parse and execute a FINS command or command chain."""

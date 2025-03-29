@@ -137,7 +137,7 @@ class Column(ABC):
             "class": self.__class__.__name__,
             "alias": self._alias
         }
-
+    
     @classmethod
     def from_dict(cls, data: dict) -> 'Column':
         """Create from dictionary."""
