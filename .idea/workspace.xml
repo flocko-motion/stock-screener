@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: basic formatter for CLI">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now">
+      <change beforePath="$PROJECT_DIR$/.cursor/rules/paths.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/paths.mdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.cursor/rules/target-audience.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/target-audience.mdc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/commands/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/parser.lark" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.lark" afterDir="false" />
@@ -253,7 +255,7 @@
       <workItem from="1743023628818" duration="3430000" />
       <workItem from="1743063858209" duration="603000" />
       <workItem from="1743105515593" duration="1816000" />
-      <workItem from="1743249200413" duration="2831000" />
+      <workItem from="1743249200413" duration="3315000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -518,7 +520,8 @@
     <MESSAGE value="fix: BasicFlowTests work" />
     <MESSAGE value="fix: CLI app now executes" />
     <MESSAGE value="feat: basic formatter for CLI" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: basic formatter for CLI" />
+    <MESSAGE value="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -618,7 +621,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1743022534623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743252839735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743253209867" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1743026944377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

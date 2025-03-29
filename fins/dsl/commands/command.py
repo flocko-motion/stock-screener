@@ -216,3 +216,8 @@ class Command(ABC):
         handler = self.get_command(command_type)
         return handler.execute(CommandArgs(tree=tree, previous_output=None))
         
+    @classmethod
+    def register_command(cls, name: str, command: 'Command') -> None:
+        """Register a command with the given name."""
+        cls._registry[name] = command
+        
