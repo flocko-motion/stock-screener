@@ -78,7 +78,9 @@ class Command(ABC):
 
     @classmethod
     def get_command(cls, command_type: str) -> 'Command':
-        """Get or create a command instance for the given type."""
+        if not isinstance(command_type, str):
+            raise ValueError(f"command_type must be a string, not {type(command_type)}")
+
         if command_type not in cls._instances:
             if command_type not in cls._registry:
                 raise SyntaxError(f"Unknown command type: {command_type}")

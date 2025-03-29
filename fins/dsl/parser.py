@@ -4,7 +4,7 @@ Parser for FINS (Financial Insights Script)
 
 import os
 import traceback
-from lark import Lark, Tree
+from lark import Lark, Tree, Token
 
 from fins.dsl import Output
 from fins.storage import Storage
@@ -37,8 +37,12 @@ class FinsParser:
         """Parse and execute a FINS command or command chain."""
         try:
             tree: Tree = parser.parse(flow)
-            executor = Command.get_command(tree.data)
-            return executor.execute(CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage))
+            if not isinstance(tree.data, Token):
+                raise SyntaxError(f"Invalid command structure, expected Token but got {tree.data}")
+            command_name = str(tree.data)
+            command = Command.get_command(command_name)
+            args = CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage)
+            return command.execute(args)
         except Exception as e:
             traceback.print_exc()
             return Output(str(e))
