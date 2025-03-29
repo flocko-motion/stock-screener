@@ -42,6 +42,16 @@ class DslTests(unittest.TestCase):
             output: The Output object to check
         """
         self.assertNotEqual(output.output_type, "error", f"Output contains an error: {output.data}")
+
+    def assert_error(self, output: Output):
+        """
+        Assert that an output contains an error.
+
+        Args:
+            output: The Output object to check
+        """
+        self.assertEqual(output.output_type, "error", "Output does not contain an error")
+
         
     def basket_from_output(self, output: Output) -> Basket:
         """
@@ -133,12 +143,17 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL": 3, "MSFT": 2, "GOOGL": 1.7111, "AMZN": 1, "NFLX": 1.25723})
 
+    def test_add_items_to_basket_bad_syntax(self):
+        """ missing an operator/function, so we don't know how to act on the left hand input """
+        output = self.execute_flow("AAPL MSFT -> GOOGL")
+        self.assert_error(output)
+
     def test_add_items_to_basket(self):
-        output = self.execute_flow("AAPL MSFT -> + GOOGL")
+        output = self.execute_flow("AAPL MSFT -> + GOOGL 7x NFLX")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1, "NFLX":7})
 
     def test_add_duplicate_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT GOOGL -> + GOOGL")
@@ -263,6 +278,8 @@ class BasicFlowTests(DslTests):
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 3, "NFLX": 2.1, "GOOG": 7, "AMZN": 1, "TPL": 0.002, "V": 2})
+
+
 
 
 class ColumnCommandTests(DslTests):

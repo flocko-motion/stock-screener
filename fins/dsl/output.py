@@ -10,6 +10,7 @@ Each command's result is wrapped in an Output instance that contains:
 """
 
 import json
+import traceback
 from typing import Any, Optional, Dict, Union, List
 
 from fins.entities.basket import Basket
@@ -136,6 +137,7 @@ class Output:
         if not self.is_type(output_type):
             raise TypeError(f"Expected output type '{output_type}', got '{self.output_type}'")
         return True
+
 
 
 

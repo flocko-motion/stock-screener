@@ -22,13 +22,23 @@ class SequenceCommand(Command):
     def execute(self, args: CommandArgs) -> Output:
         """Execute the sequence command."""
         sequence = args.tree.children
-        result_basket = args.previous_output.data if args.previous_output and args.previous_output.output_type == "basket" else Basket([])
+        previous_basket: Basket = args.previous_output.data if args.previous_output and args.previous_output.output_type == "basket" else None
+        result_basket = Basket([])
+        operator: str | None  = None
 
         for i in range(len(sequence)):
-            tree: Tree = sequence[i]
-            if not isinstance(tree, Tree):
-                raise SyntaxError(f"Unexpected node {tree}")
-            elif tree.data == "symbol":
+            node: Tree | Token = sequence[i]
+            if isinstance(node, Token):
+                if operator is not None:
+                    # multiple chained operations -> let's commit the current one
+                    previous_basket = previous_basket.operation(result_basket, operator)
+                operator = str(node.value)
+                continue
+
+            if not isinstance(node, Tree):
+                raise SyntaxError(f"Unexpected node {node}")
+            tree = node
+            if tree.data == "symbol":
                 result_basket.add_item(BasketItem(tree.children[0].value, 1.0))
                 continue
             elif tree.data == "operand":
@@ -40,6 +50,18 @@ class SequenceCommand(Command):
                 continue
             raise SyntaxError(f"Unexpected node {tree}")
 
+        if previous_basket is None:
+            # left input -> basket creation
+            if operator is None:
+                return Output(result_basket, previous=args.previous_output)
+            # operating on empty input -> error
+            raise SyntaxError(f"Unexpected operator {operator}")
+
+        if operator is None:
+            # no operator -> undefined operation with previous basket
+            raise SyntaxError("No operator specified")
+
+        result_basket = previous_basket.operation(result_basket, operator)
         return Output(result_basket, previous=args.previous_output)
 
     @staticmethod

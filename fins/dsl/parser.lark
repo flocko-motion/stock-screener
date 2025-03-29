@@ -23,7 +23,7 @@ column_ref: "." NAME
 list: "[" value ("," value)* "]"
 
 // Basket operations
-?sequence: (OPERATOR? operand)+
+?sequence: (OPERATOR? operand+)+
 ?operand: WEIGHT? (symbol | variable)
 OPERATOR: "+" | "-" | "&"
 

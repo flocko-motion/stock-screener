@@ -45,7 +45,7 @@ class FinsParser:
             return command.execute(args)
         except Exception as e:
             traceback.print_exc()
-            return Output(str(e))
+            return Output(e)
 
 
 if __name__ == "__main__":
