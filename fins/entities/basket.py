@@ -25,8 +25,9 @@ class Basket(Entity):
     
     def __init__(self, items: list[BasketItem] = None, name: Optional[str] = None):
         """Initialize a basket."""
-        self.items = items or []
+        super().__init__()
         self.name = name
+        self.items = items or []
         self._columns: List[Column] = []
 
     def __str__(self) -> str:
@@ -80,12 +81,13 @@ class Basket(Entity):
         """Remove a column by name/alias."""
         self._columns = [col for col in self._columns if col.alias() != name]
 
+    def has_column(self, name: str) -> bool:
+        """Check if basket has a column by name/alias."""
+        return any(col.alias() == name for col in self._columns)
+
     def get_column(self, name: str) -> Optional[Column]:
         """Get a column by name/alias."""
-        for col in self._columns:
-            if col.alias() == name:
-                return col
-        return None
+        return next((col for col in self._columns if col.alias() == name), None)
 
     def list_columns(self) -> List[str]:
         """Get list of column names/aliases in order."""

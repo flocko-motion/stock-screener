@@ -4,7 +4,6 @@
 from .sort import SortColumnCommand
 from .filter import FilterCommand
 from .spread import SpreadCommand
-from .col_add import AddColumnCommand
 from .info import InfoCommand
 from .define import DefineFunctionCommand
 from .syntax_operation import OperationCommand

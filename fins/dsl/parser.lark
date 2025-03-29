@@ -1,57 +1,50 @@
-// FINS grammar
-?start: command_chain | function_definition | help_command
+// FINS grammar - main rules
+?start: command_chain | function_definition | help_command | management_command | note_command
 
+// Command chains (the core flow syntax)
 command_chain: command ("->" command)*
+?command: function_call | sequence | column_function
 
-?command: sort_command
-        | filter_command
-        | sequence
-        | column_command
-        | info_command
-        | operation_command
-        | drop_command
+// Functions and arguments
+function_call: [assignment] NAME "(" [arg_list] ")"
+column_function: [column_assignment] "." NAME "(" [arg_list] ")"
+function_definition: "function" NAME "(" [arg_list] ")" "{" command_chain "}"
+management_command: NAME "(" [arg_list] ")"
+
+// Assignments
+assignment: NAME "="
+column_assignment: "." NAME "="
+
+// Arguments
+arg_list: named_arg ("," named_arg)*
+named_arg: NAME "=" value
+value: NUMBER | STRING | NAME | column_ref | list
+column_ref: "." NAME
+list: "[" value ("," value)* "]"
+
+// Basket operations
+?sequence: operand_group (OPERATOR operand_group)*
+operand_group: operand+
+?operand: WEIGHT? (symbol | variable)
+OPERATOR: "+" | "-" | "&"
 
 // Help system
 help_command: "?" [help_topic]
 help_topic: NAME | "." NAME | "." | "*" | "operators" | "syntax" | "functions" | "persistence" | "variables"
 
-// Column operations
-column_command: [column_assignment] column_function
-column_assignment: "." NAME "=" WS*
-column_function: "." NAME "(" [arg_list] ")"
-drop_command: "drop" "(" column_ref ("," WS* column_ref)* ")"
-
-// Operation commands (like sort)
-sort_command: "sort" "(" column_ref ("," WS* named_arg)* ")"
-filter_command: "filter" "(" column_ref ("," WS* named_arg)* ")"
-
-// Arguments
-arg_list: named_arg ("," WS* named_arg)*
-named_arg: NAME "=" value
-value: NUMBER | STRING | NAME | column_ref
-column_ref: "." NAME
-
-// Operation command (for pipeline operations)
-operation_command: OPERATOR operand_group
-
-// Generic expression handling
-?sequence: operand_group (OPERATOR operand_group)*
-operand_group: operand+
-?operand: WEIGHT? (symbol | variable)
+// Notes system
+note_command: "@" [NAME] "(" [arg_list] ")" [NOTE_TEXT]
+NOTE_TEXT: /[^\n]+(\n[^@][^\n]*)*/
 
 // Variables and symbols
-variable: VARIABLE
-symbol: STOCK_SYMBOL | ETF_SYMBOL | INDEX_SYMBOL
+variable: TEMP_BASKET | SAVED_BASKET
+TEMP_BASKET: /\$[a-zA-Z0-9_\/]+/
+SAVED_BASKET: /\/[a-zA-Z0-9_\/]+/
+symbol: SYMBOL
+SYMBOL: /\^?[A-Z][A-Z0-9]*/
+WEIGHT: NUMBER "x"? | NUMBER
 
-// Operators
-OPERATOR: "+" | "-" | "&"
-
-// Terminal symbols
-STOCK_SYMBOL: /[A-Z][A-Z0-9]*/
-ETF_SYMBOL: /[A-Z][A-Z0-9]*/
-INDEX_SYMBOL: /\^[A-Z][A-Z0-9]*/
-VARIABLE: /[\$\/][a-zA-Z0-9_\/]+/
-WEIGHT: /[0-9]+(\.[0-9]+)?x?/
+// Basic types
 NUMBER: /[0-9]+(\.[0-9]+)?[KMBT%]?/
 STRING: /"[^"]*"/
 NAME: /[a-zA-Z_][a-zA-Z0-9_]*/

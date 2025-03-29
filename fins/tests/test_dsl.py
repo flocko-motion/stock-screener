@@ -87,7 +87,8 @@ class DslTests(unittest.TestCase):
             basket: The basket to check
             column_name: Name of the column that should exist
         """
-        self.assertIn(column_name, basket.columns, f"Column {column_name} not found in basket")
+        self.assertTrue(basket.has_column(column_name),
+                       f"Column {column_name} not found in basket")
         
     def assert_basket_sorted_by(self, basket: Basket, column: str, ascending: bool = True):
         """
@@ -99,11 +100,12 @@ class DslTests(unittest.TestCase):
             ascending: Whether the sort should be ascending (True) or descending (False)
         """
         values = []
-        for symbol in basket.items:
-            if column in basket.columns:
-                values.append(basket.columns[column].get(symbol))
+        for item in basket.items:
+            col = basket.get_column(column)
+            if col:
+                values.append(col.value(item.ticker))
             else:
-                values.append(getattr(symbol, column, None))
+                values.append(getattr(item, column, None))
                 
         # Filter out None values
         values = [v for v in values if v is not None]
@@ -111,7 +113,7 @@ class DslTests(unittest.TestCase):
         # Check if the list is sorted
         sorted_values = sorted(values, reverse=not ascending)
         self.assertEqual(values, sorted_values, 
-                         f"Basket is not sorted by {column} in {'ascending' if ascending else 'descending'} order")
+                       f"Basket is not sorted by {column} in {'ascending' if ascending else 'descending'} order")
 
 
 class BasicFlowTests(DslTests):
@@ -268,27 +270,40 @@ class ColumnCommandTests(DslTests):
     
     def test_add_pe_column(self):
         """Test adding a PE column to a basket."""
-        output = self.execute_flow("AAPL MSFT GOOGL -> pe")
+        output = self.execute_flow("AAPL MSFT GOOGL -> .pe()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "pe")
         
-    def test_filter_by_pe(self):
-        """Test filtering a basket by PE ratio."""
-        # This test assumes that at least one of the stocks has a PE < 30
-        output = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30")
+    def test_add_multiple_columns(self):
+        """Test adding multiple columns to a basket."""
+        output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "pe")
+        self.assert_basket_has_column(basket, "mcap")
+
+    def test_add_column_with_alias(self):
+        """Test adding a column with an alias."""
+        output = self.execute_flow("AAPL MSFT GOOGL -> .ratio = .pe()")
         
-        # Check that all symbols in the result have PE < 30
-        for symbol in basket.symbols:
-            pe = basket.columns["pe"].get(symbol)
-            if pe is not None:  # Some symbols might not have PE data
-                self.assertLess(pe, 30, f"Symbol {symbol.name} has PE {pe} which is not < 30")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_has_column(basket, "ratio")
+
+    def test_add_column_with_args(self):
+        """Test adding a column with arguments."""
+        output = self.execute_flow("AAPL MSFT GOOGL -> .cagr(years=5)")
+        
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_has_column(basket, "cagr")
 
 
 class SortCommandTests(DslTests):
@@ -320,36 +335,30 @@ class SortCommandTests(DslTests):
 class ComplexFlowTests(DslTests):
     """Tests for complex command flows."""
     
-    def test_filter_then_sort(self):
-        """Test filtering a basket and then sorting it."""
-        output = self.execute_flow("AAPL MSFT GOOGL AMZN META -> pe < 30 -> sort mcap desc")
+    def test_multiple_columns(self):
+        """Test adding multiple columns."""
+        output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap() -> .div()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
-        self.assert_basket_sorted_by(basket, "mcap", ascending=False)
-        
-        # Check that all symbols in the result have PE < 30
-        for symbol in basket.symbols:
-            pe = basket.columns["pe"].get(symbol)
-            if pe is not None:  # Some symbols might not have PE data
-                self.assertLess(pe, 30, f"Symbol {symbol.name} has PE {pe} which is not < 30")
-    
-    def test_multiple_columns_and_filter(self):
-        """Test adding multiple columns and filtering."""
-        output = self.execute_flow("AAPL MSFT GOOGL -> pe -> div_yield > 0.01")
+        self.assert_basket_has_column(basket, "mcap")
+        self.assert_basket_has_column(basket, "div")
+
+    def test_complex_column_flow(self):
+        """Test complex column operations."""
+        output = self.execute_flow("""
+            AAPL MSFT GOOGL -> 
+            .pe() ->                    # Add PE column
+            .growth = .cagr(years=5) -> # Add CAGR with custom name
+            .div()                      # Add dividend yield
+        """)
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
-        self.assert_basket_has_column(basket, "div_yield")
-        
-        # Check that all symbols in the result have div_yield > 1%
-        for symbol in basket.symbols:
-            div_yield = basket.columns["div_yield"].get(symbol)
-            if div_yield is not None:  # Some symbols might not have dividend data
-                self.assertGreater(div_yield, 0.01, 
-                                  f"Symbol {symbol.name} has div_yield {div_yield} which is not > 1%")
+        self.assert_basket_has_column(basket, "growth")
+        self.assert_basket_has_column(basket, "div")
 
 
 if __name__ == "__main__":

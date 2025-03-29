@@ -3,6 +3,11 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: project guidelines (please read!)
+globs: 
+alwaysApply: true
+---
 Paths:
 This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root - full path: /r/priv/stock-screener/fins/ 
 For now you can ignore all code outside the "/r/priv/stock-screener/fins/" directory tree.
@@ -15,3 +20,50 @@ Example run command:
 
 Architecture: 
 Dependencies follow a DAG. On the root are the entities. DSL and its operators build on top of entities. Formatters build on top of entities. Clients (e.g. CLI or API) build on top of formatters and DSL.
+
+Paths:
+This is a polyrepo containing several subprojects around stock-screening. The main project is called FINS, a Python project that has "fins/" as it's project root - full path: /r/priv/stock-screener/fins/ 
+For now you can ignore all code outside the "/r/priv/stock-screener/fins/" directory tree.
+
+Before executing anything, make sure to be in the project root /r/priv/stock-screener/fins/
+To run the CLI application use 'fins' in '/r/priv/stock-screener/fins/'. That's the normative runner.
+
+Example run command:
+./fins -c "AAPL + MSFT + 7x GOOG"
+
+Grammar Rules:
+1. Manual First
+   - Always read MANUAL.md before touching the grammar
+   - Manual is the source of truth for language syntax and features
+   - If it's not in the manual, it shouldn't be in the grammar
+
+2. Grammar vs Dictionary
+   - Grammar defines syntax patterns, not specific commands
+   - Don't list individual commands like sort, filter, delete
+   - Instead, define patterns like function_call: NAME "(" [arg_list] ")"
+   - Let Python code handle specific command implementations
+
+3. Conservative Changes
+   - Grammar changes can break a lot of dependent code
+   - Changes affect parsing, AST structure, and all command implementations
+   - Small grammar changes can have large ripple effects
+   - When in doubt, ask before making changes
+
+4. Organization
+   - Group related grammar rules together
+   - Keep structure logical and maintainable
+   - Comments should explain sections, not individual rules
+   - Basic building blocks (types, symbols) at the bottom
+
+5. Process for Changes
+   - Read manual thoroughly
+   - Understand what syntax needs to be supported
+   - Ask before proposing changes
+   - Make minimal changes needed to support syntax
+   - Keep grammar focused on patterns, not specifics
+
+6. Red Flags
+   - Listing specific commands in grammar
+   - Adding rules without manual support
+   - Making big changes without consultation
+   - Mixing implementation details with syntax patterns

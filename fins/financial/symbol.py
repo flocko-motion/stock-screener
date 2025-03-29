@@ -5,10 +5,9 @@ This module defines the Symbol class, which represents a financial symbol such a
 """
 
 from typing import Optional, Dict, Any, ClassVar
-from .entity import JsonSerializable
 
 
-class Symbol(JsonSerializable):
+class Symbol:
     """
     Represents a financial symbol (stock, ETF, index).
     
@@ -53,7 +52,6 @@ class Symbol(JsonSerializable):
         Args:
             ticker: The ticker symbol
         """
-        super().__init__()
         if not isinstance(ticker, str):
             raise ValueError(f"Invalid ticker value: {ticker}")
         
@@ -111,31 +109,6 @@ class Symbol(JsonSerializable):
         return f"{self.ticker}:{self.exchange} {self.name}\n" \
             + f"{self.type_string()} {self.sector if self.sector is not None else ''} {self.country if self.country is not None else ''} {self.ipo if self.ipo is not None else ''}\n" \
             + f"{self.currency} {self.price} (MktCap: {self.currency} {self.market_cap})"
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the symbol to a dictionary.
-        
-        Returns:
-            A dictionary representation of the symbol
-        """
-        return {
-            "class": "Symbol",
-            "ticker": self.ticker,
-            "exchange": self.exchange,
-            "identifier": self.ticker + ":" + self.exchange if self.exchange else self.ticker,
-            "currency": self.currency,
-            "name": self.name,
-            "price": self.price,
-            "market_cap": self.market_cap,
-            "beta": self.beta,
-            "sector": self.sector,
-            "country": self.country,
-            "ipo": self.ipo,
-            "is_etf": self.is_etf,
-            "is_fund": self.is_fund,
-            "is_trading": self.is_trading
-        }
     
     def add_data(self, key: str, value: Any) -> None:
         """

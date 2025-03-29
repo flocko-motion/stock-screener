@@ -45,18 +45,27 @@ class Column(ABC):
         # Get the directory containing column implementations
         columns_dir = Path(__file__).parent / 'columns'
         
+        # Calculate the package prefix from the current file's location
+        package_parts = Path(__file__).relative_to(Path(__file__).parents[2]).with_suffix('').parts[:-1]
+        package_prefix = '.'.join(package_parts)
+        
         # Import all modules in the columns directory
         for module_info in pkgutil.iter_modules([str(columns_dir)]):
             if not module_info.name.startswith('_'):  # Skip __init__ etc
-                module = importlib.import_module(f'..columns.{module_info.name}', __package__)
-                
-                # Find and register Column subclasses
-                for item_name in dir(module):
-                    item = getattr(module, item_name)
-                    if (isinstance(item, type) and 
-                        issubclass(item, Column) and 
-                        item != Column):
-                        cls.register(item)
+                # Use absolute import path
+                module_path = f"{package_prefix}.columns.{module_info.name}"
+                try:
+                    module = importlib.import_module(module_path)
+                    
+                    # Find and register Column subclasses
+                    for item_name in dir(module):
+                        item = getattr(module, item_name)
+                        if (isinstance(item, type) and 
+                            issubclass(item, Column) and 
+                            item != Column):
+                            cls.register(item)
+                except ImportError as e:
+                    print(f"Warning: Failed to import {module_path}: {e}")
 
     @abstractmethod
     def value(self, ticker: str) -> Any:
