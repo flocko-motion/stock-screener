@@ -23,14 +23,13 @@ column_ref: "." NAME
 list: "[" value ("," value)* "]"
 
 // Basket operations
-?sequence: [OPERATOR] operand_group (OPERATOR operand_group)*
-operand_group: operand+
+?sequence: (OPERATOR? operand)+
 ?operand: WEIGHT? (symbol | variable)
 OPERATOR: "+" | "-" | "&"
 
 // Help system
 help_command: "?" [help_topic]
-help_topic: NAME | "." NAME | "." | "*" | "operators" | "syntax" | "functions" | "persistence" | "variables"
+help_topic: NAME | "." NAME | "." | "*"
 
 // Notes system
 note_command: "@" [NAME] "(" [arg_list] ")" [NOTE_TEXT]
