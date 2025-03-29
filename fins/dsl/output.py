@@ -11,6 +11,7 @@ Each command's result is wrapped in an Output instance that contains:
 
 import json
 from typing import Any, Optional, Dict, Union, List
+
 from fins.entities.basket import Basket
 
 class Output:

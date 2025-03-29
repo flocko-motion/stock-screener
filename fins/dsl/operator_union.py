@@ -3,11 +3,13 @@ Union operator command for combining baskets.
 """
 
 from typing import Type
+
 from fins.entities import Basket, Entity
-from command import Command, CommandArgs
-from output import Output
 
+from . import Command, CommandArgs
+from . import Output
 
+@Command.register("+")
 class UnionCommand(Command):
     """Command for combining baskets (union operation)."""
     

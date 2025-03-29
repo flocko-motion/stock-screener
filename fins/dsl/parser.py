@@ -6,8 +6,9 @@ import os
 import traceback
 from lark import Lark, Tree
 
+from fins.dsl import Output
 from fins.storage import Storage
-from output import Output
+
 
 # Load the grammar from external file "parser.lark"
 grammar_file = os.path.join(os.path.dirname(__file__), "parser.lark")
@@ -16,7 +17,6 @@ with open(grammar_file, "r") as f:
 
 # Initialize the parser using Earley
 parser = Lark(grammar, parser='earley')
-
 
 class FinsParser:
     """
@@ -32,7 +32,7 @@ class FinsParser:
 
 
     def parse(self, flow: str) -> Output:
-        from .commands.command import Command, CommandArgs
+        from .command import Command, CommandArgs
 
         """Parse and execute a FINS command or command chain."""
         try:

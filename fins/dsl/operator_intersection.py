@@ -3,11 +3,13 @@ Intersection operator command for finding common elements in baskets.
 """
 
 from typing import Type
+
 from fins.entities import Basket, Entity
-from command import Command, CommandArgs
-from output import Output
 
+from . import Command, CommandArgs
+from . import Output
 
+@Command.register("&")
 class IntersectionCommand(Command):
     """Command for finding common elements in baskets (intersection operation)."""
     

@@ -30,14 +30,11 @@ from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar
 from dataclasses import dataclass
 from lark import Tree, Token
 
-from command_column import ColumnCommand
-from operator_difference import DifferenceCommand
-from operator_intersection import IntersectionCommand
-from operator_union import UnionCommand
 from fins.entities import Entity, Basket, Column
-from output import Output
-
 from fins.storage import Storage
+
+from . import Output
+
 
 
 @dataclass
@@ -69,7 +66,6 @@ class Command(ABC):
     @classmethod
     def init(cls):
         cls.register_column_commands()
-        cls.register_operators()
 
     @classmethod
     def register(cls, command_type: str):
@@ -83,20 +79,6 @@ class Command(ABC):
     def register_command(cls, name: str, command_cls: Type['Command']) -> None:
         """Register a command with the given name."""
         cls._registry[name] = command_cls
-
-    @classmethod
-    def register_column_commands(cls):
-        """Register all column classes as commands."""
-        for col_class in Column.list():
-            name = str(col_class())  # Get default name from instance
-            Command.register_command(name, ColumnCommand)  # Register the class, not an instance
-
-    @classmethod
-    def register_operators(cls):
-        """Register operator commands."""
-        Command.register_command("+", UnionCommand)  # Register the class, not an instance
-        Command.register_command("-", DifferenceCommand)
-        Command.register_command("&", IntersectionCommand)
 
     @classmethod
     def get_command(cls, command_type: str) -> 'Command':
@@ -235,6 +217,4 @@ class Command(ABC):
         """Execute a subcommand of this command."""
         handler = self.get_command(command_type)
         return handler.execute(CommandArgs(tree=tree, previous_output=None))
-        
 
-Command.register_operators()

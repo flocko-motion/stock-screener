@@ -3,11 +3,14 @@ Difference operator command for removing elements from baskets.
 """
 
 from typing import Type
+
 from fins.entities import Basket, Entity
-from command import Command, CommandArgs
-from output import Output
+
+from . import Command, CommandArgs
+from . import Output
 
 
+@Command.register("-")
 class DifferenceCommand(Command):
     """Command for removing elements from baskets (difference operation)."""
     

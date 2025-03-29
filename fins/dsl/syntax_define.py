@@ -5,8 +5,10 @@ This command defines a custom function.
 """
 
 from typing import Type, Dict, Optional
+
 from fins.entities import Entity, Basket, BasketItem
-from command import Command, CommandArgs
+
+from . import Command, CommandArgs
 
 class DefineFunctionCommand(Command):
     """

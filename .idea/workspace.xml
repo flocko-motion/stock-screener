@@ -4,27 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: fixed grammer issue with operands, simplified grammar">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="refactor: merged dsl scripty into single dir due to circularity">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/column.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command_column.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/define.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/define.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/filter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_difference.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_difference.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_intersection.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_intersection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_union.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_union.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/basket_sort.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/spread.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_command_chain.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_function_definition.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_function_definition.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operand_group.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_sequence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/basket_sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/basket_sort.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/command_column.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command_column.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/define.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/define.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/operator_difference.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_difference.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/operator_intersection.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_intersection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/operator_union.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_union.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/output.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_command_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_command_chain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_function_definition.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_function_definition.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_operand_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operand_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_operation.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/syntax_sequence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_sequence.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -260,7 +257,7 @@
       <workItem from="1743023628818" duration="3430000" />
       <workItem from="1743063858209" duration="603000" />
       <workItem from="1743105515593" duration="1816000" />
-      <workItem from="1743249200413" duration="7677000" />
+      <workItem from="1743249200413" duration="8615000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -526,7 +523,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743277545188</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="refactor: merged dsl scripty into single dir due to circularity">
+      <option name="closed" value="true" />
+      <created>1743279086906</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1743279086906</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -561,7 +566,8 @@
     <MESSAGE value="fix: first test runs again" />
     <MESSAGE value="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;" />
     <MESSAGE value="fix: fixed grammer issue with operands, simplified grammar" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: fixed grammer issue with operands, simplified grammar" />
+    <MESSAGE value="refactor: merged dsl scripty into single dir due to circularity" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor: merged dsl scripty into single dir due to circularity" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -666,7 +672,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1743022534623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743278444337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743279927462" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1743026944377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

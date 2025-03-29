@@ -1,6 +1,7 @@
 from lark import Tree
-from output import Output
-from command import Command, CommandArgs
+
+from . import Output
+from . import Command, CommandArgs
 
 @Command.register("command_chain")
 class CommandChainCommand(Command):
