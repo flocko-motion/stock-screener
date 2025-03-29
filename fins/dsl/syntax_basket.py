@@ -1,6 +1,6 @@
-from ..output import Output
-from .command import Command, CommandArgs
-from ...entities import Basket, BasketItem
+from output import Output
+from command import Command, CommandArgs
+from fins.entities import Basket, BasketItem
 
 class BasketCommand(Command):
     """Handles basket creation commands."""

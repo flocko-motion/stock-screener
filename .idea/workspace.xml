@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: fixed grammer issue with operands, simplified grammar">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/column.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command_column.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/define.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/define.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/filter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/info.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_difference.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_difference.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_intersection.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_intersection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/operator_union.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/operator_union.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/sort.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/basket_sort.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/spread.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_command_chain.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_function_definition.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_function_definition.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operand_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_operation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/syntax_sequence.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -52,7 +73,7 @@
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor": "Run",
-    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
@@ -82,6 +103,11 @@
 }]]></component>
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
+    </key>
   </component>
   <component name="RunManager" selected="Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation">
     <configuration name="Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" type="tests" factoryName="Autodetect" nameIsGenerated="true">
@@ -234,7 +260,7 @@
       <workItem from="1743023628818" duration="3430000" />
       <workItem from="1743063858209" duration="603000" />
       <workItem from="1743105515593" duration="1816000" />
-      <workItem from="1743249200413" duration="5912000" />
+      <workItem from="1743249200413" duration="7677000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -492,7 +518,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743276936703</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="fix: fixed grammer issue with operands, simplified grammar">
+      <option name="closed" value="true" />
+      <created>1743277545188</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1743277545188</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -526,7 +560,8 @@
     <MESSAGE value="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now" />
     <MESSAGE value="fix: first test runs again" />
     <MESSAGE value="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;" />
+    <MESSAGE value="fix: fixed grammer issue with operands, simplified grammar" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: fixed grammer issue with operands, simplified grammar" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -538,46 +573,46 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>63</line>
+          <line>44</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>62</line>
+          <line>43</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>59</line>
+          <line>40</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_command_chain.py</url>
           <line>29</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_command_chain.py</url>
           <line>26</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_operation.py</url>
           <line>22</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_operation.py</url>
           <line>35</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_operand_group.py</url>
           <line>87</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_operand_group.py</url>
           <line>25</line>
           <option name="timeStamp" value="37" />
         </line-breakpoint>
@@ -592,27 +627,27 @@
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_sequence.py</url>
           <line>53</line>
           <option name="timeStamp" value="42" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_sequence.py</url>
           <line>54</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_sequence.py</url>
           <line>36</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_sequence.py</url>
           <line>49</line>
           <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operand_group.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_operand_group.py</url>
           <line>23</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
@@ -622,7 +657,7 @@
           <option name="timeStamp" value="48" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py</url>
+          <url>file://$PROJECT_DIR$/fins/dsl/syntax_sequence.py</url>
           <line>34</line>
           <option name="timeStamp" value="49" />
         </line-breakpoint>
@@ -631,7 +666,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1743022534623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743277048631" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743278444337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1743026944377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

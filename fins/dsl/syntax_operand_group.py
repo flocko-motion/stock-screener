@@ -1,8 +1,8 @@
 from lark import Tree, Token
 
-from ..output import Output
-from .command import Command, CommandArgs
-from ...entities import Basket, BasketItem
+from output import Output
+from command import Command, CommandArgs
+from fins.entities import Basket, BasketItem
 
 @Command.register("operand_group")
 class OperandGroupCommand(Command):

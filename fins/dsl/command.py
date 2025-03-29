@@ -30,16 +30,22 @@ from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar
 from dataclasses import dataclass
 from lark import Tree, Token
 
-from ...entities import Entity, Basket
-from ..output import Output
-from collections.abc import Sequence
-from typing import get_origin
+from command_column import ColumnCommand
+from operator_difference import DifferenceCommand
+from operator_intersection import IntersectionCommand
+from operator_union import UnionCommand
+from fins.entities import Entity, Basket, Column
+from output import Output
+
+from fins.storage import Storage
+
 
 @dataclass
 class CommandArgs:
     """Arguments for command execution."""
     tree: Tree
     previous_output: Output
+    storage: Storage
 
 class Command(ABC):
     """
@@ -58,8 +64,13 @@ class Command(ABC):
     _instances: ClassVar[Dict[str, 'Command']] = {}
     
     def __init__(self):
-        self.storage = None
-    
+        pass
+
+    @classmethod
+    def init(cls):
+        cls.register_column_commands()
+        cls.register_operators()
+
     @classmethod
     def register(cls, command_type: str):
         """Class decorator to register a command type."""
@@ -67,7 +78,26 @@ class Command(ABC):
             cls._registry[command_type] = command_cls
             return command_cls
         return decorator
-    
+
+    @classmethod
+    def register_command(cls, name: str, command_cls: Type['Command']) -> None:
+        """Register a command with the given name."""
+        cls._registry[name] = command_cls
+
+    @classmethod
+    def register_column_commands(cls):
+        """Register all column classes as commands."""
+        for col_class in Column.list():
+            name = str(col_class())  # Get default name from instance
+            Command.register_command(name, ColumnCommand)  # Register the class, not an instance
+
+    @classmethod
+    def register_operators(cls):
+        """Register operator commands."""
+        Command.register_command("+", UnionCommand)  # Register the class, not an instance
+        Command.register_command("-", DifferenceCommand)
+        Command.register_command("&", IntersectionCommand)
+
     @classmethod
     def get_command(cls, command_type: str) -> 'Command':
         """Get or create a command instance for the given type."""
@@ -77,17 +107,7 @@ class Command(ABC):
             cls._instances[command_type] = cls._registry[command_type]()
         return cls._instances[command_type]
     
-    @classmethod
-    def initialize_all(cls, storage):
-        """Initialize all registered commands with storage."""
-        for command_type in cls._registry:
-            command = cls.get_command(command_type)
-            command.set_storage(storage)
-    
-    def set_storage(self, storage):
-        """Set the storage instance for this command."""
-        self.storage = storage
-    
+
     @property
     @abstractmethod
     def input_type(self) -> str:
@@ -216,8 +236,5 @@ class Command(ABC):
         handler = self.get_command(command_type)
         return handler.execute(CommandArgs(tree=tree, previous_output=None))
         
-    @classmethod
-    def register_command(cls, name: str, command: 'Command') -> None:
-        """Register a command with the given name."""
-        cls._registry[name] = command
-        
+
+Command.register_operators()

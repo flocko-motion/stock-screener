@@ -1,15 +1,15 @@
 """
-Union operator command for combining baskets.
+Difference operator command for removing elements from baskets.
 """
 
 from typing import Type
 from fins.entities import Basket, Entity
-from .command import Command, CommandArgs
-from ..output import Output
+from command import Command, CommandArgs
+from output import Output
 
 
-class UnionCommand(Command):
-    """Command for combining baskets (union operation)."""
+class DifferenceCommand(Command):
+    """Command for removing elements from baskets (difference operation)."""
     
     @property
     def input_type(self) -> Type[Entity]:
@@ -22,17 +22,17 @@ class UnionCommand(Command):
     @property
     def description(self) -> str:
         """Get the operator's description."""
-        return "Basket union operator"
+        return "Basket difference operator"
         
     def execute(self, args: CommandArgs) -> Output:
-        """Execute the union operation on the baskets."""
+        """Execute the difference operation on the baskets."""
         self.validate_input(args)
         basket = args.effective_input
         
         # Get the right-hand operand from the tree
         right_operand = args.tree.children[0]
         
-        # Apply the union
-        basket.union(right_operand)
+        # Apply the difference
+        basket.difference(right_operand)
             
         return Output(basket) 

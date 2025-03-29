@@ -4,8 +4,8 @@ Column commands for adding data columns to baskets.
 
 from typing import Type
 from fins.entities import Basket, Column, Entity
-from .command import Command, CommandArgs
-from ..output import Output
+from command import Command, CommandArgs
+from output import Output
 
 
 class ColumnCommand(Command):

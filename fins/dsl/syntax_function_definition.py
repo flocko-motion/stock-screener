@@ -1,6 +1,6 @@
-from ..output import Output
-from .command import Command, CommandArgs
-from ...entities import Token
+from output import Output
+from command import Command, CommandArgs
+from fins.entities import Token
 
 class FunctionDefinitionCommand(Command):
     """Handles function definition commands."""
