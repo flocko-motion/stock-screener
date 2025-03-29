@@ -1,7 +1,5 @@
 from fins.entities import Basket, BasketItem
-
-from . import Command, CommandArgs
-from . import Output
+from fins.dsl import *
 
 class BasketCommand(Command):
     """Handles basket creation commands."""

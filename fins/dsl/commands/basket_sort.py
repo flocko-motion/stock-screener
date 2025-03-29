@@ -6,10 +6,10 @@ This command sorts a basket of symbols based on a specified column.
 
 from typing import Type
 
-from . import Output
 from fins.entities.entity import Entity
 from fins.entities.basket import Basket
-from . import Command, CommandArgs
+
+from fins.dsl import *
 
 class SortColumnCommand(Command):
     """

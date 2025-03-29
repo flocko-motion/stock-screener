@@ -64,10 +64,6 @@ class Command(ABC):
         pass
 
     @classmethod
-    def init(cls):
-        cls.register_column_commands()
-
-    @classmethod
     def register(cls, command_type: str):
         """Class decorator to register a command type."""
         def decorator(command_cls: Type['Command']):

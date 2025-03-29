@@ -7,8 +7,7 @@ This command defines a custom function.
 from typing import Type, Dict, Optional
 
 from fins.entities import Entity, Basket, BasketItem
-
-from . import Command, CommandArgs
+from fins.dsl import *
 
 class DefineFunctionCommand(Command):
     """

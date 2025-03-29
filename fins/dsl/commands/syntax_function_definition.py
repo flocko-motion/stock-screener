@@ -1,7 +1,5 @@
 from fins.entities import Token
-
-from . import Output
-from . import Command, CommandArgs
+from fins.dsl import *
 
 class FunctionDefinitionCommand(Command):
     """Handles function definition commands."""

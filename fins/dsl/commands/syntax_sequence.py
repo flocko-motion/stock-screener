@@ -1,9 +1,7 @@
 from lark import Tree, Token
 
 from fins.entities import Basket, BasketItem
-
-from . import Output
-from . import Command, CommandArgs
+from fins.dsl import *
 
 @Command.register("sequence")
 class SequenceCommand(Command):

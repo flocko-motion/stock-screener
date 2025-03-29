@@ -9,6 +9,8 @@ from lark import Lark, Tree
 from fins.dsl import Output
 from fins.storage import Storage
 
+from . import CommandArgs, Command
+
 
 # Load the grammar from external file "parser.lark"
 grammar_file = os.path.join(os.path.dirname(__file__), "parser.lark")
@@ -32,8 +34,6 @@ class FinsParser:
 
 
     def parse(self, flow: str) -> Output:
-        from .command import Command, CommandArgs
-
         """Parse and execute a FINS command or command chain."""
         try:
             tree: Tree = parser.parse(flow)
