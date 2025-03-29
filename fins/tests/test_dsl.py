@@ -250,6 +250,19 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
 
+    def test_basket_to_variable_and_multiply(self):
+        self.new_parser()
+
+        output = self.execute_flow("3x AAPL 1.7 MSFT-> $a")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":3, "MSFT": 1.7})
+
+        output = self.execute_flow("2x $a")
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":6, "MSFT": 3.4})
+
     def test_add_variable_and_basket_short(self):
         # First create a basket with AAPL and MSFT
         self.new_parser()
