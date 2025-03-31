@@ -23,49 +23,16 @@ class DslTests(unittest.TestCase):
         self.parser = FinsParser(Storage.temp())
 
     def execute_flow(self, command_str: str) -> Output:
-        """
-        Execute a FINS command flow.
-        
-        Args:
-            command_str: The command string to execute
-            
-        Returns:
-            The result of the command execution
-        """
         return self.parser.parse(command_str)
 
     def assert_no_error(self, output: Output):
-        """
-        Assert that an output does not contain an error.
-
-        Args:
-            output: The Output object to check
-        """
         self.assertNotEqual(output.output_type, "error", f"Output contains an error: {output.data}")
 
     def assert_error(self, output: Output):
-        """
-        Assert that an output contains an error.
-
-        Args:
-            output: The Output object to check
-        """
         self.assertEqual(output.output_type, "error", "Output does not contain an error")
 
         
     def basket_from_output(self, output: Output) -> Basket:
-        """
-        Extract a basket from an Output object.
-        
-        Args:
-            output: The Output object
-            
-        Returns:
-            The basket contained in the output
-            
-        Raises:
-            AssertionError: If the output does not contain a basket
-        """
         self.assert_no_error(output)
         self.assertEqual(output.output_type, "basket",
                         f"Expected output type 'basket', got '{output.output_type}'")
@@ -74,13 +41,6 @@ class DslTests(unittest.TestCase):
         return output.data
         
     def assert_basket_items(self, basket: Basket, expected: dict[str, float]):
-        """
-        Assert that a basket contains the expected symbols.
-        
-        Args:
-            basket: The basket to check
-            expected: List of symbol names that should be in the basket
-        """
         actual_items = [item.ticker for item in basket.items]
         self.assertSetEqual(set(expected.keys()), set(actual_items), f"Basket does not contain expected symbols, got {actual_items}, expected {expected}")
         for item in basket.items:
@@ -88,27 +48,11 @@ class DslTests(unittest.TestCase):
             self.assertIsNotNone(expected_value, f"Basket does not contain expected symbol {item.ticker}")
             self.assertEqual(item.amount, expected_value, f"Basket item {item.ticker} has weight {item.amount}, expected {expected_value}")
 
-        
     def assert_basket_has_column(self, basket: Basket, column_name: str):
-        """
-        Assert that a basket has a specific column.
-        
-        Args:
-            basket: The basket to check
-            column_name: Name of the column that should exist
-        """
         self.assertTrue(basket.has_column(column_name),
                        f"Column {column_name} not found in basket")
         
     def assert_basket_sorted_by(self, basket: Basket, column: str, ascending: bool = True):
-        """
-        Assert that a basket is sorted by a specific column.
-        
-        Args:
-            basket: The basket to check
-            column: The column to check sorting by
-            ascending: Whether the sort should be ascending (True) or descending (False)
-        """
         values = []
         for item in basket.items:
             col = basket.get_column(column)

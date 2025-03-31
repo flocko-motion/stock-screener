@@ -64,8 +64,4 @@ class SequenceCommand(Command):
         result_basket = previous_basket.operation(result_basket, operator)
         return Output(result_basket, previous=args.previous_output)
 
-    @staticmethod
-    def _parse_weight(value):
-        if value.endswith("x"):
-            return float(value.rstrip("x"))
-        return float(value)
+

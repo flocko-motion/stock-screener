@@ -41,8 +41,19 @@ from . import Output
 class CommandArgs:
     """Arguments for command execution."""
     tree: Tree
-    previous_output: Output
+    previous_output: Output | None
     storage: Storage
+
+    def __init__(self, tree: Tree, storage: Storage, previous_output: Output | None = None):
+        self.tree = tree
+        self.storage = storage
+        self.previous_output = previous_output
+        if self.previous_output is None:
+            self.previous_output = Output(None)
+
+    def has_previous_output(self):
+        return self.previous_output is not None and not self.previous_output.is_void()
+
 
 class Command(ABC):
     """
@@ -86,7 +97,6 @@ class Command(ABC):
                 raise SyntaxError(f"Unknown command type: {command_type}")
             cls._instances[command_type] = cls._registry[command_type]()
         return cls._instances[command_type]
-    
 
     @property
     @abstractmethod
@@ -205,14 +215,21 @@ class Command(ABC):
         
         return output
 
-    def execute_command_tree(self, tree: Tree, previous_output: Output) -> 'Output':
-        """Execute a command based on its tree structure."""
-        command_type = tree.data
-        handler = self.get_command(command_type)
-        return handler.execute(CommandArgs(tree=tree, previous_output=previous_output))
+    @classmethod
+    def execute_tree(cls, args: CommandArgs) -> 'Output':
+        """Evaluate a tree."""
+        command_type = args.tree.data
+        handler = cls.get_command(command_type)
+        return handler.execute(args)
         
     def _execute_subcommand(self, command_type: str, tree: Tree) -> 'Output':
         """Execute a subcommand of this command."""
         handler = self.get_command(command_type)
         return handler.execute(CommandArgs(tree=tree, previous_output=None))
+
+    @staticmethod
+    def _parse_weight(value):
+        if value.endswith("x"):
+            return float(value.rstrip("x"))
+        return float(value)
 

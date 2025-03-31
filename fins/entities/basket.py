@@ -241,3 +241,21 @@ class Basket(Entity):
         
         return basket
 
+    def multiply(self, weight) -> 'Basket':
+        """
+        Return a new basket with all weights multiplied by a factor.
+        """
+        basket = self.copy_of()
+        for item in basket.items:
+            item.amount *= weight
+        return basket
+
+    def copy_of(self) -> 'Basket':
+        copy = Basket(name=self.name)
+        for item in self.items:
+            copy.add_item(BasketItem(item.ticker, item.amount))
+        copy._columns = self._columns.copy()
+        return copy
+
+
+
