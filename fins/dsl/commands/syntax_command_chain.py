@@ -24,9 +24,6 @@ class CommandChainCommand(Command):
         for tree in args.tree.children:
             if not isinstance(tree, Tree):
                 raise RuntimeError("Invalid command chain structure")
-            command_name = str(tree.data)
-            command = Command.get_command(command_name)
-            args = CommandArgs(tree=tree, previous_output=chain_output, storage=args.storage)
-            chain_output = command.execute(args)
+            chain_output = Command.execute_tree(CommandArgs(tree=tree, previous_output=chain_output, storage=args.storage))
 
         return chain_output

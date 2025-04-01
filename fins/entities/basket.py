@@ -257,5 +257,10 @@ class Basket(Entity):
         copy._columns = self._columns.copy()
         return copy
 
+    def add_basket_items(self, basket: 'Basket'):
+        for item in basket.items:
+            self.add_item(item.copy_of())
+        pass
+
 
 

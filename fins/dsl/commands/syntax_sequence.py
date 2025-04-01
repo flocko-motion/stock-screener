@@ -22,46 +22,32 @@ class SequenceCommand(Command):
     def execute(self, args: CommandArgs) -> Output:
         """Execute the sequence command."""
         sequence = args.tree.children
-        previous_basket: Basket = args.previous_output.data if args.previous_output and args.previous_output.output_type == "basket" else None
-        result_basket = Basket([])
+        result_basket: Basket = args.previous_output.data if args.previous_output.is_type(Basket) else Basket([])
         operator: str | None  = None
 
         for i in range(len(sequence)):
             node: Tree | Token = sequence[i]
             if isinstance(node, Token):
                 if operator is not None:
-                    # multiple chained operations -> let's commit the current one
-                    previous_basket = previous_basket.operation(result_basket, operator)
+                    raise SyntaxError(f"Unexpected token {node}")
                 operator = str(node.value)
                 continue
 
-            if not isinstance(node, Tree):
+            elif isinstance(node, Tree):
+                res = self.execute_tree(CommandArgs(node, args.storage))
+                if not res.assert_type(Basket):
+                    raise SyntaxError(f"Expected a basket, got {res}")
+                if operator is None:
+                    operator = "+" # default operator
+                result_basket = result_basket.operation(res.data, operator)
+                operator = None
+            else:
                 raise SyntaxError(f"Unexpected node {node}")
-            tree = node
-            if tree.data == "symbol":
-                result_basket.add_item(BasketItem(tree.children[0].value, 1.0))
-                continue
-            elif tree.data == "operand":
-                if len(tree.children) != 2:
-                    raise SyntaxError(f"Unexpected operand node {tree}")
-                weight = self._parse_weight(tree.children[0].value)
-                ticker = tree.children[1].children[0].value
-                result_basket.add_item(BasketItem(ticker, weight))
-                continue
-            raise SyntaxError(f"Unexpected node {tree}")
 
-        if previous_basket is None:
-            # left input -> basket creation
-            if operator is None:
-                return Output(result_basket, previous=args.previous_output)
-            # operating on empty input -> error
-            raise SyntaxError(f"Unexpected operator {operator}")
 
-        if operator is None:
-            # no operator -> undefined operation with previous basket
-            raise SyntaxError("No operator specified")
+        if operator is not None:
+            raise SyntaxError("Unexpected end of sequence")
 
-        result_basket = previous_basket.operation(result_basket, operator)
         return Output(result_basket, previous=args.previous_output)
 
 

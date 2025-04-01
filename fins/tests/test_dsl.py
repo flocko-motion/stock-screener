@@ -229,6 +229,14 @@ class BasicFlowTests(DslTests):
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
 
+    def test_complex_basket_creation(self):
+        output = self.execute_flow("AAPL + 3x MSFT + 2.1 NFLX")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 3, "NFLX": 2.1})
+
+
     def test_complex_basket_operation(self):
         output = self.execute_flow("AAPL 3x MSFT 2.1 NFLX + 7 GOOG AMZN 0.002 TPL -> $a -> + 2x V")
 

@@ -43,4 +43,7 @@ class BasketItem(Entity):
             "class": "BasketItem",
             "ticker": self.ticker,
             "amount": self.amount
-        } 
+        }
+
+    def copy_of(self):
+        return BasketItem(self.ticker, self.amount)

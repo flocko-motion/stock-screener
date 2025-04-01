@@ -3,7 +3,7 @@
 
 // Command chains (the core flow syntax)
 command_chain: command ("->" command)*
-?command: function_call | sequence | column_function
+?command: sequence | function_call | column_function
 
 // Functions and arguments
 function_call: [assignment] NAME "(" [arg_list] ")"

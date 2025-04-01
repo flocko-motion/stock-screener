@@ -160,4 +160,4 @@ class Entity(JsonSerializable):
             A new Entity instance
         """
         data = json.loads(json_str)
-        return cls.from_dict(data) 
+        return cls.from_dict(data)

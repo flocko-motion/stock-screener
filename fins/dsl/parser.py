@@ -39,10 +39,7 @@ class FinsParser:
             tree: Tree = parser.parse(flow)
             if not isinstance(tree.data, Token):
                 raise SyntaxError(f"Invalid command structure, expected Token but got {tree.data}")
-            command_name = str(tree.data)
-            command = Command.get_command(command_name)
-            args = CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage)
-            return command.execute(args)
+            return Command.execute_tree(CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage))
         except Exception as e:
             traceback.print_exc()
             return Output(e)
