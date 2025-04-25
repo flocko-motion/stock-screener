@@ -3,28 +3,19 @@ Symbol Entity
 
 This module defines the Symbol class, which represents a financial symbol such as a stock, ETF, or index.
 """
-
+from datetime import datetime
 from typing import Optional, Dict, Any, ClassVar
 
+from fins.data_sources import fmp
+
+TYPE_STOCK="stock"
+TYPE_CRYPTO="crypto"
+TYPE_ETF="etf"
+TYPE_INDEX="index"
 
 class Symbol:
     """
     Represents a financial symbol (stock, ETF, index).
-    
-    Attributes:
-        ticker (str): The ticker symbol (e.g., 'AAPL', 'SPY')
-        exchange (Optional[str]): The exchange where the symbol is traded
-        currency (Optional[str]): The currency of the symbol
-        name (Optional[str]): The full name of the security
-        price (Optional[float]): The current price of the symbol
-        market_cap (Optional[float]): The market capitalization of the symbol
-        beta (Optional[float]): The beta of the symbol
-        sector (Optional[str]): The sector of the symbol
-        country (Optional[str]): The country of the symbol
-        ipo (Optional[str]): The IPO date of the symbol
-        is_etf (Optional[bool]): Whether the symbol is an ETF
-        is_fund (Optional[bool]): Whether the symbol is a fund
-        is_trading (Optional[bool]): Whether the symbol is currently trading
     """
     
     # Class variable to store all symbols
@@ -42,7 +33,8 @@ class Symbol:
             The Symbol instance
         """
         if ticker not in cls.symbols:
-            cls.symbols[ticker] = Symbol(ticker)
+                s = Symbol(ticker)
+                cls.symbols[ticker] = s
         return cls.symbols[ticker]
     
     def __init__(self, ticker: str):
@@ -59,45 +51,75 @@ class Symbol:
         
         self.ticker = tokens[0]
         self.exchange = None if len(tokens) < 2 else tokens[1]
-        self.currency = None
-        self.name = None
-        self.price = None
-        self.market_cap = None
-        self.beta = None
-        self.sector = None
-        self.country = None
-        self.ipo = None
-        self.is_etf = None
-        self.is_fund = None
-        self.is_trading = None
         
-        # Load profile data from FMP API
+        self.name = None
+        self.type = None
+        self.currency = None
+        self.sector = None
+        self.industry = None
+        self.country = None
+        self.description = None
+        self.website = None
+        self.isin = None
+        self.inception = None
+        
         self._load_profile_data()
     
     def _load_profile_data(self):
-        """Load profile data from the FMP API."""
-        # This is a placeholder for the actual implementation
-        # In the real implementation, this would call the FMP API
-        pass
+        """Load profile data from appropriate API based on symbol type."""
+        try:
+            if self.ticker.endswith("USD"):
+                profile = fmp.profile_crypto(self.ticker)
+                if profile:
+                    self.type = TYPE_CRYPTO
+                    self._load_profile(profile)
+                    self.currency = "USD"
+                    self.exchange = "CRYPTO"
+                    return
+        except ValueError:
+            pass
+
+        try:
+            profile = fmp.profile(self.ticker)
+            if profile:
+                self.type = TYPE_STOCK
+                self._load_profile(profile)
+                return
+        except ValueError:
+            pass
+
+        try:
+            profile = fmp.profile_etf(self.ticker)
+            if profile:
+                self.type = TYPE_ETF
+                self._load_profile(profile)
+                return
+        except ValueError:
+            pass
+
+        raise ValueError(f"Symbol not found: {self.ticker}")
+
+
+    def _load_profile(self, profile: Dict[str, Any]):
+        """Load unified profile data."""
+        self.name = profile.get("companyName") or profile.get("name")
+        self.currency = profile.get("currency") or profile.get("navCurrency")
+        self.exchange = profile.get("exchangeShortName") or profile.get("exchange")
+        
+        self.sector = profile.get("sector")
+        self.industry = profile.get("industry")
+        self.country = profile.get("country") or profile.get("domicile")
+        
+        self.description = profile.get("description")
+        self.website = profile.get("website")
+        self.isin = profile.get("isin")
+
+        self.inception = datetime.strptime(profile.get("icoDate"), '%Y-%m-%d') if profile.get("icoDate") else None
+
     
     def __str__(self) -> str:
         """Return the string representation of the symbol."""
         return self.ticker + ":" + self.exchange if self.exchange else self.ticker
-    
-    def type_string(self) -> str:
-        """
-        Get the type of the symbol as a string.
-        
-        Returns:
-            The type of the symbol (ETF, Fund, Crypto, Stock)
-        """
-        if self.is_etf:
-            return "ETF"
-        if self.is_fund:
-            return "Fund"
-        if self.exchange == "CRYPTO":
-            return "Crypto"
-        return "Stock"
     
     def profile_string(self) -> str:
         """
@@ -107,8 +129,8 @@ class Symbol:
             A formatted string with the symbol's profile information
         """
         return f"{self.ticker}:{self.exchange} {self.name}\n" \
-            + f"{self.type_string()} {self.sector if self.sector is not None else ''} {self.country if self.country is not None else ''} {self.ipo if self.ipo is not None else ''}\n" \
-            + f"{self.currency} {self.price} (MktCap: {self.currency} {self.market_cap})"
+            + f"{self.type} {self.sector if self.sector is not None else ''} {self.country if self.country is not None else ''}\n" \
+            + f"{self.currency} {self.description if self.description is not None else ''}"
     
     def add_data(self, key: str, value: Any) -> None:
         """

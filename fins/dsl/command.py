@@ -51,8 +51,16 @@ class CommandArgs:
         if self.previous_output is None:
             self.previous_output = Output(None)
 
-    def has_previous_output(self):
-        return self.previous_output is not None and not self.previous_output.is_void()
+    def has_previous_output(self, type: Type = None) -> bool:
+        res: bool = self.previous_output is not None and not self.previous_output.is_void()
+        if type is not None:
+            return res and self.previous_output.is_type(type)
+        return res
+
+    def get_previous_basket(self) -> Basket:
+        if self.has_previous_output(Basket):
+            return self.previous_output.data
+        raise SyntaxError("Expected a basket as previous output")
 
 
 class Command(ABC):

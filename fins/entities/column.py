@@ -123,7 +123,7 @@ class Column(ABC):
             'parameters': params
         }
 
-    def __init__(self, alias: str = None):
+    def __init__(self, alias: str = None, args: Dict[str, str] = None):
         """Initialize column with optional alias."""
         self._alias = alias
 

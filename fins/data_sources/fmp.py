@@ -13,9 +13,9 @@ from .cache import (
 )
 from .watchdog import watchdog
 
-
 # Read the API key from the file
 key_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'api-keys', 'financialmodelingprep.key')
+
 try:
     with open(key_file_path, 'r') as file:
         API_KEY = file.read().strip()
@@ -31,41 +31,14 @@ except Exception as e:
     print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}")
     sys.exit(1)
 
-# def load_ticker(ticker: str):
-#     # ticker = ticker.replace(".", "-")
-#     fundamentals_raw = load_ticker_fundamentals(ticker)
-#     if fundamentals_raw is None:
-#         raise ValueError(f"No fundamentals data found for ticker '{ticker}'.")
-#     fundamentals = to_ticker_info(fundamentals_raw)
-#     history = load_ticker_history(ticker)
-#     return fundamentals, history
-
-# def to_ticker_info(fundamentals):
-#     if len(fundamentals) == 0:
-#         raise ValueError("No fundamentals data found.")
-#     fundamentals = fundamentals.iloc[0]
-#     info = TickerInfo(
-#         ticker=fundamentals["symbol"],
-#         name=str(fundamentals["companyName"]),
-#         exchange=str(fundamentals["exchange"]),
-#         currency=str(fundamentals["currency"]),
-#         industry=str(fundamentals["industry"]),
-#         sector=str(fundamentals["sector"]),
-#         country=str(fundamentals["country"]),
-#         market_cap=float(fundamentals["mktCap"]),
-#         beta=fundamentals["beta"],
-#         # trailing_pe=fundamentals["trailing_pe"],
-#         # forward_pe=fundamentals["forward_pe"]
-#     )
-#     return info
 
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()
 last_request_time = 0
-RATE_LIMIT_INTERVAL = 0.25
 
-# Print rate limit settings
+RATE_LIMIT_INTERVAL = 0.25
 print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
+
 
 def api_get(endpoint, params=None):
     """
@@ -83,7 +56,7 @@ def api_get(endpoint, params=None):
     if params is None:
         params = {}
     
-    url = f"https://financialmodelingprep.com/api/v3/{endpoint}"
+    url = f"https://financialmodelingprep.com/stable/{endpoint}"
     
     # Define a function to fetch the data if not in cache
     def fetch_data():
@@ -121,6 +94,29 @@ def search(query: str):
 def profile(ticker: str):
     return api_get(f"profile/{ticker}")
 
+def profile_index(ticker: str):
+    items = api_get(f"stable/quote", {"symbol":ticker})
+    if len(items) == 0:
+        raise ValueError("symbol not found")
+    if len(items) > 1:
+        raise ValueError("multiple symbols found")
+    return items[0]
+
+def profile_etf(ticker: str):
+    items = api_get(f"etf/info", {"symbol": ticker})
+    if len(items) == 0:
+        raise ValueError("symbol not found")
+    if len(items) > 1:
+        raise ValueError("multiple symbols found")
+    return items[0]
+
+def profile_crypto(ticker: str):
+    items = api_get(f"cryptocurrency-list", {"symbol": ticker})
+    item = next((item for item in items if item.get("symbol") == ticker), None)
+    if item is None:
+        raise ValueError("symbol not found")
+    return item
+
 def quote(ticker):
     return api_get(f"quote/{ticker}")
 
@@ -133,14 +129,6 @@ def tradeable_symbols():
 def etf_holder(ticker: str):
     return api_get(f"etf-holder/{ticker}")
 
-def load_ticker_fundamentals(ticker: str):
-    fundamentals_data = api_get(f"profile/{ticker}")
-    try:
-        return pd.DataFrame(fundamentals_data)
-    except Exception as e:
-        print(f"Error converting fundamentals data to DataFrame: {e}")
-        print(fundamentals_data)
-        raise e
 
 
 @watchdog(timeout=10, retries=3)

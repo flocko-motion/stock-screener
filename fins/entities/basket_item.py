@@ -5,6 +5,7 @@ This module defines the BasketItem class, which represents an item in a financia
 """
 
 from .entity import Entity
+from ..financial import Symbol
 
 
 class BasketItem(Entity):
@@ -27,6 +28,7 @@ class BasketItem(Entity):
         super().__init__()
         self.ticker = ticker
         self.amount = amount
+        self.symbol = Symbol.get(self.ticker)
     
     def __str__(self) -> str:
         """Return the string representation of the basket item."""
@@ -47,3 +49,6 @@ class BasketItem(Entity):
 
     def copy_of(self):
         return BasketItem(self.ticker, self.amount)
+
+
+
