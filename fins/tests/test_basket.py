@@ -25,6 +25,7 @@ class BasketTests(unittest.TestCase):
 
         data = basket.data()
         assert not (data is None)
+        print(f"\n{data}\n")
 
 
 if __name__ == "__main__":
