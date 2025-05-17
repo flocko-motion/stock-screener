@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 import pandas as pd
 import requests
@@ -161,10 +162,27 @@ def price_history(ticker: str):
     df = df.rename(columns={"adjClose": "close"})
     # Use actual prices instead of normalizing
     df.set_index("date", inplace=True)
-    df.to_pickle(history_path)
-    
-    # Set cache expiry (1 week)
-    set_cache_expiry(history_path, 7 * 24 * 3600)
-    
-    return df
 
+    df_monthly = df['close'].resample('M').last().reset_index()
+    df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
+
+
+    df_monthly.to_pickle(history_path)
+
+    set_cache_expiry(history_path, expiry_end_of_month())
+    
+    return df_monthly
+
+
+def expiry_end_of_month():
+    """ number of seconds until noon on the first day of next month"""
+    now = datetime.now()
+    # Get the first day of next month
+    if now.month == 12:
+        next_month = datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
+    else:
+        next_month = datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
+
+    # Calculate seconds until that timestamp
+    seconds_until_expiry = (next_month - now).total_seconds()
+    return int(seconds_until_expiry)
