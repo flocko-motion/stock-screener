@@ -92,7 +92,12 @@ def search(query: str):
     return api_get(f"search", {"query":query})
 
 def profile(ticker: str):
-    return api_get(f"profile/{ticker}")
+    res = api_get(f"profile", {"symbol":ticker})
+    if len(res) == 0:
+        raise Exception(f"No profile for {ticker}")
+    elif len(res) > 1:
+        raise Exception(f"More than one profile for {ticker}")
+    return res[0]
 
 def profile_index(ticker: str):
     items = api_get(f"stable/quote", {"symbol":ticker})
