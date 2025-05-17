@@ -7,3 +7,4 @@ Access them through Column.list() or Column.get(name).
 
 from ...financial import Symbol
 
+from .pe import PeColumn

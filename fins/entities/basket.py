@@ -50,6 +50,11 @@ class Basket(Entity):
         """Check if a symbol is in the basket."""
         return any(item.ticker == ticker for item in self.items)
 
+    def add_basket_items(self, basket: 'Basket'):
+        for item in basket.items:
+            self.add_item(item.copy_of())
+        pass
+
     def add_item(self, item: BasketItem) -> None:
         """
         Add an item to the basket.
@@ -72,7 +77,14 @@ class Basket(Entity):
             ticker: The ticker of the item to remove
         """
         self.items = [item for item in self.items if item.ticker != ticker]
-    
+
+    def copy_of(self) -> 'Basket':
+        copy = Basket(name=self.name)
+        for item in self.items:
+            copy.add_item(BasketItem(item.ticker, item.amount))
+        copy._columns = self._columns.copy()
+        return copy
+
     def add_column(self, column: Column) -> None:
         """Add a column to the basket."""
         self._columns.append(column)
@@ -93,17 +105,6 @@ class Basket(Entity):
         """Get list of column names/aliases in order."""
         return [col.alias() for col in self._columns]
 
-    def get_values(self, ticker: str) -> Dict[str, Any]:
-        """
-        Get all column values for a ticker.
-        
-        Returns:
-            Dictionary mapping column names to their values
-        """
-        return {
-            col.alias(): col.value(ticker)
-            for col in self._columns
-        }
 
     def operation(self, other: 'Basket', operator: str) -> 'Basket':
         if operator == "+":
@@ -197,8 +198,29 @@ class Basket(Entity):
         result._columns = self._columns.copy()
         
         return result
-    
-    def to_dataframe(self) -> pd.DataFrame:
+
+    def multiply(self, weight) -> 'Basket':
+        """
+        Return a new basket with all weights multiplied by a factor.
+        """
+        basket = self.copy_of()
+        for item in basket.items:
+            item.amount *= weight
+        return basket
+
+    def get_values(self, ticker: str) -> Dict[str, Any]:
+        """
+        Get all column values for a ticker.
+
+        Returns:
+            Dictionary mapping column names to their values
+        """
+        return {
+            col.alias(): col.value(ticker)
+            for col in self._columns
+        }
+
+    def data(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""
         # Start with basic ticker data
         data = {
@@ -213,7 +235,7 @@ class Basket(Entity):
         return pd.DataFrame(data)
     
     def to_dict(self) -> dict:
-        """Convert to dictionary."""
+        """Convert to dictionary describing the basket - does NOT contain the actual data points."""
         return {
             "class": "Basket",
             "name": self.name,
@@ -241,26 +263,6 @@ class Basket(Entity):
         
         return basket
 
-    def multiply(self, weight) -> 'Basket':
-        """
-        Return a new basket with all weights multiplied by a factor.
-        """
-        basket = self.copy_of()
-        for item in basket.items:
-            item.amount *= weight
-        return basket
-
-    def copy_of(self) -> 'Basket':
-        copy = Basket(name=self.name)
-        for item in self.items:
-            copy.add_item(BasketItem(item.ticker, item.amount))
-        copy._columns = self._columns.copy()
-        return copy
-
-    def add_basket_items(self, basket: 'Basket'):
-        for item in basket.items:
-            self.add_item(item.copy_of())
-        pass
 
 
 
