@@ -52,16 +52,16 @@ class Symbol:
         self.ticker = tokens[0]
         self.exchange = None if len(tokens) < 2 else tokens[1]
         
-        self.name = None
-        self.type = None
-        self.currency = None
-        self.sector = None
-        self.industry = None
-        self.country = None
-        self.description = None
-        self.website = None
-        self.isin = None
-        self.inception = None
+        self.name: str | None = None
+        self.type: str | None = None
+        self.currency: str | None = None
+        self.sector: str | None = None
+        self.industry: str | None = None
+        self.country: str | None = None
+        self.description: str | None = None
+        self.website: str | None = None
+        self.isin: str | None = None
+        self.inception: datetime | None = None
         
         self._load_profile_data()
     
@@ -82,7 +82,10 @@ class Symbol:
         try:
             profile = fmp.profile(self.ticker)
             if profile:
-                self.type = TYPE_STOCK
+                if profile.get("isEtf", False):
+                    self.type = TYPE_ETF
+                else:
+                    self.type = TYPE_STOCK
                 self._load_profile(profile)
                 return
         except ValueError:
