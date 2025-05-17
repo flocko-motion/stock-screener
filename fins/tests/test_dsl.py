@@ -252,12 +252,14 @@ class ColumnCommandTests(DslTests):
     
     def test_add_pe_column(self):
         """Test adding a PE column to a basket."""
-        output = self.execute_flow("AAPL -> .pe()")
+        output = self.execute_flow("AAPL -> .pe() -> .peg()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_items(basket, {"AAPL":1})
         self.assert_basket_has_column(basket, "pe")
+
+        assert basket.data()['pe'].iloc[0] > 0
         
     def test_add_multiple_columns(self):
         """Test adding multiple columns to a basket."""

@@ -208,17 +208,17 @@ class Basket(Entity):
             item.amount *= weight
         return basket
 
-    def get_values(self, ticker: str) -> Dict[str, Any]:
-        """
-        Get all column values for a ticker.
-
-        Returns:
-            Dictionary mapping column names to their values
-        """
-        return {
-            col.alias(): col.value(ticker)
-            for col in self._columns
-        }
+    # def get_values(self, ticker: str) -> Dict[str, Any]:
+    #     """
+    #     Get all column values for a ticker.
+    #
+    #     Returns:
+    #         Dictionary mapping column names to their values
+    #     """
+    #     return {
+    #         col.alias(): col.value(ticker)
+    #         for col in self._columns
+    #     }
 
     def data(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""

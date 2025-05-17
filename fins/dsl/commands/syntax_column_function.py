@@ -27,7 +27,7 @@ class ColumnFunctionCommand(Command):
         column_class:Type[Column] = Column.get(column_class_name)
         # TODO: parse col_func_args[2].value into args dict
         column_name = str(col_func_args[0].value) if col_func_args[0] is not None else column_class_name
-        column:Column = column_class(column_name, args={})
+        column:Column = column_class(alias=column_name)
         basket = args.get_previous_basket().copy_of()
         basket.add_column(column)
         return Output(basket, previous=args.previous_output)
