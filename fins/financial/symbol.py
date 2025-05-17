@@ -63,9 +63,6 @@ class Symbol:
         self.isin: str | None = None
         self.inception: datetime | None = None
 
-        self.market_cap: int | None = None
-        self.volume: int | None = None
-
         self._load_analytics_expiry = None
         self._analytics = {}
 
@@ -147,6 +144,8 @@ class Symbol:
             ratios = outlook.get("ratios")[0]
             for k0, k1 in self.ratios_field_mapping.items():
                 analytics[k0] = ratios.get(k1, None)
+        analytics["market_cap"] = outlook.get("profile", {}).get("mktCap", None)
+        analytics["volume"] = outlook.get("profile", {}).get("volAvg", None)
         self._analytics = analytics
 
 
