@@ -56,7 +56,7 @@ def api_get(endpoint, params=None):
     if params is None:
         params = {}
     
-    url = f"https://financialmodelingprep.com/stable/{endpoint}"
+    url = f"https://financialmodelingprep.com/{endpoint}"
     
     # Define a function to fetch the data if not in cache
     def fetch_data():
@@ -89,10 +89,10 @@ def api_get(endpoint, params=None):
     return cache_api_response(endpoint, params, fetch_data)
 
 def search(query: str):
-    return api_get(f"search", {"query":query})
+    return api_get(f"api/v3/search", {"query":query})
 
 def profile(ticker: str):
-    res = api_get(f"profile", {"symbol":ticker})
+    res = api_get(f"stable/profile", {"symbol":ticker})
     if len(res) == 0:
         raise Exception(f"No profile for {ticker}")
     elif len(res) > 1:
@@ -108,7 +108,7 @@ def profile_index(ticker: str):
     return items[0]
 
 def profile_etf(ticker: str):
-    items = api_get(f"etf/info", {"symbol": ticker})
+    items = api_get(f"stable/etf/info", {"symbol": ticker})
     if len(items) == 0:
         raise ValueError("symbol not found")
     if len(items) > 1:
@@ -116,28 +116,33 @@ def profile_etf(ticker: str):
     return items[0]
 
 def profile_crypto(ticker: str):
-    items = api_get(f"cryptocurrency-list", {"symbol": ticker})
+    items = api_get(f"stable/cryptocurrency-list", {"symbol": ticker})
     item = next((item for item in items if item.get("symbol") == ticker), None)
     if item is None:
         raise ValueError("symbol not found")
     return item
 
 def quote(ticker):
-    return api_get(f"quote/{ticker}")
+    res = api_get(f"stable/quote", {"symbol":ticker})
+    if len(res) == 0:
+        raise ValueError(f"No quote for {ticker}")
+    if len(res) > 1:
+        raise ValueError("multiple symbols found")
+    return res[0]
 
 def search_name(query: str):
-    return api_get(f"search-name", {"query":query})
+    return api_get(f"stable/search-name", {"query":query})
 
 def tradeable_symbols():
-    return api_get(f"available-traded/list")
+    return api_get(f"api/v3/available-traded/list")
 
 def etf_holder(ticker: str):
-    return api_get(f"etf-holder/{ticker}")
+    return api_get("funds/disclosure-holders-latest",{"symbol":ticker})
 
 
 
-@watchdog(timeout=10, retries=3)
-def load_ticker_history(ticker: str):
+@watchdog(timeout=30, retries=3)
+def price_history(ticker: str):
     history_path = get_cache_path(ticker, "fmp_history", "pkl")
     if os.path.exists(history_path) and is_cache_valid(history_path):
         print(f"Loading {ticker} from cache..")
@@ -145,7 +150,7 @@ def load_ticker_history(ticker: str):
         return df
 
     # Fetch full history without date parameters
-    prices_response = api_get(f"historical-price-full/{ticker}", {})
+    prices_response = api_get(f"api/v3/historical-price-full/{ticker}", {"from":"1900-01-01"})
     prices_data = prices_response.get("historical", [])
 
     prices_df = pd.DataFrame(prices_data)

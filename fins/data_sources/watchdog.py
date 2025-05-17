@@ -28,6 +28,8 @@ def watchdog(timeout: int, retries: int):
 				def target():
 					try:
 						result[0] = func(*args, **kwargs)
+					except OSError as e:
+						raise e
 					except Exception as e:
 						exception[0] = e
 

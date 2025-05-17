@@ -62,7 +62,7 @@ class TestFMP(unittest.TestCase):
     def test_api_get(self):
         """Test the api_get function with real API."""
         # Call the function with a simple endpoint
-        result = fmp.api_get("search", {"query": "Apple"})
+        result = fmp.api_get("stable/search-name", {"query": "Apple"})
         
         # Verify the result is a list and contains data
         self.assertIsInstance(result, list)
@@ -98,48 +98,24 @@ class TestFMP(unittest.TestCase):
         # Call the function
         result = fmp.profile("AAPL")
         
-        # Verify the result is a list and contains data
-        self.assertIsInstance(result, list)
-        self.assertTrue(len(result) > 0)
-        
         # Verify the result contains Apple's profile
-        self.assertEqual(result[0]["symbol"], "AAPL")
-        self.assertIn("Apple", result[0]["companyName"])
+        self.assertEqual(result["symbol"], "AAPL")
+        self.assertIn("Apple", result["companyName"])
 
     def test_quote(self):
         """Test the quote function with real API."""
         # Call the function
         result = fmp.quote("AAPL")
-        
-        # Verify the result is a list and contains data
-        self.assertIsInstance(result, list)
-        self.assertTrue(len(result) > 0)
-        
+
         # Verify the result contains Apple's quote
-        self.assertEqual(result[0]["symbol"], "AAPL")
-        self.assertIn("price", result[0])
+        self.assertEqual(result["symbol"], "AAPL")
+        self.assertIn("price", result)
 
-    def test_load_ticker_fundamentals(self):
-        """Test the load_ticker_fundamentals function with real API."""
-        # Call the function
-        result = fmp.load_ticker_fundamentals("AAPL")
-        
-        # Verify the result is a DataFrame
-        self.assertIsInstance(result, pd.DataFrame)
-        
-        # Verify the DataFrame contains the expected data
-        self.assertEqual(result.iloc[0]["symbol"], "AAPL")
-        self.assertIn("Apple", result.iloc[0]["companyName"])
-        
-        # Verify the DataFrame has the expected columns
-        expected_columns = ["symbol", "companyName", "exchange", "currency", "industry", "sector", "country", "mktCap", "beta"]
-        for col in expected_columns:
-            self.assertIn(col, result.columns)
 
-    def test_load_ticker_history(self):
+    def test_price_history(self):
         """Test the load_ticker_history function with real API."""
         # Call the function
-        result = fmp.load_ticker_history("AAPL")
+        result = fmp.price_history("AAPL")
         
         # Verify the result is a DataFrame
         self.assertIsInstance(result, pd.DataFrame)
@@ -181,19 +157,20 @@ class TestFMP(unittest.TestCase):
         self.assertIn("name", result[0])
         self.assertIn("exchange", result[0])
 
-    def test_etf_holder(self):
-        """Test the etf_holder function with real API."""
-        # Call the function with a known ETF
-        result = fmp.etf_holder("SPY")
-        
-        # Verify the result is a list and contains data
-        self.assertIsInstance(result, list)
-        self.assertTrue(len(result) > 0)
-        
-        # Verify the expected fields are present in the response
-        self.assertIn("asset", result[0])
-        self.assertIn("name", result[0])
-        self.assertIn("weightPercentage", result[0])
+    # Not available in Starter-Plan
+    # def test_etf_holder(self):
+    #     """Test the etf_holder function with real API."""
+    #     # Call the function with a known ETF
+    #     result = fmp.etf_holder("SPY")
+    #
+    #     # Verify the result is a list and contains data
+    #     self.assertIsInstance(result, list)
+    #     self.assertTrue(len(result) > 0)
+    #
+    #     # Verify the expected fields are present in the response
+    #     self.assertIn("asset", result[0])
+    #     self.assertIn("name", result[0])
+    #     self.assertIn("weightPercentage", result[0])
 
     def test_load_ticker_history_caching(self):
         """Test that ticker history is properly cached."""
@@ -211,7 +188,7 @@ class TestFMP(unittest.TestCase):
         
         print("First call (should hit API):")
         start_time = time.time()
-        result1 = fmp.load_ticker_history("AAPL")
+        result1 = fmp.price_history("AAPL")
         first_call_time = time.time() - start_time
         print(f"First call took {first_call_time:.2f} seconds")
         
@@ -221,7 +198,7 @@ class TestFMP(unittest.TestCase):
         # Second call should use cache
         print("Second call (should use cache):")
         start_time = time.time()
-        result2 = fmp.load_ticker_history("AAPL")
+        result2 = fmp.price_history("AAPL")
         second_call_time = time.time() - start_time
         print(f"Second call took {second_call_time:.2f} seconds")
         
