@@ -7,6 +7,7 @@
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: implementing first Column &quot;Pe&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -289,15 +290,7 @@
       <workItem from="1745584317085" duration="520000" />
       <workItem from="1745824243462" duration="621000" />
       <workItem from="1746545250465" duration="683000" />
-      <workItem from="1747479563886" duration="6700000" />
-    </task>
-    <task id="LOCAL-00002" summary="fix: commands 'create' and 'union' are working and test-covered">
-      <option name="closed" value="true" />
-      <created>1742330784250</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1742330784250</updated>
+      <workItem from="1747479563886" duration="8407000" />
     </task>
     <task id="LOCAL-00003" summary="fix: commands 'subtract' are working and test-covered">
       <option name="closed" value="true" />
@@ -683,7 +676,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747485445164</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="feat: implementing first Column &quot;Pe&quot;">
+      <option name="closed" value="true" />
+      <created>1747486418391</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1747486418391</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -868,7 +869,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>137</line>
+          <line>143</line>
           <option name="timeStamp" value="116" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -890,6 +891,11 @@
           <url>file://$PROJECT_DIR$/fins/entities/column.py</url>
           <line>131</line>
           <option name="timeStamp" value="124" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_fmp.py</url>
+          <line>123</line>
+          <option name="timeStamp" value="125" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -926,7 +932,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$column.coverage" NAME="column Coverage Results" MODIFIED="1743250672207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/entities" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_search.coverage" NAME="pytest for test_fmp.TestFMP.test_search Coverage Results" MODIFIED="1747482892074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_index_constituents_IndexConstituentsTests_test_get_constituents.coverage" NAME="pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents Coverage Results" MODIFIED="1745583998596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1747486240215" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1747486317269" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_fmp_TestFMP_test_etf_holder.coverage" NAME="pytest for tests.test_fmp.TestFMP.test_etf_holder Coverage Results" MODIFIED="1747481133600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history_caching.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history_caching Coverage Results" MODIFIED="1747483119490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

@@ -131,6 +131,12 @@ def quote(ticker):
         raise ValueError("multiple symbols found")
     return res[0]
 
+def outlook(ticker):
+    """ combined info on a stock or ETF """
+    res = api_get(f"api/v4/company-outlook", {"symbol":ticker})
+    return res
+
+
 def search_name(query: str):
     return api_get(f"stable/search-name", {"query":query})
 

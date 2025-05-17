@@ -62,8 +62,20 @@ class Symbol:
         self.website: str | None = None
         self.isin: str | None = None
         self.inception: datetime | None = None
-        
+
+        self._load_analytics_expiry = None
+        self.market_cap: int | None = None
+        self.volume: int | None = None
+
+        self.return_on_equity_ttm: float | None = None
+        self.net_profit_margin_ttm: float | None = None
+        self.pe_ratio_ttm: float | None = None
+        self.peg_ratio_ttm: float | None = None
+        self.dividend_yield_ttm: float | None = None
+
         self._load_profile_data()
+        self._load_analytics()
+
     
     def _load_profile_data(self):
         """Load profile data from appropriate API based on symbol type."""
@@ -119,7 +131,20 @@ class Symbol:
 
         self.inception = datetime.strptime(profile.get("icoDate"), '%Y-%m-%d') if profile.get("icoDate") else None
 
-    
+
+    def _load_analytics(self):
+        if not (self._load_analytics_expiry is None) and self._load_analytics_expiry > datetime.now():
+            return
+        analytics = fmp.outlook(self.ticker)
+
+        self.return_on_equity_ttm = analytics.get("ratios", {}).get("returnOnEquityTTM", None)
+        self.net_profit_margin_ttm = analytics.get("ratios", {}).get("netProfitMarginTTM", None)
+        self.pe_ratio_ttm = analytics.get("ratios", {}).get("peRatioTTM", None)
+        self.peg_ratio_ttm = analytics.get("ratios", {}).get("pegRatioTTM", None)
+        self.dividend_yield_ttm = analytics.get("ratios", {}).get("dividendYielTTM", None)
+
+
+
     def __str__(self) -> str:
         """Return the string representation of the symbol."""
         return self.ticker + ":" + self.exchange if self.exchange else self.ticker
@@ -156,4 +181,16 @@ class Symbol:
         Returns:
             The value associated with the key, or the default value if not found
         """
-        return getattr(self, key, default) 
+        return getattr(self, key, default)
+
+
+
+def expiry_end_of_month():
+    """ number of seconds until noon on the first day of next month"""
+    now = datetime.now()
+    # Get the first day of next month
+    if now.month == 12:
+        next_month = datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
+    else:
+        next_month = datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
+    return next_month - now
