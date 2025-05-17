@@ -63,15 +63,11 @@ class Symbol:
         self.isin: str | None = None
         self.inception: datetime | None = None
 
-        self._load_analytics_expiry = None
         self.market_cap: int | None = None
         self.volume: int | None = None
 
-        self.return_on_equity_ttm: float | None = None
-        self.net_profit_margin_ttm: float | None = None
-        self.pe_ratio_ttm: float | None = None
-        self.peg_ratio_ttm: float | None = None
-        self.dividend_yield_ttm: float | None = None
+        self._load_analytics_expiry = None
+        self._analytics = {}
 
         self._load_profile_data()
         self._load_analytics()
@@ -131,19 +127,32 @@ class Symbol:
 
         self.inception = datetime.strptime(profile.get("icoDate"), '%Y-%m-%d') if profile.get("icoDate") else None
 
+    ratios_field_mapping = {
+        "return_on_equity_ttm": "returnOnEquityTTM",
+        "net_profit_margin_ttm": "netProfitMarginTTM",
+        "pe_ratio_ttm": "peRatioTTM",
+        "peg_ratio_ttm": "pegRatioTTM",
+        "dividend_yield_ttm":"dividendYielTTM",
+    }
 
     def _load_analytics(self):
+        if not (self.type == TYPE_STOCK or self.type == TYPE_ETF):
+            return
         if not (self._load_analytics_expiry is None) and self._load_analytics_expiry > datetime.now():
             return
-        analytics = fmp.outlook(self.ticker)
+        outlook = fmp.outlook(self.ticker)
+        self._load_analytics_expiry = beginning_of_next_month()
+        analytics = {}
+        if len(outlook.get("ratios", [])) == 1:
+            ratios = outlook.get("ratios")[0]
+            for k0, k1 in self.ratios_field_mapping.items():
+                analytics[k0] = ratios.get(k1, None)
+        self._analytics = analytics
 
-        self.return_on_equity_ttm = analytics.get("ratios", {}).get("returnOnEquityTTM", None)
-        self.net_profit_margin_ttm = analytics.get("ratios", {}).get("netProfitMarginTTM", None)
-        self.pe_ratio_ttm = analytics.get("ratios", {}).get("peRatioTTM", None)
-        self.peg_ratio_ttm = analytics.get("ratios", {}).get("pegRatioTTM", None)
-        self.dividend_yield_ttm = analytics.get("ratios", {}).get("dividendYielTTM", None)
 
-
+    def get_analytics(self, field: str) -> float | None:
+        self._load_analytics()
+        return self._analytics.get(field, None)
 
     def __str__(self) -> str:
         """Return the string representation of the symbol."""
@@ -185,12 +194,10 @@ class Symbol:
 
 
 
-def expiry_end_of_month():
-    """ number of seconds until noon on the first day of next month"""
+def beginning_of_next_month():
     now = datetime.now()
     # Get the first day of next month
     if now.month == 12:
-        next_month = datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
+        return datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
     else:
-        next_month = datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
-    return next_month - now
+        return datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
