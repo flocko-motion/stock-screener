@@ -23,10 +23,10 @@ class PeColumn(Column):
     def value(self, ticker: str) -> Optional[float]:
         """Get P/E ratio for a ticker."""
         symbol = Symbol.get(ticker)
-        
-        price = symbol.price
+
+        # TODO: Symbol needs to support price and eps query!
+        price = symbol.price()
         eps = symbol.get_data('ttm_eps') if self.mode == "ttm" else symbol.get_data('forward_eps')
-        
         if price is None or eps is None or eps == 0:
             return None
             

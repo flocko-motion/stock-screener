@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: debugged tests for Symbol">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: implementing first Column &quot;Pe&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/columns/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/pe.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +69,7 @@
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
     "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Run",
     "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Debug",
-    "Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor": "Run",
+    "Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor": "Debug",
     "Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
     "Python tests.pytest for test_fmp.TestFMP.test_api_get.executor": "Run",
     "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor": "Debug",
@@ -291,7 +289,7 @@
       <workItem from="1745584317085" duration="520000" />
       <workItem from="1745824243462" duration="621000" />
       <workItem from="1746545250465" duration="683000" />
-      <workItem from="1747479563886" duration="5485000" />
+      <workItem from="1747479563886" duration="5851000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cleaning up codebase">
       <option name="closed" value="true" />
@@ -677,7 +675,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747483787642</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="feat: implementing first Column &quot;Pe&quot;">
+      <option name="closed" value="true" />
+      <created>1747485086869</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1747485086869</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -695,7 +701,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: commands 'subtract' are working and test-covered" />
     <MESSAGE value="feat: storing and retrieving variables works now" />
     <MESSAGE value="feat: introducing direct operations" />
     <MESSAGE value="feat: upgraded parser to universal expressions" />
@@ -720,7 +725,8 @@
     <MESSAGE value="fix: fetching symbol with fmp" />
     <MESSAGE value="fix: all fmp tests succeed" />
     <MESSAGE value="fix: debugged tests for Symbol" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: debugged tests for Symbol" />
+    <MESSAGE value="feat: implementing first Column &quot;Pe&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: implementing first Column &quot;Pe&quot;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -892,13 +898,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>14</line>
-          <option name="timeStamp" value="121" />
+          <line>25</line>
+          <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>16</line>
-          <option name="timeStamp" value="122" />
+          <url>file://$PROJECT_DIR$/fins/entities/column.py</url>
+          <line>131</line>
+          <option name="timeStamp" value="124" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -950,7 +956,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1743284460273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_quote.coverage" NAME="pytest for test_fmp.TestFMP.test_quote Coverage Results" MODIFIED="1747483083530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_pe_column.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column Coverage Results" MODIFIED="1743578250802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_basket_BasketTests_test_simple_basket.coverage" NAME="pytest for test_basket.BasketTests.test_simple_basket Coverage Results" MODIFIED="1747485069849" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_basket_BasketTests_test_simple_basket.coverage" NAME="pytest for test_basket.BasketTests.test_simple_basket Coverage Results" MODIFIED="1747485250137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file_overwrite.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite Coverage Results" MODIFIED="1743285481117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$.coverage" NAME=" Coverage Results" MODIFIED="1742330443546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_tradeable_symbols.coverage" NAME="pytest for test_fmp.TestFMP.test_tradeable_symbols Coverage Results" MODIFIED="1747483101329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
