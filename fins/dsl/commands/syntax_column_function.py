@@ -26,8 +26,20 @@ class ColumnFunctionCommand(Command):
         column_class_name = col_func_args[1].value
         column_class:Type[Column] = Column.get(column_class_name)
         # TODO: parse col_func_args[2].value into args dict
-        column_name = str(col_func_args[0].value) if col_func_args[0] is not None else column_class_name
-        column:Column = column_class(alias=column_name)
+        if isinstance(col_func_args[0], Tree):
+            column_name = str(col_func_args[0].children[0])
+        else:
+            column_name = str(col_func_args[0].value) if col_func_args[0] is not None else column_class_name
+
+        # fetch named args for column function
+        col_func_args_dict = {
+            "alias": column_name
+        }
+        if len(col_func_args) == 3 and isinstance(col_func_args[2], Tree):
+            for arg in col_func_args[2].children:
+                col_func_args_dict[str(arg.children[0])] = str(arg.children[1].children[0])
+
+        column:Column = column_class(**col_func_args_dict)
         basket = args.get_previous_basket().copy_of()
         basket.add_column(column)
         return Output(basket, previous=args.previous_output)

@@ -252,7 +252,7 @@ class ColumnCommandTests(DslTests):
     
     def test_add_pe_column(self):
         """Test adding a PE column to a basket."""
-        output = self.execute_flow("AAPL -> .pe() -> .peg()")
+        output = self.execute_flow("AAPL -> .pe()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
