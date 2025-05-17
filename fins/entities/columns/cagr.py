@@ -12,5 +12,4 @@ class CagrColumn(Column):
         self.years = int(years) if years else None
 
     def value(self, ticker: str) -> Optional[float]:
-        # TODO: implement
-        return 0
+        return Symbol.get(ticker).get_cagr(years=self.years)

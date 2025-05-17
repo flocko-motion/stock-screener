@@ -6,6 +6,8 @@ This module defines the Symbol class, which represents a financial symbol such a
 from datetime import datetime
 from typing import Optional, Dict, Any, ClassVar
 
+import pandas as pd
+
 from fins.data_sources import fmp
 
 TYPE_STOCK="stock"
@@ -68,6 +70,9 @@ class Symbol:
 
         self._load_profile_data()
         self._load_analytics()
+
+        self.history = None
+        self._load_history_expiry = None
 
     
     def _load_profile_data(self):
@@ -148,14 +153,43 @@ class Symbol:
         analytics["volume"] = outlook.get("profile", {}).get("volAvg", None)
         self._analytics = analytics
 
+    def _load_history(self):
+        if not (self._load_history_expiry is None) and self._load_history_expiry > datetime.now():
+            return
+        self.history = fmp.price_history(self.ticker)
+        self._load_history_expiry = beginning_of_next_month()
 
     def get_analytics(self, field: str) -> float | None:
         self._load_analytics()
         return self._analytics.get(field, None)
 
+    def get_cagr(self, years: int) -> float | None:
+        self._load_history()
+        if self.history is None or len(self.history) == 0:
+            return None
+        latest_date = self.history['date'].max()
+        start_date = latest_date - pd.DateOffset(years=years)
+
+        start_prices = self.history[self.history['date'] >= start_date].head(1)
+        end_prices = self.history[self.history['date'] <= latest_date].tail(1)
+
+        # Check if we have both start and end prices
+        if len(start_prices) == 0 or len(end_prices) == 0:
+            return None
+
+        start_price = start_prices['close'].values[0]
+        end_price = end_prices['close'].values[0]
+
+        if start_price <= 0:  # Avoid division by zero or negative values
+            return None
+
+        cagr = (end_price / start_price) ** (1 / years) - 1
+        return cagr
+
     def __str__(self) -> str:
         """Return the string representation of the symbol."""
         return self.ticker + ":" + self.exchange if self.exchange else self.ticker
+
     
     def profile_string(self) -> str:
         """
