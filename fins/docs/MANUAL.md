@@ -117,13 +117,14 @@ Sort and filter using column references:
 
 ```
 # Sorting
-asc(.pe)                       # Sort by PE ratio ascending
-desc(.pe)                      # Sort by PE ratio descending
+asc(.pe)                      # Sort by PE ratio ascending
+asc(.pe, .mcap)               # Sort by PE ratio, then market cap ascending
+desc(.pe)                     # Sort by PE ratio descending
 desc(.mcap, nulls=last)       # Sort by market cap, nulls at end
 
 # Multiple columns
-asc(.sector, .pe)             # Sort by sector, then PE ascending
-desc(.mcap, .div)             # Sort by market cap, then dividend yield
+sort(.sector, .pe)             # Sort by sector, then PE ascending
+sort(.mcap, -.div)             # Sort by market cap ascending, then dividend yield descending
 
 # Special sorting
 shuffle()                      # Random order

@@ -229,11 +229,7 @@ class Command(ABC):
         command_type = args.tree.data
         handler = cls.get_command(command_type)
         return handler.execute(args)
-        
-    def _execute_subcommand(self, command_type: str, tree: Tree) -> 'Output':
-        """Execute a subcommand of this command."""
-        handler = self.get_command(command_type)
-        return handler.execute(CommandArgs(tree=tree, previous_output=None))
+
 
     @staticmethod
     def _parse_weight(value):

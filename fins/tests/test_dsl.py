@@ -293,22 +293,38 @@ class ColumnCommandTests(DslTests):
 class SortCommandTests(DslTests):
     """Tests for sort commands."""
     
-    def test_sort_by_market_cap(self):
+    def test_sort_by_market_cap_asc(self):
         """Test sorting a basket by market cap."""
-        output = self.execute_flow("AAPL MSFT GOOGL -> sort mcap desc")
+        output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> asc(.mcap)")
         
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
+        self.assert_basket_sorted_by(basket, "mcap", ascending=True)
+
+    def test_sort_by_market_cap_desc(self):
+        """Test sorting a basket by market cap."""
+        output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> desc(.mcap)")
+
+        self.assertIsInstance(output, Output)
+        basket = self.basket_from_output(output)
+        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
+        self.assert_basket_sorted_by(basket, "mcap", ascending=False)
+
+    def test_multisort(self):
+        output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> .pe() -> asc(.mcap, .pe)")
+
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, ["AAPL", "MSFT", "GOOGL"])
         self.assert_basket_sorted_by(basket, "mcap", ascending=False)
         
-    def test_explicit_sort_syntax(self):
-        """Test the explicit sort syntax."""
+    def test_implicit_sort_syntax(self):
         # First create a basket with tech stocks
         self.execute_flow("AAPL MSFT GOOGL -> $tech")
         
-        # Then sort using explicit syntax
-        output = self.execute_flow("$tech sort pe")
+        # Then sort by a column not yet existing
+        output = self.execute_flow("$tech -> asc(.pe)")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)

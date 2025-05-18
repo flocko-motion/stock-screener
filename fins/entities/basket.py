@@ -208,17 +208,33 @@ class Basket(Entity):
             item.amount *= weight
         return basket
 
-    # def get_values(self, ticker: str) -> Dict[str, Any]:
-    #     """
-    #     Get all column values for a ticker.
-    #
-    #     Returns:
-    #         Dictionary mapping column names to their values
-    #     """
-    #     return {
-    #         col.alias(): col.value(ticker)
-    #         for col in self._columns
-    #     }
+    def sort(self, criteria:List) -> 'Basket':
+        """Sort the basket, each sort criteria is a tuple (field, direction) with direction being 1 (asc) or -1 (desc)"""
+        if len(criteria) != 1:
+            raise ValueError(f"Invalid sort criteria: {criteria} - currently only a single criteria is supported")
+
+        field, direction = criteria[0]
+        result = self.copy_of()
+
+        # Special case for built-in fields
+        if field == "ticker":
+            result.items.sort(key=lambda item: item.ticker, reverse=(direction == -1))
+        elif field == "weight" or field == "amount":
+            result.items.sort(key=lambda item: item.amount, reverse=(direction == -1))
+        else:
+            # For custom columns, get the column and use its value for sorting
+            column = self.get_column(field)
+            if column is None:
+                raise ValueError(f"Unknown sort field: {field}")
+
+            # Sort based on column values
+            result.items.sort(
+                key=lambda item: column.value(item.ticker),
+                reverse=(direction == -1)
+            )
+
+        return result
+
 
     def data(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""

@@ -6,17 +6,18 @@ command_chain: command ("->" command)*
 ?command: sequence | function_call | column_function
 
 // Functions and arguments
-function_call: [assignment] NAME "(" [arg_list] ")"
-column_function: [column_assignment] "." NAME "(" [arg_list] ")"
-function_definition: "function" NAME "(" [arg_list] ")" "{" command_chain "}"
-management_command: NAME "(" [arg_list] ")"
+function_call: NAME "(" [arg_list_positional_and_named] ")"
+column_function: [column_assignment] "." NAME "(" [arg_list_named] ")"
+function_definition: "function" NAME "(" [arg_list_named] ")" "{" command_chain "}"
+management_command: NAME "(" [arg_list_named] ")"
 
 // Assignments
-assignment: NAME "="
 column_assignment: "." NAME "="
 
 // Arguments
-arg_list: named_arg ("," named_arg)*
+arg_list_positional_and_named: (unnamed_arg ",")* unnamed_arg | named_arg ("," named_arg)*
+arg_list_named: named_arg ("," named_arg)*
+unnamed_arg: NAME | column_ref
 named_arg: NAME "=" value
 value: NUMBER | STRING | NAME | column_ref | list
 column_ref: "." NAME
@@ -32,7 +33,7 @@ help_command: "?" [help_topic]
 help_topic: NAME | "." NAME | "." | "*"
 
 // Notes system
-note_command: "@" [NAME] "(" [arg_list] ")" [NOTE_TEXT]
+note_command: "@" [NAME] "(" [arg_list_named] ")" [NOTE_TEXT]
 NOTE_TEXT: /[^\n]+(\n[^@][^\n]*)*/
 
 // Variables and symbols
