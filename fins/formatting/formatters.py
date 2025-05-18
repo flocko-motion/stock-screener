@@ -34,23 +34,22 @@ class BasketFormatter(ABC):
         """Convert a basket into a table structure with computed column widths."""
         # Define columns
         columns = [
-            Column("Weight", ColumnType.WEIGHT),
-            Column("Symbol", ColumnType.STRING)
+            Column("weight", ColumnType.WEIGHT),
+            Column("ticker", ColumnType.STRING)
         ]
-        columns.extend(Column(name, ColumnType.FLOAT) for name in basket.columns)
+        columns.extend(Column(name, ColumnType.FLOAT) for name in basket.list_columns())
 
         # Create table
         table = Table(columns)
 
         # Add rows sorted by weight
-        sorted_items = sorted(basket.items, key=lambda x: (-x.amount, x.ticker))
-        for item in sorted_items:
+        for item in basket.items:
             values = {
-                "Weight": f"{item.amount:.4f}",
-                "Symbol": item.ticker
+                "weight": f"{item.amount:.4f}",
+                "ticker": item.ticker
             }
-            for col_name in basket.columns:
-                values[col_name] = str(basket.columns[col_name].get(item))
+            for col_name in basket.list_columns():
+                values[col_name] = basket.get_column(col_name).value_str(item.ticker)
             table.add_row(values)
 
         return table

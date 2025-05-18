@@ -77,6 +77,16 @@ class Column(ABC):
         """
         pass
 
+    @abstractmethod
+    def value_str(self, ticker: str) -> str:
+        """
+        Get the column value for a ticker and format it nicely
+        Must be implemented by each column type.
+
+        The actual data fetching/symbol resolution happens in a deeper layer.
+        """
+        pass
+
     def __str__(self) -> str:
         """String representation of the column."""
         return self.__class__.__name__.lower().replace('column', '')

@@ -168,7 +168,11 @@ class Symbol:
         if self.history is None or len(self.history) == 0:
             return None
         latest_date = self.history['date'].max()
-        start_date = latest_date - pd.DateOffset(years=years)
+        start_date = self.history['date'].min()
+        if years:
+            start_date = max(latest_date - pd.DateOffset(years=years), start_date)
+        years = (latest_date - start_date) / pd.Timedelta(days=365.25)
+
 
         start_prices = self.history[self.history['date'] >= start_date].head(1)
         end_prices = self.history[self.history['date'] <= latest_date].tail(1)

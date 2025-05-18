@@ -170,7 +170,7 @@ def price_history(ticker: str):
     df.set_index("date", inplace=True)
     df.sort_values("date")
 
-    df_monthly = df['close'].resample('M').last().reset_index()
+    df_monthly = df['close'].resample('ME').last().reset_index()
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
 
 

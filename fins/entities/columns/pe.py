@@ -13,3 +13,7 @@ class PeColumn(Column):
 
     def value(self, ticker: str) -> Optional[float]:
         return Symbol.get(ticker).get_analytics("pe_ratio_ttm")
+
+    def value_str(self, ticker: str) -> str:
+        v = self.value(ticker)
+        return "n/a" if v is None else  f"{int(v)}"
