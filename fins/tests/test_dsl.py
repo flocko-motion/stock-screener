@@ -318,28 +318,23 @@ class ComplexFlowTests(DslTests):
     
     def test_multiple_columns(self):
         """Test adding multiple columns."""
-        output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap() -> .div()")
+        output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap() -> .yield()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
         self.assert_basket_has_column(basket, "mcap")
-        self.assert_basket_has_column(basket, "div")
+        self.assert_basket_has_column(basket, "yield")
 
     def test_complex_column_flow(self):
         """Test complex column operations."""
-        output = self.execute_flow("""
-            AAPL MSFT GOOGL -> 
-            .pe() ->                    # Add PE column
-            .growth = .cagr(years=5) -> # Add CAGR with custom name
-            .div()                      # Add dividend yield
-        """)
+        output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .growth = .cagr(years=5) ->  .yield()")
         
         self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
         self.assert_basket_has_column(basket, "growth")
-        self.assert_basket_has_column(basket, "div")
+        self.assert_basket_has_column(basket, "yield")
 
 
 if __name__ == "__main__":
