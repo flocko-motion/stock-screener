@@ -157,7 +157,7 @@ def price_history(ticker: str):
         return df
 
     # Fetch full history without date parameters
-    prices_response = api_get(f"api/v3/historical-price-full/{ticker}", {"from":"1900-01-01"})
+    prices_response = api_get(f"api/v3/historical-price-full/{ticker}", {"from":"1980-01-01"})
     prices_data = prices_response.get("historical", [])
 
     prices_df = pd.DataFrame(prices_data)
@@ -167,7 +167,8 @@ def price_history(ticker: str):
     df = prices_df[["date", "adjClose"]]
     df = df.rename(columns={"adjClose": "close"})
     # Use actual prices instead of normalizing
-    df.set_index("date", inplace=True).sort_values("date")
+    df.set_index("date", inplace=True)
+    df.sort_values("date")
 
     df_monthly = df['close'].resample('M').last().reset_index()
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
