@@ -3,6 +3,8 @@ BasketItem Entity
 
 This module defines the BasketItem class, which represents an item in a financial basket.
 """
+from datetime import datetime
+from typing import Optional, Dict, Any, List
 
 from .entity import Entity
 from ..financial import Symbol
@@ -17,7 +19,13 @@ class BasketItem(Entity):
         amount (float): The quantity of the item
     """
     
-    def __init__(self, ticker: str, amount: float = 1):
+    def __init__(self, ticker: str, amount: float = 1,
+                 id: Optional[str] = None,
+                 created_at: Optional[datetime] = None,
+                 updated_at: Optional[datetime] = None,
+                 tags: Optional[List[str]] = None,
+                 metadata: Optional[Dict[str, Any]] = None,
+                 ):
         """
         Initialize a basket item.
         
@@ -25,7 +33,7 @@ class BasketItem(Entity):
             ticker: The ticker of the financial instrument
             amount: The quantity of the item (default: 1)
         """
-        super().__init__()
+        super().__init__(id=id, created_at=created_at, updated_at=updated_at, tags=tags, metadata=metadata)
         self.ticker = ticker
         self.amount = amount
         self.symbol = Symbol.get(self.ticker)

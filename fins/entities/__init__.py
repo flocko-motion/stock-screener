@@ -26,3 +26,15 @@ __all__ = [
     'Token',
 ]
 
+def entity_from_dict(data: dict) -> 'Entity':
+    data_copy = data.copy()
+    class_name = data_copy.pop("class", None)
+    
+    if not class_name:
+        raise ValueError("Class name not provided in data dictionary")
+
+    if class_name in globals():
+        cls = globals()[class_name]
+        return cls.from_dict(data_copy)  # Pass the data without the "class" key
+    
+    raise ValueError(f"Class {class_name} not found")

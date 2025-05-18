@@ -141,7 +141,8 @@ class Entity(JsonSerializable):
         updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
         
         return cls(
-            id=data.get('id'),
+            **data,
+            id=data.get('id', None),
             created_at=created_at,
             updated_at=updated_at,
             tags=data.get('tags', []),

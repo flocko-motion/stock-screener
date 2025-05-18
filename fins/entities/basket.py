@@ -261,22 +261,18 @@ class Basket(Entity):
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Basket':
-        """Create from dictionary."""
+        from . import entity_from_dict
+        from .columns import column_from_dict
+
         items = []
         for item_data in data.get('items', []):
-            if isinstance(item_data, dict) and item_data.get('class') == 'BasketItem':
-                from .basket_item import BasketItem
-                item = BasketItem.from_dict(item_data)
-                items.append(item)
+            items.append(entity_from_dict(item_data))
 
         basket = cls(items=items, name=data.get('name'))
         
         for col_data in data.get('columns', []):
-            if isinstance(col_data, dict) and 'class' in col_data:
-                from .column import Column
-                col = Column.from_dict(col_data)
-                basket.add_column(col)
-        
+            basket.add_column(column_from_dict(col_data))
+
         return basket
 
 

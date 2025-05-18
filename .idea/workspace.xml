@@ -4,20 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: all tests work - core feature set complete!">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: print column values with explicit stringify method">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/column.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/column.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/cagr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/dividend_yield.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/dividend_yield.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/mcap.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/mcap.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/npm.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/npm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/pe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/peg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/peg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/roe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/roe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/vol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/vol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/formatting/formatters.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/formatting/formatters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/columns/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/entity.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/entity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/storage/storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/storage/storage.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +99,7 @@
     "Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor": "Debug",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
     "Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
     "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor": "Run",
@@ -187,6 +182,24 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="stock-screener" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests.test_basket_to_file&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -244,6 +257,7 @@
     <list>
       <item itemvalue="Python.cli" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" />
       <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
       <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" />
       <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns" />
@@ -251,11 +265,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" />
         <item itemvalue="Python.cli" />
         <item itemvalue="Python tests.pytest in tests" />
         <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
         <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" />
-        <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns" />
       </list>
     </recent_temporary>
   </component>
@@ -295,15 +309,7 @@
       <workItem from="1745824243462" duration="621000" />
       <workItem from="1746545250465" duration="683000" />
       <workItem from="1747479563886" duration="19653000" />
-      <workItem from="1747594801178" duration="2907000" />
-    </task>
-    <task id="LOCAL-00014" summary="fix: repairing execution flows based to satisfy unit tests">
-      <option name="closed" value="true" />
-      <created>1742414714049</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1742414714049</updated>
+      <workItem from="1747594801178" duration="6028000" />
     </task>
     <task id="LOCAL-00015" summary="fix: repairing execution flows based to satisfy unit tests">
       <option name="closed" value="true" />
@@ -689,7 +695,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747596082206</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="feat: print column values with explicit stringify method">
+      <option name="closed" value="true" />
+      <created>1747597910514</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1747597910514</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -707,7 +721,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: CLI app now executes" />
     <MESSAGE value="feat: basic formatter for CLI" />
     <MESSAGE value="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now" />
     <MESSAGE value="fix: first test runs again" />
@@ -732,7 +745,8 @@
     <MESSAGE value="test: removed non-existing advanced sort calls" />
     <MESSAGE value="test: fixed complex flow tests" />
     <MESSAGE value="feat: all tests work - core feature set complete!" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: all tests work - core feature set complete!" />
+    <MESSAGE value="feat: print column values with explicit stringify method" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: print column values with explicit stringify method" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -867,6 +881,21 @@
           <line>55</line>
           <option name="timeStamp" value="149" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
+          <line>153</line>
+          <option name="timeStamp" value="161" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/storage/entity_store.py</url>
+          <line>146</line>
+          <option name="timeStamp" value="162" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/entities/__init__.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="171" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -909,7 +938,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_fmp_TestFMP_test_etf_holder.coverage" NAME="pytest for tests.test_fmp.TestFMP.test_etf_holder Coverage Results" MODIFIED="1747481133600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history_caching.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history_caching Coverage Results" MODIFIED="1747483119490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747597620500" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747600778521" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket_short.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short Coverage Results" MODIFIED="1743402971075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1747483127717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
@@ -919,6 +948,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_SortCommandTests_test_sort_by_market_cap.coverage" NAME="pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap Coverage Results" MODIFIED="1747515385220" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_api_get.coverage" NAME="pytest for test_fmp.TestFMP.test_api_get Coverage Results" MODIFIED="1747482848388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1747598155826" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1743284460273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_quote.coverage" NAME="pytest for test_fmp.TestFMP.test_quote Coverage Results" MODIFIED="1747483083530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_pe_column.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column Coverage Results" MODIFIED="1747511431308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

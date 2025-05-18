@@ -97,9 +97,10 @@ class StorageValue:
         Returns:
             A new StorageValue instance
         """
+        from fins.entities import entity_from_dict
         return cls(
             path=data.get('path', ''),
-            value=data.get('value'),
+            value=entity_from_dict(data.get('value')),
             is_locked=data.get('is_locked', False),
             metadata=data.get('metadata', {})
         )
@@ -305,7 +306,7 @@ class DiskStorage(StorageBackend):
                 data = json.load(f)
             
             value = StorageValue.from_dict(data)
-            
+
             # Update the cache
             self.cache[path] = value
             
