@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Symbol.get_cagr()">
-      <change afterPath="$PROJECT_DIR$/fins/dsl/commands/function_asc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fins/dsl/commands/function_desc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_function.py" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: generic functions, sort asc / desc by column">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/docs/MANUAL.md" beforeDir="false" afterPath="$PROJECT_DIR$/fins/docs/MANUAL.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.lark" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.lark" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_dsl.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_dsl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -307,15 +300,7 @@
       <workItem from="1745824243462" duration="621000" />
       <workItem from="1746545250465" duration="683000" />
       <workItem from="1747479563886" duration="19653000" />
-      <workItem from="1747594801178" duration="711000" />
-    </task>
-    <task id="LOCAL-00010" summary="refactor: lean parser, moved all commands to seperate classes. next: repair execution flows">
-      <option name="closed" value="true" />
-      <created>1742371589818</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1742371589818</updated>
+      <workItem from="1747594801178" duration="845000" />
     </task>
     <task id="LOCAL-00011" summary="fix: repairing execution flows based to satisfy unit tests">
       <option name="closed" value="true" />
@@ -701,7 +686,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747513773636</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="feat: generic functions, sort asc / desc by column">
+      <option name="closed" value="true" />
+      <created>1747595534991</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1747595534991</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -719,7 +712,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: repairing execution flows based to satisfy unit tests" />
     <MESSAGE value="refactor: removed deprecated functions" />
     <MESSAGE value="fix: simple variable get/set works now" />
     <MESSAGE value="fix: BasicFlowTests work" />
@@ -744,14 +736,15 @@
     <MESSAGE value="feat: use columns in fins" />
     <MESSAGE value="feat: implemented column kwargs" />
     <MESSAGE value="feat: Symbol.get_cagr()" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Symbol.get_cagr()" />
+    <MESSAGE value="feat: generic functions, sort asc / desc by column" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: generic functions, sort asc / desc by column" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>342</line>
+          <line>323</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

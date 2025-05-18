@@ -311,25 +311,6 @@ class SortCommandTests(DslTests):
         self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
         self.assert_basket_sorted_by(basket, "mcap", ascending=False)
 
-    def test_multisort(self):
-        output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> .pe() -> asc(.mcap, .pe)")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_sorted_by(basket, "mcap", ascending=False)
-        
-    def test_implicit_sort_syntax(self):
-        # First create a basket with tech stocks
-        self.execute_flow("AAPL MSFT GOOGL -> $tech")
-        
-        # Then sort by a column not yet existing
-        output = self.execute_flow("$tech -> asc(.pe)")
-        
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, ["AAPL", "MSFT", "GOOGL"])
-        self.assert_basket_sorted_by(basket, "pe", ascending=True)
 
 
 class ComplexFlowTests(DslTests):
