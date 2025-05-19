@@ -30,8 +30,12 @@ class DefineFunctionCommand(Command):
     def output_type(self) -> Type[Entity]:
         return Basket
         
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Define a custom function"
         
     @property

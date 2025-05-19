@@ -25,8 +25,9 @@ Example:
 - Second command: sort the resulting basket
 """
 
-from abc import ABC, abstractmethod
-from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar
+from abc import ABC, abstractmethod, abstractclassmethod
+from distutils.cmd import Command
+from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar, List
 from dataclasses import dataclass
 from lark import Tree, Token
 
@@ -96,15 +97,23 @@ class Command(ABC):
         cls._registry[name] = command_cls
 
     @classmethod
-    def get_command(cls, command_type: str) -> 'Command':
-        if not isinstance(command_type, str):
-            raise ValueError(f"command_type must be a string, not {type(command_type)}")
+    def get_command(cls, command_name: str) -> 'Command':
+        if not isinstance(command_name, str):
+            raise ValueError(f"command_type must be a string, not {type(command_name)}")
 
-        if command_type not in cls._instances:
-            if command_type not in cls._registry:
-                raise SyntaxError(f"Unknown command type: {command_type}")
-            cls._instances[command_type] = cls._registry[command_type]()
-        return cls._instances[command_type]
+        if command_name not in cls._instances:
+            if command_name not in cls._registry:
+                raise SyntaxError(f"Unknown command type: {command_name}")
+            cls._instances[command_name] = cls._registry[command_name]()
+        return cls._instances[command_name]
+
+    @classmethod
+    def get_name_of_command(cls, command: type[Command]) -> str | None:
+        return next((key for key, value in Command._registry.items() if value == command), None)
+
+    @classmethod
+    def get_commands(cls) -> Dict[str, type[Command]]:
+        return cls._registry
 
     @property
     @abstractmethod
@@ -122,10 +131,15 @@ class Command(ABC):
     def allows_explicit_left_hand(self) -> bool:
         """Whether this command supports explicit left-hand syntax (e.g. '$a + NFLX')."""
         return True
-        
-    @property
+
+    @classmethod
     @abstractmethod
-    def description(self) -> str:
+    def category(cls) -> str | None:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def description(cls) -> str:
         """Get a description of what this command does."""
         pass
         
@@ -138,40 +152,7 @@ class Command(ABC):
     def examples(self) -> dict[str, str]:
         """Example usages of this command."""
         return {}
-        
-    def help(self) -> str:
-        """Generate help text for this command."""
-        lines = [
-            f"Command: {self.__class__.__name__}",
-            "",
-            self.description,
-            "",
-            f"Input: {self.input_type}",
-            f"Output: {self.output_type}",
-            "",
-            "Syntax:",
-            f"  {self.__class__.__name__.lower()} [right_tokens]  # Implicit input",
-        ]
-        
-        if self.allows_explicit_left_hand:
-            lines.append(f"  input {self.__class__.__name__.lower()} [right_tokens]  # Explicit input")
-            
-        if self.right_tokens:
-            lines.extend([
-                "",
-                "Right Tokens:",
-                *[f"  {name}: {desc}" for name, desc in self.right_tokens.items()]
-            ])
-            
-        if self.examples:
-            lines.extend([
-                "",
-                "Examples:",
-                *[f"  {cmd}\n    {desc}" for cmd, desc in self.examples.items()]
-            ])
-            
-        return "\n".join(lines)
-        
+
     def validate_input(self, args: CommandArgs) -> None:
         """
         Validate command input and arguments.

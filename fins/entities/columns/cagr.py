@@ -4,10 +4,19 @@ Compound Annual Growth Rate Column
 
 from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
+
 
 class CagrColumn(Column):
-    def __init__(self, alias: str = None, years: str = None):
+    @classmethod
+    def name(cls) -> str:
+        return "cagr"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Compound Annual Growth Rate"
+
+    def __init__(self, alias: str = None, years: int = 5):
         super().__init__(alias=alias)
         self.years = int(years) if years else None
 

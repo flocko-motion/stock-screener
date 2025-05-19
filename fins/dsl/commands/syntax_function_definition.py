@@ -4,8 +4,12 @@ from fins.dsl import *
 class FunctionDefinitionCommand(Command):
     """Handles function definition commands."""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Defines a new function for later use"
         
     @property

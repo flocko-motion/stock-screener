@@ -7,8 +7,12 @@ class FunctionSortAscending(Command):
 	""" Sort ascending
 	"""
 
-	@property
-	def description(self) -> str:
+	@classmethod
+	def category(cls) -> str | None:
+		return "basket.sort"
+
+	@classmethod
+	def description(cls) -> str:
 		return "Sort ascending"
 
 	@property

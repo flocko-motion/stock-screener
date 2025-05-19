@@ -7,8 +7,12 @@ from fins.dsl import *
 class OperationCommand(Command):
     """Handles operation commands like + MSFT, - AAPL, etc."""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Performs set operations (+, -, &) on baskets in a pipeline"
         
     @property

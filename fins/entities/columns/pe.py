@@ -2,12 +2,20 @@
 PE (Price/Earnings) Column
 """
 
-from typing import Literal, Optional
+from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
 
 
 class PeColumn(Column):
+    @classmethod
+    def name(cls) -> str:
+        return "pe"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Price/Earnings ratio (TTM)"
+
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 

@@ -7,8 +7,12 @@ from fins.dsl import *
 class SymbolCommand(Command):
     """Handles a single symbol"""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Processes a single symbol"
         
     @property

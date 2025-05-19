@@ -9,8 +9,12 @@ class OperandCommand(Command):
     There's no left input. The operand acts as a function on the next argument and returns a basket.
     """
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Performs set operations (+, -, &) on next argument. Takes no left input."
         
     @property

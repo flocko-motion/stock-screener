@@ -1,5 +1,5 @@
 // FINS grammar - main rules
-?start: command_chain | function_definition | help_command | management_command | note_command
+?start: command_chain | function_definition | function_help | management_command | note_command
 
 // Command chains (the core flow syntax)
 command_chain: command ("->" command)*
@@ -29,7 +29,7 @@ list: "[" value ("," value)* "]"
 OPERATOR: "+" | "-" | "&"
 
 // Help system
-help_command: "?" [help_topic]
+function_help: "?" [help_topic]
 help_topic: NAME | "." NAME | "." | "*"
 
 // Notes system

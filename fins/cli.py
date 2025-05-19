@@ -152,7 +152,7 @@ def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> 
     
     while True:
         try:
-            command = session.prompt("fins> ")
+            command = session.prompt("F> ")
             if command.lower() in ("exit", "quit"):
                 break
             if not command.strip():

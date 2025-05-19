@@ -4,9 +4,18 @@ Market Cap Column
 
 from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
+
 
 class McapColumn(Column):
+    @classmethod
+    def name(cls) -> str:
+        return "mcap"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Market Capitalization"
+
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 

@@ -26,7 +26,11 @@ class ColumnCommand(Command):
     def output_type(self) -> Type[Entity]:
         return Basket
 
-    @property
+    @classmethod
+    def category(cls) -> str | None:
+        return None
+
+    @classmethod
     def description(self) -> str:
         """Get the column's description."""
         return str(self.column_class())

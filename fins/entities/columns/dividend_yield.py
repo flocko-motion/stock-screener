@@ -8,6 +8,14 @@ from ...financial import Symbol
 
 
 class YieldColumn(Column):
+    @classmethod
+    def name(cls) -> str:
+        return "div"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Dividend Yield"
+
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 

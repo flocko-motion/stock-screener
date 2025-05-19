@@ -7,8 +7,12 @@ from fins.dsl import *
 @Command.register("column_function")
 class ColumnFunctionCommand(Command):
 
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Execute a column function"
         
     @property

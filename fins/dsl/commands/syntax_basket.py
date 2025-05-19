@@ -4,8 +4,12 @@ from fins.dsl import *
 class BasketCommand(Command):
     """Handles basket creation commands."""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Creates a basket from a list of symbols"
         
     @property

@@ -7,8 +7,12 @@ from fins.dsl import *
 class SequenceCommand(Command):
     """Handles sequences of operands and operators."""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Processes a sequence of operands and operators to create or modify baskets"
         
     @property

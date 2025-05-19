@@ -7,8 +7,12 @@ class FunctionCallCommand(Command):
     """ Executes a function call.
     """
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Call a function with arguments"
         
     @property

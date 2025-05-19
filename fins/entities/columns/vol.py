@@ -4,9 +4,18 @@ Volume Column
 
 from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
+
 
 class VolColumn(Column):
+    @classmethod
+    def name(cls) -> str:
+        return "vol"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Trading volume"
+
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 

@@ -19,6 +19,16 @@ class Column(ABC):
     _registry: ClassVar[Dict[str, Type['Column']]] = {}
 
     @classmethod
+    @abstractmethod
+    def name(cls) -> str:
+        return ""
+
+    @classmethod
+    @abstractmethod
+    def description(cls) -> str:
+        return ""
+
+    @classmethod
     def register(cls, column_class: Type['Column']) -> None:
         """Register a column type."""
         name = str(column_class())  # Use the __str__ representation as key

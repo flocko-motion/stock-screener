@@ -7,8 +7,12 @@ from fins.dsl import *
 class VariableCommand(Command):
     """Handles variables"""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Processes a variable"
         
     @property

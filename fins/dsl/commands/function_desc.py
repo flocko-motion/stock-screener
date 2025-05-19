@@ -5,8 +5,12 @@ from fins.dsl import *
 @Command.register("function_desc")
 class FunctionSortDescending(Command):
 
-	@property
-	def description(self) -> str:
+	@classmethod
+	def category(cls) -> str | None:
+		return "basket.sort"
+
+	@classmethod
+	def description(cls) -> str:
 		return "Sort descending"
 
 	@property

@@ -6,8 +6,12 @@ from fins.dsl import *
 class CommandChainCommand(Command):
     """Handles chains of commands connected by pipeline operators."""
     
-    @property
-    def description(self) -> str:
+    @classmethod
+    def category(cls) -> str | None:
+        return "syntax"
+        
+    @classmethod
+    def description(cls) -> str:
         return "Executes a chain of commands connected by pipeline operators (->)"
         
     @property

@@ -4,9 +4,18 @@ Net Profit Margin Column
 
 from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
+
 
 class NpmColumn(Column):
+    @classmethod
+    def name(cls) -> str:
+        return "npm"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Net Profit Margin"
+
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 

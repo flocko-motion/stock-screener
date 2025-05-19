@@ -18,9 +18,13 @@ class IntersectionCommand(Command):
     @property
     def output_type(self) -> Type[Entity]:
         return Basket
-        
-    @property
-    def description(self) -> str:
+
+    @classmethod
+    def category(cls) -> str | None:
+        return "basket.operator"
+
+    @classmethod
+    def description(cls) -> str:
         """Get the operator's description."""
         return "Basket intersection operator"
         

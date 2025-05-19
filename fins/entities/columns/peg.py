@@ -4,10 +4,19 @@ Price Earnings Growth Column
 
 from typing import Optional
 from ..column import Column
-from . import Symbol
+from ...financial import Symbol
+
 
 class PegColumn(Column):
-    def __init__(self,  alias: str = None):
+    @classmethod
+    def name(cls) -> str:
+        return "peg"
+
+    @classmethod
+    def description(cls) -> str:
+        return "Price/Earnings to Growth ratio"
+
+    def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 
     def value(self, ticker: str) -> Optional[float]:
