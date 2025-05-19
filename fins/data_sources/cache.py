@@ -197,14 +197,14 @@ def cache_api_response(endpoint: str, params: Dict = None,
 	
 	# Use the first part of the endpoint to determine cache validity if not specified
 	if validity_seconds is None:
-		# Default cache validity periods by endpoint type
+		eom = expiry_end_of_month()
 		endpoint_cache_validity = {
-			"profile": 7 * 24 * 3600,  # 1 week
-			"historical-price-full": 7 * 24 * 3600,  # 1 week
+			"profile": eom,
+			"historical-price-full": eom,
 			"quote": 24 * 3600,  # 1 day
-			"search": 3600,  # 1 hour
+			"search": 3600,
 		}
-		validity_seconds = endpoint_cache_validity.get(endpoint.split("/")[0], 3600)
+		validity_seconds = endpoint_cache_validity.get(endpoint.split("/")[-1], 3600)
 	
 	return cache_api_request(resource, fetch_func, validity_seconds)
 
@@ -231,3 +231,17 @@ def clear_cache(identifier: Optional[str] = None):
 				file_path = os.path.join(root, file)
 				os.remove(file_path)
 		print("Cleared all cache files")
+
+
+def expiry_end_of_month():
+    """ number of seconds until noon on the first day of next month"""
+    now = datetime.now()
+    # Get the first day of next month
+    if now.month == 12:
+        next_month = datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
+    else:
+        next_month = datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
+
+    # Calculate seconds until that timestamp
+    seconds_until_expiry = (next_month - now).total_seconds()
+    return int(seconds_until_expiry)
