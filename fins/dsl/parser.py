@@ -20,6 +20,8 @@ with open(grammar_file, "r") as f:
 # Initialize the parser using Earley
 parser = Lark(grammar, parser='earley')
 
+
+
 class FinsParser:
     """
     FINS Parser class that provides a high-level interface for parsing FINS commands.

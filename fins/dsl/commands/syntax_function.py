@@ -25,9 +25,9 @@ class FunctionCallCommand(Command):
     
     def execute(self, args: CommandArgs) -> Output:
         f_name = f"function_{args.tree.children[0]}"
-        f_args: Tree = args.tree.children[1]
-        if not isinstance(f_args, Tree):
-            raise TypeError("Expected a Tree")
+        f_args: Tree | None = args.tree.children[1] if len(args.tree.children) > 1 else None
+        if not f_args is None and not isinstance(f_args, Tree):
+            raise TypeError("failed to parse arguments of function call")
 
         handler = Command.get_command(f_name)
         return handler.execute(CommandArgs(tree=f_args, previous_output=args.previous_output, storage=args.storage))

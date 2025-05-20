@@ -259,6 +259,7 @@ class Basket(Entity):
             "columns": [col.to_dict() for col in self._columns]
         }
 
+
     @classmethod
     def from_dict(cls, data: dict) -> 'Basket':
         from . import entity_from_dict

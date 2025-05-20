@@ -4,11 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: inline help with &quot;?&quot;">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: 'debug' command">
+      <change afterPath="$PROJECT_DIR$/fins/dsl/commands/function_screen.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fins/entities/columns/industry.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fins/entities/columns/name.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fins/entities/columns/sector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/cli.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/cache.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_function.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/columns/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,7 +126,7 @@
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/dsl/commands",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/columns",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -135,8 +141,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl\commands" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities\columns" />
+      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl\commands" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\tests" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -306,15 +312,7 @@
       <workItem from="1746545250465" duration="683000" />
       <workItem from="1747479563886" duration="19653000" />
       <workItem from="1747594801178" duration="6236000" />
-      <workItem from="1747680023404" duration="9716000" />
-    </task>
-    <task id="LOCAL-00019" summary="fix: repairing execution flows based to satisfy unit tests">
-      <option name="closed" value="true" />
-      <created>1742457498192</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1742457498192</updated>
+      <workItem from="1747680023404" duration="13558000" />
     </task>
     <task id="LOCAL-00020" summary="fix: repairing execution flows based to satisfy unit tests">
       <option name="closed" value="true" />
@@ -700,7 +698,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747685792149</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="feat: 'debug' command">
+      <option name="closed" value="true" />
+      <created>1747767000707</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1747767000707</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -718,7 +724,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;" />
     <MESSAGE value="fix: fixed grammer issue with operands, simplified grammar" />
     <MESSAGE value="refactor: merged dsl scripty into single dir due to circularity" />
     <MESSAGE value="refactor: moved commands to dsl/commands, now fixing unit tests and simplifying code" />
@@ -743,7 +748,8 @@
     <MESSAGE value="feat: persist basket with columns" />
     <MESSAGE value="fix: cache validity for profile/history is now end-of-month" />
     <MESSAGE value="feat: inline help with &quot;?&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: inline help with &quot;?&quot;" />
+    <MESSAGE value="feat: 'debug' command" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: 'debug' command" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -830,7 +836,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>143</line>
+          <line>179</line>
           <option name="timeStamp" value="116" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -885,18 +891,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>152</line>
+          <line>188</line>
           <option name="timeStamp" value="172" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>40</line>
-          <option name="timeStamp" value="190" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
-          <line>37</line>
-          <option name="timeStamp" value="191" />
+          <url>file://$PROJECT_DIR$/fins/entities/columns/name.py</url>
+          <line>25</line>
+          <option name="timeStamp" value="201" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -943,7 +944,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_fmp_TestFMP_test_etf_holder.coverage" NAME="pytest for tests.test_fmp.TestFMP.test_etf_holder Coverage Results" MODIFIED="1747481133600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history_caching.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history_caching Coverage Results" MODIFIED="1747483119490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747766924472" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747770570650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket_short.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short Coverage Results" MODIFIED="1743402971075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1747483127717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

@@ -6,6 +6,9 @@ import pandas as pd
 import requests
 import threading
 import time
+
+from typing import Dict, Any
+
 from .cache import (
     get_cache_path, 
     cache_api_response, 
@@ -39,6 +42,12 @@ last_request_time = 0
 
 RATE_LIMIT_INTERVAL = 0.25
 print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
+
+
+class ApiLimitationException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
 
 def api_get(endpoint, params=None):
@@ -81,7 +90,9 @@ def api_get(endpoint, params=None):
         
         # Make the request
         response = requests.get(url, params=request_params)
-        if response.status_code != 200:
+        if response.status_code == 402:
+            raise ApiLimitationException(f"{response.content}")
+        elif response.status_code != 200:
             raise Exception(f"Error fetching data from {url}: {response.json()}")
         
         return response.json()
@@ -91,6 +102,31 @@ def api_get(endpoint, params=None):
 
 def search(query: str):
     return api_get(f"api/v3/search", {"query":query})
+
+def screen(mcap_min: int = None, mcap_max: int = None, type: str = "all", sector: str = None, industry: str = None, country: str = None, exchange: str = None, limit: int = 1000):
+    params: Dict[str, Any] = {
+        "limit": limit,
+    }
+    if mcap_min:
+        params["marketCapMoreThan"] = mcap_min
+    if mcap_max:
+        params["marketCapLowerThan"] = mcap_max
+    if type == "etf":
+        params["isEtf"] = True
+    elif type == "fund":
+        params["isFund"] = True
+    elif type == "stock":
+        params["isStock"] = True
+    if sector:
+        params["sector"] = sector
+    if industry:
+        params["industry"] = industry
+    if country:
+        params["country"] = country
+    if exchange:
+        params["exchange"] = exchange
+    res = api_get(f"stable/company-screener", params)
+    return [item.get("symbol") for item in res]
 
 def profile(ticker: str):
     res = api_get(f"stable/profile", {"symbol":ticker})
