@@ -200,6 +200,7 @@ def cache_api_response(endpoint: str, params: Dict = None,
 		eom = expiry_end_of_month()
 		endpoint_cache_validity = {
 			"profile": eom,
+			"company-outlook": eom,
 			"historical-price-full": eom,
 			"quote": 24 * 3600,  # 1 day
 			"search": 3600,

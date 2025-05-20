@@ -144,20 +144,19 @@ def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> 
     Returns:
         int: Exit code (0 for success)
     """
-    print(f"FINS Interactive Mode. Type 'exit' or 'quit' to exit.")
+    print(f"FINS Interactive Mode. Type '?' for help, 'exit' or 'quit' to leave.")
     
     # Set up prompt session with history
     history_file = setup_history_file()
     session = PromptSession(history=FileHistory(str(history_file)))
-    
     while True:
         try:
-            command = session.prompt("F> ")
+            command = session.prompt("F> ").strip()
+            if not command:
+                continue
             if command.lower() in ("exit", "quit"):
                 break
-            if not command.strip():
-                continue
-                
+
             result = fins_parser.parse(command)
             print(format_output(result, json_output))
         except KeyboardInterrupt:

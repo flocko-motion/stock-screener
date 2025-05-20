@@ -35,14 +35,21 @@ class FinsParser:
 
     def parse(self, flow: str) -> Output:
         """Parse and execute a FINS command or command chain."""
+        debug = False
+        if (flow + " ")[0:6] == "debug ":
+            debug = True
+            flow = flow.replace("debug", "").strip()
+
         try:
             tree: Tree = parser.parse(flow)
             if not isinstance(tree.data, Token):
                 raise SyntaxError(f"Invalid command structure, expected Token but got {tree.data}")
             return Command.execute_tree(CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage))
         except Exception as e:
-            traceback.print_exc()
-            return Output(e)
+            if debug:
+                return Output(f"{traceback.format_exc()}\n{e}")
+            else:
+                return Output(f"parser error: {e.__class__.__name__}")
 
 
 if __name__ == "__main__":
