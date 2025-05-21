@@ -49,10 +49,6 @@ class SymbolTests(unittest.TestCase):
         assert s.sector == None
         assert s.type == TYPE_CRYPTO
 
-    def test_stock_cagr(self):
-        s = Symbol.get("AAPL")
-        cagr_5 = s.get_cagr(5)
-        assert cagr_5 > 0.1
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from fins.data_sources import fmp
+from fins.config import PATH_DB
 
 Base = declarative_base()
 
@@ -58,9 +59,10 @@ class Symbol(Base):
     history = None
     
     @classmethod
-    def _init_db(cls, db_path: str = "symbol_cache.db"):
+    def _init_db(cls, db_path: str = None):
         """Initialize the database connection."""
         if cls._engine is None:
+            db_path = db_path or str(PATH_DB)
             cls._engine = create_engine(
                 f'sqlite:///{db_path}',
                 connect_args={'check_same_thread': False},
