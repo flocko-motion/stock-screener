@@ -131,9 +131,9 @@ def screen(mcap_min: int = None, mcap_max: int = None, type: str = "all", sector
 def profile(ticker: str):
     res = api_get(f"stable/profile", {"symbol":ticker})
     if len(res) == 0:
-        raise Exception(f"No profile for {ticker}")
+        raise ValueError(f"No profile for {ticker}")
     elif len(res) > 1:
-        raise Exception(f"More than one profile for {ticker}")
+        raise ValueError(f"More than one profile for {ticker}")
     return res[0]
 
 def profile_index(ticker: str):
