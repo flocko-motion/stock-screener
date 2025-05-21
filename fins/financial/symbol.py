@@ -4,18 +4,15 @@ Database Models
 This module defines SQLAlchemy models for the financial data.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, ClassVar
-from contextlib import contextmanager
 
 import pandas as pd
-from sqlalchemy import create_engine, Column, String, DateTime, JSON, Text
+from sqlalchemy import Column, String, DateTime, JSON, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 
 from fins.data_sources import fmp
-from fins.config import PATH_DB
+from fins.financial.cache import session_scope, get_expiration_time
 
 Base = declarative_base()
 
@@ -31,8 +28,6 @@ class Symbol(Base):
     
     # Class variables for caching
     symbols: ClassVar[Dict[str, 'Symbol']] = {}
-    _engine = None
-    _Session = None
     
     # Core fields that are unlikely to change
     ticker = Column(String(20), primary_key=True)
@@ -59,38 +54,9 @@ class Symbol(Base):
     history = None
     
     @classmethod
-    def _init_db(cls, db_path: str = None):
-        """Initialize the database connection."""
-        if cls._engine is None:
-            db_path = db_path or str(PATH_DB)
-            cls._engine = create_engine(
-                f'sqlite:///{db_path}',
-                connect_args={'check_same_thread': False},
-                poolclass=StaticPool
-            )
-            Base.metadata.create_all(cls._engine)
-            cls._Session = sessionmaker(bind=cls._engine)
-    
-    @classmethod
-    @contextmanager
-    def _session_scope(cls):
-        """Provide a transactional scope around a series of operations."""
-        if cls._Session is None:
-            cls._init_db()
-        session = cls._Session()
-        try:
-            yield session
-            session.commit()
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
-    
-    @classmethod
     def _get_from_cache(cls, ticker: str) -> Optional['Symbol']:
         """Get a symbol from the cache."""
-        with cls._session_scope() as session:
+        with session_scope() as session:
             symbol = session.query(cls).filter_by(ticker=ticker).first()
             if symbol and symbol.valid_until > datetime.now():
                 # Detach the symbol from the session and return a copy
@@ -101,7 +67,7 @@ class Symbol(Base):
     @classmethod
     def _save_to_cache(cls, symbol: 'Symbol') -> None:
         """Store a symbol in the cache."""
-        with cls._session_scope() as session:
+        with session_scope() as session:
             # Delete any existing entry
             session.query(cls).filter_by(ticker=symbol.ticker).delete()
             # Add the new entry
@@ -112,19 +78,19 @@ class Symbol(Base):
     @classmethod
     def _delete_from_cache(cls, ticker: str) -> None:
         """Delete a symbol from the cache."""
-        with cls._session_scope() as session:
+        with session_scope() as session:
             session.query(cls).filter_by(ticker=ticker).delete()
     
     @classmethod
     def _clear_expired_cache(cls) -> None:
         """Remove all expired entries from the cache."""
-        with cls._session_scope() as session:
+        with session_scope() as session:
             session.query(cls).filter(cls.valid_until <= datetime.now()).delete()
     
     @classmethod
     def _clear_all_cache(cls) -> None:
         """Remove all entries from the cache."""
-        with cls._session_scope() as session:
+        with session_scope() as session:
             session.query(cls).delete()
     
     @classmethod
@@ -173,7 +139,7 @@ class Symbol(Base):
             
         # Otherwise, initialize a new symbol
         self.exchange = ticker.split(":", 1)[1] if ":" in ticker else None
-        self.valid_until = beginning_of_next_month()
+        self.valid_until = get_expiration_time()
         
         # Load data from API
         self._load_profile_data()
@@ -333,10 +299,13 @@ class Symbol(Base):
             
         return instance
 
-def beginning_of_next_month():
-    """Get the beginning of next month."""
+def beginning_of_next_month() -> datetime:
+    """Get the beginning of next month plus 12 hours for market data to settle."""
     now = datetime.now()
     if now.month == 12:
-        return datetime(now.year + 1, 1, 1, 12, 0)
+        next_month = datetime(now.year + 1, 1, 1)
     else:
-        return datetime(now.year, now.month + 1, 1, 12, 0) 
+        next_month = datetime(now.year, now.month + 1, 1)
+    
+    # Add 12 hours to allow for market data to settle
+    return next_month + timedelta(hours=12) 
