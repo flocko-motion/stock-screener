@@ -3,9 +3,7 @@ Tests for BasketItem operations.
 """
 
 import unittest
-from fins.financial.symbol import Symbol
-import fins.financial.symbol as symbol
-
+from fins.financial import Symbol, TYPE_INDEX, TYPE_STOCK, TYPE_CRYPTO, TYPE_ETF
 
 class SymbolTests(unittest.TestCase):
     """Tests for BasketItem operations."""
@@ -21,7 +19,7 @@ class SymbolTests(unittest.TestCase):
         assert s.industry == 'Consumer Electronics'
         assert s.isin == 'US0378331005'
         assert s.sector == 'Technology'
-        assert s.type == symbol.TYPE_STOCK
+        assert s.type == TYPE_STOCK
         assert s.website == 'https://www.apple.com'
         pass
 
@@ -36,7 +34,7 @@ class SymbolTests(unittest.TestCase):
         assert s.industry == "Asset Management"
         assert s.isin == "US78462F1030"
         assert s.sector == "Financial Services"
-        assert s.type == symbol.TYPE_ETF
+        assert s.type == TYPE_ETF
 
     def test_get_crypto(self):
         s = Symbol.get("ADAUSD")
@@ -49,7 +47,7 @@ class SymbolTests(unittest.TestCase):
         assert s.industry == None
         assert s.isin == None
         assert s.sector == None
-        assert s.type == symbol.TYPE_CRYPTO
+        assert s.type == TYPE_CRYPTO
 
     def test_stock_cagr(self):
         s = Symbol.get("AAPL")
