@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: query etf profile">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: sqlite cache for Symbol">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/financial/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/fins/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_financial.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -324,31 +320,7 @@
       <workItem from="1747594801178" duration="6236000" />
       <workItem from="1747680023404" duration="18208000" />
       <workItem from="1747831444405" duration="13000" />
-      <workItem from="1747855844432" duration="3070000" />
-    </task>
-    <task id="LOCAL-00022" summary="refactor: removed deprecated functions">
-      <option name="closed" value="true" />
-      <created>1742459563698</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1742459563698</updated>
-    </task>
-    <task id="LOCAL-00023" summary="refactor: removed deprecated functions">
-      <option name="closed" value="true" />
-      <created>1742500351400</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1742500351400</updated>
-    </task>
-    <task id="LOCAL-00024" summary="fix: BasicFlowTests work">
-      <option name="closed" value="true" />
-      <created>1743024374273</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1743024374273</updated>
+      <workItem from="1747855844432" duration="3320000" />
     </task>
     <task id="LOCAL-00025" summary="fix: BasicFlowTests work">
       <option name="closed" value="true" />
@@ -718,7 +690,31 @@
       <option name="project" value="LOCAL" />
       <updated>1747856137894</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859394302</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859394302</updated>
+    </task>
+    <task id="LOCAL-00072" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859409424</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859409424</updated>
+    </task>
+    <task id="LOCAL-00073" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859414466</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859414466</updated>
+    </task>
+    <option name="localTasksCounter" value="74" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -736,7 +732,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactor: moved commands to dsl/commands, now fixing unit tests and simplifying code" />
     <MESSAGE value="refactor: fixed command sequence" />
     <MESSAGE value="refactor: fixed first variables test" />
     <MESSAGE value="feat: multiply basket" />
@@ -761,7 +756,8 @@
     <MESSAGE value="feat: 'debug' command" />
     <MESSAGE value="feat: more columns" />
     <MESSAGE value="fix: query etf profile" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: query etf profile" />
+    <MESSAGE value="feat: sqlite cache for Symbol" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: sqlite cache for Symbol" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -907,17 +903,17 @@
           <option name="timeStamp" value="176" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/financial/models.py</url>
+          <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
           <line>139</line>
           <option name="timeStamp" value="177" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/financial/models.py</url>
+          <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
           <line>159</line>
           <option name="timeStamp" value="178" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/financial/models.py</url>
+          <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
           <line>181</line>
           <option name="timeStamp" value="179" />
         </line-breakpoint>
@@ -962,7 +958,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$column.coverage" NAME="column Coverage Results" MODIFIED="1743250672207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/entities" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_search.coverage" NAME="pytest for test_fmp.TestFMP.test_search Coverage Results" MODIFIED="1747482892074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_stock.coverage" NAME="pytest for test_financial.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747859146142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_stock.coverage" NAME="pytest for test_financial.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747859417496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_index_constituents_IndexConstituentsTests_test_get_constituents.coverage" NAME="pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents Coverage Results" MODIFIED="1745583998596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1747596036658" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
