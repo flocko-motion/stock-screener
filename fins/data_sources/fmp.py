@@ -89,14 +89,23 @@ def api_get(endpoint, params=None):
         request_params["apikey"] = API_KEY
         
         # Make the request
-        response = requests.get(url, params=request_params)
-        if response.status_code == 402:
-            raise ApiLimitationException(f"{response.content}")
-        elif response.status_code != 200:
-            raise Exception(f"Error fetching data from {url}: {response.json()}")
-        
-        return response.json()
-    
+        for i in range(5):
+            try:
+                response = requests.get(url, params=request_params)
+                if response.status_code == 200:
+                    return response.json()
+                if response.status_code == 402:
+                    raise ApiLimitationException(f"{response.content}")
+                raise Exception(f"Failed fetching data from {url}: {response.json()}")
+            except requests.exceptions.ConnectionError as e:
+                print(f"connection error - retrying soon: {e.args}")
+                time.sleep(3)
+            except Exception as e:
+                print(f"ERROR fetching {url}: {str(e)}")
+        raise Exception(f"Failed fetching {url} - too many retries")
+
+
+
     # Use the cache_api_response function to handle caching
     return cache_api_response(endpoint, params, fetch_data)
 
@@ -178,6 +187,18 @@ def search_name(query: str):
 
 def tradeable_symbols():
     return api_get(f"api/v3/available-traded/list")
+
+def all_stocks():
+    res = api_get(f"stable/stock-list")
+    return [item.get("symbol") for item in res]
+
+def all_etfs():
+    res = api_get(f"stable/etf-list")
+    return [item.get("symbol") for item in res]
+
+def all_cryptos():
+    res = api_get(f"stable/cryptocurrency-list")
+    return [item.get("symbol") for item in res]
 
 def etf_holder(ticker: str):
     return api_get("funds/disclosure-holders-latest",{"symbol":ticker})
