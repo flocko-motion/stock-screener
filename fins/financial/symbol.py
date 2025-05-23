@@ -8,18 +8,37 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, ClassVar
 
 import pandas as pd
-from sqlalchemy import Column, String, DateTime, JSON, Text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.orm import relationship
 
-from fins.data_sources import fmp
-from fins.financial.cache import session_scope, get_expiration_time
-
-Base = declarative_base()
+from fins.financial.cache import Base, session_scope, get_expiration_time
+from fins.data_sources.fmp import price_history
 
 TYPE_STOCK = "stock"
 TYPE_CRYPTO = "crypto"
 TYPE_ETF = "etf"
 TYPE_INDEX = "index"
+
+class PriceData(Base):
+    """Base class for price data tables."""
+    __abstract__ = True
+    
+    date = Column(DateTime, primary_key=True)
+    close = Column(Float, nullable=False)
+    symbol_ticker = Column(String(20), ForeignKey('symbols.ticker'), primary_key=True)
+    
+    @declared_attr
+    def symbol(cls):
+        return relationship("Symbol")
+
+class WeeklyPrice(PriceData):
+    """Weekly price data."""
+    __tablename__ = 'weekly_prices'
+
+class MonthlyPrice(PriceData):
+    """Monthly price data."""
+    __tablename__ = 'monthly_prices'
 
 class Symbol(Base):
     """SQLAlchemy model for symbol data with business logic."""
@@ -33,6 +52,11 @@ class Symbol(Base):
     ticker = Column(String(20), primary_key=True)
     exchange = Column(String(20), nullable=True)
     valid_until = Column(DateTime, nullable=False)
+    last_price_update = Column(DateTime, nullable=True)
+    
+    # Relationships
+    weekly_prices = relationship("WeeklyPrice", back_populates="symbol")
+    monthly_prices = relationship("MonthlyPrice", back_populates="symbol")
     
     # Profile data
     name = Column(String(200), nullable=True)
@@ -51,7 +75,8 @@ class Symbol(Base):
     details = Column(JSON, nullable=True)  # For any future fields we might add
     
     # Runtime-only attributes (not stored in DB)
-    history = None
+    _weekly_prices = None
+    _monthly_prices = None
     
     @classmethod
     def _get_from_cache(cls, ticker: str) -> Optional['Symbol']:
@@ -225,14 +250,68 @@ class Symbol(Base):
         self.analytics = analytics
 
     def _load_history(self):
-        """Load price history from API."""
-        self.history = fmp.price_history(self.ticker)
+        """Load price history from API and update both weekly and monthly data."""
+        monthly_df, weekly_df = fmp.price_history(self.ticker)
+        
+        with session_scope() as session:
+            # Always update both frequencies in DB
+            for _, row in monthly_df.iterrows():
+                price = MonthlyPrice(
+                    date=row['date'],
+                    close=row['close'],
+                    symbol_ticker=self.ticker
+                )
+                session.merge(price)
+            
+            for _, row in weekly_df.iterrows():
+                price = WeeklyPrice(
+                    date=row['date'],
+                    close=row['close'],
+                    symbol_ticker=self.ticker
+                )
+                session.merge(price)
+        
+        # Always cache both frequencies in RAM since we have them
+        self._monthly_prices = monthly_df
+        self._weekly_prices = weekly_df
+        self.last_price_update = datetime.now()
+        self._save_to_cache(self)
 
-    def get_history(self) -> pd.DataFrame | None:
-        """Get price history data, loading it if necessary."""
-        if self.history is None:
+    def _load_from_db(self, frequency: str):
+        """Load price data from database into memory.
+        
+        Args:
+            frequency: Frequency to load ('weekly' or 'monthly')
+        """
+        with session_scope() as session:
+            if frequency == 'weekly':
+                prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).all()
+                self._weekly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
+            else:  # monthly
+                prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).all()
+                self._monthly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
+
+    def _needs_price_update(self) -> bool:
+        """Check if price data needs to be updated."""
+        if not self.last_price_update:
+            return True
+        return datetime.now() - self.last_price_update > timedelta(days=7)
+
+    def get_weekly(self) -> pd.DataFrame:
+        """Get weekly price data, updating if necessary."""
+        if self._needs_price_update():
             self._load_history()
-        return self.history
+        elif self._weekly_prices is None:
+            self._load_from_db('weekly')
+        return self._weekly_prices
+
+    def get_monthly(self) -> pd.DataFrame:
+        """Get monthly price data, updating if necessary."""
+        if self._needs_price_update():
+            self._load_history()
+        elif self._monthly_prices is None:
+            self._load_from_db('monthly')
+        return self._monthly_prices
 
     def get_analytics(self, field: str) -> float | None:
         """Get a specific analytics field."""
@@ -275,6 +354,7 @@ class Symbol(Base):
             'inception': self.inception,
             'analytics': self.analytics,
             'valid_until': self.valid_until,
+            'last_price_update': self.last_price_update,
             **(self.details or {})  # Include any additional fields
         }
     
@@ -285,7 +365,7 @@ class Symbol(Base):
         core_fields = {
             'ticker', 'exchange', 'name', 'type', 'currency', 'sector',
             'industry', 'country', 'description', 'website', 'isin',
-            'inception', 'analytics', 'valid_until'
+            'inception', 'analytics', 'valid_until', 'last_price_update'
         }
         
         # Create base instance with core fields, excluding ticker from kwargs
