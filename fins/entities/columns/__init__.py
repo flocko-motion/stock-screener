@@ -7,6 +7,7 @@ Access them through Column.list() or Column.get(name).
 
 from ...financial import Symbol
 
+from .cagr import CagrColumn
 from .dividend_yield import YieldColumn
 from .mcap import McapColumn
 from .industry import IndustryColumn
