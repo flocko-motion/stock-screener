@@ -9,11 +9,11 @@ from typing import Dict, Any, Optional, ClassVar
 
 import pandas as pd
 from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
+from data_sources import fmp
 from fins.financial.cache import Base, session_scope, get_expiration_time
-from fins.data_sources.fmp import price_history
 
 TYPE_STOCK = "stock"
 TYPE_CRYPTO = "crypto"
@@ -39,6 +39,9 @@ class WeeklyPrice(PriceData):
 class MonthlyPrice(PriceData):
     """Monthly price data."""
     __tablename__ = 'monthly_prices'
+
+
+
 
 class Symbol(Base):
     """SQLAlchemy model for symbol data with business logic."""
@@ -93,12 +96,14 @@ class Symbol(Base):
     def _save_to_cache(cls, symbol: 'Symbol') -> None:
         """Store a symbol in the cache."""
         with session_scope() as session:
-            # Delete any existing entry
-            session.query(cls).filter_by(ticker=symbol.ticker).delete()
-            # Add the new entry
-            session.add(symbol)
+            # Merge returns a new instance that is attached to the session
+            merged_symbol = session.merge(symbol)
             session.flush()  # Ensure the symbol is in the database
-            session.expunge(symbol)  # Detach it from the session
+            session.expunge(merged_symbol)  # Detach the merged instance from the session
+            # Update the original symbol with the merged one's state
+            for key, value in merged_symbol.__dict__.items():
+                if not key.startswith('_'):
+                    setattr(symbol, key, value)
     
     @classmethod
     def _delete_from_cache(cls, ticker: str) -> None:
@@ -188,7 +193,7 @@ class Symbol(Base):
             pass
 
         try:
-            profile = fmp.profile(self.ticker)
+            profile = profile(self.ticker)
             if profile:
                 if profile.get("isEtf", False):
                     self.type = TYPE_ETF

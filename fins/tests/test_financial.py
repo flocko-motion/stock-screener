@@ -49,6 +49,10 @@ class SymbolTests(unittest.TestCase):
         assert s.sector == None
         assert s.type == TYPE_CRYPTO
 
+    def test_get_prices(self):
+        s = Symbol.get("AAPL")
+        s.get_monthly()
+
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from urllib.parse import urlencode
 
 import pandas as pd
 import requests
@@ -35,7 +36,6 @@ except Exception as e:
     print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}")
     sys.exit(1)
 
-
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()
 last_request_time = 0
@@ -43,68 +43,78 @@ last_request_time = 0
 RATE_LIMIT_INTERVAL = 0.25
 print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
 
-
 class ApiLimitationException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
 
+class ApiBadRequestException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
-def api_get(endpoint, params=None):
+def enforce_rate_limit():
+    """Enforce rate limiting between requests."""
+    global last_request_time
+    current_time = time.time()
+    elapsed_time = current_time - last_request_time
+    if elapsed_time < RATE_LIMIT_INTERVAL:
+        time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
+    last_request_time = time.time()
+
+def api_get(endpoint, params=None, max_retries=5, base_delay=3):
     """
     Make an API request to the FMP API with rate limiting and caching.
     
     Args:
         endpoint: The API endpoint to request
         params: Optional parameters for the request
+        max_retries: Maximum number of retry attempts
+        base_delay: Base delay in seconds for exponential backoff
         
     Returns:
         The JSON response from the API
+        
+    Raises:
+        ApiBadRequestException: For 400 status code
+        ApiLimitationException: For 402 status code
+        Exception: For other errors after retries
     """
-    global last_request_time
-    
-    if params is None:
-        params = {}
-    
     url = f"https://financialmodelingprep.com/{endpoint}"
-    
-    # Define a function to fetch the data if not in cache
-    def fetch_data():
-        global last_request_time
+    request_params = (params or {}).copy()
+    request_params["apikey"] = API_KEY
+
+    def handle_response(response):
+        if response.status_code == 200:
+            return response.json()
+        if response.status_code == 400:
+            raise ApiBadRequestException(response.content)
+        if response.status_code == 402:
+            raise ApiLimitationException(response.content)
+        raise Exception(f"API error: {response.status_code} - {response.content}")
+
+    def make_request():
         with rate_limit_lock:
-            current_time = time.time()
-            elapsed_time = current_time - last_request_time
-            if elapsed_time < RATE_LIMIT_INTERVAL:
-                time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
-            
-            # Update the last request time
-            last_request_time = time.time()
-            
-            # Print the URL being fetched
-            params_url_string = "&".join([f"{k}={v}" for k, v in params.items()])
-            print(f"Fetching {url}?{params_url_string}")
-        
-        # Add API key to params dictionary
-        request_params = params.copy()
-        request_params["apikey"] = API_KEY
-        
-        # Make the request
-        for i in range(5):
+            enforce_rate_limit()
+            print(f"Fetching {url}?{urlencode(request_params)}")
+            return requests.get(url, params=request_params)
+
+    def fetch_data():
+        for attempt in range(max_retries):
             try:
-                response = requests.get(url, params=request_params)
-                if response.status_code == 200:
-                    return response.json()
-                if response.status_code == 402:
-                    raise ApiLimitationException(f"{response.content}")
-                raise Exception(f"Failed fetching data from {url}: {response.json()}")
+                response = make_request()
+                return handle_response(response)
+            except (ApiBadRequestException, ApiLimitationException):
+                raise
             except requests.exceptions.ConnectionError as e:
-                print(f"connection error - retrying soon: {e.args}")
-                time.sleep(3)
+                if attempt == max_retries - 1:
+                    raise Exception(f"Connection failed after {max_retries} attempts: {e}")
+                delay = base_delay * (2 ** attempt)  # Exponential backoff
+                print(f"Connection error, retrying in {delay}s: {e}")
+                time.sleep(delay)
             except Exception as e:
-                print(f"ERROR fetching {url}: {str(e)}")
-        raise Exception(f"Failed fetching {url} - too many retries")
-
-
+                raise Exception(f"Request failed: {e}")
+        raise Exception("failed to fetch data")
 
     # Use the cache_api_response function to handle caching
     return cache_api_response(endpoint, params, fetch_data)
@@ -207,6 +217,7 @@ def etf_holder(ticker: str):
 def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Fetch full history without date parameters
     params = {
+        "symbol": ticker,
         "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1980-01-01",
     }
     prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
