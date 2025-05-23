@@ -1,14 +1,18 @@
 """
-Database cache management.
+Database caching and migration functionality
 """
 
 from datetime import datetime, timedelta
 from contextlib import contextmanager
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine, event, Column, String, DateTime, JSON, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session, scoped_session
 from sqlalchemy.pool import StaticPool
 
 from fins.config import PATH_DB
+
+# Create declarative base
+Base = declarative_base()
 
 # Database engine and session factory
 _engine = None
@@ -24,7 +28,7 @@ def get_expiration_time() -> datetime:
     return next_month + timedelta(hours=12)
 
 def init_db():
-    """Initialize the database connection."""
+    """Initialize the database connection and ensure schema is up to date."""
     global _engine, _Session
     if _engine is None:
         _engine = create_engine(
@@ -46,6 +50,8 @@ def init_db():
             cursor.close()
         
         _Session = sessionmaker(bind=_engine)
+        
+        Base.metadata.create_all(_engine)
 
 @contextmanager
 def session_scope():
@@ -60,4 +66,4 @@ def session_scope():
         session.rollback()
         raise
     finally:
-        session.close() 
+        session.close()
