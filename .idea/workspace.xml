@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="refactor: moved financial db and cache into seperate file">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: column functions not found">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/fins/TODO.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/command_column.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command_column.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/fins/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +42,9 @@
     &quot;accountId&quot;: &quot;ad3dc772-ba00-4625-999a-d28f9e29fcdf&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/fins/financial/symbol.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 4
@@ -49,99 +54,99 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests in test_dsl.py.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_crypto.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_etf.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_stock.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_api_get.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_price_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_profile.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_quote.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search_name.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_cache.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_dsl.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_fmp.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_watchdog.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cli.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.column.executor&quot;: &quot;Run&quot;,
-    &quot;Python.command.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/symbol-cache-sqlite&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/columns&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.Python tests in test_dsl.py.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor": "Run",
+    "Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_stock.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_api_get.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_price_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_profile.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_quote.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_search.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_search_name.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor": "Run",
+    "Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor": "Debug",
+    "Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.executor": "Run",
+    "Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor": "Run",
+    "Python tests.pytest in test_cache.py.executor": "Run",
+    "Python tests.pytest in test_dsl.py.executor": "Run",
+    "Python tests.pytest in test_fmp.py.executor": "Run",
+    "Python tests.pytest in test_watchdog.py.executor": "Run",
+    "Python tests.pytest in tests.executor": "Run",
+    "Python.__init__.executor": "Run",
+    "Python.cli.executor": "Debug",
+    "Python.column.executor": "Run",
+    "Python.command.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "feat/symbol-cache-sqlite",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/columns",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
     ]
   }
-}</component>
+}]]></component>
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
   </component>
@@ -321,71 +326,7 @@
       <workItem from="1747594801178" duration="6236000" />
       <workItem from="1747680023404" duration="18208000" />
       <workItem from="1747831444405" duration="13000" />
-      <workItem from="1747855844432" duration="7610000" />
-    </task>
-    <task id="LOCAL-00028" summary="feat: basic formatter for CLI">
-      <option name="closed" value="true" />
-      <created>1743028106050</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1743028106050</updated>
-    </task>
-    <task id="LOCAL-00029" summary="feat: basic formatter for CLI">
-      <option name="closed" value="true" />
-      <created>1743111363980</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1743111363980</updated>
-    </task>
-    <task id="LOCAL-00030" summary="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now">
-      <option name="closed" value="true" />
-      <created>1743253430559</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1743253430559</updated>
-    </task>
-    <task id="LOCAL-00031" summary="fix: first test runs again">
-      <option name="closed" value="true" />
-      <created>1743253876515</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1743253876515</updated>
-    </task>
-    <task id="LOCAL-00032" summary="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;">
-      <option name="closed" value="true" />
-      <created>1743276936703</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1743276936703</updated>
-    </task>
-    <task id="LOCAL-00033" summary="fix: fixed grammer issue with operands, simplified grammar">
-      <option name="closed" value="true" />
-      <created>1743277545188</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1743277545188</updated>
-    </task>
-    <task id="LOCAL-00034" summary="refactor: merged dsl scripty into single dir due to circularity">
-      <option name="closed" value="true" />
-      <created>1743279086906</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1743279086906</updated>
-    </task>
-    <task id="LOCAL-00035" summary="refactor: merged dsl scripty into single dir due to circularity">
-      <option name="closed" value="true" />
-      <created>1743280069500</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1743280069500</updated>
+      <workItem from="1747855844432" duration="24124000" />
     </task>
     <task id="LOCAL-00036" summary="refactor: merged dsl scripty into single dir due to circularity">
       <option name="closed" value="true" />
@@ -715,7 +656,71 @@
       <option name="project" value="LOCAL" />
       <updated>1747860809270</updated>
     </task>
-    <option name="localTasksCounter" value="77" />
+    <task id="LOCAL-00077" summary="feat: functions stocks(), etfs(), cryptos() to fetch all symbols of a type">
+      <option name="closed" value="true" />
+      <created>1747894506121</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1747894506121</updated>
+    </task>
+    <task id="LOCAL-00078" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987841197</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987841197</updated>
+    </task>
+    <task id="LOCAL-00079" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987847540</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987847540</updated>
+    </task>
+    <task id="LOCAL-00080" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987855211</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987855211</updated>
+    </task>
+    <task id="LOCAL-00081" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987866844</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987866844</updated>
+    </task>
+    <task id="LOCAL-00082" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987874004</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987874004</updated>
+    </task>
+    <task id="LOCAL-00083" summary="fix: column functions not found">
+      <option name="closed" value="true" />
+      <created>1747987891658</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987891658</updated>
+    </task>
+    <task id="LOCAL-00084" summary="fix: column functions not found">
+      <option name="closed" value="true" />
+      <created>1747987927666</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987927666</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -733,9 +738,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: multiply basket" />
-    <MESSAGE value="feat: basic flow tests run through" />
-    <MESSAGE value="feat: basic Symbol implementation and attachment to fmp" />
     <MESSAGE value="fix: fetching symbol with fmp" />
     <MESSAGE value="fix: all fmp tests succeed" />
     <MESSAGE value="fix: debugged tests for Symbol" />
@@ -758,7 +760,10 @@
     <MESSAGE value="feat: sqlite cache for Symbol" />
     <MESSAGE value="refactor: moved db path to .config" />
     <MESSAGE value="refactor: moved financial db and cache into seperate file" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: moved financial db and cache into seperate file" />
+    <MESSAGE value="feat: functions stocks(), etfs(), cryptos() to fetch all symbols of a type" />
+    <MESSAGE value="feat: fetch and cache price history weekly/monthly" />
+    <MESSAGE value="fix: column functions not found" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: column functions not found" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -910,13 +915,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>96</line>
-          <option name="timeStamp" value="182" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
           <line>103</line>
           <option name="timeStamp" value="183" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/financial/cache.py</url>
+          <line>31</line>
+          <option name="timeStamp" value="184" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -966,7 +971,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_fmp_TestFMP_test_etf_holder.coverage" NAME="pytest for tests.test_fmp.TestFMP.test_etf_holder Coverage Results" MODIFIED="1747481133600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history_caching.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history_caching Coverage Results" MODIFIED="1747483119490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747894449650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747988467641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket_short.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short Coverage Results" MODIFIED="1743402971075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1747483127717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
