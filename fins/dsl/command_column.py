@@ -48,5 +48,4 @@ class ColumnCommand(Command):
 
 """Register all column classes as commands."""
 for col_class in Column.list():
-    name = str(col_class())  # Get default name from instance
-    Command.register_command(name, ColumnCommand)  # Register the class, not an instance
+    Command.register_command(f"function_{col_class()}", ColumnCommand)  # Register the class, not an instance
