@@ -204,18 +204,12 @@ def etf_holder(ticker: str):
     return api_get("funds/disclosure-holders-latest",{"symbol":ticker})
 
 
-
-@watchdog(timeout=30, retries=3)
-def price_history(ticker: str):
-    history_path = get_cache_path(ticker, "fmp_history", "pkl")
-    if os.path.exists(history_path) and is_cache_valid(history_path):
-        print(f"Loading {ticker} from cache..")
-        df = pd.read_pickle(history_path)
-        return df
-
+def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Fetch full history without date parameters
-    prices_response = api_get(f"api/v3/historical-price-full/{ticker}", {"from":"1980-01-01"})
-    prices_data = prices_response.get("historical", [])
+    params = {
+        "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1980-01-01",
+    }
+    prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
 
     prices_df = pd.DataFrame(prices_data)
     prices_df["date"] = pd.to_datetime(prices_df["date"])
@@ -223,19 +217,20 @@ def price_history(ticker: str):
 
     df = prices_df[["date", "adjClose"]]
     df = df.rename(columns={"adjClose": "close"})
-    # Use actual prices instead of normalizing
     df.set_index("date", inplace=True)
     df.sort_values("date")
 
     df_monthly = df['close'].resample('ME').last().reset_index()
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
+    if date_from:
+        df_monthly = df_monthly[df_monthly['date'] >= date_from]
 
+    df_weekly = df['close'].resample('W').last().reset_index()
+    df_weekly = df_weekly[df_weekly['date'] < pd.Timestamp(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))]
+    if date_from:        
+        df_weekly = df_weekly[df_weekly['date'] >= date_from]
 
-    df_monthly.to_pickle(history_path)
-
-    set_cache_expiry(history_path, expiry_end_of_month())
-    
-    return df_monthly
+    return df_monthly, df_weekly
 
 
 def expiry_end_of_month():
