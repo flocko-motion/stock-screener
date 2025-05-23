@@ -17,13 +17,16 @@ class CagrColumn(Column):
     def description(cls) -> str:
         return "Compound Annual Growth Rate"
 
-    def __init__(self, alias: str = None, years: int = 5):
+    def __init__(self, alias: str = None, years: int = 5, frequency: str = 'monthly'):
         super().__init__(alias=alias)
         self.years = int(years) if years else None
+        if frequency not in ['weekly', 'monthly']:
+            raise ValueError("frequency must be either 'weekly' or 'monthly'")
+        self.frequency = frequency
 
     def value(self, ticker: str) -> Optional[float]:
         symbol = Symbol.get(ticker)
-        history = symbol.get_history()
+        history = symbol.get_monthly() if self.frequency == 'monthly' else symbol.get_weekly()
         
         if history is None or len(history) == 0:
             return None
