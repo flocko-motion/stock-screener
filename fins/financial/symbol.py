@@ -137,8 +137,8 @@ class Symbol(Base):
         """
         if ticker not in cls.symbols:
             # Check cache first
-            cached_symbol =None #  cls._get_from_cache(ticker)
-            
+            cached_symbol = cls._get_from_cache(ticker)
+
             if cached_symbol:
                 cls.symbols[ticker] = cached_symbol
             else:

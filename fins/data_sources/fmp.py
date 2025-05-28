@@ -243,7 +243,7 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
     # Fetch full history without date parameters
     params = {
         "symbol": ticker,
-        "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1980-01-01",
+        "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1900-01-01",
     }
     prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
 
