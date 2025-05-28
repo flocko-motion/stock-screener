@@ -137,7 +137,7 @@ class Symbol(Base):
         """
         if ticker not in cls.symbols:
             # Check cache first
-            cached_symbol = cls._get_from_cache(ticker)
+            cached_symbol =None #  cls._get_from_cache(ticker)
             
             if cached_symbol:
                 cls.symbols[ticker] = cached_symbol
@@ -194,7 +194,7 @@ class Symbol(Base):
             pass
 
         try:
-            profile = profile(self.ticker)
+            profile = fmp.profile(self.ticker)
             if profile:
                 if profile.get("isEtf", False):
                     self.type = TYPE_ETF
@@ -230,7 +230,7 @@ class Symbol(Base):
         self.website = profile.get("website")
         self.isin = profile.get("isin")
 
-        self.inception = datetime.strptime(profile.get("icoDate"), '%Y-%m-%d') if profile.get("icoDate") else None
+        self.inception = datetime.strptime(profile.get("ipoDate"), '%Y-%m-%d') if profile.get("ipoDate") else None
 
     ratios_field_mapping = {
         "return_on_equity_ttm": "returnOnEquityTTM",
@@ -241,7 +241,6 @@ class Symbol(Base):
     }
 
     def _load_analytics(self):
-        """Load analytics data from API."""
         if not (self.type == TYPE_STOCK or self.type == TYPE_ETF):
             return
             
@@ -256,12 +255,11 @@ class Symbol(Base):
         self.analytics = analytics
 
     def _load_history(self):
-        """Load price history from API and update both weekly and monthly data."""
-        monthly_df, weekly_df = fmp.price_history(self.ticker)
+        start_date = self.inception if self.last_price_update is None else self.last_price_update - pd.DateOffset(months=1)
+        monthly_df, weekly_df = fmp.price_history(self.ticker, start_date)
 
         try:
             with session_scope() as session:
-                # Always update both frequencies in DB
                 for _, row in monthly_df.iterrows():
                     try:
                         price = MonthlyPrice(
@@ -287,9 +285,22 @@ class Symbol(Base):
         except Exception as e:
             raise e
 
-        # Always cache both frequencies in RAM since we have them
-        self._monthly_prices = monthly_df
-        self._weekly_prices = weekly_df
+        if self.last_price_update is None:
+            # First load - cache API data directly
+            self._monthly_prices = monthly_df
+            self._weekly_prices = weekly_df
+        else:
+            # Incremental load - merge with existing data
+            if self._monthly_prices is not None:
+                self._monthly_prices = pd.concat([self._monthly_prices, monthly_df]).drop_duplicates(subset=['date']).sort_values('date').reset_index(drop=True)
+            else:
+                self._load_from_db('monthly')
+                
+            if self._weekly_prices is not None:
+                self._weekly_prices = pd.concat([self._weekly_prices, weekly_df]).drop_duplicates(subset=['date']).sort_values('date').reset_index(drop=True)
+            else:
+                self._load_from_db('weekly')
+
         self.last_price_update = datetime.now()
         self._save_to_cache(self)
 
@@ -301,10 +312,10 @@ class Symbol(Base):
         """
         with session_scope() as session:
             if frequency == 'weekly':
-                prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).all()
+                prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(WeeklyPrice.date).all()
                 self._weekly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
             else:  # monthly
-                prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).all()
+                prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(MonthlyPrice.date).all()
                 self._monthly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
 
     def _needs_price_update(self) -> bool:
