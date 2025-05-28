@@ -96,14 +96,15 @@ class Symbol(Base):
     def _save_to_cache(cls, symbol: 'Symbol') -> None:
         """Store a symbol in the cache."""
         with session_scope() as session:
-            # Merge returns a new instance that is attached to the session
-            merged_symbol = session.merge(symbol)
-            session.flush()  # Ensure the symbol is in the database
-            session.expunge(merged_symbol)  # Detach the merged instance from the session
-            # Update the original symbol with the merged one's state
-            for key, value in merged_symbol.__dict__.items():
-                if not key.startswith('_'):
-                    setattr(symbol, key, value)
+            with session.no_autoflush:
+                # Merge returns a new instance that is attached to the session
+                merged_symbol = session.merge(symbol)
+                session.flush()  # Ensure the symbol is in the database
+                session.expunge(merged_symbol)  # Detach the merged instance from the session
+                # Update the original symbol with the merged one's state
+                for key, value in merged_symbol.__dict__.items():
+                    if not key.startswith('_'):
+                        setattr(symbol, key, value)
     
     @classmethod
     def _delete_from_cache(cls, ticker: str) -> None:
@@ -257,25 +258,35 @@ class Symbol(Base):
     def _load_history(self):
         """Load price history from API and update both weekly and monthly data."""
         monthly_df, weekly_df = fmp.price_history(self.ticker)
-        
-        with session_scope() as session:
-            # Always update both frequencies in DB
-            for _, row in monthly_df.iterrows():
-                price = MonthlyPrice(
-                    date=row['date'],
-                    close=row['close'],
-                    symbol_ticker=self.ticker
-                )
-                session.merge(price)
-            
-            for _, row in weekly_df.iterrows():
-                price = WeeklyPrice(
-                    date=row['date'],
-                    close=row['close'],
-                    symbol_ticker=self.ticker
-                )
-                session.merge(price)
-        
+
+        try:
+            with session_scope() as session:
+                # Always update both frequencies in DB
+                for _, row in monthly_df.iterrows():
+                    try:
+                        price = MonthlyPrice(
+                            date=row['date'],
+                            close=row['close'],
+                            symbol_ticker=self.ticker
+                        )
+                        session.merge(price)
+                    except Exception as e:
+                        raise e
+
+                for _, row in weekly_df.iterrows():
+                    try:
+                        close = float(row['close'])
+                        price = WeeklyPrice(
+                            date=row['date'],
+                            close=close,
+                            symbol_ticker=self.ticker
+                        )
+                        session.merge(price)
+                    except Exception as e:
+                        raise e
+        except Exception as e:
+            raise e
+
         # Always cache both frequencies in RAM since we have them
         self._monthly_prices = monthly_df
         self._weekly_prices = weekly_df

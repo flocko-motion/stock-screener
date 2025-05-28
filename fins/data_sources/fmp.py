@@ -213,6 +213,31 @@ def all_cryptos():
 def etf_holder(ticker: str):
     return api_get("funds/disclosure-holders-latest",{"symbol":ticker})
 
+def clean_time_series_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean time series data by removing NaN values at the beginning and end,
+    and interpolating NaN values in the middle of the series.
+    
+    Args:
+        df: DataFrame with 'date' and 'close' columns
+        
+    Returns:
+        Cleaned DataFrame with NaN values handled
+    """
+    if df.empty:
+        return df
+    
+    # Remove NaN values at the beginning and end
+    df_clean = df.dropna()
+    
+    if df_clean.empty:
+        return df_clean
+    
+    # For any remaining NaN values in the middle, interpolate
+    df_clean = df_clean.copy()
+    df_clean['close'] = df_clean['close'].interpolate(method='linear')
+    
+    return df_clean
 
 def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Fetch full history without date parameters
@@ -235,11 +260,13 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
     if date_from:
         df_monthly = df_monthly[df_monthly['date'] >= date_from]
+    df_monthly = clean_time_series_data(df_monthly)
 
     df_weekly = df['close'].resample('W').last().reset_index()
     df_weekly = df_weekly[df_weekly['date'] < pd.Timestamp(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))]
     if date_from:        
         df_weekly = df_weekly[df_weekly['date'] >= date_from]
+    df_weekly = clean_time_series_data(df_weekly)
 
     return df_monthly, df_weekly
 
