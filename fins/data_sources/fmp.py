@@ -219,7 +219,7 @@ def clean_time_series_data(df: pd.DataFrame) -> pd.DataFrame:
     and interpolating NaN values in the middle of the series.
     
     Args:
-        df: DataFrame with 'date' and 'close' columns
+        df: DataFrame with 'date' and OHLC columns
         
     Returns:
         Cleaned DataFrame with NaN values handled
@@ -227,15 +227,33 @@ def clean_time_series_data(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
     
-    # Remove NaN values at the beginning and end
-    df_clean = df.dropna()
+    df_clean = df.copy()
+    price_columns = ['open', 'high', 'low', 'avg', 'close']
+    available_price_columns = [col for col in price_columns if col in df_clean.columns]
+    
+    if not available_price_columns:
+        return df_clean
+    
+    # Remove rows where ALL price columns are NaN
+    df_clean = df_clean.dropna(subset=available_price_columns, how='all')
     
     if df_clean.empty:
         return df_clean
     
-    # For any remaining NaN values in the middle, interpolate
-    df_clean = df_clean.copy()
-    df_clean['close'] = df_clean['close'].interpolate(method='linear')
+    # Interpolate NaN values in the middle of the series
+    for col in available_price_columns:
+        df_clean[col] = df_clean[col].interpolate(method='linear')
+    
+    # Ensure OHLC relationships are maintained after interpolation
+    if all(col in df_clean.columns for col in ['open', 'high', 'low', 'close']):
+        # Ensure high is at least as high as open and close
+        df_clean['high'] = df_clean[['high', 'open', 'close']].max(axis=1)
+        # Ensure low is at most as low as open and close  
+        df_clean['low'] = df_clean[['low', 'open', 'close']].min(axis=1)
+        
+        # Recalculate average after OHLC adjustments
+        if 'avg' in df_clean.columns:
+            df_clean['avg'] = (df_clean['open'] + df_clean['high'] + df_clean['low'] + df_clean['close']) / 4
     
     return df_clean
 
@@ -251,18 +269,33 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
     prices_df["date"] = pd.to_datetime(prices_df["date"])
     prices_df = prices_df.sort_values(by="date")
 
-    df = prices_df[["date", "adjClose"]]
-    df = df.rename(columns={"adjClose": "close"})
+    df = prices_df[["date", "adjOpen", "adjHigh", "adjLow", "adjClose"]]
+    df = df.rename(columns={"adjOpen": "open", "adjHigh": "high", "adjLow":"low", "adjClose": "close"})
     df.set_index("date", inplace=True)
     df.sort_values("date")
+    
+    # Calculate average price (OHLC/4)
+    df['avg'] = (df['open'] + df['high'] + df['low'] + df['close']) / 4
 
-    df_monthly = df['close'].resample('ME').last().reset_index()
+    df_monthly = df.resample('ME').agg({
+        'open': 'first',
+        'high': 'max',
+        'low': 'min',
+        'avg': 'mean',
+        'close': 'last'
+    }).reset_index()
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
     if date_from:
         df_monthly = df_monthly[df_monthly['date'] >= date_from]
     df_monthly = clean_time_series_data(df_monthly)
 
-    df_weekly = df['close'].resample('W').last().reset_index()
+    df_weekly = df.resample('W').agg({
+        'open': 'first',
+        'high': 'max',
+        'low': 'min',
+        'avg': 'mean',
+        'close': 'last'
+    }).reset_index()
     df_weekly = df_weekly[df_weekly['date'] < pd.Timestamp(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))]
     if date_from:        
         df_weekly = df_weekly[df_weekly['date'] >= date_from]
