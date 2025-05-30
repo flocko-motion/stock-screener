@@ -25,6 +25,10 @@ class PriceData(Base):
     __abstract__ = True
     
     date = Column(DateTime, primary_key=True)
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    avg = Column(Float, nullable=False)
     close = Column(Float, nullable=False)
     symbol_ticker = Column(String(20), ForeignKey('symbols.ticker'), primary_key=True)
     
@@ -264,6 +268,10 @@ class Symbol(Base):
                     try:
                         price = MonthlyPrice(
                             date=row['date'],
+                            open=row['open'],
+                            high=row['high'],
+                            low=row['low'],
+                            avg=row['avg'],
                             close=row['close'],
                             symbol_ticker=self.ticker
                         )
@@ -273,10 +281,13 @@ class Symbol(Base):
 
                 for _, row in weekly_df.iterrows():
                     try:
-                        close = float(row['close'])
                         price = WeeklyPrice(
                             date=row['date'],
-                            close=close,
+                            open=row['open'],
+                            high=row['high'],
+                            low=row['low'],
+                            avg=row['avg'],
+                            close=row['close'],
                             symbol_ticker=self.ticker
                         )
                         session.merge(price)
@@ -313,10 +324,10 @@ class Symbol(Base):
         with session_scope() as session:
             if frequency == 'weekly':
                 prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(WeeklyPrice.date).all()
-                self._weekly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
+                self._weekly_prices = pd.DataFrame([{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for p in prices])
             else:  # monthly
                 prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(MonthlyPrice.date).all()
-                self._monthly_prices = pd.DataFrame([{'date': p.date, 'close': p.close} for p in prices])
+                self._monthly_prices = pd.DataFrame([{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for p in prices])
 
     def _needs_price_update(self) -> bool:
         """Check if price data needs to be updated."""
