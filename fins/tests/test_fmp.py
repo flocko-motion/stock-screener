@@ -115,16 +115,17 @@ class TestFMP(unittest.TestCase):
     def test_price_history(self):
         """Test the load_ticker_history function with real API."""
         # Call the function
-        result = fmp.price_history("AAPL")
+        monthly, weekly = fmp.price_history("AAPL")
         
         # Verify the result is a DataFrame
-        self.assertIsInstance(result, pd.DataFrame)
-        
-        # Verify the DataFrame has the expected structure
-        self.assertIn("close", result.columns)
-        
-        # Verify the DataFrame has data
-        self.assertTrue(len(result) > 0)
+        for df in [monthly, weekly]:
+            self.assertIsInstance(df, pd.DataFrame)
+            self.assertIn("open", df.columns)
+            self.assertIn("high", df.columns)
+            self.assertIn("low", df.columns)
+            self.assertIn("close", df.columns)
+            self.assertIn("avg", df.columns)
+            self.assertTrue(len(df) > 0)
 
     def test_search_name(self):
         """Test the search_name function with real API."""
