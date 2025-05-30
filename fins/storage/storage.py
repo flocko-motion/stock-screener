@@ -316,15 +316,17 @@ class DiskStorage(StorageBackend):
             print(f"Error loading value from {file_path}: {e}")
             return None
 
-    def get_type(self, file_path) -> str:
+    def info(self, file_path) -> (str, int):
         file_path = self._path_to_file_path(file_path)
 
         if not os.path.exists(file_path):
             raise FileNotFoundError(file_path)
 
         try:
-            with open(file_path, 'r') as f:
-                return json.load(f).get('value').get('class')
+            with (open(file_path, 'r') as f):
+                v = json.load(f)
+                value = v.get('value')
+                return value.get('class'), len(value.get('items'))
         except Exception as e:
             raise InvalidFileException(f"Error loading value from {file_path}: {e}")
 
@@ -537,11 +539,12 @@ class Storage:
         else:
             raise ValueError(f"Invalid prefix format: {prefix}. Prefix must start with $ or /")
 
-    def get_type(self, file_path) -> str:
+    def info(self, file_path) -> (str, int):
         if file_path.startswith('$'):
-            return self.memory_storage.get(file_path).__class__.__name__
+            e = (self.memory_storage.get(file_path))
+            return e.__class__.__name__, 0
         elif file_path.startswith('/'):
-            return self.disk_storage.get_type(file_path)
+            return self.disk_storage.info(file_path)
         else:
             raise ValueError(f"Invalid path: {file_path}. Must start with $ or /")
 

@@ -28,7 +28,10 @@ class FunctionFilesList(Command):
             p = "/" + p
         files = args.storage.list(prefix=p)
         files.sort()
+        captions = ["path", "type", "size"]
+        print(f"{captions[0]:<20}\t{captions[1]}\t{captions[2]}")
         for file in files:
-            print(f"{file} \t{args.storage.get_type(file)}")
+            info = args.storage.info(file)
+            print(f"{file:<20}\t{info[0]}\t{info[1]}")
 
         return Output(None)
