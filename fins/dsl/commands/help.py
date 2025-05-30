@@ -33,6 +33,14 @@ class HelpCommand(Command):
         super().__init__()
 
     def execute(self, args: CommandArgs) -> Output:
+        if len(args.tree.children) == 1:
+            topic = args.tree.children[0]
+            topic_type = str(topic.data)
+            topic_value = str(topic.children[0])
+            if topic_type == "help_topic_function":
+                return Output(f"Function: .{topic_value}()\nHelp not implemented")
+
+
         if self.content is not None:
             return Output(self.content)
 
