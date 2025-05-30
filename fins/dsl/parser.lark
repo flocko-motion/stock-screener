@@ -30,7 +30,7 @@ OPERATOR: "+" | "-" | "&"
 
 // Help system
 function_help: "?" [help_topic]
-help_topic: NAME | "." NAME | "." | "*"
+help_topic: "."? NAME "()"? | "." | "*"
 
 // Notes system
 note_command: "@" [NAME] "(" [arg_list_named] ")" [NOTE_TEXT]
