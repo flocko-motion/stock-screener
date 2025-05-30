@@ -13,6 +13,7 @@ Path formats:
 import os
 import json
 import tempfile
+from plistlib import InvalidFileException
 from typing import Dict, Any, Optional, List, Protocol, runtime_checkable
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -314,6 +315,20 @@ class DiskStorage(StorageBackend):
         except Exception as e:
             print(f"Error loading value from {file_path}: {e}")
             return None
+
+    def get_type(self, file_path) -> str:
+        file_path = self._path_to_file_path(file_path)
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(file_path)
+
+        try:
+            with open(file_path, 'r') as f:
+                return json.load(f).get('value').get('class')
+        except Exception as e:
+            raise InvalidFileException(f"Error loading value from {file_path}: {e}")
+
+
     
     def set(self, path: str, value: Any, metadata: Optional[Dict[str, Any]] = None) -> bool:
         """
@@ -405,6 +420,8 @@ class DiskStorage(StorageBackend):
                         result.append(path)
         
         return result
+
+
 
 
 class Storage:
@@ -512,14 +529,22 @@ class Storage:
         if not prefix:
             # List both memory and disk paths
             return self.memory_storage.list() + self.disk_storage.list()
-        
+
         if prefix.startswith('$'):
             return self.memory_storage.list(prefix)
         elif prefix.startswith('/'):
             return self.disk_storage.list(prefix)
         else:
             raise ValueError(f"Invalid prefix format: {prefix}. Prefix must start with $ or /")
-    
+
+    def get_type(self, file_path) -> str:
+        if file_path.startswith('$'):
+            return self.memory_storage.get(file_path).__class__.__name__
+        elif file_path.startswith('/'):
+            return self.disk_storage.get_type(file_path)
+        else:
+            raise ValueError(f"Invalid path: {file_path}. Must start with $ or /")
+
     def lock(self, path: str) -> bool:
         """
         Lock a value at the specified path.
@@ -582,3 +607,4 @@ class Storage:
         """Create a new storage instance with a temporary directory."""
         temp_dir = tempfile.mkdtemp()
         return cls(temp_dir)
+

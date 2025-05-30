@@ -63,6 +63,21 @@ class CommandArgs:
             return self.previous_output.data
         raise SyntaxError("Expected a basket as previous output")
 
+    def get_named(self, name, default = None, required=False):
+        for c in self.tree.children:
+            if isinstance(c, Tree):
+                if str(c.data) == "named_arg":
+                    if name == str(c.children[0]):
+                        v = str(c.children[1].children[0])
+                        if v.startswith('"') and v.endswith('"'):
+                            v = v[1:-1]
+                        return v
+        if required:
+            raise SyntaxError("Expected a named argument")
+
+        return default
+
+
 
 class Command(ABC):
     """
