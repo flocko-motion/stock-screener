@@ -64,7 +64,27 @@ $tech MSFT 0.7 NFLX $finance  # Mix baskets and symbols
 /tech/semis                   # Tech semiconductor stocks
 /etf/growth                   # Growth ETFs
 /watchlist/2024/q1           # Q1 2024 watchlist
-```
+
+### File Operations
+
+Manage stored entities (baskets, notes, etc.) using file-like operations:
+
+# List stored entities
+ls()                          # List all stored entities
+ls("/tech")                   # List entities in /tech path
+ls("/tech/*")                 # List all entities under /tech
+ls("*faang*")                 # List entities matching pattern
+
+# Remove stored entities
+rm("/tech/faang")             # Remove single entity
+rm("/tech/old_basket")        # Remove old basket
+rm("/watchlist/2023/*")       # Remove all 2023 watchlists
+rm("/old_analysis", recursive=true)  # Remove recursively
+
+# Copy stored entities
+cp("/tech/faang", "/backup/faang")           # Copy basket to backup
+cp("/watchlist/2024/q1", "/watchlist/2024/q1_backup")  # Backup watchlist
+cp("/tech/*", "/archive/tech/")              # Copy all tech baskets to archive
 
 ### Column Functions
 
