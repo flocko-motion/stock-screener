@@ -1,5 +1,6 @@
 from lark import Tree, Token
 
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 
@@ -15,13 +16,17 @@ class OperationCommand(Command):
     def description(cls) -> str:
         return "Performs set operations (+, -, &) on baskets in a pipeline"
         
-    @property
-    def input_type(self) -> str:
-        return "basket"  # Requires a basket from the pipeline
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return Basket
+
+    @classmethod
+    def output_type(cls) -> type:
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
         operator = None
