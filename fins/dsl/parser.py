@@ -51,7 +51,7 @@ class FinsParser:
             if debug:
                 return Output(f"{traceback.format_exc()}\n{e}")
             else:
-                return Output(f"parser error: {e.__class__.__name__}")
+                return Output(e)
 
 
 if __name__ == "__main__":

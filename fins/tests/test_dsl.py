@@ -24,21 +24,9 @@ class DslTests(unittest.TestCase):
 
     def execute_flow(self, command_str: str) -> Output:
         return self.parser.parse(command_str)
-
-    def assert_no_error(self, output: Output):
-        self.assertNotEqual(output.output_type, "error", f"Output contains an error: {output.data}")
-
-    def assert_error(self, output: Output):
-        self.assertEqual(output.output_type, "error", "Output does not contain an error")
-
         
     def basket_from_output(self, output: Output) -> Basket:
         output.assert_type(Basket)
-        self.assert_no_error(output)
-        self.assertEqual(output.output_type, "basket",
-                        f"Expected output type 'basket', got '{output.output_type}'")
-        self.assertIsInstance(output.data, Basket, 
-                             f"Expected data to be a Basket, got {type(output.data)}")
         return output.data
         
     def assert_basket_items(self, basket: Basket, expected: dict[str, float]):
@@ -91,7 +79,7 @@ class BasicFlowTests(DslTests):
     def test_add_items_to_basket_bad_syntax(self):
         """ missing an operator/function, so we don't know how to act on the left hand input """
         output = self.execute_flow("AAPL MSFT -> GOOGL")
-        self.assert_error(output)
+        assert output.has_error()
 
     def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL 7x NFLX")

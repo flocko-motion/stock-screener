@@ -11,6 +11,7 @@ Each command's result is wrapped in an Output instance that contains:
 
 import json
 import traceback
+from types import NoneType
 from typing import Any, Optional, Dict, Union, List
 
 from fins.entities.basket import Basket
@@ -21,7 +22,6 @@ class Output:
     
     Attributes:
         data: The actual output data (Basket, value, etc.)
-        output_type: Type of the output (basket, value, error, etc.)
         metadata: Optional metadata about the output
         log: List of log messages describing what happened during execution
     """
@@ -41,30 +41,11 @@ class Output:
             log: Optional list of log messages
         """
         self.data = data
-        self.output_type = self._infer_type()
         self.metadata = metadata or {}
         self.log = log or []
         
-        # If data is a string and output_type is not error, add it to the log
-        if isinstance(data, str) and self.output_type != "error":
+        if isinstance(data, str) and  not isinstance(data, Exception):
             self.add_log(data)
-
-    def _infer_type(self) -> str:
-        """Infer the output type from the data."""
-        if isinstance(self.data, Basket):
-            return "basket"
-        elif isinstance(self.data, (int, float)):
-            return "number"
-        elif isinstance(self.data, str):
-            return "text"
-        elif isinstance(self.data, bool):
-            return "boolean"
-        elif isinstance(self.data, Exception):
-            return "error"
-        elif self.data is None:
-            return "void"
-        else:
-            return "unknown"
 
     def has_data(self):
         return not self.is_void() and not self.has_error()
@@ -89,15 +70,15 @@ class Output:
             self.log.extend(other_output.log)
 
     def has_error(self) -> bool:
-        return self.output_type == "error"
+        return isinstance(self.data, Exception)
 
     def is_void(self) -> bool:
-        return self.output_type == "void"
+        return isinstance(self.data, NoneType)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the output to a dictionary representation."""
         return {
-            "type": self.output_type,
+            "type": type(self.data),
             "data": self._serialize_data(),
             "metadata": self.metadata,
             "log": self.log
@@ -113,9 +94,9 @@ class Output:
         
     def __str__(self) -> str:
         """Return a string representation of the output."""
-        if self.output_type == "error":
+        if self.has_error():
             return f"Error: {str(self.data)}"
-        elif self.output_type == "void":
+        elif self.is_void() == "void":
             return ""
             
         # If we have log messages, show them
@@ -126,11 +107,9 @@ class Output:
         
     def __repr__(self) -> str:
         """Return a detailed string representation."""
-        return f"Output(type={self.output_type}, data={self.data}, metadata={self.metadata}, log={self.log})"
+        return f"Output(type={type(self.data)}, data={self.data}, metadata={self.metadata}, log={self.log})"
 
-    def is_type(self, output_type) -> bool:
-        if isinstance(output_type, str):
-            return self.output_type == output_type
+    def is_type(self, output_type: type) -> bool:
         return isinstance(self.data, output_type)
 
     def assert_type(self, output_type) -> bool:
