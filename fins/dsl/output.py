@@ -72,6 +72,10 @@ class Output:
     def has_error(self) -> bool:
         return isinstance(self.data, Exception)
 
+    def stack_trace(self):
+        if self.has_error():
+            traceback.format_exc()
+
     def is_void(self) -> bool:
         return isinstance(self.data, NoneType)
 
@@ -114,7 +118,7 @@ class Output:
 
     def assert_type(self, output_type) -> bool:
         if not self.is_type(output_type):
-            raise TypeError(f"Expected output type '{output_type}', got '{type(self.data)}'")
+            raise TypeError(f"Expected output type '{output_type}', got '{str(type(self.data))}'")
         return True
 
 

@@ -32,7 +32,7 @@ class SymbolCommand(Command):
     def execute(self, args: CommandArgs) -> Output:
         """Execute the symbol command."""
         sequence = args.tree.children
-        previous_basket: Basket = args.previous_output.data if args.previous_output and args.previous_output.output_type == "basket" else None
+        previous_basket: Basket = args.get_previous_output()
         if previous_basket is not None:
             raise SyntaxError("Symbol command can only be used at the beginning of a command chain")
 

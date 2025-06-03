@@ -66,12 +66,19 @@ class CommandArgs:
             return res and self.previous_output.is_type(type)
         return res
 
+    def get_previous_output(self):
+        return self.previous_output
+
     def get_previous_basket(self) -> Basket:
         if self.has_previous_output(Basket):
             return self.previous_output.data
         raise SyntaxError("Expected a basket as previous output")
 
     def validate(self):
+        input_type = self.cmd.__class__.input_type()
+        if not (input_type is None):
+            # TODO: check input type
+
         named_args: list[CommandArg] = self.cmd.__class__.named_args()
         for named_arg in named_args:
             if not named_arg.optional and self.get_named_arg(named_arg.name) is None:
