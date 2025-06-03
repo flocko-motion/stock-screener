@@ -1,5 +1,6 @@
 from lark import Tree
 
+from dsl.command import CommandArg
 from fins.dsl import *
 
 @Command.register("command_chain")
@@ -13,14 +14,25 @@ class CommandChainCommand(Command):
     @classmethod
     def description(cls) -> str:
         return "Executes a chain of commands connected by pipeline operators (->)"
-        
-    @property
-    def input_type(self) -> str:
-        return "none"  # Can start fresh or use injected input
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"  # The final output will be a basket
+
+    @classmethod
+    def examples(cls) -> str | None:
+        return None
+
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        """Get the type of input this command expects."""
+        pass
+
+    @classmethod
+    def output_type(cls) -> type:
+        """Get the type of output this command produces."""
+        pass
+ # The final output will be a basket
     
     def execute(self, args: CommandArgs) -> Output:
         chain_output = args.previous_output

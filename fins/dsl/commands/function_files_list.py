@@ -1,8 +1,9 @@
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 from data_sources.fmp import all_etfs
 
-@Command.register("function_ls")
+@Command.register("ls")
 class FunctionFilesList(Command):
     @classmethod
     def category(cls) -> str | None:
@@ -12,16 +13,27 @@ class FunctionFilesList(Command):
     def description(cls) -> str:
         return "List files, optionally with search filters"
 
-    @property
-    def input_type(self) -> str:
-        return "none"
+    @classmethod
+    def examples(cls) -> str:
+        return f"""{cls.name()}(path="/foo/bar")"""
 
-    @property
-    def output_type(self) -> str:
-        return "none"
+    @classmethod
+    def named_args(cls) -> list[CommandArg] | None:
+        return [
+            CommandArg(name="path", description="Path prefix filter", optional=True),
+            CommandArg(name="type", description="Entity type to filter for, e.g. 'basket'", optional=True),
+        ]
+
+    @classmethod
+    def input_type(cls) -> type:
+        return object
+
+    @classmethod
+    def output_type(cls) -> type:
+        return object
 
     def execute(self, args: CommandArgs) -> Output:
-        p = args.get_named("path", default="", required=False)
+        p = args.get_named_arg("path")
         if p is None:
             p = "/"
         elif not p.startswith("/"):
