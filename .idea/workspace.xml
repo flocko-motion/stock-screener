@@ -5,9 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/output.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_dsl.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_dsl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,8 +104,9 @@
     "Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor": "Debug",
     "Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor": "Debug",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Debug",
-    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
     "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
@@ -164,7 +162,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax">
+  <component name="RunManager" selected="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket">
     <configuration name="Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" type="tests" factoryName="Autodetect" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -181,13 +179,13 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_fmp.TestFMP.test_price_history" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -195,7 +193,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_fmp.TestFMP.test_price_history&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -274,19 +272,19 @@
     <list>
       <item itemvalue="Python.cli" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" />
       <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket" />
       <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax" />
       <item itemvalue="Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc" />
       <item itemvalue="Python tests.pytest in tests" />
-      <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" />
         <item itemvalue="Python tests.pytest in tests" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax" />
         <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket" />
         <item itemvalue="Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc" />
-        <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
       </list>
     </recent_temporary>
   </component>
@@ -330,15 +328,7 @@
       <workItem from="1747680023404" duration="18208000" />
       <workItem from="1747831444405" duration="13000" />
       <workItem from="1747855844432" duration="44653000" />
-      <workItem from="1748969388022" duration="5088000" />
-    </task>
-    <task id="LOCAL-00053" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747508923453</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1747508923453</updated>
+      <workItem from="1748969388022" duration="5487000" />
     </task>
     <task id="LOCAL-00054" summary="feat: implementing first Column &quot;Pe&quot;">
       <option name="closed" value="true" />
@@ -724,7 +714,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748974199557</updated>
     </task>
-    <option name="localTasksCounter" value="102" />
+    <task id="LOCAL-00102" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748974819508</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1748974819508</updated>
+    </task>
+    <option name="localTasksCounter" value="103" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -774,7 +772,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>312</line>
+          <line>243</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -794,12 +792,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>209</line>
+          <line>164</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>81</line>
+          <line>75</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -854,12 +852,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>243</line>
+          <line>188</line>
           <option name="timeStamp" value="130" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>247</line>
+          <line>190</line>
           <option name="timeStamp" value="131" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -874,7 +872,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>142</line>
+          <line>115</line>
           <option name="timeStamp" value="161" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -953,11 +951,6 @@
           <option name="timeStamp" value="230" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>288</line>
-          <option name="timeStamp" value="231" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
           <line>33</line>
           <option name="timeStamp" value="233" />
@@ -997,7 +990,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743536201302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1748974653945" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1748974807865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_profile.coverage" NAME="pytest for test_fmp.TestFMP.test_profile Coverage Results" MODIFIED="1747482962987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1743284425871" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -1060,11 +1053,12 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1748973917506" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$command.coverage" NAME="command Coverage Results" MODIFIED="1742285005110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/dsl/commands" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ComplexFlowTests_test_multiple_columns.coverage" NAME="pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns Coverage Results" MODIFIED="1747595708457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_duplicate_items_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket Coverage Results" MODIFIED="1748974839174" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_item_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745344371786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation Coverage Results" MODIFIED="1743536184843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_index.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_index Coverage Results" MODIFIED="1745390910779" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743282789513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1748974211043" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1748974827382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_operation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation Coverage Results" MODIFIED="1743536188474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_multiple_columns.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns Coverage Results" MODIFIED="1747511506904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
