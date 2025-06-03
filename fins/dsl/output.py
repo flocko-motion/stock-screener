@@ -135,7 +135,7 @@ class Output:
 
     def assert_type(self, output_type) -> bool:
         if not self.is_type(output_type):
-            raise TypeError(f"Expected output type '{output_type}', got '{self.output_type}'")
+            raise TypeError(f"Expected output type '{output_type}', got '{type(self.data)}'")
         return True
 
 

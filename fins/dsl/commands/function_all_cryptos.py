@@ -1,8 +1,11 @@
+from types import NoneType
+
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 from data_sources.fmp import all_cryptos
 
-@Command.register("function_cryptos")
+@Command.register("cryptos")
 class FunctionAllCryptos(Command):
     @classmethod
     def category(cls) -> str | None:
@@ -12,13 +15,18 @@ class FunctionAllCryptos(Command):
     def description(cls) -> str:
         return "Get all available cryptocurrencies"
 
-    @property
-    def input_type(self) -> str:
-        return "none"
 
-    @property
-    def output_type(self) -> str:
-        return "basket"
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return NoneType
+
+    @classmethod
+    def output_type(cls) -> type:
+        return Basket
 
     def execute(self, args: CommandArgs) -> Output:
         symbols = all_cryptos()

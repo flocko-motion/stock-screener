@@ -154,7 +154,7 @@ class Command(ABC):
         pass
 
     @classmethod
-    @abstractmethod
+    # @abstractmethod
     def examples(cls) -> str | None:
         """Example usages of this command."""
         return None
@@ -186,7 +186,10 @@ class Command(ABC):
         if command_name not in cls._instances:
             if command_name not in cls._registry:
                 raise SyntaxError(f"Unknown command type: {command_name}")
-            cls._instances[command_name] = cls._registry[command_name]()
+            try:
+                cls._instances[command_name] = cls._registry[command_name]()
+            except TypeError as e:
+                raise Exception(f"Badly implemented command: {command_name}") from e
         return cls._instances[command_name]
 
     @classmethod
@@ -259,10 +262,10 @@ class Command(ABC):
 
     @classmethod
     def execute_tree(cls, args: CommandArgs) -> 'Output':
-        """Evaluate a tree."""
         command_type = args.tree.data
-        handler = cls.get_command(command_type)
-        return handler.execute(args)
+        cmd_handler = cls.get_command(command_type)
+        args.cmd = cmd_handler
+        return cmd_handler.execute(args)
 
 
     @staticmethod

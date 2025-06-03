@@ -1,5 +1,9 @@
+from types import NoneType
+
 from lark import Tree
 
+from dsl.command import CommandArg
+from entities import Basket
 from fins.dsl import *
 
 @Command.register("function_asc")
@@ -15,17 +19,19 @@ class FunctionSortAscending(Command):
 	def description(cls) -> str:
 		return "Sort ascending"
 
-	@property
-	def input_type(self) -> str:
-		return "none"  # Requires a basket from the pipeline
+	@classmethod
+	def named_args(cls) -> list[CommandArg]:
+		return []
 
-	@property
-	def output_type(self) -> str:
-		return "basket"
+	@classmethod
+	def input_type(cls) -> type:
+		return Basket
+
+	@classmethod
+	def output_type(cls) -> type:
+		return Basket
 
 	def execute(self, args: CommandArgs) -> Output:
-		if not args.previous_output.is_type("basket"):
-			raise SyntaxError("Expected a basket")
 		sort_cols = []
 		for arg in args.tree.children[0].children:
 			if not isinstance(arg, Tree):

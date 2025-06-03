@@ -1,5 +1,8 @@
+from types import NoneType
+
 from lark import Tree, Token
 
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 
@@ -14,14 +17,18 @@ class SequenceCommand(Command):
     @classmethod
     def description(cls) -> str:
         return "Processes a sequence of operands and operators to create or modify baskets"
-        
-    @property
-    def input_type(self) -> str:
-        return "none"  # Can start fresh or use injected basket
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"
+
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return NoneType
+
+    @classmethod
+    def output_type(cls) -> type:
+        return NoneType
     
     def execute(self, args: CommandArgs) -> Output:
         """Execute the sequence command."""

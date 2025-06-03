@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 from .entity import Entity
-from ..financial import Symbol
+from fins.financial import Symbol
 
 
 class BasketItem(Entity):

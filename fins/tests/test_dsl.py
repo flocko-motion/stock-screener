@@ -33,6 +33,7 @@ class DslTests(unittest.TestCase):
 
         
     def basket_from_output(self, output: Output) -> Basket:
+        output.assert_type(Basket)
         self.assert_no_error(output)
         self.assertEqual(output.output_type, "basket",
                         f"Expected output type 'basket', got '{output.output_type}'")
