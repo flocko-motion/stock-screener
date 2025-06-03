@@ -2,7 +2,7 @@ from lark import Tree
 
 from fins.dsl import *
 
-@Command.register("function_desc")
+@Command.register("desc")
 class FunctionSortDescending(Command):
 
 	@classmethod

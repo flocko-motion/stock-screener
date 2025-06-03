@@ -185,7 +185,7 @@ class Command(ABC):
 
         if command_name not in cls._instances:
             if command_name not in cls._registry:
-                raise SyntaxError(f"Unknown command type: {command_name}")
+                raise SyntaxError(f"Unknown FINS command: {command_name}")
             try:
                 cls._instances[command_name] = cls._registry[command_name]()
             except TypeError as e:

@@ -7,15 +7,10 @@
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/command.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_cryptos.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_cryptos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_etfs.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_etfs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_stocks.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_stocks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_asc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_asc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_sequence.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_symbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/output.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket_item.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_dsl.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_dsl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_desc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_desc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_screen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -335,15 +330,7 @@
       <workItem from="1747680023404" duration="18208000" />
       <workItem from="1747831444405" duration="13000" />
       <workItem from="1747855844432" duration="44653000" />
-      <workItem from="1748969388022" duration="3257000" />
-    </task>
-    <task id="LOCAL-00050" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747485445164</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1747485445164</updated>
+      <workItem from="1748969388022" duration="4203000" />
     </task>
     <task id="LOCAL-00051" summary="feat: implementing first Column &quot;Pe&quot;">
       <option name="closed" value="true" />
@@ -729,7 +716,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748971080201</updated>
     </task>
-    <option name="localTasksCounter" value="99" />
+    <task id="LOCAL-00099" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748972754956</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1748972754956</updated>
+    </task>
+    <option name="localTasksCounter" value="100" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -874,7 +869,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
-          <line>43</line>
+          <line>50</line>
           <option name="timeStamp" value="138" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -954,11 +949,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
-          <line>265</line>
-          <option name="timeStamp" value="227" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
           <line>191</line>
           <option name="timeStamp" value="229" />
         </line-breakpoint>
@@ -971,6 +961,31 @@
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
           <line>300</line>
           <option name="timeStamp" value="231" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="233" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="234" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
+          <line>48</line>
+          <option name="timeStamp" value="235" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>186</line>
+          <option name="timeStamp" value="236" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command_column.py</url>
+          <line>50</line>
+          <option name="timeStamp" value="237" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -1043,7 +1058,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_tradeable_symbols.coverage" NAME="pytest for test_fmp.TestFMP.test_tradeable_symbols Coverage Results" MODIFIED="1747483101329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_stock_cagr.coverage" NAME="pytest for test_symbol.SymbolTests.test_stock_cagr Coverage Results" MODIFIED="1747513712008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_etf.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747483498696" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1748972580580" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1748973883375" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$command.coverage" NAME="command Coverage Results" MODIFIED="1742285005110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/dsl/commands" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ComplexFlowTests_test_multiple_columns.coverage" NAME="pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns Coverage Results" MODIFIED="1747595708457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_item_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745344371786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

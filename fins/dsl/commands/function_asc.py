@@ -6,7 +6,7 @@ from dsl.command import CommandArg
 from entities import Basket
 from fins.dsl import *
 
-@Command.register("function_asc")
+@Command.register("asc")
 class FunctionSortAscending(Command):
 	""" Sort ascending
 	"""
