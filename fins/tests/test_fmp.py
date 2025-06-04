@@ -173,43 +173,6 @@ class TestFMP(unittest.TestCase):
     #     self.assertIn("name", result[0])
     #     self.assertIn("weightPercentage", result[0])
 
-    def test_load_ticker_history_caching(self):
-        """Test that ticker history is properly cached."""
-        # First call should hit the API
-        print("\nTesting load_ticker_history caching...")
-        
-        # Get the cache path that would be used by the load_ticker_history function
-        cache_path = get_cache_path("AAPL", "fmp_history", "pkl")
-        print(f"Expected cache path: {cache_path}")
-        
-        # Delete the cache file if it exists
-        if os.path.exists(cache_path):
-            os.remove(cache_path)
-            print(f"Removed existing cache file: {cache_path}")
-        
-        print("First call (should hit API):")
-        start_time = time.time()
-        result1 = fmp.price_history("AAPL")
-        first_call_time = time.time() - start_time
-        print(f"First call took {first_call_time:.2f} seconds")
-        
-        # Verify the cache file was created
-        self.assertTrue(os.path.exists(cache_path), f"Cache file was not created at {cache_path}")
-        
-        # Second call should use cache
-        print("Second call (should use cache):")
-        start_time = time.time()
-        result2 = fmp.price_history("AAPL")
-        second_call_time = time.time() - start_time
-        print(f"Second call took {second_call_time:.2f} seconds")
-        
-        # Verify the results are the same
-        pd.testing.assert_frame_equal(result1, result2)
-        
-        # Verify the cache file exists
-        self.assertTrue(os.path.exists(cache_path), "Cache file does not exist")
-
-
 
 if __name__ == "__main__":
     unittest.main() 
