@@ -1,6 +1,7 @@
 from types import NoneType
 
 from lark import Tree, Token
+from typing import Optional
 
 from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
@@ -24,11 +25,11 @@ class SequenceCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        return NoneType
+        return Optional[Basket]
 
     @classmethod
     def output_type(cls) -> type:
-        return NoneType
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
         """Execute the sequence command."""

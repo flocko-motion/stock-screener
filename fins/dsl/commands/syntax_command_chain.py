@@ -1,3 +1,5 @@
+from typing import Optional
+
 from lark import Tree
 
 from dsl.command import CommandArg
@@ -25,15 +27,12 @@ class CommandChainCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        """Get the type of input this command expects."""
-        pass
+        return Optional[object]
 
     @classmethod
     def output_type(cls) -> type:
-        """Get the type of output this command produces."""
-        pass
- # The final output will be a basket
-    
+        return Optional[object]
+
     def execute(self, args: CommandArgs) -> Output:
         chain_output = args.previous_output
 
