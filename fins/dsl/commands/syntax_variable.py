@@ -1,5 +1,10 @@
+from types import NoneType
+from typing import Optional
+
 from lark import Tree, Token
 
+from dsl.command import CommandArg
+from entities import Entity
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 
@@ -15,13 +20,17 @@ class VariableCommand(Command):
     def description(cls) -> str:
         return "Processes a variable"
         
-    @property
-    def input_type(self) -> str:
-        return "none"
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return Optional[Basket]
+
+    @classmethod
+    def output_type(cls) -> type:
+        return Optional[Basket]
     
     def execute(self, args: CommandArgs) -> Output:
         if len(args.tree.children) != 1:

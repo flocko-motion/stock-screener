@@ -1,5 +1,9 @@
-from lark import Tree, Token
+from types import NoneType
 
+from lark import Tree, Token
+from typing import Optional
+
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 
@@ -14,22 +18,21 @@ class SymbolCommand(Command):
     @classmethod
     def description(cls) -> str:
         return "Processes a single symbol"
-        
-    @property
-    def input_type(self) -> str:
-        return "none"  # Can start fresh or use injected basket
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"
+
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return NoneType
+
+    @classmethod
+    def output_type(cls) -> type:
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
-        """Execute the symbol command."""
         sequence = args.tree.children
-        previous_basket: Basket = args.previous_output.data if args.previous_output and args.previous_output.output_type == "basket" else None
-        if previous_basket is not None:
-            raise SyntaxError("Symbol command can only be used at the beginning of a command chain")
-
         token: Token = sequence[0]
         if not isinstance(token, Token):
             raise SyntaxError(f"Unexpected node {token}")

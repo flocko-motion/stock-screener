@@ -1,6 +1,7 @@
 from lark import Tree, Token
 from typing import Type
 
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem, Column
 from fins.dsl import *
 
@@ -15,13 +16,17 @@ class ColumnFunctionCommand(Command):
     def description(cls) -> str:
         return "Execute a column function"
         
-    @property
-    def input_type(self) -> str:
-        return "none"  # Can start fresh or use injected basket
-        
-    @property
-    def output_type(self) -> str:
-        return "basket"
+    @classmethod
+    def named_args(cls) -> list[CommandArg]:
+        return []
+
+    @classmethod
+    def input_type(cls) -> type:
+        return Basket
+
+    @classmethod
+    def output_type(cls) -> type:
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
         col_func_args = args.tree.children

@@ -1,7 +1,8 @@
 Next steps:
 
+- refactor: remove "function_" prefix from function registrations
+
 - file ops: 
-  - list persisted baskets: ls <path>
   - remove persisted baskets
 
-- fmp screen(..) to create basket
+- fetch price history to db

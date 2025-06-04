@@ -1,27 +1,132 @@
 """
-Symbol Entity
+Database Models
 
-This module defines the Symbol class, which represents a financial symbol such as a stock, ETF, or index.
+This module defines SQLAlchemy models for the financial data.
 """
-from datetime import datetime
-from typing import Optional, Dict, Any, ClassVar
+
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, ClassVar
 
 import pandas as pd
+from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
 
-from fins.data_sources import fmp
+from data_sources import fmp
+from fins.financial.cache import Base, session_scope, get_expiration_time
 
-TYPE_STOCK="stock"
-TYPE_CRYPTO="crypto"
-TYPE_ETF="etf"
-TYPE_INDEX="index"
+TYPE_STOCK = "stock"
+TYPE_CRYPTO = "crypto"
+TYPE_ETF = "etf"
+TYPE_INDEX = "index"
 
-class Symbol:
-    """
-    Represents a financial symbol (stock, ETF, index).
-    """
+class PriceData(Base):
+    """Base class for price data tables."""
+    __abstract__ = True
     
-    # Class variable to store all symbols
+    date = Column(DateTime, primary_key=True)
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    avg = Column(Float, nullable=False)
+    close = Column(Float, nullable=False)
+    symbol_ticker = Column(String(20), ForeignKey('symbols.ticker'), primary_key=True)
+    
+    @declared_attr
+    def symbol(cls):
+        return relationship("Symbol")
+
+class WeeklyPrice(PriceData):
+    """Weekly price data."""
+    __tablename__ = 'weekly_prices'
+
+class MonthlyPrice(PriceData):
+    """Monthly price data."""
+    __tablename__ = 'monthly_prices'
+
+
+
+
+class Symbol(Base):
+    """SQLAlchemy model for symbol data with business logic."""
+    
+    __tablename__ = 'symbols'
+    
+    # Class variables for caching
     symbols: ClassVar[Dict[str, 'Symbol']] = {}
+    
+    # Core fields that are unlikely to change
+    ticker = Column(String(20), primary_key=True)
+    exchange = Column(String(20), nullable=True)
+    valid_until = Column(DateTime, nullable=False)
+    last_price_update = Column(DateTime, nullable=True)
+    
+    # Relationships
+    weekly_prices = relationship("WeeklyPrice", back_populates="symbol")
+    monthly_prices = relationship("MonthlyPrice", back_populates="symbol")
+    
+    # Profile data
+    name = Column(String(200), nullable=True)
+    type = Column(String(20), nullable=True)
+    currency = Column(String(10), nullable=True)
+    sector = Column(String(100), nullable=True)
+    industry = Column(String(100), nullable=True)
+    country = Column(String(100), nullable=True)
+    description = Column(Text, nullable=True)
+    website = Column(String(200), nullable=True)
+    isin = Column(String(20), nullable=True)
+    inception = Column(DateTime, nullable=True)
+    
+    # Flexible data storage for analytics and other future fields
+    analytics = Column(JSON, nullable=True)
+    details = Column(JSON, nullable=True)  # For any future fields we might add
+    
+    # Runtime-only attributes (not stored in DB)
+    _weekly_prices = None
+    _monthly_prices = None
+    
+    @classmethod
+    def _get_from_cache(cls, ticker: str) -> Optional['Symbol']:
+        """Get a symbol from the cache."""
+        with session_scope() as session:
+            symbol = session.query(cls).filter_by(ticker=ticker).first()
+            if symbol and symbol.valid_until > datetime.now():
+                # Detach the symbol from the session and return a copy
+                session.expunge(symbol)
+                return symbol
+            return None
+    
+    @classmethod
+    def _save_to_cache(cls, symbol: 'Symbol') -> None:
+        """Store a symbol in the cache."""
+        with session_scope() as session:
+            with session.no_autoflush:
+                # Merge returns a new instance that is attached to the session
+                merged_symbol = session.merge(symbol)
+                session.flush()  # Ensure the symbol is in the database
+                session.expunge(merged_symbol)  # Detach the merged instance from the session
+                # Update the original symbol with the merged one's state
+                for key, value in merged_symbol.__dict__.items():
+                    if not key.startswith('_'):
+                        setattr(symbol, key, value)
+    
+    @classmethod
+    def _delete_from_cache(cls, ticker: str) -> None:
+        """Delete a symbol from the cache."""
+        with session_scope() as session:
+            session.query(cls).filter_by(ticker=ticker).delete()
+    
+    @classmethod
+    def _clear_expired_cache(cls) -> None:
+        """Remove all expired entries from the cache."""
+        with session_scope() as session:
+            session.query(cls).filter(cls.valid_until <= datetime.now()).delete()
+    
+    @classmethod
+    def _clear_all_cache(cls) -> None:
+        """Remove all entries from the cache."""
+        with session_scope() as session:
+            session.query(cls).delete()
     
     @classmethod
     def get(cls, ticker: str) -> 'Symbol':
@@ -35,45 +140,48 @@ class Symbol:
             The Symbol instance
         """
         if ticker not in cls.symbols:
+            # Check cache first
+            cached_symbol = cls._get_from_cache(ticker)
+
+            if cached_symbol:
+                cls.symbols[ticker] = cached_symbol
+            else:
+                # Create new symbol only if not in cache
                 s = Symbol(ticker)
                 cls.symbols[ticker] = s
+                
         return cls.symbols[ticker]
     
-    def __init__(self, ticker: str):
+    def __init__(self, ticker: str, **kwargs):
         """
         Initialize a symbol.
         
         Args:
             ticker: The ticker symbol
+            **kwargs: Additional fields when loading from cache
         """
         if not isinstance(ticker, str):
             raise ValueError(f"Invalid ticker value: {ticker}")
         
-        tokens = ticker.split(":", 1)
+        # Always set the ticker first
+        self.ticker = ticker.split(":", 1)[0]
         
-        self.ticker = tokens[0]
-        self.exchange = None if len(tokens) < 2 else tokens[1]
+        # If we're loading from cache, set all fields directly
+        if kwargs:
+            for key, value in kwargs.items():
+                setattr(self, key, value)
+            return
+            
+        # Otherwise, initialize a new symbol
+        self.exchange = ticker.split(":", 1)[1] if ":" in ticker else None
+        self.valid_until = get_expiration_time()
         
-        self.name: str | None = None
-        self.type: str | None = None
-        self.currency: str | None = None
-        self.sector: str | None = None
-        self.industry: str | None = None
-        self.country: str | None = None
-        self.description: str | None = None
-        self.website: str | None = None
-        self.isin: str | None = None
-        self.inception: datetime | None = None
-
-        self._load_analytics_expiry = None
-        self._analytics = {}
-
+        # Load data from API
         self._load_profile_data()
         self._load_analytics()
-
-        self.history = None
-        self._load_history_expiry = None
-
+        
+        # Cache the new symbol
+        self._save_to_cache(self)
     
     def _load_profile_data(self):
         """Load profile data from appropriate API based on symbol type."""
@@ -112,7 +220,6 @@ class Symbol:
 
         raise ValueError(f"Symbol not found: {self.ticker}")
 
-
     def _load_profile(self, profile: Dict[str, Any]):
         """Load unified profile data."""
         self.name = profile.get("companyName") or profile.get("name")
@@ -127,23 +234,21 @@ class Symbol:
         self.website = profile.get("website")
         self.isin = profile.get("isin")
 
-        self.inception = datetime.strptime(profile.get("icoDate"), '%Y-%m-%d') if profile.get("icoDate") else None
+        self.inception = datetime.strptime(profile.get("ipoDate"), '%Y-%m-%d') if profile.get("ipoDate") else None
 
     ratios_field_mapping = {
         "return_on_equity_ttm": "returnOnEquityTTM",
         "net_profit_margin_ttm": "netProfitMarginTTM",
         "pe_ratio_ttm": "peRatioTTM",
         "peg_ratio_ttm": "pegRatioTTM",
-        "dividend_yield_ttm":"dividendYielTTM",
+        "dividend_yield_ttm": "dividendYielTTM",
     }
 
     def _load_analytics(self):
         if not (self.type == TYPE_STOCK or self.type == TYPE_ETF):
             return
-        if not (self._load_analytics_expiry is None) and self._load_analytics_expiry > datetime.now():
-            return
+            
         outlook = fmp.outlook(self.ticker)
-        self._load_analytics_expiry = beginning_of_next_month()
         analytics = {}
         if len(outlook.get("ratios", [])) == 1:
             ratios = outlook.get("ratios")[0]
@@ -151,90 +256,174 @@ class Symbol:
                 analytics[k0] = ratios.get(k1, None)
         analytics["market_cap"] = outlook.get("profile", {}).get("mktCap", None)
         analytics["volume"] = outlook.get("profile", {}).get("volAvg", None)
-        self._analytics = analytics
+        self.analytics = analytics
 
     def _load_history(self):
-        if not (self._load_history_expiry is None) and self._load_history_expiry > datetime.now():
-            return
-        self.history = fmp.price_history(self.ticker)
-        self._load_history_expiry = beginning_of_next_month()
+        start_date = self.inception if self.last_price_update is None else self.last_price_update - pd.DateOffset(months=1)
+        monthly_df, weekly_df = fmp.price_history(self.ticker, start_date)
+
+        try:
+            with session_scope() as session:
+                for _, row in monthly_df.iterrows():
+                    try:
+                        price = MonthlyPrice(
+                            date=row['date'],
+                            open=row['open'],
+                            high=row['high'],
+                            low=row['low'],
+                            avg=row['avg'],
+                            close=row['close'],
+                            symbol_ticker=self.ticker
+                        )
+                        session.merge(price)
+                    except Exception as e:
+                        raise e
+
+                for _, row in weekly_df.iterrows():
+                    try:
+                        price = WeeklyPrice(
+                            date=row['date'],
+                            open=row['open'],
+                            high=row['high'],
+                            low=row['low'],
+                            avg=row['avg'],
+                            close=row['close'],
+                            symbol_ticker=self.ticker
+                        )
+                        session.merge(price)
+                    except Exception as e:
+                        raise e
+        except Exception as e:
+            raise e
+
+        if self.last_price_update is None:
+            # First load - cache API data directly
+            self._monthly_prices = monthly_df
+            self._weekly_prices = weekly_df
+        else:
+            # Incremental load - merge with existing data
+            if self._monthly_prices is not None:
+                self._monthly_prices = pd.concat([self._monthly_prices, monthly_df]).drop_duplicates(subset=['date']).sort_values('date').reset_index(drop=True)
+            else:
+                self._load_from_db('monthly')
+                
+            if self._weekly_prices is not None:
+                self._weekly_prices = pd.concat([self._weekly_prices, weekly_df]).drop_duplicates(subset=['date']).sort_values('date').reset_index(drop=True)
+            else:
+                self._load_from_db('weekly')
+
+        self.last_price_update = datetime.now()
+        self._save_to_cache(self)
+
+    def _load_from_db(self, frequency: str):
+        """Load price data from database into memory.
+        
+        Args:
+            frequency: Frequency to load ('weekly' or 'monthly')
+        """
+        with session_scope() as session:
+            if frequency == 'weekly':
+                prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(WeeklyPrice.date).all()
+                self._weekly_prices = pd.DataFrame([{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for p in prices])
+            else:  # monthly
+                prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(MonthlyPrice.date).all()
+                self._monthly_prices = pd.DataFrame([{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for p in prices])
+
+    def _needs_price_update(self) -> bool:
+        """Check if price data needs to be updated."""
+        if not self.last_price_update:
+            return True
+        return datetime.now() - self.last_price_update > timedelta(days=7)
+
+    def get_weekly(self) -> pd.DataFrame:
+        """Get weekly price data, updating if necessary."""
+        if self._needs_price_update():
+            self._load_history()
+        elif self._weekly_prices is None:
+            self._load_from_db('weekly')
+        return self._weekly_prices
+
+    def get_monthly(self) -> pd.DataFrame:
+        """Get monthly price data, updating if necessary."""
+        if self._needs_price_update():
+            self._load_history()
+        elif self._monthly_prices is None:
+            self._load_from_db('monthly')
+        return self._monthly_prices
 
     def get_analytics(self, field: str) -> float | None:
-        self._load_analytics()
-        return self._analytics.get(field, None)
-
-    def get_cagr(self, years: int) -> float | None:
-        self._load_history()
-        if self.history is None or len(self.history) == 0:
-            return None
-        latest_date = self.history['date'].max()
-        start_date = self.history['date'].min()
-        if years:
-            start_date = max(latest_date - pd.DateOffset(years=years), start_date)
-        years = (latest_date - start_date) / pd.Timedelta(days=365.25)
-
-
-        start_prices = self.history[self.history['date'] >= start_date].head(1)
-        end_prices = self.history[self.history['date'] <= latest_date].tail(1)
-
-        # Check if we have both start and end prices
-        if len(start_prices) == 0 or len(end_prices) == 0:
-            return None
-
-        start_price = start_prices['close'].values[0]
-        end_price = end_prices['close'].values[0]
-
-        if start_price <= 0:  # Avoid division by zero or negative values
-            return None
-
-        cagr = (end_price / start_price) ** (1 / years) - 1
-        return cagr
+        """Get a specific analytics field."""
+        if not self.analytics:
+            self._load_analytics()
+        return self.analytics.get(field, None)
 
     def __str__(self) -> str:
         """Return the string representation of the symbol."""
         return self.ticker + ":" + self.exchange if self.exchange else self.ticker
 
-    
     def profile_string(self) -> str:
-        """
-        Get a formatted string with the symbol's profile information.
-        
-        Returns:
-            A formatted string with the symbol's profile information
-        """
+        """Get a formatted string with the symbol's profile information."""
         return f"{self.ticker}:{self.exchange} {self.name}\n" \
             + f"{self.type} {self.sector if self.sector is not None else ''} {self.country if self.country is not None else ''}\n" \
             + f"{self.currency} {self.description if self.description is not None else ''}"
     
     def add_data(self, key: str, value: Any) -> None:
-        """
-        Add data to the symbol.
-        
-        Args:
-            key: The key for the data
-            value: The value to store
-        """
+        """Add data to the symbol."""
         setattr(self, key, value)
     
     def get_data(self, key: str, default: Any = None) -> Any:
-        """
-        Get data from the symbol.
-        
-        Args:
-            key: The key for the data
-            default: The default value to return if the key is not found
-            
-        Returns:
-            The value associated with the key, or the default value if not found
-        """
+        """Get data from the symbol."""
         return getattr(self, key, default)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the model to a dictionary."""
+        return {
+            'ticker': self.ticker,
+            'exchange': self.exchange,
+            'name': self.name,
+            'type': self.type,
+            'currency': self.currency,
+            'sector': self.sector,
+            'industry': self.industry,
+            'country': self.country,
+            'description': self.description,
+            'website': self.website,
+            'isin': self.isin,
+            'inception': self.inception,
+            'analytics': self.analytics,
+            'valid_until': self.valid_until,
+            'last_price_update': self.last_price_update,
+            **(self.details or {})  # Include any additional fields
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Symbol':
+        """Create a model instance from a dictionary."""
+        # Separate core fields from details
+        core_fields = {
+            'ticker', 'exchange', 'name', 'type', 'currency', 'sector',
+            'industry', 'country', 'description', 'website', 'isin',
+            'inception', 'analytics', 'valid_until', 'last_price_update'
+        }
+        
+        # Create base instance with core fields, excluding ticker from kwargs
+        kwargs = {k: v for k, v in data.items() if k in core_fields and k != 'ticker'}
+        instance = cls(data['ticker'], **kwargs)
+        
+        # Store any additional fields in details
+        details = {k: v for k, v in data.items() if k not in core_fields}
+        if details:
+            instance.details = details
+            
+        return instance
 
-
-
-def beginning_of_next_month():
+def beginning_of_next_month() -> datetime:
+    """Get the beginning of next month plus 12 hours for market data to settle."""
     now = datetime.now()
-    # Get the first day of next month
     if now.month == 12:
-        return datetime(now.year + 1, 1, 1, 12, 0)  # Noon on Jan 1st of next year
+        next_month = datetime(now.year + 1, 1, 1)
     else:
-        return datetime(now.year, now.month + 1, 1, 12, 0)  # Noon on 1st of next month
+        next_month = datetime(now.year, now.month + 1, 1)
+    
+    # Add 12 hours to allow for market data to settle
+    return next_month + timedelta(hours=12) 

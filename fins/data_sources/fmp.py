@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from urllib.parse import urlencode
 
 import pandas as pd
 import requests
@@ -35,7 +36,6 @@ except Exception as e:
     print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}")
     sys.exit(1)
 
-
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()
 last_request_time = 0
@@ -43,60 +43,79 @@ last_request_time = 0
 RATE_LIMIT_INTERVAL = 0.25
 print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
 
-
 class ApiLimitationException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
 
+class ApiBadRequestException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
-def api_get(endpoint, params=None):
+def enforce_rate_limit():
+    """Enforce rate limiting between requests."""
+    global last_request_time
+    current_time = time.time()
+    elapsed_time = current_time - last_request_time
+    if elapsed_time < RATE_LIMIT_INTERVAL:
+        time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
+    last_request_time = time.time()
+
+def api_get(endpoint, params=None, max_retries=5, base_delay=3):
     """
     Make an API request to the FMP API with rate limiting and caching.
     
     Args:
         endpoint: The API endpoint to request
         params: Optional parameters for the request
+        max_retries: Maximum number of retry attempts
+        base_delay: Base delay in seconds for exponential backoff
         
     Returns:
         The JSON response from the API
+        
+    Raises:
+        ApiBadRequestException: For 400 status code
+        ApiLimitationException: For 402 status code
+        Exception: For other errors after retries
     """
-    global last_request_time
-    
-    if params is None:
-        params = {}
-    
     url = f"https://financialmodelingprep.com/{endpoint}"
-    
-    # Define a function to fetch the data if not in cache
-    def fetch_data():
-        global last_request_time
-        with rate_limit_lock:
-            current_time = time.time()
-            elapsed_time = current_time - last_request_time
-            if elapsed_time < RATE_LIMIT_INTERVAL:
-                time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
-            
-            # Update the last request time
-            last_request_time = time.time()
-            
-            # Print the URL being fetched
-            params_url_string = "&".join([f"{k}={v}" for k, v in params.items()])
-            print(f"Fetching {url}?{params_url_string}")
-        
-        # Add API key to params dictionary
-        request_params = params.copy()
-        request_params["apikey"] = API_KEY
-        
-        # Make the request
-        response = requests.get(url, params=request_params)
+    request_params = (params or {}).copy()
+    request_params["apikey"] = API_KEY
+
+    def handle_response(response):
+        if response.status_code == 200:
+            return response.json()
+        if response.status_code == 400:
+            raise ApiBadRequestException(response.content)
         if response.status_code == 402:
-            raise ApiLimitationException(f"{response.content}")
-        elif response.status_code != 200:
-            raise Exception(f"Error fetching data from {url}: {response.json()}")
-        
-        return response.json()
-    
+            raise ApiLimitationException(response.content)
+        raise Exception(f"API error: {response.status_code} - {response.content}")
+
+    def make_request():
+        with rate_limit_lock:
+            enforce_rate_limit()
+            print(f"Fetching {url}?{urlencode(request_params)}")
+            return requests.get(url, params=request_params)
+
+    def fetch_data():
+        for attempt in range(max_retries):
+            try:
+                response = make_request()
+                return handle_response(response)
+            except (ApiBadRequestException, ApiLimitationException):
+                raise
+            except requests.exceptions.ConnectionError as e:
+                if attempt == max_retries - 1:
+                    raise Exception(f"Connection failed after {max_retries} attempts: {e}")
+                delay = base_delay * (2 ** attempt)  # Exponential backoff
+                print(f"Connection error, retrying in {delay}s: {e}")
+                time.sleep(delay)
+            except Exception as e:
+                raise Exception(f"Request failed: {e}")
+        raise Exception("failed to fetch data")
+
     # Use the cache_api_response function to handle caching
     return cache_api_response(endpoint, params, fetch_data)
 
@@ -179,42 +198,110 @@ def search_name(query: str):
 def tradeable_symbols():
     return api_get(f"api/v3/available-traded/list")
 
+def all_stocks():
+    res = api_get(f"stable/stock-list")
+    return [item.get("symbol") for item in res]
+
+def all_etfs():
+    res = api_get(f"stable/etf-list")
+    return [item.get("symbol") for item in res]
+
+def all_cryptos():
+    res = api_get(f"stable/cryptocurrency-list")
+    return [item.get("symbol") for item in res]
+
 def etf_holder(ticker: str):
     return api_get("funds/disclosure-holders-latest",{"symbol":ticker})
 
-
-
-@watchdog(timeout=30, retries=3)
-def price_history(ticker: str):
-    history_path = get_cache_path(ticker, "fmp_history", "pkl")
-    if os.path.exists(history_path) and is_cache_valid(history_path):
-        print(f"Loading {ticker} from cache..")
-        df = pd.read_pickle(history_path)
+def clean_time_series_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean time series data by removing NaN values at the beginning and end,
+    and interpolating NaN values in the middle of the series.
+    
+    Args:
+        df: DataFrame with 'date' and OHLC columns
+        
+    Returns:
+        Cleaned DataFrame with NaN values handled
+    """
+    if df.empty:
         return df
+    
+    df_clean = df.copy()
+    price_columns = ['open', 'high', 'low', 'avg', 'close']
+    available_price_columns = [col for col in price_columns if col in df_clean.columns]
+    
+    if not available_price_columns:
+        return df_clean
+    
+    # Remove rows where ALL price columns are NaN
+    df_clean = df_clean.dropna(subset=available_price_columns, how='all')
+    
+    if df_clean.empty:
+        return df_clean
+    
+    # Interpolate NaN values in the middle of the series
+    for col in available_price_columns:
+        df_clean[col] = df_clean[col].interpolate(method='linear')
+    
+    # Ensure OHLC relationships are maintained after interpolation
+    if all(col in df_clean.columns for col in ['open', 'high', 'low', 'close']):
+        # Ensure high is at least as high as open and close
+        df_clean['high'] = df_clean[['high', 'open', 'close']].max(axis=1)
+        # Ensure low is at most as low as open and close  
+        df_clean['low'] = df_clean[['low', 'open', 'close']].min(axis=1)
+        
+        # Recalculate average after OHLC adjustments
+        if 'avg' in df_clean.columns:
+            df_clean['avg'] = (df_clean['open'] + df_clean['high'] + df_clean['low'] + df_clean['close']) / 4
+    
+    return df_clean
 
+def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Fetch full history without date parameters
-    prices_response = api_get(f"api/v3/historical-price-full/{ticker}", {"from":"1980-01-01"})
-    prices_data = prices_response.get("historical", [])
+    params = {
+        "symbol": ticker,
+        "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1900-01-01",
+    }
+    prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
 
     prices_df = pd.DataFrame(prices_data)
     prices_df["date"] = pd.to_datetime(prices_df["date"])
     prices_df = prices_df.sort_values(by="date")
 
-    df = prices_df[["date", "adjClose"]]
-    df = df.rename(columns={"adjClose": "close"})
-    # Use actual prices instead of normalizing
+    df = prices_df[["date", "adjOpen", "adjHigh", "adjLow", "adjClose"]]
+    df = df.rename(columns={"adjOpen": "open", "adjHigh": "high", "adjLow":"low", "adjClose": "close"})
     df.set_index("date", inplace=True)
     df.sort_values("date")
-
-    df_monthly = df['close'].resample('ME').last().reset_index()
-    df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
-
-
-    df_monthly.to_pickle(history_path)
-
-    set_cache_expiry(history_path, expiry_end_of_month())
     
-    return df_monthly
+    # Calculate average price (OHLC/4)
+    df['avg'] = (df['open'] + df['high'] + df['low'] + df['close']) / 4
+
+    df_monthly = df.resample('ME').agg({
+        'open': 'first',
+        'high': 'max',
+        'low': 'min',
+        'avg': 'mean',
+        'close': 'last'
+    }).reset_index()
+    df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
+    if date_from:
+        df_monthly = df_monthly[df_monthly['date'] >= date_from]
+    df_monthly = clean_time_series_data(df_monthly)
+
+    df_weekly = df.resample('W').agg({
+        'open': 'first',
+        'high': 'max',
+        'low': 'min',
+        'avg': 'mean',
+        'close': 'last'
+    }).reset_index()
+    df_weekly = df_weekly[df_weekly['date'] < pd.Timestamp(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))]
+    if date_from:        
+        df_weekly = df_weekly[df_weekly['date'] >= date_from]
+    df_weekly = clean_time_series_data(df_weekly)
+
+    return df_monthly, df_weekly
 
 
 def expiry_end_of_month():

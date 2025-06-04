@@ -24,20 +24,9 @@ class DslTests(unittest.TestCase):
 
     def execute_flow(self, command_str: str) -> Output:
         return self.parser.parse(command_str)
-
-    def assert_no_error(self, output: Output):
-        self.assertNotEqual(output.output_type, "error", f"Output contains an error: {output.data}")
-
-    def assert_error(self, output: Output):
-        self.assertEqual(output.output_type, "error", "Output does not contain an error")
-
         
     def basket_from_output(self, output: Output) -> Basket:
-        self.assert_no_error(output)
-        self.assertEqual(output.output_type, "basket",
-                        f"Expected output type 'basket', got '{output.output_type}'")
-        self.assertIsInstance(output.data, Basket, 
-                             f"Expected data to be a Basket, got {type(output.data)}")
+        output.assert_type(Basket)
         return output.data
         
     def assert_basket_items(self, basket: Basket, expected: dict[str, float]):
@@ -75,64 +64,41 @@ class BasicFlowTests(DslTests):
 
     def test_simple_basket_creation(self):
         output = self.execute_flow("AAPL MSFT GOOGL")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
 
     def test_simple_weighted_basket_creation(self):
         output = self.execute_flow("3x AAPL 2 MSFT 1.7111x GOOGL AMZN 1.25723 NFLX")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 3, "MSFT": 2, "GOOGL": 1.7111, "AMZN": 1, "NFLX": 1.25723})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 3, "MSFT": 2, "GOOGL": 1.7111, "AMZN": 1, "NFLX": 1.25723})
 
     def test_add_items_to_basket_bad_syntax(self):
         """ missing an operator/function, so we don't know how to act on the left hand input """
         output = self.execute_flow("AAPL MSFT -> GOOGL")
-        self.assert_error(output)
+        assert output.has_error()
 
     def test_add_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT -> + GOOGL 7x NFLX")
-        
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1, "NFLX":7})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1, "MSFT":1, "GOOGL":1, "NFLX":7})
 
     def test_add_duplicate_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT GOOGL -> + GOOGL")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 2})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "MSFT": 1, "GOOGL": 2})
 
     def test_add_overlapping_items_to_basket(self):
         output = self.execute_flow("AAPL MSFT GOOGL -> + GOOGL NFLX")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 2, "NFLX": 1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "MSFT": 1, "GOOGL": 2, "NFLX": 1})
 
     def test_remove_items_from_basket(self):
         output = self.execute_flow("AAPL MSFT GOOGL -> - MSFT")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "GOOGL": 1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "GOOGL": 1})
 
     def test_basket_to_variable(self):
         # First create a basket with AAPL and MSFT
         self.new_parser()
-
         output = self.execute_flow("AAPL -> $a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
 
         output = self.execute_flow("$a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
 
     def test_basket_to_file(self):
         # First create a basket with AAPL and MSFT
@@ -140,21 +106,15 @@ class BasicFlowTests(DslTests):
 
         # write first file
         output = self.execute_flow("AAPL -> /a/b/c")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
 
         # write another file with another name
         output = self.execute_flow("MSFT -> /d/e")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"MSFT":1})
+        self.assert_basket_items(self.basket_from_output(output), {"MSFT":1})
 
         # retrieve first file
         output = self.execute_flow("/a/b/c")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
 
     def test_basket_to_file_overwrite(self):
         # First create a basket with AAPL and MSFT
@@ -162,21 +122,15 @@ class BasicFlowTests(DslTests):
 
         # write first file
         output = self.execute_flow("AAPL -> /a/b/c")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
 
         # overwrite file
         output = self.execute_flow("MSFT -> /a/b/c")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"MSFT":1})
+        self.assert_basket_items(self.basket_from_output(output), {"MSFT":1})
 
         # retrieve
         output = self.execute_flow("/a/b/c")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"MSFT":1})
+        self.assert_basket_items(self.basket_from_output(output), {"MSFT":1})
 
     def test_add_variable_and_basket(self):
         # First create a basket with AAPL and MSFT
@@ -184,28 +138,20 @@ class BasicFlowTests(DslTests):
 
         # prepare variable
         output = self.execute_flow("AAPL -> $a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1})
 
         # addition
         output = self.execute_flow("$a -> + MSFT")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1, "MSFT":1})
 
     def test_basket_to_variable_and_multiply(self):
         self.new_parser()
 
         output = self.execute_flow("3x AAPL 1.7 MSFT-> $a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":3, "MSFT": 1.7})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":3, "MSFT": 1.7})
 
         output = self.execute_flow("2x $a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":6, "MSFT": 3.4})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":6, "MSFT": 3.4})
 
     def test_add_variable_and_basket_short(self):
         # First create a basket with AAPL and MSFT
@@ -213,36 +159,24 @@ class BasicFlowTests(DslTests):
 
         # prepare variable
         output = self.execute_flow("AAPL -> $a")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1})
 
         # addition
         output = self.execute_flow("$a + MSFT")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1, "MSFT":1})
 
         # addition of multiple items
         output = self.execute_flow("$a + MSFT NFLX")
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "NFLX":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1, "MSFT":1, "NFLX":1})
 
     def test_complex_basket_creation(self):
         output = self.execute_flow("AAPL + 3x MSFT + 2.1 NFLX")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 3, "NFLX": 2.1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "MSFT": 3, "NFLX": 2.1})
 
 
     def test_complex_basket_operation(self):
         output = self.execute_flow("AAPL 3x MSFT 2.1 NFLX + 7 GOOG AMZN 0.002 TPL -> $a -> + 2x V")
-
-        self.assertIsInstance(output, Output)
-        basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 3, "NFLX": 2.1, "GOOG": 7, "AMZN": 1, "TPL": 0.002, "V": 2})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL": 1, "MSFT": 3, "NFLX": 2.1, "GOOG": 7, "AMZN": 1, "TPL": 0.002, "V": 2})
 
 
 
@@ -253,10 +187,8 @@ class ColumnCommandTests(DslTests):
     def test_add_pe_column(self):
         """Test adding a PE column to a basket."""
         output = self.execute_flow("AAPL -> .pe()")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
-        self.assert_basket_items(basket, {"AAPL":1})
+        self.assert_basket_items(self.basket_from_output(output), {"AAPL":1})
         self.assert_basket_has_column(basket, "pe")
 
         assert basket.data()['pe'].iloc[0] > 0
@@ -264,8 +196,6 @@ class ColumnCommandTests(DslTests):
     def test_add_multiple_columns(self):
         """Test adding multiple columns to a basket."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap()")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "pe")
@@ -274,8 +204,6 @@ class ColumnCommandTests(DslTests):
     def test_add_column_with_alias(self):
         """Test adding a column with an alias."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .ratio = .pe()")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "ratio")
@@ -283,8 +211,6 @@ class ColumnCommandTests(DslTests):
     def test_add_column_with_args(self):
         """Test adding a column with arguments."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .cagr(years=5)")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_has_column(basket, "cagr")
@@ -296,8 +222,6 @@ class SortCommandTests(DslTests):
     def test_sort_by_market_cap_asc(self):
         """Test sorting a basket by market cap."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> asc(.mcap)")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL":1, "MSFT":1, "GOOGL":1})
         self.assert_basket_sorted_by(basket, "mcap", ascending=True)
@@ -305,8 +229,6 @@ class SortCommandTests(DslTests):
     def test_sort_by_market_cap_desc(self):
         """Test sorting a basket by market cap."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .mcap() -> desc(.mcap)")
-
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_items(basket, {"AAPL": 1, "MSFT": 1, "GOOGL": 1})
         self.assert_basket_sorted_by(basket, "mcap", ascending=False)
@@ -319,8 +241,6 @@ class ComplexFlowTests(DslTests):
     def test_multiple_columns(self):
         """Test adding multiple columns."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .mcap() -> .yield()")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
         self.assert_basket_has_column(basket, "mcap")
@@ -329,8 +249,6 @@ class ComplexFlowTests(DslTests):
     def test_complex_column_flow(self):
         """Test complex column operations."""
         output = self.execute_flow("AAPL MSFT GOOGL -> .pe() -> .growth = .cagr(years=5) ->  .yield()")
-        
-        self.assertIsInstance(output, Output)
         basket = self.basket_from_output(output)
         self.assert_basket_has_column(basket, "pe")
         self.assert_basket_has_column(basket, "growth")

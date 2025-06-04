@@ -9,9 +9,20 @@ methods for calculating various financial metrics.
 
 Symbols don't need to be persisted - they are created on-the-fly from data retrieved from the data_sources module.
 """
-
+from .cache import init_db
 from .symbol import Symbol
+
+TYPE_STOCK="stock"
+TYPE_CRYPTO="crypto"
+TYPE_ETF="etf"
+TYPE_INDEX="index"
 
 __all__ = [
 	Symbol,
+	TYPE_STOCK,
+	TYPE_CRYPTO,
+	TYPE_ETF,
+	TYPE_INDEX,
 ]
+
+init_db()

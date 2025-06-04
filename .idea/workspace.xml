@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: more columns, screener">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: asc() and desc()">
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_fmp.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +20,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -34,6 +39,9 @@
     &quot;accountId&quot;: &quot;ad3dc772-ba00-4625-999a-d28f9e29fcdf&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/fins/financial/symbol.py" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 4
@@ -43,97 +51,111 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests in test_dsl.py.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_api_get.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_price_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_profile.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_quote.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search_name.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_cache.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_dsl.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_fmp.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_watchdog.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cli.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.column.executor&quot;: &quot;Run&quot;,
-    &quot;Python.command.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/columns&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.Python tests in test_dsl.py.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor": "Run",
+    "Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_prices.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_stock.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_api_get.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_price_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_profile.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_quote.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_search.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_search_name.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor": "Run",
+    "Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor": "Debug",
+    "Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.executor": "Run",
+    "Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor": "Run",
+    "Python tests.pytest in test_cache.py.executor": "Run",
+    "Python tests.pytest in test_dsl.py.executor": "Run",
+    "Python tests.pytest in test_fmp.py.executor": "Run",
+    "Python tests.pytest in test_watchdog.py.executor": "Run",
+    "Python tests.pytest in tests.executor": "Run",
+    "Python.__init__.executor": "Run",
+    "Python.cli.executor": "Debug",
+    "Python.column.executor": "Run",
+    "Python.command.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "feat/symbol-cache-sqlite",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/dsl/commands",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.sync",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
+    ]
   }
-}</component>
+}]]></component>
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities\columns" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl\commands" />
+      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities\columns" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\tests" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -141,7 +163,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.cli">
+  <component name="RunManager" selected="Python tests.pytest in tests">
     <configuration name="Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" type="tests" factoryName="Autodetect" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -158,25 +180,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_fmp.TestFMP.test_price_history" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="stock-screener" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_fmp.TestFMP.test_price_history&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -190,11 +194,11 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests.test_basket_to_file&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -208,11 +212,11 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_dsl.ComplexFlowTests.test_complex_column_flow&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.BasicFlowTests.test_add_variable_and_basket&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -226,8 +230,26 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_dsl.ComplexFlowTests.test_multiple_columns&quot;" />
+      <option name="_new_target" value="&quot;tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_dsl.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="stock-screener" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/fins/tests/test_dsl.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <configuration name="pytest in tests" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
@@ -251,18 +273,19 @@
     <list>
       <item itemvalue="Python.cli" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
-      <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
-      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" />
-      <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" />
-      <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket" />
+      <item itemvalue="Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc" />
+      <item itemvalue="Python tests.pytest in test_dsl.py" />
       <item itemvalue="Python tests.pytest in tests" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest in tests" />
-        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file" />
-        <item itemvalue="Python tests.pytest for test_fmp.TestFMP.test_price_history" />
-        <item itemvalue="Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow" />
+        <item itemvalue="Python tests.pytest in test_dsl.py" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket" />
+        <item itemvalue="Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket" />
       </list>
     </recent_temporary>
   </component>
@@ -305,318 +328,8 @@
       <workItem from="1747594801178" duration="6236000" />
       <workItem from="1747680023404" duration="18208000" />
       <workItem from="1747831444405" duration="13000" />
-    </task>
-    <task id="LOCAL-00021" summary="fix: repairing execution flows based to satisfy unit tests">
-      <option name="closed" value="true" />
-      <created>1742457859033</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1742457859033</updated>
-    </task>
-    <task id="LOCAL-00022" summary="refactor: removed deprecated functions">
-      <option name="closed" value="true" />
-      <created>1742459563698</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1742459563698</updated>
-    </task>
-    <task id="LOCAL-00023" summary="refactor: removed deprecated functions">
-      <option name="closed" value="true" />
-      <created>1742500351400</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1742500351400</updated>
-    </task>
-    <task id="LOCAL-00024" summary="fix: BasicFlowTests work">
-      <option name="closed" value="true" />
-      <created>1743024374273</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1743024374273</updated>
-    </task>
-    <task id="LOCAL-00025" summary="fix: BasicFlowTests work">
-      <option name="closed" value="true" />
-      <created>1743024603183</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1743024603183</updated>
-    </task>
-    <task id="LOCAL-00026" summary="fix: CLI app now executes">
-      <option name="closed" value="true" />
-      <created>1743025543319</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1743025543319</updated>
-    </task>
-    <task id="LOCAL-00027" summary="fix: CLI app now executes">
-      <option name="closed" value="true" />
-      <created>1743027425387</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1743027425388</updated>
-    </task>
-    <task id="LOCAL-00028" summary="feat: basic formatter for CLI">
-      <option name="closed" value="true" />
-      <created>1743028106050</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1743028106050</updated>
-    </task>
-    <task id="LOCAL-00029" summary="feat: basic formatter for CLI">
-      <option name="closed" value="true" />
-      <created>1743111363980</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1743111363980</updated>
-    </task>
-    <task id="LOCAL-00030" summary="feat!: restructured grammar - this will have caused some breaking changes, which will need to be fixed now">
-      <option name="closed" value="true" />
-      <created>1743253430559</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1743253430559</updated>
-    </task>
-    <task id="LOCAL-00031" summary="fix: first test runs again">
-      <option name="closed" value="true" />
-      <created>1743253876515</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1743253876515</updated>
-    </task>
-    <task id="LOCAL-00032" summary="fix: grammar seems ok now, allowed &quot;-&gt; + SYMBOL&quot;">
-      <option name="closed" value="true" />
-      <created>1743276936703</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1743276936703</updated>
-    </task>
-    <task id="LOCAL-00033" summary="fix: fixed grammer issue with operands, simplified grammar">
-      <option name="closed" value="true" />
-      <created>1743277545188</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1743277545188</updated>
-    </task>
-    <task id="LOCAL-00034" summary="refactor: merged dsl scripty into single dir due to circularity">
-      <option name="closed" value="true" />
-      <created>1743279086906</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1743279086906</updated>
-    </task>
-    <task id="LOCAL-00035" summary="refactor: merged dsl scripty into single dir due to circularity">
-      <option name="closed" value="true" />
-      <created>1743280069500</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1743280069500</updated>
-    </task>
-    <task id="LOCAL-00036" summary="refactor: merged dsl scripty into single dir due to circularity">
-      <option name="closed" value="true" />
-      <created>1743280781137</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1743280781137</updated>
-    </task>
-    <task id="LOCAL-00037" summary="refactor: moved commands to dsl/commands, now fixing unit tests and simplifying code">
-      <option name="closed" value="true" />
-      <created>1743282340830</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1743282340830</updated>
-    </task>
-    <task id="LOCAL-00038" summary="refactor: moved commands to dsl/commands, now fixing unit tests and simplifying code">
-      <option name="closed" value="true" />
-      <created>1743282768192</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1743282768192</updated>
-    </task>
-    <task id="LOCAL-00039" summary="refactor: fixed command sequence">
-      <option name="closed" value="true" />
-      <created>1743284468557</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1743284468557</updated>
-    </task>
-    <task id="LOCAL-00040" summary="refactor: fixed first variables test">
-      <option name="closed" value="true" />
-      <created>1743285572318</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1743285572318</updated>
-    </task>
-    <task id="LOCAL-00041" summary="refactor: fixed first variables test">
-      <option name="closed" value="true" />
-      <created>1743285698036</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1743285698036</updated>
-    </task>
-    <task id="LOCAL-00042" summary="feat: multiply basket">
-      <option name="closed" value="true" />
-      <created>1743402142784</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1743402142784</updated>
-    </task>
-    <task id="LOCAL-00043" summary="feat: basic flow tests run through">
-      <option name="closed" value="true" />
-      <created>1743536249310</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1743536249310</updated>
-    </task>
-    <task id="LOCAL-00044" summary="feat: basic Symbol implementation and attachment to fmp">
-      <option name="closed" value="true" />
-      <created>1745584206639</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1745584206639</updated>
-    </task>
-    <task id="LOCAL-00045" summary="feat: basic Symbol implementation and attachment to fmp">
-      <option name="closed" value="true" />
-      <created>1745584436957</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1745584436957</updated>
-    </task>
-    <task id="LOCAL-00046" summary="fix: fetching symbol with fmp">
-      <option name="closed" value="true" />
-      <created>1747480666541</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1747480666541</updated>
-    </task>
-    <task id="LOCAL-00047" summary="fix: all fmp tests succeed">
-      <option name="closed" value="true" />
-      <created>1747483155112</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1747483155112</updated>
-    </task>
-    <task id="LOCAL-00048" summary="fix: debugged tests for Symbol">
-      <option name="closed" value="true" />
-      <created>1747483787642</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1747483787642</updated>
-    </task>
-    <task id="LOCAL-00049" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747485086869</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1747485086869</updated>
-    </task>
-    <task id="LOCAL-00050" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747485445164</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1747485445164</updated>
-    </task>
-    <task id="LOCAL-00051" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747486418391</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1747486418391</updated>
-    </task>
-    <task id="LOCAL-00052" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747488009350</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1747488009350</updated>
-    </task>
-    <task id="LOCAL-00053" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747508923453</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1747508923453</updated>
-    </task>
-    <task id="LOCAL-00054" summary="feat: implementing first Column &quot;Pe&quot;">
-      <option name="closed" value="true" />
-      <created>1747509001106</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1747509001106</updated>
-    </task>
-    <task id="LOCAL-00055" summary="feat: multiple colum plugins">
-      <option name="closed" value="true" />
-      <created>1747510199591</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1747510199591</updated>
-    </task>
-    <task id="LOCAL-00056" summary="feat: use columns in fins">
-      <option name="closed" value="true" />
-      <created>1747511350618</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1747511350618</updated>
-    </task>
-    <task id="LOCAL-00057" summary="feat: implemented column kwargs">
-      <option name="closed" value="true" />
-      <created>1747512799536</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1747512799536</updated>
-    </task>
-    <task id="LOCAL-00058" summary="feat: Symbol.get_cagr()">
-      <option name="closed" value="true" />
-      <created>1747513773636</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1747513773636</updated>
-    </task>
-    <task id="LOCAL-00059" summary="feat: generic functions, sort asc / desc by column">
-      <option name="closed" value="true" />
-      <created>1747595534991</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1747595534991</updated>
+      <workItem from="1747855844432" duration="44653000" />
+      <workItem from="1748969388022" duration="9683000" />
     </task>
     <task id="LOCAL-00060" summary="test: removed non-existing advanced sort calls">
       <option name="closed" value="true" />
@@ -698,7 +411,319 @@
       <option name="project" value="LOCAL" />
       <updated>1747771114520</updated>
     </task>
-    <option name="localTasksCounter" value="70" />
+    <task id="LOCAL-00070" summary="fix: query etf profile">
+      <option name="closed" value="true" />
+      <created>1747856137894</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1747856137894</updated>
+    </task>
+    <task id="LOCAL-00071" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859394302</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859394302</updated>
+    </task>
+    <task id="LOCAL-00072" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859409424</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859409424</updated>
+    </task>
+    <task id="LOCAL-00073" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859414466</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859414466</updated>
+    </task>
+    <task id="LOCAL-00074" summary="feat: sqlite cache for Symbol">
+      <option name="closed" value="true" />
+      <created>1747859434439</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859434439</updated>
+    </task>
+    <task id="LOCAL-00075" summary="refactor: moved db path to .config">
+      <option name="closed" value="true" />
+      <created>1747859926701</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1747859926701</updated>
+    </task>
+    <task id="LOCAL-00076" summary="refactor: moved financial db and cache into seperate file">
+      <option name="closed" value="true" />
+      <created>1747860809270</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1747860809270</updated>
+    </task>
+    <task id="LOCAL-00077" summary="feat: functions stocks(), etfs(), cryptos() to fetch all symbols of a type">
+      <option name="closed" value="true" />
+      <created>1747894506121</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1747894506121</updated>
+    </task>
+    <task id="LOCAL-00078" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987841197</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987841197</updated>
+    </task>
+    <task id="LOCAL-00079" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987847540</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987847540</updated>
+    </task>
+    <task id="LOCAL-00080" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987855211</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987855211</updated>
+    </task>
+    <task id="LOCAL-00081" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987866844</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987866844</updated>
+    </task>
+    <task id="LOCAL-00082" summary="feat: fetch and cache price history weekly/monthly">
+      <option name="closed" value="true" />
+      <created>1747987874004</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987874004</updated>
+    </task>
+    <task id="LOCAL-00083" summary="fix: column functions not found">
+      <option name="closed" value="true" />
+      <created>1747987891658</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987891658</updated>
+    </task>
+    <task id="LOCAL-00084" summary="fix: column functions not found">
+      <option name="closed" value="true" />
+      <created>1747987927666</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1747987927666</updated>
+    </task>
+    <task id="LOCAL-00085" summary="fix: column functions not found">
+      <option name="closed" value="true" />
+      <created>1747988482336</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1747988482336</updated>
+    </task>
+    <task id="LOCAL-00086" summary="feat: price history fully implemented">
+      <option name="closed" value="true" />
+      <created>1747989526562</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1747989526562</updated>
+    </task>
+    <task id="LOCAL-00087" summary="fix: handle NaN entries in time series">
+      <option name="closed" value="true" />
+      <created>1748455691009</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1748455691009</updated>
+    </task>
+    <task id="LOCAL-00088" summary="fix: bad field name for inception of stock">
+      <option name="closed" value="true" />
+      <created>1748456956981</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1748456956982</updated>
+    </task>
+    <task id="LOCAL-00089" summary="fix: bad field name for inception of stock">
+      <option name="closed" value="true" />
+      <created>1748457212786</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1748457212786</updated>
+    </task>
+    <task id="LOCAL-00090" summary="feat: price history now has open, high, low, close and avg">
+      <option name="closed" value="true" />
+      <created>1748608593057</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1748608593057</updated>
+    </task>
+    <task id="LOCAL-00091" summary="feat: price history now has open, high, low, close and avg">
+      <option name="closed" value="true" />
+      <created>1748608926097</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1748608926097</updated>
+    </task>
+    <task id="LOCAL-00092" summary="feat: price history now has open, high, low, close and avg">
+      <option name="closed" value="true" />
+      <created>1748609611829</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1748609611829</updated>
+    </task>
+    <task id="LOCAL-00093" summary="feat: price history now has open, high, low, close and avg">
+      <option name="closed" value="true" />
+      <created>1748610194721</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1748610194721</updated>
+    </task>
+    <task id="LOCAL-00094" summary="feat: command ls() to list files">
+      <option name="closed" value="true" />
+      <created>1748614517643</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1748614517646</updated>
+    </task>
+    <task id="LOCAL-00095" summary="feat: command ls() to list files">
+      <option name="closed" value="true" />
+      <created>1748614994726</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1748614994726</updated>
+    </task>
+    <task id="LOCAL-00096" summary="fix: adapted &quot;?&quot; lark grammar to match all function names">
+      <option name="closed" value="true" />
+      <created>1748615364231</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1748615364231</updated>
+    </task>
+    <task id="LOCAL-00097" summary="feat: online help base">
+      <option name="closed" value="true" />
+      <created>1748616180290</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1748616180290</updated>
+    </task>
+    <task id="LOCAL-00098" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748971080201</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1748971080201</updated>
+    </task>
+    <task id="LOCAL-00099" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748972754956</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1748972754956</updated>
+    </task>
+    <task id="LOCAL-00100" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748973954138</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1748973954138</updated>
+    </task>
+    <task id="LOCAL-00101" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748974199557</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1748974199557</updated>
+    </task>
+    <task id="LOCAL-00102" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748974819508</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1748974819508</updated>
+    </task>
+    <task id="LOCAL-00103" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748975214092</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1748975214092</updated>
+    </task>
+    <task id="LOCAL-00104" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1748976156738</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1748976156738</updated>
+    </task>
+    <task id="LOCAL-00105" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1749018101436</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1749018101436</updated>
+    </task>
+    <task id="LOCAL-00106" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1749018847142</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1749018847142</updated>
+    </task>
+    <task id="LOCAL-00107" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
+      <option name="closed" value="true" />
+      <created>1749019287312</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1749019287312</updated>
+    </task>
+    <task id="LOCAL-00108" summary="fix: asc() and desc()">
+      <option name="closed" value="true" />
+      <created>1749020107378</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1749020107378</updated>
+    </task>
+    <option name="localTasksCounter" value="109" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -716,22 +741,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactor: merged dsl scripty into single dir due to circularity" />
-    <MESSAGE value="refactor: moved commands to dsl/commands, now fixing unit tests and simplifying code" />
-    <MESSAGE value="refactor: fixed command sequence" />
-    <MESSAGE value="refactor: fixed first variables test" />
-    <MESSAGE value="feat: multiply basket" />
-    <MESSAGE value="feat: basic flow tests run through" />
-    <MESSAGE value="feat: basic Symbol implementation and attachment to fmp" />
-    <MESSAGE value="fix: fetching symbol with fmp" />
-    <MESSAGE value="fix: all fmp tests succeed" />
-    <MESSAGE value="fix: debugged tests for Symbol" />
-    <MESSAGE value="feat: implementing first Column &quot;Pe&quot;" />
-    <MESSAGE value="feat: multiple colum plugins" />
-    <MESSAGE value="feat: use columns in fins" />
-    <MESSAGE value="feat: implemented column kwargs" />
-    <MESSAGE value="feat: Symbol.get_cagr()" />
-    <MESSAGE value="feat: generic functions, sort asc / desc by column" />
     <MESSAGE value="test: removed non-existing advanced sort calls" />
     <MESSAGE value="test: fixed complex flow tests" />
     <MESSAGE value="feat: all tests work - core feature set complete!" />
@@ -741,80 +750,76 @@
     <MESSAGE value="feat: inline help with &quot;?&quot;" />
     <MESSAGE value="feat: 'debug' command" />
     <MESSAGE value="feat: more columns" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: more columns" />
+    <MESSAGE value="fix: query etf profile" />
+    <MESSAGE value="feat: sqlite cache for Symbol" />
+    <MESSAGE value="refactor: moved db path to .config" />
+    <MESSAGE value="refactor: moved financial db and cache into seperate file" />
+    <MESSAGE value="feat: functions stocks(), etfs(), cryptos() to fetch all symbols of a type" />
+    <MESSAGE value="feat: fetch and cache price history weekly/monthly" />
+    <MESSAGE value="fix: column functions not found" />
+    <MESSAGE value="feat: price history fully implemented" />
+    <MESSAGE value="fix: handle NaN entries in time series" />
+    <MESSAGE value="fix: bad field name for inception of stock" />
+    <MESSAGE value="feat: price history now has open, high, low, close and avg" />
+    <MESSAGE value="feat: command ls() to list files" />
+    <MESSAGE value="fix: adapted &quot;?&quot; lark grammar to match all function names" />
+    <MESSAGE value="feat: online help base" />
+    <MESSAGE value="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching" />
+    <MESSAGE value="fix: asc() and desc()" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: asc() and desc()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>323</line>
+          <line>243</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py</url>
-          <line>29</line>
+          <line>40</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
-          <line>26</line>
+          <line>31</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
-          <line>39</line>
+          <line>44</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_variable.py</url>
-          <line>87</line>
-          <option name="timeStamp" value="35" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>220</line>
+          <line>164</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>92</line>
+          <line>75</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
-          <line>105</line>
-          <option name="timeStamp" value="75" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>14</line>
           <option name="timeStamp" value="80" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>29</line>
           <option name="timeStamp" value="87" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>28</line>
           <option name="timeStamp" value="89" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>41</line>
           <option name="timeStamp" value="95" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
-          <line>13</line>
-          <option name="timeStamp" value="101" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_fmp.py</url>
-          <line>117</line>
-          <option name="timeStamp" value="109" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/watchdog.py</url>
@@ -827,17 +832,12 @@
           <option name="timeStamp" value="115" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>179</line>
-          <option name="timeStamp" value="116" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_fmp.py</url>
           <line>107</line>
           <option name="timeStamp" value="117" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_symbol.py</url>
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>43</line>
           <option name="timeStamp" value="118" />
         </line-breakpoint>
@@ -853,27 +853,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>254</line>
+          <line>188</line>
           <option name="timeStamp" value="130" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>258</line>
+          <line>190</line>
           <option name="timeStamp" value="131" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
-          <line>43</line>
+          <line>48</line>
           <option name="timeStamp" value="138" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>55</line>
+          <line>44</line>
           <option name="timeStamp" value="149" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
-          <line>153</line>
+          <line>115</line>
           <option name="timeStamp" value="161" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -882,16 +882,138 @@
           <option name="timeStamp" value="162" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>188</line>
-          <option name="timeStamp" value="172" />
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="176" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
+          <line>159</line>
+          <option name="timeStamp" value="178" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/financial/cache.py</url>
+          <line>31</line>
+          <option name="timeStamp" value="184" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="188" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
+          <line>257</line>
+          <option name="timeStamp" value="196" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_fmp.py</url>
+          <line>117</line>
+          <option name="timeStamp" value="200" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/help.py</url>
+          <line>76</line>
+          <option name="timeStamp" value="213" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/help.py</url>
+          <line>73</line>
+          <option name="timeStamp" value="214" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/help.py</url>
+          <line>57</line>
+          <option name="timeStamp" value="217" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_function.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="218" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>82</line>
+          <option name="timeStamp" value="223" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>79</line>
+          <option name="timeStamp" value="224" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>190</line>
+          <option name="timeStamp" value="229" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/AppData/Local/JetBrains/PyCharm2025.1/remote_sources/754686584/1952936618/unittest/case.py</url>
+          <line>1267</line>
+          <option name="timeStamp" value="230" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="234" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
+          <line>48</line>
+          <option name="timeStamp" value="235" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>186</line>
+          <option name="timeStamp" value="238" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/parser.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="241" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_dsl.py</url>
+          <line>28</line>
+          <option name="timeStamp" value="242" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>247</line>
+          <option name="timeStamp" value="243" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>204</line>
+          <option name="timeStamp" value="246" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>220</line>
+          <option name="timeStamp" value="249" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>224</line>
+          <option name="timeStamp" value="250" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>232</line>
+          <option name="timeStamp" value="251" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_symbol.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="254" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
+          <line>214</line>
+          <option name="timeStamp" value="255" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="tests">
-        <watch expression="self.currency" />
-      </configuration>
       <configuration name="PythonConfigurationType">
         <watch expression="cls._registry.keys()" language="Python" />
       </configuration>
@@ -899,12 +1021,15 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743536201302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1749018842713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_profile.coverage" NAME="pytest for test_fmp.TestFMP.test_profile Coverage Results" MODIFIED="1747482962987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1743284425871" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743027268739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_stock.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747485467837" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_cache_py.coverage" NAME="pytest in test_cache.py Coverage Results" MODIFIED="1743024501480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1747513810345" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_financial.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747860741635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1749020086939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1743022534623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_remove_items_from_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket Coverage Results" MODIFIED="1743284490967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_desc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc Coverage Results" MODIFIED="1747595511809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -926,26 +1051,30 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$column.coverage" NAME="column Coverage Results" MODIFIED="1743250672207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/entities" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_search.coverage" NAME="pytest for test_fmp.TestFMP.test_search Coverage Results" MODIFIED="1747482892074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_stock.coverage" NAME="pytest for test_financial.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747988519666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_index_constituents_IndexConstituentsTests_test_get_constituents.coverage" NAME="pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents Coverage Results" MODIFIED="1745583998596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1747596036658" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1748608912783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history Coverage Results" MODIFIED="1747482671547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_fmp_TestFMP_test_etf_holder.coverage" NAME="pytest for tests.test_fmp.TestFMP.test_etf_holder Coverage Results" MODIFIED="1747481133600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_history_caching.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_history_caching Coverage Results" MODIFIED="1747483119490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1747770846497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$cli.coverage" NAME="cli Coverage Results" MODIFIED="1748971295805" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket_short.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short Coverage Results" MODIFIED="1743402971075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1747483127717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_load_ticker_fundamentals.coverage" NAME="pytest for test_fmp.TestFMP.test_load_ticker_fundamentals Coverage Results" MODIFIED="1747481444389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap Coverage Results" MODIFIED="1747595365233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1749019438129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_search_name.coverage" NAME="pytest for test_fmp.TestFMP.test_search_name Coverage Results" MODIFIED="1747483097209" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_SortCommandTests_test_sort_by_market_cap.coverage" NAME="pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap Coverage Results" MODIFIED="1747515385220" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1749018433959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_api_get.coverage" NAME="pytest for test_fmp.TestFMP.test_api_get Coverage Results" MODIFIED="1747482848388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1747598155826" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1743284460273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_quote.coverage" NAME="pytest for test_fmp.TestFMP.test_quote Coverage Results" MODIFIED="1747483083530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_pe_column.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column Coverage Results" MODIFIED="1747511431308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ComplexFlowTests_test_complex_column_flow.coverage" NAME="pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow Coverage Results" MODIFIED="1747595773057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_prices.coverage" NAME="pytest for test_financial.SymbolTests.test_get_prices Coverage Results" MODIFIED="1747989485003" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_basket_BasketTests_test_simple_basket.coverage" NAME="pytest for test_basket.BasketTests.test_simple_basket Coverage Results" MODIFIED="1747510169105" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file_overwrite.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite Coverage Results" MODIFIED="1743285481117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ColumnCommandTests_test_add_pe_column.coverage" NAME="pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column Coverage Results" MODIFIED="1747511391001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
@@ -953,14 +1082,15 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_tradeable_symbols.coverage" NAME="pytest for test_fmp.TestFMP.test_tradeable_symbols Coverage Results" MODIFIED="1747483101329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_stock_cagr.coverage" NAME="pytest for test_symbol.SymbolTests.test_stock_cagr Coverage Results" MODIFIED="1747513712008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_etf.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747483498696" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1747595508752" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1749019991447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$command.coverage" NAME="command Coverage Results" MODIFIED="1742285005110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/dsl/commands" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ComplexFlowTests_test_multiple_columns.coverage" NAME="pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns Coverage Results" MODIFIED="1747595708457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_duplicate_items_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket Coverage Results" MODIFIED="1749019273408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_item_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745344371786" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation Coverage Results" MODIFIED="1743536184843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_index.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_index Coverage Results" MODIFIED="1745390910779" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_simple_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation Coverage Results" MODIFIED="1743282789513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1747600907550" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1749020112490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_operation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation Coverage Results" MODIFIED="1743536188474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_multiple_columns.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns Coverage Results" MODIFIED="1747511506904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

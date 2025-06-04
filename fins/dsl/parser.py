@@ -48,10 +48,11 @@ class FinsParser:
                 raise SyntaxError(f"Invalid command structure, expected Token but got {tree.data}")
             return Command.execute_tree(CommandArgs(tree=tree, previous_output=Output(None), storage=self.storage))
         except Exception as e:
+            print(traceback.format_exc())
             if debug:
                 return Output(f"{traceback.format_exc()}\n{e}")
             else:
-                return Output(f"parser error: {e.__class__.__name__}")
+                return Output(e)
 
 
 if __name__ == "__main__":

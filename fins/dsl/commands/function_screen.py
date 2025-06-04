@@ -1,12 +1,14 @@
+from types import NoneType
 from typing import Any, Dict
 
 from lark import Tree, Token
 
 from data_sources.fmp import screen
+from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
 
-@Command.register("function_screen")
+@Command.register("screen")
 class FunctionScreen(Command):
 
 	@classmethod
@@ -17,13 +19,27 @@ class FunctionScreen(Command):
 	def description(cls) -> str:
 		return "Search symbols using filters"
 
-	@property
-	def input_type(self) -> str:
-		return "none"  # Requires a basket from the pipeline
+	@classmethod
+	def named_args(cls) -> list[CommandArg] | None:
+		return [
+			CommandArg(name="mcap_min", description="Market Cap Min", optional=True),
+			CommandArg(name="mcap_max", description="Market Cap Max", optional=True),
+			CommandArg(name="type", description="Asset Type {stocks|etf|crypto}", optional=True),
+			CommandArg(name="sector", description="Sector Name", optional=True),
+			CommandArg(name="industry", description="Industry Name", optional=True),
+			CommandArg(name="country", description="Country Code", optional=True),
+			CommandArg(name="exchange", description="Exchange Name", optional=True),
+			CommandArg(name="limit", description="Max results", optional=True, default="100"),
+		]
 
-	@property
-	def output_type(self) -> str:
-		return "basket"
+
+	@classmethod
+	def input_type(cls) -> type:
+		return NoneType
+
+	@classmethod
+	def output_type(cls) -> type:
+		return Basket
 
 	def execute(self, args: CommandArgs) -> Output:
 		filters: Dict[str, Any] = {"limit":100}
