@@ -1,8 +1,7 @@
 Next steps:
 
-- refactor: remove "function_" prefix from function registrations
-
 - file ops: 
   - remove persisted baskets
 
-- fetch price history to db
+- multithreaded fin data fetching:
+  - create baskets from lists, not iteratively. this allows centralized implementation of multithreaded fetching. 10x speedup should be the minimum, 100x should be possible
