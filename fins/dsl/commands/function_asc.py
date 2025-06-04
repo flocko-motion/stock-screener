@@ -3,7 +3,7 @@ from types import NoneType
 from lark import Tree
 
 from dsl.command import CommandArg
-from entities import Basket
+from fins.entities import Basket
 from fins.dsl import *
 
 @Command.register("asc")

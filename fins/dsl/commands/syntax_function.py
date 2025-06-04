@@ -1,6 +1,10 @@
+from types import NoneType
+
 from lark import Tree, Token
+from typing import Optional
 
 from dsl.command import CommandArg
+from fins.entities import Basket
 from fins.dsl import *
 
 @Command.register("function_call")
@@ -24,13 +28,13 @@ class FunctionCallCommand(Command):
     def named_args(cls) -> list[CommandArg]:
         return []
 
-    @property
+    @classmethod
     def input_type(cls) -> type:
-        return "none"  # Requires a basket from the pipeline
+        return Optional[Basket]
         
-    @property
+    @classmethod
     def output_type(cls) -> type:
-        return "basket"
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
         f_name = f"{args.tree.children[0]}"
@@ -40,6 +44,8 @@ class FunctionCallCommand(Command):
 
         cmd_handler = Command.get_command(f_name)
         cmd_args = CommandArgs(cmd=cmd_handler, tree=f_args, previous_output=args.previous_output, storage=args.storage)
-        cmd_args.validate()
-        return cmd_handler.execute(cmd_args)
+        cmd_handler.validate_input(cmd_args)
+        res = cmd_handler.execute(cmd_args)
+        cmd_handler.validate_output(res)
+        return res
 

@@ -22,13 +22,11 @@ class ColumnFunctionCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        """Get the type of input this command expects."""
-        pass
+        return Basket
 
     @classmethod
     def output_type(cls) -> type:
-        """Get the type of output this command produces."""
-        pass
+        return Basket
     
     def execute(self, args: CommandArgs) -> Output:
         col_func_args = args.tree.children

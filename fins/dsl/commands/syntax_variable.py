@@ -1,4 +1,5 @@
 from types import NoneType
+from typing import Optional
 
 from lark import Tree, Token
 
@@ -25,11 +26,11 @@ class VariableCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        return NoneType
+        return Optional[Basket]
 
     @classmethod
     def output_type(cls) -> type:
-        return Entity
+        return Optional[Basket]
     
     def execute(self, args: CommandArgs) -> Output:
         if len(args.tree.children) != 1:

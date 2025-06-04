@@ -215,10 +215,10 @@ class Command(ABC):
         input_type = self.__class__.input_type()
         if input_type is None or input_type == NoneType:
             if not args.previous_output.is_void():
-                raise SyntaxError(f"{self.name()}: Unexpected input type for command '{self.name()}': Expected {str(NoneType)}, got {str(type(args.previous_output))}")
+                raise SyntaxError(f"{self.name()}: Unexpected input type for command '{self.name()}': Expected {str(NoneType)}, got {str(type(args.previous_output.data))}")
         else:
             if not args.previous_output.is_type(input_type):
-                raise SyntaxError(f"{self.name()}: Unexpected input type for command '{self.name()}': Expected {str(input_type)}, got {str(type(args.previous_output))}")
+                raise SyntaxError(f"{self.name()}: Unexpected input type for command '{self.name()}': Expected {str(input_type)}, got {str(type(args.previous_output.data))}")
         named_args: list[CommandArg] = self.__class__.named_args()
         for named_arg in named_args:
             if not named_arg.optional and args.get_named_arg(named_arg.name) is None:
@@ -228,9 +228,9 @@ class Command(ABC):
         output_type = self.__class__.output_type()
         if output_type is None or output_type == NoneType:
             if not output.is_void():
-                raise SyntaxError(f"{self.name()}: Unexpected output type for command '{self.name()}'. Expected {str(NoneType)}, got {str(type(output))}")
+                raise SyntaxError(f"{self.name()}: Unexpected output type for command '{self.name()}'. Expected {str(NoneType)}, got {str(type(output.data))}")
         elif not output.is_type(output_type):
-                raise SyntaxError(f"{self.name()}: Unexpected output type for command '{self.name()}'. Expected {str(output_type)}, got {str(type(output))}")
+                raise SyntaxError(f"{self.name()}: Unexpected output type for command '{self.name()}'. Expected {str(output_type)}, got {str(type(output.data))}")
 
 
 
