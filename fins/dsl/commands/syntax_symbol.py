@@ -1,3 +1,5 @@
+from types import NoneType
+
 from lark import Tree, Token
 from typing import Optional
 
@@ -23,19 +25,14 @@ class SymbolCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        return Optional[Basket]
+        return NoneType
 
     @classmethod
     def output_type(cls) -> type:
         return Basket
     
     def execute(self, args: CommandArgs) -> Output:
-        """Execute the symbol command."""
         sequence = args.tree.children
-        previous_basket: Basket = args.get_previous_output()
-        if previous_basket is not None:
-            raise SyntaxError("Symbol command can only be used at the beginning of a command chain")
-
         token: Token = sequence[0]
         if not isinstance(token, Token):
             raise SyntaxError(f"Unexpected node {token}")

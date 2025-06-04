@@ -27,6 +27,7 @@ Example:
 
 from abc import ABC, abstractmethod, abstractclassmethod
 from distutils.cmd import Command
+from types import NoneType
 from typing import Type, Optional, Any, NamedTuple, Sequence, Dict, ClassVar, List
 from dataclasses import dataclass
 from lark import Tree, Token
@@ -74,21 +75,12 @@ class CommandArgs:
             return self.previous_output.data
         raise SyntaxError("Expected a basket as previous output")
 
-    def validate(self):
-        input_type = self.cmd.__class__.input_type()
-        if not (input_type is None):
-            # TODO: check input type
-
-        named_args: list[CommandArg] = self.cmd.__class__.named_args()
-        for named_arg in named_args:
-            if not named_arg.optional and self.get_named_arg(named_arg.name) is None:
-                raise SyntaxError(f"Missing required argument '{named_arg.name}'")
-
 
     def get_named_arg(self, name):
         if self.cmd is None:
             raise Exception("implementation error: self.cmd should not be None when using named args")
-        named_args: list[CommandArg] = self.cmd.__class__.named_args()
+        cmd: Command = self.cmd
+        named_args: list[CommandArg] = cmd.__class__.named_args()
         for named_arg in named_args:
             if named_arg.name != name:
                 continue
@@ -220,27 +212,21 @@ class Command(ABC):
         return {}
         
     def validate_input(self, args: CommandArgs) -> None:
-        """
-        Validate command input and arguments.
-        
-        Args:
-            args: The command arguments to validate
-            
-        Raises:
-            TypeError: If input is not of the required type
-
-        TODO: Implement a generic input types checking system. This could be based on a type-checking class
-        that contains a list of types and alternatives and allowed repetitions and omissions..
-        As this is not crucial to the functionality of this program, we might just never need it and
-        rely on the functions execution block to throw errors where invalid values are found.
-        """
-        return
+        input_type = self.__class__.input_type()
+        if not (input_type is None or input_type == NoneType):
+            if not args.previous_output.is_type(input_type):
+                raise SyntaxError(f"{self.name()}: Unexpected input type. Expected '{str(input_type)}', got '{str(type(args.previous_output))}'")
+        named_args: list[CommandArg] = self.__class__.named_args()
+        for named_arg in named_args:
+            if not named_arg.optional and args.get_named_arg(named_arg.name) is None:
+                raise SyntaxError(f"Missing required argument '{named_arg.name}'")
 
     def validate_output(self, output):
-        if isinstance(output, self.output_type):
-            return
-        else:
-            raise ValueError(f"output '{output}' is not of expected type '{self.output_type}'")
+        output_type = self.__class__.output_type()
+        if not (output_type is None or output_type == NoneType):
+            if not output.is_type(output_type):
+                raise SyntaxError(f"{self.name()}: Unexpected output type. Expected '{str(output_type)}', got '{str(type(output))}'")
+
 
 
         
@@ -272,7 +258,10 @@ class Command(ABC):
         command_type = args.tree.data
         cmd_handler = cls.get_command(command_type)
         args.cmd = cmd_handler
-        return cmd_handler.execute(args)
+        cmd_handler.validate_input(args)
+        res = cmd_handler.execute(args)
+        cmd_handler.validate_output(res)
+        return res
 
 
     @staticmethod
