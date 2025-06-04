@@ -1,4 +1,7 @@
+from types import NoneType
+
 from lark import Tree, Token
+from typing import Optional
 
 from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
@@ -16,7 +19,7 @@ class OperandCommand(Command):
         
     @classmethod
     def description(cls) -> str:
-        return "Performs set operations (+, -, &) on next argument. Takes no left input."
+        return "Applies weight to a Basket"
         
     @classmethod
     def named_args(cls) -> list[CommandArg]:
@@ -24,7 +27,7 @@ class OperandCommand(Command):
 
     @classmethod
     def input_type(cls) -> type:
-        return Basket
+        return NoneType
 
     @classmethod
     def output_type(cls) -> type:
