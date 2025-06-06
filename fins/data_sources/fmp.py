@@ -39,6 +39,7 @@ except Exception as e:
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()
 last_request_time = 0
+use_cache = False
 
 RATE_LIMIT_INTERVAL = 0.25
 print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
@@ -116,13 +117,15 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 raise Exception(f"Request failed: {e}")
         raise Exception("failed to fetch data")
 
-    # Use the cache_api_response function to handle caching
-    return cache_api_response(endpoint, params, fetch_data)
+    if use_cache:
+        return cache_api_response(endpoint, params, fetch_data)
+    else:
+        return fetch_data()
 
 def search(query: str):
     return api_get(f"api/v3/search", {"query":query})
 
-def screen(mcap_min: int = None, mcap_max: int = None, type: str = "all", sector: str = None, industry: str = None, country: str = None, exchange: str = None, limit: int = 1000):
+def screen(mcap_min: int = None, mcap_max: int = None, type: str = "all", sector: str = None, industry: str = None, country: str = None, exchange: str = None, limit: int = 1000) -> list[str]:
     params: Dict[str, Any] = {
         "limit": limit,
     }

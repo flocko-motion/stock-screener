@@ -127,7 +127,18 @@ class Symbol(Base):
         """Remove all entries from the cache."""
         with session_scope() as session:
             session.query(cls).delete()
-    
+
+    use_cache = True
+
+    @classmethod
+    def set_caching(cls, mode: str) -> None:
+        if mode == "none":
+            cls.use_cache = False
+        elif mode == "default":
+            cls.use_cache = True
+        else:
+            raise Exception("Invalid cache mode")
+
     @classmethod
     def get(cls, ticker: str) -> 'Symbol':
         """
@@ -139,6 +150,9 @@ class Symbol(Base):
         Returns:
             The Symbol instance
         """
+        if not cls.use_cache:
+            return Symbol(ticker)
+
         if ticker not in cls.symbols:
             # Check cache first
             cached_symbol = cls._get_from_cache(ticker)

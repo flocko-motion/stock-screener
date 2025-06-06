@@ -55,7 +55,7 @@ class FunctionScreen(Command):
 				else:
 					raise SyntaxError("failed parsing arguments")
 		symbols = screen(**filters)
-		return Output(Basket([BasketItem(symbol) for symbol in symbols]))
+		return Output(Basket.from_symbols(symbols))
 
 	def parse_arg(self, arg: Tree):
 		return arg

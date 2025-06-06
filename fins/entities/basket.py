@@ -7,6 +7,8 @@ with associated data and analysis columns.
 
 from typing import Any, Optional, Iterator, Dict, List
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 from .entity import Entity
 from .basket_item import BasketItem
@@ -275,6 +277,56 @@ class Basket(Entity):
             basket.add_column(column_from_dict(col_data))
 
         return basket
+
+    @classmethod
+    def from_symbols(cls, symbols: list[str], ignore_unresolved: bool = True, max_workers: int = 10) -> 'Basket':
+        """
+        Create a basket from a list of symbols using multithreading for faster symbol resolution.
+        
+        Args:
+            symbols: List of symbol tickers
+            ignore_unresolved: Whether to ignore symbols that can't be resolved
+            max_workers: Maximum number of threads to use for parallel processing
+            
+        Returns:
+            A new Basket containing the symbols
+        """
+        def create_basket_item(symbol: str) -> Optional[BasketItem]:
+            """Create a single basket item, handling errors if ignore_unresolved is True."""
+            try:
+                return BasketItem(symbol)
+            except Exception as e:
+                if ignore_unresolved:
+                    print(f"Warning: Could not resolve symbol {symbol}: {e}")
+                    return None
+                else:
+                    raise
+        
+        basket_items = []
+        
+        # Use ThreadPoolExecutor to parallelize symbol resolution
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_symbol = {executor.submit(create_basket_item, symbol): symbol for symbol in symbols}
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_symbol):
+                symbol = future_to_symbol[future]
+                try:
+                    basket_item = future.result()
+                    if basket_item is not None:
+                        basket_items.append(basket_item)
+                except Exception as e:
+                    if not ignore_unresolved:
+                        raise
+                    print(f"Warning: Could not resolve symbol {symbol}: {e}")
+        
+        # Preserve original order by sorting basket_items according to symbols list
+        symbol_to_item = {item.ticker: item for item in basket_items}
+        ordered_items = [symbol_to_item[symbol] for symbol in symbols if symbol in symbol_to_item]
+        
+        return cls(ordered_items)
+
 
 
 
