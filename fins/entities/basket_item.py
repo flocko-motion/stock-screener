@@ -36,12 +36,22 @@ class BasketItem(Entity):
         super().__init__(id=id, created_at=created_at, updated_at=updated_at, tags=tags, metadata=metadata)
         self.ticker = ticker
         self.amount = amount
-        self.symbol = Symbol.get(self.ticker)
+        self._symbol = None
     
     def __str__(self) -> str:
         """Return the string representation of the basket item."""
         return f"{self.amount} x {self.ticker}"
-    
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            return BasketItem(self.ticker, amount=other * self.amount)
+        return NotImplemented
+
+    def symbol(self) -> Symbol:
+        if self._symbol is None:
+            self._symbol = Symbol.get(self.ticker)
+        return self._symbol
+
     def to_dict(self):
         """
         Convert the basket item to a dictionary.

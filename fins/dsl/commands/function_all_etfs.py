@@ -1,9 +1,8 @@
 from types import NoneType
 
-from dsl.command import CommandArg
 from fins.entities import Basket, BasketItem
 from fins.dsl import *
-from data_sources.fmp import all_etfs
+from fins.data_sources.fmp import all_etfs
 
 @Command.register("function_etfs")
 class FunctionAllEtfs(Command):

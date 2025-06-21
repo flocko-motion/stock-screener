@@ -11,6 +11,7 @@ __all__ = [
 	"Output",
 	"Command",
 	"CommandArgs",
+	"FinsParser",
 ]
 
 from .output import Output

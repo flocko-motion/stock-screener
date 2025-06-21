@@ -3,10 +3,17 @@ import unittest
 from fins.entities import columns
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
-from .tools import time_it, no_cache
+from .tools import time_it, no_cache, unbuffered_output
 
 
 class BasketTests(unittest.TestCase):
+
+    def test_basket_item_multiplication(self):
+        print("hello")
+        item = BasketItem("AAPL")
+        multiplied_item = item * 3
+        self.assertEqual(multiplied_item.symbol, "AAPL")
+        self.assertEqual(multiplied_item.amount, 3)
 
     def test_simple_basket(self):
         basket = Basket(name="foo", items=[
@@ -49,6 +56,7 @@ class BasketTests(unittest.TestCase):
 
     @time_it
     @no_cache
+    @unbuffered_output
     def test_multithreaded_basket_creation_one(self):
         symbols = ["AAPL"]
         basket = Basket.from_symbols(symbols)
@@ -56,10 +64,11 @@ class BasketTests(unittest.TestCase):
 
     @time_it
     @no_cache
+    @unbuffered_output
     def test_multithreaded_basket_creation(self):
         symbols = ["ATLFF","ALFNF","ACMDY","ASBPW","CWBR","ATIW","FBTC","FXED","PFS","DGRS","BUFIX","GPFT","FFTI","ASXSF","BKAYY","AMH-PE","RGNX","WSCC","RXST","ACU","TIBGX","ZSPY","AHG","GOP","FTA","HROWM","FORD","RSYEX","NNAVW","HNGZY","TNGRF","MARUY","HIZOF","ALRY","RUSHA","ORMP","WLGS","SRTS","DISSX","ULNV","SOGFF","DFLIW","TCEFF","APPZ","CGO","YAMCF","NIKLF",]
-        #symbols = ["AAPL", "GOOG", "MSFT"]
-        basket = Basket.from_symbols(symbols)
+        # symbols = symbols[0:10]
+        basket = Basket.from_symbols(symbols, max_workers=50)
         assert len(basket.items) == len(symbols)
 
 

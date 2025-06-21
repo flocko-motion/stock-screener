@@ -26,14 +26,14 @@ try:
         API_KEY = file.read().strip()
     
     # Print the first few characters of the API key for debugging
-    print(f"FMP API key loaded successfully. Length: {len(API_KEY)}, First chars: {API_KEY[:3]}...")
+    print(f"FMP API key loaded successfully. Length: {len(API_KEY)}, First chars: {API_KEY[:3]}...", file=sys.stderr)
     
     # Crash immediately if API key is empty or too short
     if not API_KEY or len(API_KEY) < 10:
-        print(f"ERROR: Invalid FMP API key found in {key_file_path}. Key is empty or too short.")
+        print(f"ERROR: Invalid FMP API key found in {key_file_path}. Key is empty or too short.", file=sys.stderr)
         sys.exit(1)
 except Exception as e:
-    print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}")
+    print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}", file=sys.stderr)
     sys.exit(1)
 
 # Initialize a lock and a variable to store the last request time
@@ -41,8 +41,8 @@ rate_limit_lock = threading.Lock()
 last_request_time = 0
 use_cache = False
 
-RATE_LIMIT_INTERVAL = 0.25
-print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds")
+RATE_LIMIT_INTERVAL = 0.1
+print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", file=sys.stderr)
 
 class ApiLimitationException(Exception):
     def __init__(self, message):
@@ -60,7 +60,9 @@ def enforce_rate_limit():
     current_time = time.time()
     elapsed_time = current_time - last_request_time
     if elapsed_time < RATE_LIMIT_INTERVAL:
-        time.sleep(RATE_LIMIT_INTERVAL - elapsed_time)
+        sleep_interval = RATE_LIMIT_INTERVAL - elapsed_time
+        print(f"sleep {sleep_interval} seconds")
+        time.sleep(sleep_interval)
     last_request_time = time.time()
 
 def api_get(endpoint, params=None, max_retries=5, base_delay=3):

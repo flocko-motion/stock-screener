@@ -1,8 +1,0 @@
-pillow
-requests
-beautifulsoup4
-matplotlib
-pandas
-numpy
-yfinance
-lark-parser

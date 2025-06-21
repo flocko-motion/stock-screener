@@ -4,6 +4,8 @@ Test utilities and decorators for the FINS test suite.
 
 import time
 import functools
+import os
+import sys
 
 import fins.data_sources.fmp
 
@@ -47,5 +49,36 @@ def no_cache(func):
 
         Symbol.set_caching("default")
         fins.data_sources.fmp.use_cache = fmp_cache_original
+        return result
+    return wrapper
+
+def unbuffered_output(func):
+    """Decorator to force immediate output by setting environment variable and using explicit flushing."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Set environment variable for unbuffered output
+        old_pythonunbuffered = os.environ.get('PYTHONUNBUFFERED', '')
+        os.environ['PYTHONUNBUFFERED'] = '1'
+        
+        # Force flush on all print statements by monkey-patching print temporarily
+        import builtins
+        original_print = builtins.print
+        
+        def flushing_print(*args, **kwargs):
+            kwargs.setdefault('flush', True)
+            return original_print(*args, **kwargs)
+        
+        builtins.print = flushing_print
+        
+        try:
+            result = func(*args, **kwargs)
+        finally:
+            # Restore original state
+            builtins.print = original_print
+            if old_pythonunbuffered:
+                os.environ['PYTHONUNBUFFERED'] = old_pythonunbuffered
+            else:
+                os.environ.pop('PYTHONUNBUFFERED', None)
+        
         return result
     return wrapper

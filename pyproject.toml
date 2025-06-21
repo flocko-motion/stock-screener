@@ -2,19 +2,19 @@
 name = "fins"
 version = "0.1.0"
 description = "Financial Insights and Notation System - A terminal-based tool for financial analysis"
-authors = ["Florian Metzger-Noel <fnoel@ik.me>"]
+authors = ["Florian Metzger-Noel <fins@fmnoel.de>"]
 readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-lark = "^1.1.5"
 pandas = "^2.0.0"
 requests = "^2.32.3"
 matplotlib = "^3.10.1"
 prompt-toolkit = "^3.0.43"
 sqlalchemy = "^2.0.27"
 alembic = "^1.16.1"
+plotly = "^6.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"

@@ -9,6 +9,7 @@ from typing import Any, Optional, Iterator, Dict, List
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import sys
 
 from .entity import Entity
 from .basket_item import BasketItem
@@ -25,7 +26,7 @@ class Basket(Entity):
         columns: List of columns in display order
     """
     
-    def __init__(self, items: list[BasketItem] = None, name: Optional[str] = None):
+    def __init__(self, *symbols, items: list[BasketItem] = None, name: Optional[str] = None):
         """Initialize a basket."""
         super().__init__()
         self.name = name
@@ -294,15 +295,20 @@ class Basket(Entity):
         def create_basket_item(symbol: str) -> Optional[BasketItem]:
             """Create a single basket item, handling errors if ignore_unresolved is True."""
             try:
-                return BasketItem(symbol)
+                print(f"Processing {symbol}...")
+                result = BasketItem(symbol)
+                print(f"✓ {symbol} resolved")
+                return result
             except Exception as e:
                 if ignore_unresolved:
-                    print(f"Warning: Could not resolve symbol {symbol}: {e}")
+                    print(f"⚠ Warning: Could not resolve symbol {symbol}: {e}")
                     return None
                 else:
                     raise
         
+        print(f"Creating basket from {len(symbols)} symbols using {max_workers} threads...")
         basket_items = []
+        completed_count = 0
         
         # Use ThreadPoolExecutor to parallelize symbol resolution
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -311,7 +317,9 @@ class Basket(Entity):
             
             # Collect results as they complete
             for future in as_completed(future_to_symbol):
+                print("completed..")
                 symbol = future_to_symbol[future]
+                completed_count += 1
                 try:
                     basket_item = future.result()
                     if basket_item is not None:
@@ -319,12 +327,16 @@ class Basket(Entity):
                 except Exception as e:
                     if not ignore_unresolved:
                         raise
-                    print(f"Warning: Could not resolve symbol {symbol}: {e}")
+                    print(f"⚠ Warning: Could not resolve symbol {symbol}: {e}")
+                
+                # Progress indicator
+                print(f"Progress: {completed_count}/{len(symbols)} symbols processed")
         
         # Preserve original order by sorting basket_items according to symbols list
         symbol_to_item = {item.ticker: item for item in basket_items}
         ordered_items = [symbol_to_item[symbol] for symbol in symbols if symbol in symbol_to_item]
         
+        print(f"✓ Basket creation complete! Successfully resolved {len(ordered_items)}/{len(symbols)} symbols")
         return cls(ordered_items)
 
 

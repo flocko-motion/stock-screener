@@ -12,7 +12,7 @@ from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
-from data_sources import fmp
+from fins.data_sources import fmp
 from fins.financial.cache import Base, session_scope, get_expiration_time
 
 TYPE_STOCK = "stock"
