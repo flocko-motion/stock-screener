@@ -11,12 +11,7 @@
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: complete restart ... now with Python instead of a DSL">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/cli.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/columns/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/cagr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -350,15 +345,7 @@
       <workItem from="1750077468177" duration="13000" />
       <workItem from="1750504788952" duration="6504000" />
       <workItem from="1750517509300" duration="264000" />
-      <workItem from="1750517981093" duration="8236000" />
-    </task>
-    <task id="LOCAL-00065" summary="feat: persist basket with columns">
-      <option name="closed" value="true" />
-      <created>1747601088751</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1747601088751</updated>
+      <workItem from="1750517981093" duration="9039000" />
     </task>
     <task id="LOCAL-00066" summary="fix: cache validity for profile/history is now end-of-month">
       <option name="closed" value="true" />
@@ -744,7 +731,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750588241140</updated>
     </task>
-    <option name="localTasksCounter" value="114" />
+    <task id="LOCAL-00114" summary="feat: complete restart ... now with Python instead of a DSL">
+      <option name="closed" value="true" />
+      <created>1750592052543</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1750592052543</updated>
+    </task>
+    <option name="localTasksCounter" value="115" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

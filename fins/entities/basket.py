@@ -103,13 +103,17 @@ class Basket(Entity):
         copy._columns = self._columns.copy()
         return copy
 
-    def add_column(self, column: Column) -> None:
-        """Add a column to the basket."""
-        self._columns.append(column)
+    def add_column(self, column: Column) -> 'Basket':
+        """Add a column to the basket and return a new basket."""
+        result = self.copy_of()
+        result._columns.append(column)
+        return result
 
-    def remove_column(self, name: str) -> None:
-        """Remove a column by name/alias."""
-        self._columns = [col for col in self._columns if col.alias() != name]
+    def remove_column(self, name: str) -> 'Basket':
+        """Remove a column by name/alias and return a new basket."""
+        result = self.copy_of()
+        result._columns = [col for col in result._columns if col.alias() != name]
+        return result
 
     def has_column(self, name: str) -> bool:
         """Check if basket has a column by name/alias."""
@@ -123,16 +127,6 @@ class Basket(Entity):
         """Get list of column names/aliases in order."""
         return [col.alias() for col in self._columns]
 
-
-    def operation(self, other: 'Basket', operator: str) -> 'Basket':
-        if operator == "+":
-            return self.union(other)
-        elif operator == "-":
-            return self.subtract(other)
-        elif operator == "&":
-            return self.intersection(other)
-        else:
-            raise ValueError(f"Unknown operator: {operator}")
 
     def union(self, other: 'Basket') -> 'Basket':
         """
