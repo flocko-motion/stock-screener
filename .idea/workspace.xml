@@ -10,7 +10,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: complete restart ... now with Python instead of a DSL">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -65,6 +64,7 @@
     "Python tests.Python tests in test_dsl.py.executor": "Debug",
     "Python tests.Unittests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
     "Python tests.Unittests for test_test.TestTests.test_test.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets.executor": "Debug",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_item.executor": "Run",
@@ -196,7 +196,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket">
+  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -274,7 +274,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -286,7 +286,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_add_baskets_overlap&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -359,7 +359,7 @@
       <item itemvalue="Python.codegen" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_remove_item" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_sub_basket" />
@@ -367,11 +367,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_remove_item" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_sub_basket" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_sub_item" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap" />
       </list>
     </recent_temporary>
   </component>
@@ -420,15 +420,7 @@
       <workItem from="1750077468177" duration="13000" />
       <workItem from="1750504788952" duration="6504000" />
       <workItem from="1750517509300" duration="264000" />
-      <workItem from="1750517981093" duration="14740000" />
-    </task>
-    <task id="LOCAL-00070" summary="fix: query etf profile">
-      <option name="closed" value="true" />
-      <created>1747856137894</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1747856137894</updated>
+      <workItem from="1750517981093" duration="14815000" />
     </task>
     <task id="LOCAL-00071" summary="feat: sqlite cache for Symbol">
       <option name="closed" value="true" />
@@ -814,7 +806,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750598473196</updated>
     </task>
-    <option name="localTasksCounter" value="119" />
+    <task id="LOCAL-00119" summary="feat: complete restart ... now with Python instead of a DSL">
+      <option name="closed" value="true" />
+      <created>1750598756636</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1750598756636</updated>
+    </task>
+    <option name="localTasksCounter" value="120" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -901,11 +901,6 @@
           <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>43</line>
           <option name="timeStamp" value="118" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>100</line>
-          <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_fmp.py</url>
@@ -1014,7 +1009,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>135</line>
+          <line>96</line>
           <option name="timeStamp" value="256" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1076,6 +1071,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_add_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_add_item Coverage Results" MODIFIED="1750596984729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743027268739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_BasketTests_test_basket_item_multiplication.coverage" NAME="pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication Coverage Results" MODIFIED="1750518516466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests.coverage" NAME="Unittests for tests.test_basket.BasketTests Coverage Results" MODIFIED="1750598782377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_stock.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747485467837" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_cache_py.coverage" NAME="pytest in test_cache.py Coverage Results" MODIFIED="1743024501480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_financial.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747860741635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
