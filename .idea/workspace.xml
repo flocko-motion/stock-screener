@@ -8,80 +8,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: multithreaded basket creation">
-      <change afterPath="$PROJECT_DIR$/codegen.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fins/tests/test_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.coverage" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/cli.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/stock-screener.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/stock-screener.iml" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: complete restart ... now with Python instead of a DSL">
+      <change afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/cache.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/datapackaging.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/datapackaging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/financialmodelingprep.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/image_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/image_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/stockanalysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/stockanalysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/terminal.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/ticker.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/ticker_info.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/ticker_info.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/watchdog.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/watchdog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/lib/lib/yahoo_finance.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/yahoo_finance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compress-png.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/.flake8" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/CONTRIBUTING.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/Makefile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/ast_transformer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_cryptos.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_cryptos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_etfs.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_etfs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_all_stocks.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_all_stocks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_files_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_files_list.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/commands/function_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/dsl/commands/function_screen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.lark" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/dsl/parser.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket_item.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codegen.py" beforeDir="false" afterPath="$PROJECT_DIR$/codegen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/pytest.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_dsl.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/identifier.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/commands.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/cache.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/datapackaging.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/financialmodelingprep.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/financialmodelingprep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/image_processing.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/stockanalysis.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/terminal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ticker.py" beforeDir="false" afterPath="$PROJECT_DIR$/legacy_lib/ticker.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ticker_info.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/watchdog.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/yahoo_finance.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preloader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/preloader.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock-screener.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock_screener.egg-info/PKG-INFO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock_screener.egg-info/SOURCES.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock_screener.egg-info/dependency_links.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock_screener.egg-info/requires.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stock_screener.egg-info/top_level.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -92,8 +25,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Jupyter Notebook" />
         <option value="Python Script" />
+        <option value="Jupyter Notebook" />
       </list>
     </option>
   </component>
@@ -212,10 +145,11 @@
     "Python.__init__.executor": "Run",
     "Python.cli.executor": "Run",
     "Python.codegen (1).executor": "Run",
+    "Python.codegen.executor": "Run",
     "Python.column.executor": "Run",
     "Python.command.executor": "Debug",
     "Python.jupyter_frontend.executor": "Run",
-    "Python.terminal.executor": "Debug",
+    "Python.terminal.executor": "Run",
     "Python.test.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -306,9 +240,6 @@
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -418,15 +349,7 @@
       <workItem from="1750077468177" duration="13000" />
       <workItem from="1750504788952" duration="6504000" />
       <workItem from="1750517509300" duration="264000" />
-      <workItem from="1750517981093" duration="3548000" />
-    </task>
-    <task id="LOCAL-00063" summary="feat: print column values with explicit stringify method">
-      <option name="closed" value="true" />
-      <created>1747597910514</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1747597910514</updated>
+      <workItem from="1750517981093" duration="4597000" />
     </task>
     <task id="LOCAL-00064" summary="feat: persist basket with columns">
       <option name="closed" value="true" />
@@ -812,7 +735,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749206599085</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <task id="LOCAL-00112" summary="feat: complete restart ... now with Python instead of a DSL">
+      <option name="closed" value="true" />
+      <created>1750521587795</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1750521587795</updated>
+    </task>
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -830,7 +761,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: print column values with explicit stringify method" />
     <MESSAGE value="feat: persist basket with columns" />
     <MESSAGE value="fix: cache validity for profile/history is now end-of-month" />
     <MESSAGE value="feat: inline help with &quot;?&quot;" />
@@ -855,7 +785,8 @@
     <MESSAGE value="fix: all tests work" />
     <MESSAGE value="docs: updated todo" />
     <MESSAGE value="feat: multithreaded basket creation" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: multithreaded basket creation" />
+    <MESSAGE value="feat: complete restart ... now with Python instead of a DSL" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: complete restart ... now with Python instead of a DSL" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -942,7 +873,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
-          <line>173</line>
+          <line>174</line>
           <option name="timeStamp" value="178" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1062,7 +993,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/financial/symbol.py</url>
-          <line>214</line>
+          <line>217</line>
           <option name="timeStamp" value="263" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1123,7 +1054,7 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/stock_screener$codegen__1_.coverage" NAME="codegen (1) Coverage Results" MODIFIED="1750521251652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$codegen__1_.coverage" NAME="codegen Coverage Results" MODIFIED="1750587113584" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743536201302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1749018842713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
