@@ -50,7 +50,7 @@ class BasketTests(unittest.TestCase):
         assert desc["columns"][5]["class"] == "VolColumn"
         assert desc["columns"][6]["class"] == "YieldColumn"
 
-        data = basket.data()
+        data = basket.df()
         assert not (data is None)
         print(f"\n{data}\n")
 

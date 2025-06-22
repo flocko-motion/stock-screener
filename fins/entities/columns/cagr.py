@@ -9,6 +9,9 @@ from ...financial import Symbol
 
 
 class CagrColumn(Column):
+    """
+    Add CAGR (Compound Annual Growth) column
+    """
     @classmethod
     def name(cls) -> str:
         return "cagr"

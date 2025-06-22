@@ -8,9 +8,10 @@ with associated data and analysis columns.
 from typing import Any, Optional, Iterator, Dict, List
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
-import sys
+import inspect
 
+from . import columns
+from .columns import IndustryColumn, NameColumn
 from .entity import Entity
 from .basket_item import BasketItem
 from .column import Column
@@ -18,7 +19,9 @@ from .column import Column
 
 class Basket(Entity):
     """
-    Represents a collection of financial symbols with associated data and analysis columns.
+    A weighted list of BasketItems (wrapped Symbols) and a lot of column-functions for analytics.
+
+
     
     Attributes:
         name: Optional name of the basket
@@ -30,7 +33,7 @@ class Basket(Entity):
         """Initialize a basket."""
         super().__init__()
         self.name = name
-        self.items = items or []
+        self.items = list(symbols) if len(symbols) > 0 else (items or [])
         self._columns: List[Column] = []
 
     def __str__(self) -> str:
@@ -40,6 +43,18 @@ class Basket(Entity):
             
         # Simple text representation preserving order
         return "\n".join(f"{item.amount:g}x {item.ticker}" for item in sorted(self.items, key=lambda x: (-x.amount, x.ticker)))
+    
+    def __repr__(self) -> str:
+        """Return a simple string representation of the basket."""
+        if not self.items:
+            return "Empty Basket"
+        return repr(self.df())
+    
+    def _repr_html_(self) -> str:
+        """Return HTML representation for rich Jupyter display."""
+        if not self.items:
+            return "<i>Empty Basket</i>"
+        return self.df()._repr_html_()
     
     def __len__(self) -> int:
         """Return the number of items in the basket."""
@@ -239,7 +254,7 @@ class Basket(Entity):
         return result
 
 
-    def data(self) -> pd.DataFrame:
+    def df(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""
         # Start with basic ticker data
         data = {
@@ -338,6 +353,32 @@ class Basket(Entity):
         
         print(f"✓ Basket creation complete! Successfully resolved {len(ordered_items)}/{len(symbols)} symbols")
         return cls(ordered_items)
+
+
+# Dynamic method creation for all column types
+def _create_column_method(column_class):
+    """Create a method that adds the specified column to the basket."""
+    def method(self):
+        """Add column to the basket."""
+        if not self.has_column(column_class.name()):
+            self.add_column(column_class())
+        return self
+    
+    method.__name__ = column_class.name()
+    method.__doc__ = column_class.__doc__
+    return method
+
+
+# Scan all column classes and add methods to Basket
+for name, obj in inspect.getmembers(columns):
+    if (inspect.isclass(obj) and 
+        hasattr(obj, 'name') and 
+        hasattr(obj, 'description') and
+        name.endswith('Column')):
+        
+        method_name = obj.name()
+        method = _create_column_method(obj)
+        setattr(Basket, method_name, method)
 
 
 

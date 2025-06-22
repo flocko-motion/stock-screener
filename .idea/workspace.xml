@@ -9,12 +9,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: complete restart ... now with Python instead of a DSL">
-      <change afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codegen.py" beforeDir="false" afterPath="$PROJECT_DIR$/codegen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/columns/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/columns/cagr.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -349,15 +350,7 @@
       <workItem from="1750077468177" duration="13000" />
       <workItem from="1750504788952" duration="6504000" />
       <workItem from="1750517509300" duration="264000" />
-      <workItem from="1750517981093" duration="4597000" />
-    </task>
-    <task id="LOCAL-00064" summary="feat: persist basket with columns">
-      <option name="closed" value="true" />
-      <created>1747600901833</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1747600901833</updated>
+      <workItem from="1750517981093" duration="8236000" />
     </task>
     <task id="LOCAL-00065" summary="feat: persist basket with columns">
       <option name="closed" value="true" />
@@ -743,7 +736,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750521587795</updated>
     </task>
-    <option name="localTasksCounter" value="113" />
+    <task id="LOCAL-00113" summary="feat: complete restart ... now with Python instead of a DSL">
+      <option name="closed" value="true" />
+      <created>1750588241139</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1750588241140</updated>
+    </task>
+    <option name="localTasksCounter" value="114" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -791,21 +792,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_command_chain.py</url>
-          <line>40</line>
-          <option name="timeStamp" value="29" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
-          <line>31</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_operation.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
           <line>14</line>
@@ -857,11 +843,6 @@
           <option name="timeStamp" value="125" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="138" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/storage/entity_store.py</url>
           <line>146</line>
           <option name="timeStamp" value="162" />
@@ -907,11 +888,6 @@
           <option name="timeStamp" value="217" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_function.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="218" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
           <line>82</line>
           <option name="timeStamp" value="223" />
@@ -930,11 +906,6 @@
           <url>file://$USER_HOME$/AppData/Local/JetBrains/PyCharm2025.1/remote_sources/754686584/1952936618/unittest/case.py</url>
           <line>1267</line>
           <option name="timeStamp" value="230" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_column_function.py</url>
-          <line>51</line>
-          <option name="timeStamp" value="234" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
@@ -965,11 +936,6 @@
           <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>
           <line>232</line>
           <option name="timeStamp" value="251" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/dsl/commands/syntax_symbol.py</url>
-          <line>37</line>
-          <option name="timeStamp" value="254" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/dsl/command.py</url>

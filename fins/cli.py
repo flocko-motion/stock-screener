@@ -119,18 +119,18 @@ def format_output(output: Output, json_output: bool = False) -> str:
         return str(output)  # Uses Output.__str__ which returns JSON
         
     if output.output_type == "error":
-        return f"Error: {str(output.data)}"
+        return f"Error: {str(output.df)}"
     elif output.output_type == "void":
         return ""
     elif output.output_type == "basket":
         # Format basket data with metadata using the text formatter
         formatter = TextBasketFormatter()
-        result = formatter.format(output.data)
+        result = formatter.format(output.df)
         if output.metadata:
             result += f"\nMetadata: {output.metadata}"
         return result
     else:
-        return str(output.data)  # Just the data, not the full JSON
+        return str(output.df)  # Just the data, not the full JSON
 
 
 def run_interactive_mode(fins_parser: FinsParser, json_output: bool = False) -> int:
