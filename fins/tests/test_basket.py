@@ -28,6 +28,20 @@ class BasketTests(unittest.TestCase):
             "GOOG": 1.7,
         })
 
+    def test_sub_item(self):
+        self.assertBasket(
+            Basket(AAPL * 2, GOOG * 3) - GOOG,{
+            "AAPL": 2,
+        })
+
+    def test_sub_basket(self):
+        self.assertBasket(
+            Basket(AAPL * 2, GOOG * 3) - Basket(GOOG * 2),{
+            "AAPL": 2,
+            "GOOG": 1,
+        })
+
+
     def test_add_baskets_overlap(self):
         self.assertBasket(
             Basket(AAPL * 2, GOOG * 1) + Basket(GOOG * 1.7),{

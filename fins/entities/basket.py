@@ -54,8 +54,155 @@ class Basket(Entity):
     def __iter__(self) -> Iterator[BasketItem]:
         return iter(self._items)
     
-    def __contains__(self, ticker: str) -> bool:
+    def __contains__(self, other) -> bool:
+        if isinstance(other, str):
+            ticker = other
+        elif isinstance(other, BasketItem):
+            ticker = other.ticker
+        else:
+            raise Exception(f"Unsupported type {type(other)}")
+
         return any(item.ticker == ticker for item in self._items)
+
+
+
+    def __add__(self, other) -> 'Basket':
+        """Add operator: Basket + Basket or Basket + BasketItem."""
+        if isinstance(other, Basket):
+            result = Basket(name=self._name)
+
+            # Add all items from this basket
+            for item in self._items:
+                result._add_item(BasketItem(item.ticker, item.amount))
+
+            # Add all items from the other basket
+            for item in other._items:
+                result._add_item(BasketItem(item.ticker, item.amount))
+
+            # Merge columns
+            result._columns = self._columns.copy()
+            for col in other._columns:
+                if col not in result._columns:
+                    result._columns.append(col)
+
+            return result
+        elif isinstance(other, BasketItem):
+            new_basket = self._copy_of()
+            new_basket._add_item(other)
+            return new_basket
+        else:
+            return NotImplemented
+
+    def __sub__(self, other) -> 'Basket':
+        if isinstance(other, Basket):
+            result = Basket(name=self._name)
+
+            for item in self._items:
+                if other.__contains__(item):
+                    continue
+                result._add_item(BasketItem(item.ticker, item.amount))
+
+            result._columns = self._columns.copy()
+
+            return result
+        elif isinstance(other, BasketItem):
+            new_basket = self._copy_of()
+            new_basket._remove_item(other.ticker)
+            return new_basket
+        else:
+            return NotImplemented
+
+    def __and__(self, other) -> 'Basket':
+        """Intersection operator: Basket & Basket or Basket & BasketItem."""
+        if isinstance(other, Basket):
+            # Basket & Basket - intersection
+            result = Basket(name=self._name)
+
+            # Find symbols that are in both baskets
+            this_symbols = {item.ticker for item in self._items}
+            other_symbols = {item.ticker for item in other._items}
+            common_symbols = this_symbols.intersection(other_symbols)
+
+            # Add items for common symbols with minimum quantity
+            for item in self._items:
+                if item.ticker in common_symbols:
+                    other_item = next(i for i in other._items if i.ticker == item.ticker)
+                    quantity = min(item.amount, other_item.amount)
+                    result._add_item(BasketItem(item.ticker, quantity))
+
+            # Merge columns from both baskets
+            result._columns = self._columns.copy()
+            for col in other._columns:
+                if col not in result._columns:
+                    result._columns.append(col)
+
+            return result
+
+        elif isinstance(other, BasketItem):
+            # Basket & BasketItem - return basket with item if it exists, empty otherwise
+            if other.ticker in self:
+                result = Basket(name=self._name)
+                existing_item = next(item for item in self._items if item.ticker == other.ticker)
+                result._add_item(BasketItem(other.ticker, min(existing_item.amount, other.amount)))
+                result._columns = self._columns.copy()
+                return result
+            else:
+                return Basket(name=self._name)  # Empty basket
+        else:
+            return NotImplemented
+
+    def __xor__(self, other) -> 'Basket':
+        """Symmetric difference operator: Basket ^ Basket or Basket ^ BasketItem."""
+        if isinstance(other, Basket):
+            # Basket ^ Basket - symmetric difference (items in either but not both)
+            result = Basket(name=self._name)
+
+            # Get all symbols from both baskets
+            this_symbols = {item.ticker for item in self._items}
+            other_symbols = {item.ticker for item in other._items}
+
+            # Add items that are only in this basket
+            for item in self._items:
+                if item.ticker not in other_symbols:
+                    result._add_item(BasketItem(item.ticker, item.amount))
+
+            # Add items that are only in the other basket
+            for item in other._items:
+                if item.ticker not in this_symbols:
+                    result._add_item(BasketItem(item.ticker, item.amount))
+
+            # Merge columns from both baskets
+            result._columns = self._columns.copy()
+            for col in other._columns:
+                if col not in result._columns:
+                    result._columns.append(col)
+
+            return result
+
+        elif isinstance(other, BasketItem):
+            # Basket ^ BasketItem - toggle the item (remove if exists, add if doesn't)
+            result = self._copy_of()
+            if other.ticker in self:
+                result._remove_item(other.ticker)
+            else:
+                result._add_item(other)
+            return result
+        else:
+            return NotImplemented
+
+    def __mul__(self, other) -> 'Basket':
+        """Multiplication operator: Basket * number to scale all weights."""
+        if isinstance(other, (int, float)):
+            result = self._copy_of()
+            for item in result._items:
+                item.amount *= other
+            return result
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other) -> 'Basket':
+        """Reverse multiplication operator: number * Basket."""
+        return self.__mul__(other)
 
     def _add_item(self, item: BasketItem) -> None:
         for existing_item in self._items:
@@ -99,155 +246,7 @@ class Basket(Entity):
         """Get list of column names/aliases in order."""
         return [col.alias() for col in self._columns]
 
-    def __add__(self, other) -> 'Basket':
-        """Add operator: Basket + Basket or Basket + BasketItem."""
-        if isinstance(other, Basket):
-            result = Basket(name=self._name)
 
-            # Add all items from this basket
-            for item in self._items:
-                result._add_item(BasketItem(item.ticker, item.amount))
-
-            # Add all items from the other basket
-            for item in other._items:
-                result._add_item(BasketItem(item.ticker, item.amount))
-
-            # Merge columns
-            result._columns = self._columns.copy()
-            for col in other._columns:
-                if col not in result._columns:
-                    result._columns.append(col)
-
-            return result
-        elif isinstance(other, BasketItem):
-            new_basket = self._copy_of()
-            new_basket._add_item(other)
-            return new_basket
-        else:
-            return NotImplemented
-
-    def __sub__(self, other) -> 'Basket':
-        """Subtract operator: Basket - Basket or Basket - BasketItem."""
-        if isinstance(other, Basket):
-            """
-            Create a new basket that is the difference of this basket and another.
-
-            Args:
-                other: The other basket
-
-            Returns:
-                A new basket containing only items that are in this basket but not in the other
-            """
-            result = Basket(name=self._name)
-
-            # Add items that aren't in other basket, preserving this basket's order
-            other_symbols = {item.ticker for item in other._items}
-            for item in self._items:
-                if item.ticker not in other_symbols:
-                    result._add_item(BasketItem(item.ticker, item.amount))
-
-            # Include columns from this basket
-            result._columns = self._columns.copy()
-
-            return result
-        elif isinstance(other, BasketItem):
-            new_basket = self._copy_of()
-            new_basket._remove_item(other.ticker)
-            return new_basket
-        else:
-            return NotImplemented
-
-    def __and__(self, other) -> 'Basket':
-        """Intersection operator: Basket & Basket or Basket & BasketItem."""
-        if isinstance(other, Basket):
-            # Basket & Basket - intersection
-            result = Basket(name=self._name)
-            
-            # Find symbols that are in both baskets
-            this_symbols = {item.ticker for item in self._items}
-            other_symbols = {item.ticker for item in other._items}
-            common_symbols = this_symbols.intersection(other_symbols)
-            
-            # Add items for common symbols with minimum quantity
-            for item in self._items:
-                if item.ticker in common_symbols:
-                    other_item = next(i for i in other._items if i.ticker == item.ticker)
-                    quantity = min(item.amount, other_item.amount)
-                    result._add_item(BasketItem(item.ticker, quantity))
-            
-            # Merge columns from both baskets
-            result._columns = self._columns.copy()
-            for col in other._columns:
-                if col not in result._columns:
-                    result._columns.append(col)
-            
-            return result
-            
-        elif isinstance(other, BasketItem):
-            # Basket & BasketItem - return basket with item if it exists, empty otherwise
-            if other.ticker in self:
-                result = Basket(name=self._name)
-                existing_item = next(item for item in self._items if item.ticker == other.ticker)
-                result._add_item(BasketItem(other.ticker, min(existing_item.amount, other.amount)))
-                result._columns = self._columns.copy()
-                return result
-            else:
-                return Basket(name=self._name)  # Empty basket
-        else:
-            return NotImplemented
-
-    def __xor__(self, other) -> 'Basket':
-        """Symmetric difference operator: Basket ^ Basket or Basket ^ BasketItem."""
-        if isinstance(other, Basket):
-            # Basket ^ Basket - symmetric difference (items in either but not both)
-            result = Basket(name=self._name)
-            
-            # Get all symbols from both baskets
-            this_symbols = {item.ticker for item in self._items}
-            other_symbols = {item.ticker for item in other._items}
-            
-            # Add items that are only in this basket
-            for item in self._items:
-                if item.ticker not in other_symbols:
-                    result._add_item(BasketItem(item.ticker, item.amount))
-            
-            # Add items that are only in the other basket
-            for item in other._items:
-                if item.ticker not in this_symbols:
-                    result._add_item(BasketItem(item.ticker, item.amount))
-            
-            # Merge columns from both baskets
-            result._columns = self._columns.copy()
-            for col in other._columns:
-                if col not in result._columns:
-                    result._columns.append(col)
-            
-            return result
-            
-        elif isinstance(other, BasketItem):
-            # Basket ^ BasketItem - toggle the item (remove if exists, add if doesn't)
-            result = self._copy_of()
-            if other.ticker in self:
-                result._remove_item(other.ticker)
-            else:
-                result._add_item(other)
-            return result
-        else:
-            return NotImplemented
-
-    def __mul__(self, other) -> 'Basket':
-        """Multiplication operator: Basket * number to scale all weights."""
-        if isinstance(other, (int, float)):
-            result = self._copy_of()
-            for item in result._items:
-                item.amount *= other
-            return result
-        else:
-            return NotImplemented
-
-    def __rmul__(self, other) -> 'Basket':
-        """Reverse multiplication operator: number * Basket."""
-        return self.__mul__(other)
 
     def sort(self, criteria:List) -> 'Basket':
         """Sort the basket, each sort criteria is a tuple (field, direction) with direction being 1 (asc) or -1 (desc)"""
