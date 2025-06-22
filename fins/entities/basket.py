@@ -93,7 +93,7 @@ class Basket(Entity):
         else:
             return NotImplemented
 
-    def __sub__(self, other) -> 'Basket':
+    def __truediv__(self, other) -> 'Basket':
         if isinstance(other, Basket):
             result = Basket(name=self._name)
 

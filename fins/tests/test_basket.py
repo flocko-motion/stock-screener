@@ -28,17 +28,17 @@ class BasketTests(unittest.TestCase):
             "GOOG": 1.7,
         })
 
-    def test_sub_item(self):
+    def test_remove_item(self):
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 3) - GOOG,{
+            Basket(AAPL * 2, GOOG * 3) / GOOG,{
             "AAPL": 2,
         })
 
-    def test_sub_basket(self):
+    def test_remove_basket(self):
+        # subtraction follows set algebra, thus ignores weights
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 3) - Basket(GOOG * 2),{
+            Basket(AAPL * 2, GOOG * 3) / Basket(GOOG * 2),{
             "AAPL": 2,
-            "GOOG": 1,
         })
 
 
