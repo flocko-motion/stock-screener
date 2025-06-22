@@ -367,7 +367,7 @@ class Ticker:
                 bbox=dict(facecolor='white', alpha=0.8, edgecolor="#AAAAAA")  # Add a white background to the label
             )
 
-            ax1.set_title(f'{self.ticker} ({self.info.name}) CAGR Histogram', fontsize=14)
+            ax1.set_title(f'{self.ticker} ({self.info._name}) CAGR Histogram', fontsize=14)
             ax1.set_xlabel('CAGR', fontsize=12)
             ax1.set_ylabel('Frequency', fontsize=12)
             ax1.set_xlim(-10, 10)
@@ -441,7 +441,7 @@ class Ticker:
                 label='Price History',
             )
 
-            ax2.set_title(f'{self.ticker} ({self.info.name}) - Price History', fontsize=14)
+            ax2.set_title(f'{self.ticker} ({self.info._name}) - Price History', fontsize=14)
             ax2.set_ylabel('Price', fontsize=12)
             ax2.set_xlabel('Year', fontsize=12)
             ax2.grid(axis='y', linestyle='--', alpha=0.7)

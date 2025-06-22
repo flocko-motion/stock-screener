@@ -105,7 +105,7 @@ class Note(Entity):
         """
         symbols = []
         for basket in self.baskets.values():
-            for item in basket.items:
+            for item in basket._items:
                 if item.symbol.ticker not in symbols:
                     symbols.append(item.symbol.ticker)
         return symbols
@@ -291,7 +291,7 @@ class Trade(Note):
             The total USD value
         """
         total = 0.0
-        for item in self.bought_basket.items:
+        for item in self.bought_basket._items:
             price = item.symbol.get_data('price', 0.0)
             total += item.amount * price
         return total
@@ -305,7 +305,7 @@ class Trade(Note):
             The total USD value
         """
         total = 0.0
-        for item in self.sold_basket.items:
+        for item in self.sold_basket._items:
             price = item.symbol.get_data('price', 0.0)
             total += item.amount * price
         return total

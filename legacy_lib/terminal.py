@@ -147,7 +147,7 @@ class Portfolio(JsonSerializable):
 			sorted_positions = sorted(self.positions, key=lambda position: position.symbol.ticker)
 			for position in sorted_positions:
 				try:
-					out += f"{position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol.name:<20}\n"
+					out += f"{position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol._name:<20}\n"
 				except Exception as e:
 					return f"error formatting position {position}: {e}"
 		else:
@@ -155,7 +155,7 @@ class Portfolio(JsonSerializable):
 			sorted_positions = sorted(self.positions, key=lambda position: position.amount, reverse=True)
 			for position in sorted_positions:
 				try:
-					out += f"{position.amount:>10.2f}  {position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol.name:<20}\n"
+					out += f"{position.amount:>10.2f}  {position.symbol.ticker:<14} {position.symbol.exchange:<10} {position.symbol._name:<20}\n"
 				except Exception as e:
 					return f"error formatting position {position}: {e}"
 

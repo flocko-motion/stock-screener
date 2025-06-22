@@ -24,7 +24,7 @@ class BasketFormatter(ABC):
         Returns:
             The formatted output as a string
         """
-        if not basket.items:
+        if not basket._items:
             return ""
             
         table = self._build_table(basket)
@@ -37,19 +37,19 @@ class BasketFormatter(ABC):
             Column("weight", ColumnType.WEIGHT),
             Column("ticker", ColumnType.STRING)
         ]
-        columns.extend(Column(name, ColumnType.FLOAT) for name in basket.list_columns())
+        columns.extend(Column(name, ColumnType.FLOAT) for name in basket._list_columns())
 
         # Create table
         table = Table(columns)
 
         # Add rows sorted by weight
-        for item in basket.items:
+        for item in basket._items:
             values = {
                 "weight": f"{item.amount:.4f}",
                 "ticker": item.ticker
             }
-            for col_name in basket.list_columns():
-                values[col_name] = basket.get_column(col_name).value_str(item.ticker)
+            for col_name in basket._list_columns():
+                values[col_name] = basket._get_column(col_name).value_str(item.ticker)
             table.add_row(values)
 
         return table

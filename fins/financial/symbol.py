@@ -107,7 +107,7 @@ class Symbol(Base):
 				session.flush()  # Ensure the symbol is in the database
 				session.expunge(merged_symbol)  # Detach the merged instance from the session
 				# Update the original symbol with the merged one's state
-				for key, value in merged_symbol.__dict__.items():
+				for key, value in merged_symbol.__dict__._items():
 					if not key.startswith('_'):
 						setattr(symbol, key, value)
 
@@ -176,7 +176,7 @@ class Symbol(Base):
             **kwargs: Additional fields when loading from cache
         """
 		super().__init__(**kwargs)
-        
+
 		if not isinstance(ticker, str):
 			raise ValueError(f"Invalid ticker value: {ticker}")
 
