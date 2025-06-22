@@ -11,7 +11,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import inspect
 
 from . import columns
-from .columns import IndustryColumn, NameColumn
 from .entity import Entity
 from .basket_item import BasketItem
 from .column import Column
@@ -50,20 +49,18 @@ class Basket(Entity):
         return self.df()._repr_html_()
     
     def __len__(self) -> int:
-        """Return the number of items in the basket."""
         return len(self._items)
     
     def __iter__(self) -> Iterator[BasketItem]:
-        """Return an iterator over the items in the basket."""
         return iter(self._items)
     
     def __contains__(self, ticker: str) -> bool:
-        """Check if a symbol is in the basket."""
         return any(item.ticker == ticker for item in self._items)
 
     def _add_item(self, item: BasketItem) -> None:
         for existing_item in self._items:
             if existing_item.ticker == item.ticker:
+                existing_item.amount += item.amount
                 return
         
         self._items.append(item)

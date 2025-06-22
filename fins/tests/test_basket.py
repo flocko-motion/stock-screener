@@ -10,12 +10,43 @@ from .tools import time_it, no_cache, unbuffered_output
 class BasketTests(unittest.TestCase):
 
     def test_create_basket(self):
-        basket = Basket(AAPL * 1.5)
-        assert len(basket._items) == 1.5
-        assert basket._items[0].ticker == "AAPL"
+        self.assertBasket(Basket(AAPL * 1.5), {
+            "AAPL": 1.5,
+        })
 
     def test_add_item(self):
-        basket = Basket(AAPL * 2) + (GOOG * 1.7)
+        self.assertBasket(
+            Basket(AAPL * 2) + (GOOG * 1.7),{
+            "AAPL": 2,
+            "GOOG": 1.7,
+        })
+
+    def test_add_baskets(self):
+        self.assertBasket(
+            Basket(AAPL * 2) + Basket(GOOG * 1.7),{
+            "AAPL": 2,
+            "GOOG": 1.7,
+        })
+
+    def test_add_baskets_overlap(self):
+        self.assertBasket(
+            Basket(AAPL * 2, GOOG * 1) + Basket(GOOG * 1.7),{
+            "AAPL": 2,
+            "GOOG": 2.7,
+        })
+
+    def test_multiply_weights(self):
+        self.assertBasket(
+            Basket(AAPL * 2, GOOG * 1) * 3, {
+            "AAPL": 6,
+            "GOOG": 3,
+        })
+        self.assertBasket(
+            1.5 * Basket(AAPL * 2, GOOG * 1), {
+            "AAPL": 3,
+            "GOOG": 1.5,
+        })
+
 
 
     def test_simple_basket(self):
@@ -56,6 +87,32 @@ class BasketTests(unittest.TestCase):
         data = basket.df()
         assert not (data is None)
         print(f"\n{data}\n")
+
+    def assertBasket(self, basket: Basket, expected: dict):
+        """
+        Assert that the basket contains exactly the expected items with expected weights.
+
+        Args:
+            basket: The basket to check
+            expected: Dict mapping ticker symbols to expected weights
+        """
+        # Check that we have the right number of items
+        self.assertEqual(len(basket._items), len(expected),
+                         f"Expected {len(expected)} items, got {len(basket._items)}")
+
+        # Create a dict of actual items for comparison
+        actual = {item.ticker: item.amount for item in basket._items}
+
+        # Check each expected item
+        for ticker, expected_weight in expected.items():
+            self.assertIn(ticker, actual, f"Expected ticker {ticker} not found in basket")
+            self.assertAlmostEqual(actual[ticker], expected_weight, places=6,
+                                   msg=f"Expected {ticker} weight {expected_weight}, got {actual[ticker]}")
+
+        # Check that we don't have any unexpected items
+        for ticker in actual:
+            self.assertIn(ticker, expected, f"Unexpected ticker {ticker} found in basket")
+
 
     @time_it
     @no_cache
