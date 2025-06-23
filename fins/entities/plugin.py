@@ -20,6 +20,15 @@ class Plugin(ABC):
     def run(self, runtime: 'BasketRuntime'):
         pass
 
+    def __rshift__(self, other: 'Plugin') -> 'BasketPipeline':
+        """Chain plugins using >> operator"""
+        if isinstance(other, Plugin):
+            return BasketPipeline(self, other)
+        elif isinstance(other, BasketPipeline):
+            return BasketPipeline(self, *other._plugins)
+        else:
+            return NotImplemented
+
 
 class FieldPlugin(Plugin):
 
@@ -51,6 +60,15 @@ class BasketPipeline:
             if plugin.alias in aliases:
                 raise RuntimeError(f"Plugin {plugin.alias} already exists in pipe - please provide a different alias")
             aliases.add(plugin.alias)
+
+    def __rshift__(self, other: 'Plugin') -> 'BasketPipeline':
+        """Chain additional plugins using >> operator"""
+        if isinstance(other, Plugin):
+            return BasketPipeline(*self._plugins, other)
+        elif isinstance(other, BasketPipeline):
+            return BasketPipeline(*self._plugins, *other._plugins)
+        else:
+            return NotImplemented
 
     def run(self, basket: Basket) -> 'BasketRuntime':
         runtime = BasketRuntime(basket)
