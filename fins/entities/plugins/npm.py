@@ -3,11 +3,12 @@ Net Profit Margin Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class NpmColumn(Column):
+class NpmColumn(Plugin):
     @classmethod
     def name(cls) -> str:
         return "npm"

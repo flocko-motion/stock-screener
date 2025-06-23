@@ -4,21 +4,15 @@ Compound Annual Growth Rate Column
 
 from typing import Optional
 import pandas as pd
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class CagrColumn(Column):
+class CagrColumn(Plugin):
     """
     Add CAGR (Compound Annual Growth) column
     """
-    @classmethod
-    def name(cls) -> str:
-        return "cagr"
-
-    @classmethod
-    def description(cls) -> str:
-        return "Compound Annual Growth Rate"
 
     def __init__(self, alias: str = None, years: int = 5, frequency: str = 'monthly'):
         super().__init__(alias=alias)

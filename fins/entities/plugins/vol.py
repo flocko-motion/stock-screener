@@ -1,26 +1,28 @@
 """
-Market Cap Column
+Volume Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class SectorColumn(Column):
+class VolColumn(Plugin):
     @classmethod
     def name(cls) -> str:
-        return "sector"
+        return "vol"
 
     @classmethod
     def description(cls) -> str:
-        return "sector"
+        return "Trading volume"
 
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 
     def value(self, ticker: str) -> Optional[float]:
-        raise NotImplementedError()
+        return Symbol.get(ticker).get_analytics("volume")
 
     def value_str(self, ticker: str) -> str:
-        return Symbol.get(ticker).sector
+        v = self.value(ticker)
+        return "n/a" if v is None else  f"{v:.4f}"

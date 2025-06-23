@@ -6,16 +6,17 @@ This package contains the core domain entities used throughout the FINS system, 
 
 from .basket_item import BasketItem
 from .basket import Basket
-from .column import Column
+from .plugin import Plugin
+from .pipe import Pipe
 from .entity import Entity, JsonSerializable
 from .note import Note, Principle, Observation, Trade, Fact, Strategy
-from .token import Token
 
 __all__ = [
     'JsonSerializable',
     'BasketItem',
     'Basket',
-    'Column',
+    'Plugin',
+    'Pipe',
     'Entity',
     'Note',
     'Principle',
@@ -23,7 +24,6 @@ __all__ = [
     'Trade',
     'Fact',
     'Strategy',
-    'Token',
 ]
 
 def entity_from_dict(data: dict) -> 'Entity':

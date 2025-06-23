@@ -1,28 +1,28 @@
 """
-Dividend Yield Column
+Market Cap Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class YieldColumn(Column):
+class McapColumn(Plugin):
     @classmethod
     def name(cls) -> str:
-        return "div"
+        return "mcap"
 
     @classmethod
     def description(cls) -> str:
-        return "Dividend Yield"
+        return "Market Capitalization"
 
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 
     def value(self, ticker: str) -> Optional[float]:
-        return Symbol.get(ticker).get_analytics("dividend_yield_ttm")
+        return Symbol.get(ticker).get_analytics("market_cap")
 
     def value_str(self, ticker: str) -> str:
         v = self.value(ticker)
-        return "n/a" if v is None else  f"{v:.4f}"
-
+        return "n/a" if v is None else  f"{int(v)}"

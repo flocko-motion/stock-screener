@@ -1,8 +1,13 @@
 Next steps:
 
-- file ops: 
-  - remove persisted baskets
+Working on Plugins. Implementing a first prototype Plugin "Industry()".
 
-- multithreaded fin data fetching:
-  - create baskets from lists, not iteratively. this allows centralized implementation of multithreaded fetching. 10x speedup should be the minimum, 100x should be possible
-  - => Problem: multithreading has no proper console output
+Clarify: how are generated fields stored? Are they part of the basket? Or are they transient pipeline data? Rather the latter... 
+
+Idea: Have some archetypal Plugin superclasses derived from the base class: FilterPlugin, FieldPlugin, IndicatorPlugin, OutputPlugin. This 
+could simplify implementation.
+
+Goals:
+- get Industry plugin running, implement basic plugin execution: Basket(..)(PluginA() >> (FilterPluginB() < threshold) >> PlotterPluginC())
+- build a simple plotter
+- build a simple filter

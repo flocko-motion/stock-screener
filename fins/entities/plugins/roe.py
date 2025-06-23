@@ -1,26 +1,28 @@
 """
-Market Cap Column
+Return On Equity Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class IndustryColumn(Column):
+class RoeColumn(Plugin):
     @classmethod
     def name(cls) -> str:
-        return "industry"
+        return "roe"
 
     @classmethod
     def description(cls) -> str:
-        return "Industry"
+        return "Return on Equity"
 
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 
     def value(self, ticker: str) -> Optional[float]:
-        raise NotImplementedError()
+        return Symbol.get(ticker).get_analytics("return_on_equity_ttm")
 
     def value_str(self, ticker: str) -> str:
-        return Symbol.get(ticker).industry
+        v = self.value(ticker)
+        return "n/a" if v is None else  f"{v:.4f}"

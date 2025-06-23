@@ -1,26 +1,27 @@
 """
-Price Earnings Growth Column
+PE (Price/Earnings) Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class PegColumn(Column):
+class PeColumn(Plugin):
     @classmethod
     def name(cls) -> str:
-        return "peg"
+        return "pe"
 
     @classmethod
     def description(cls) -> str:
-        return "Price/Earnings to Growth ratio"
+        return "Price/Earnings ratio (TTM)"
 
     def __init__(self, alias: str = None):
         super().__init__(alias=alias)
 
     def value(self, ticker: str) -> Optional[float]:
-        return Symbol.get(ticker).get_analytics("peg_ratio_ttm")
+        return Symbol.get(ticker).get_analytics("pe_ratio_ttm")
 
     def value_str(self, ticker: str) -> str:
         v = self.value(ticker)

@@ -1,7 +1,7 @@
 import unittest
 
+from fins.entities.plugins import Industry
 from fins.terminal.symbols import *
-from fins.entities import columns
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
 from .tools import time_it, no_cache, unbuffered_output
@@ -28,14 +28,35 @@ class BasketTests(unittest.TestCase):
             "GOOG": 1.7,
         })
 
-    def test_remove_item(self):
+    def test_subtract_basket(self):
+        b0 = Basket(AAPL * 2, GOOG * 3)
+        b1 = Basket(GOOG * 2)
+        b2 = b0 - b1
+        self.assertBasket(
+            b0,{
+            "AAPL": 2,
+            "GOOG": 3,
+        })
+        self.assertBasket(
+            b1,{
+                "GOOG": 2,
+            }
+        )
+        self.assertBasket(
+            b2,{
+                "AAPL": 2,
+                "GOOG": 1,
+            }
+        )
+
+    def test_slash_item(self):
         self.assertBasket(
             Basket(AAPL * 2, GOOG * 3) / GOOG,{
             "AAPL": 2,
         })
 
-    def test_remove_basket(self):
-        # subtraction follows set algebra, thus ignores weights
+
+    def test_slash_basket(self):
         self.assertBasket(
             Basket(AAPL * 2, GOOG * 3) / Basket(GOOG * 2),{
             "AAPL": 2,
@@ -61,6 +82,12 @@ class BasketTests(unittest.TestCase):
             "GOOG": 1.5,
         })
 
+    def test_minimal_plugin_application(self):
+        b = Basket(AAPL * 1.5)
+        self.assertBasket(b, {
+            "AAPL": 1.5,
+        })
+        b(Industry())
 
 
     def assertBasket(self, basket: Basket, expected: dict):
@@ -87,24 +114,6 @@ class BasketTests(unittest.TestCase):
         # Check that we don't have any unexpected items
         for ticker in actual:
             self.assertIn(ticker, expected, f"Unexpected ticker {ticker} found in basket")
-
-
-    # @time_it
-    # @no_cache
-    # @unbuffered_output
-    # def test_multithreaded_basket_creation_one(self):
-    #     symbols = ["AAPL"]
-    #     basket = Basket.from_symbols(symbols)
-    #     assert len(basket._items) == len(symbols)
-    #
-    # @time_it
-    # @no_cache
-    # @unbuffered_output
-    # def test_multithreaded_basket_creation(self):
-    #     symbols = ["ATLFF","ALFNF","ACMDY","ASBPW","CWBR","ATIW","FBTC","FXED","PFS","DGRS","BUFIX","GPFT","FFTI","ASXSF","BKAYY","AMH-PE","RGNX","WSCC","RXST","ACU","TIBGX","ZSPY","AHG","GOP","FTA","HROWM","FORD","RSYEX","NNAVW","HNGZY","TNGRF","MARUY","HIZOF","ALRY","RUSHA","ORMP","WLGS","SRTS","DISSX","ULNV","SOGFF","DFLIW","TCEFF","APPZ","CGO","YAMCF","NIKLF",]
-    #     # symbols = symbols[0:10]
-    #     basket = Basket.from_symbols(symbols, max_workers=50)
-    #     assert len(basket._items) == len(symbols)
 
 
 if __name__ == "__main__":

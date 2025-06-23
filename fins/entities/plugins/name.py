@@ -3,11 +3,12 @@ Market Cap Column
 """
 
 from typing import Optional
-from ..column import Column
+
+from .. import Plugin
 from ...financial import Symbol
 
 
-class NameColumn(Column):
+class NameColumn(Plugin):
     @classmethod
     def name(cls) -> str:
         return "name"
