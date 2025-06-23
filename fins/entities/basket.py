@@ -197,20 +197,20 @@ class Basket(Entity):
         """Reverse multiplication operator: number * Basket."""
         return self.__mul__(other)
 
-    def __call__(self, arg) -> 'Basket':
+
+    def __call__(self, arg): # -> BasketRuntime
         """Execute a pipeline of Plugins and return the processed basket."""
-        from .pipe import Pipe
-        from . import Plugin
+        from . import Plugin, BasketPipeline, BasketRuntime
 
         if isinstance(arg, Plugin):
-            return Pipe(arg).run(self)
-        elif isinstance(arg, Pipe):
+            return BasketPipeline(arg).run(self)
+        elif isinstance(arg, BasketPipeline):
             return arg.run(self)
         else:            
-            raise TypeError(f"Expected Pipe or Plugin, got {type(arg)}")
+            raise TypeError(f"Expected Plugin or BasketPipeline, got {type(arg)}")
         
-        
-
+    def items(self):
+        return self._items
 
 
     def df(self) -> pd.DataFrame:

@@ -6,8 +6,7 @@ This package contains the core domain entities used throughout the FINS system, 
 
 from .basket_item import BasketItem
 from .basket import Basket
-from .plugin import Plugin
-from .pipe import Pipe
+from .plugin import Plugin, BasketPipeline, BasketRuntime
 from .entity import Entity, JsonSerializable
 from .note import Note, Principle, Observation, Trade, Fact, Strategy
 
@@ -16,7 +15,8 @@ __all__ = [
     'BasketItem',
     'Basket',
     'Plugin',
-    'Pipe',
+    'BasketPipeline',
+    'BasketRuntime',
     'Entity',
     'Note',
     'Principle',

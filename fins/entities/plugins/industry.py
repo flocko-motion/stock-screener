@@ -4,19 +4,20 @@ Market Cap Column
 
 from typing import Optional
 
-from .. import BasketItem
-from ..plugin import Plugin
+from .. import BasketItem, Basket
+from ..plugin import Plugin, BasketRuntime, FieldPlugin
 
 
-class Industry(Plugin):
+class Industry(FieldPlugin):
     """ Add 'Industry' field """
 
     def __init__(self, alias: Optional[str] = None):
         super().__init__(alias=alias)
 
-    def value(self, item: BasketItem) -> Optional[float] | str:
+    def field_type(self) -> type:
+        return str
+
+    def field_value(self, item: BasketItem):
         return item.symbol().industry
 
-    def run(self, basket):
-        pass
 
