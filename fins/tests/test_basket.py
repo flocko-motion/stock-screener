@@ -83,12 +83,20 @@ class BasketTests(unittest.TestCase):
         })
 
     def test_minimal_plugin_application(self):
-        b = Basket(AAPL * 1.5)
-        self.assertBasket(b, {
-            "AAPL": 1.5,
-        })
-        b(Industry())
+        res = Basket(AAPL * 1.5, GOOG * 10)(Industry())
+        df = res.df()
+        
+        self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
+        self.assertEqual(df.iloc[1]['Industry'], 'Internet Content & Information')
 
+    def test_two_plugin_application(self):
+        res = Basket(AAPL * 1.5, GOOG * 10)(Industry() >> Name())
+        df = res.df()
+
+        self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
+        self.assertEqual(df.iloc[1]['Industry'], 'Internet Content & Information')
+        self.assertEqual(df.iloc[0]['Name'], 'Apple Inc')
+        self.assertEqual(df.iloc[1]['Name'], 'Alphabet')
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

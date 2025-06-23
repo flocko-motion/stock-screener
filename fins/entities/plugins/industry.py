@@ -1,11 +1,7 @@
-"""
-Market Cap Column
-"""
-
 from typing import Optional
 
-from .. import BasketItem, Basket
-from ..plugin import Plugin, BasketRuntime, FieldPlugin
+from .. import BasketItem
+from ..plugin import FieldPlugin
 
 
 class Industry(FieldPlugin):

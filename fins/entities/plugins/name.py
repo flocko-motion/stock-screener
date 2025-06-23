@@ -1,27 +1,19 @@
-"""
-Market Cap Column
-"""
-
 from typing import Optional
 
-from .. import Plugin
-from ...financial import Symbol
+from .. import BasketItem
+from ..plugin import FieldPlugin
 
 
-class NameColumn(Plugin):
-    @classmethod
-    def name(cls) -> str:
-        return "name"
+class Name(FieldPlugin):
+    """ Add 'Name' field """
 
-    @classmethod
-    def description(cls) -> str:
-        return "Name"
-
-    def __init__(self, alias: str = None):
+    def __init__(self, alias: Optional[str] = None):
         super().__init__(alias=alias)
 
-    def value(self, ticker: str) -> Optional[float]:
-        raise NotImplementedError()
+    def field_type(self) -> type:
+        return str
 
-    def value_str(self, ticker: str) -> str:
-        return Symbol.get(ticker).name
+    def field_value(self, item: BasketItem):
+        return item.symbol().name
+
+

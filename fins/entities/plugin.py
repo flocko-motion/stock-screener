@@ -66,6 +66,9 @@ class BasketRuntime:
         self._df = basket.df().copy()  # Start with basket's DataFrame
         self._fields = dict[str, type]()
 
+    def __repr__(self) -> str:
+        return repr(self.df())
+
     def basket_items(self) -> List[BasketItem]:
         """Return the original basket items for plugin processing"""
         return self._basket.items()

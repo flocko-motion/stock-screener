@@ -1,8 +1,11 @@
 from fins.entities.basket import Basket
+from fins.entities.plugins import *
+from fins.entities.plugins import __all__ as all_plugins
 from fins.terminal.symbols import *
-import fins.terminal.symbols
+from fins.terminal.symbols import __all__ as all_symbols
 
 __all__ = [
     'Basket',
-    *symbols.__all__,
+    *all_plugins,
+    *all_symbols,
 ]

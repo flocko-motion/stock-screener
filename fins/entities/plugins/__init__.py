@@ -1,16 +1,17 @@
 """
-Column implementations.
+Plugin implementations.
 
-All column types are automatically discovered and registered by the Column base class.
-Access them through Column.list() or Column.get(name).
+All plugin types extend either Plugin or FieldPlugin base classes.
 """
 
-from ...financial import Symbol
+# FieldPlugin implementations (DataFrame-based)
+from .industry import Industry
+from .name import Name
 
+# Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
 # from .dividend_yield import YieldColumn
 # from .mcap import McapColumn
-from .industry import Industry
 # from .name import NameColumn
 # from .npm import NpmColumn
 # from .pe import PeColumn
@@ -18,5 +19,9 @@ from .industry import Industry
 # from .roe import RoeColumn
 # from .sector import SectorColumn
 # from .vol import VolColumn
+
+__all__ = [
+    'Industry',
+]
 
 
