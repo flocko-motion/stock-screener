@@ -1,6 +1,7 @@
 import unittest
+from datetime import datetime
 
-from fins.entities.plugins import Industry, Name
+from fins.entities.plugins import *
 from fins.terminal.symbols import *
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
@@ -100,7 +101,7 @@ class BasketTests(unittest.TestCase):
         self.assertEqual(df.iloc[0]['foo'], 'Apple Inc.')
         self.assertEqual(df.iloc[1]['foo'], 'Alphabet Inc.')
 
-    def test_plugin_name_collision(self):
+    def test_plugin_alias_collision(self):
         try:
             Basket(AAPL * 1.5, GOOG * 10)(Industry() >> Name() >> Name())
             assert False
@@ -113,6 +114,16 @@ class BasketTests(unittest.TestCase):
         except RuntimeError as e:
             assert str(e).startswith('Plugin foo already exists in pipe')
 
+    def test_plugins_update(self):
+        res = Basket(AAPL * 1.5)(Name() >> LastPriceUpdate() >> LastProfileUpdate())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['LastPriceUpdate'])
+        self.assertIsNotNone(df.iloc[0]['LastProfileUpdate'])
+
+        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastPriceUpdate() >> LastProfileUpdate())
+        df2 = res2.df()
+        self.assertGreater(df2.iloc[0]['LastPriceUpdate'], df.iloc[0]['LastPriceUpdate'])
+        self.assertGreater(df2.iloc[0]['LastProfileUpdate'], df.iloc[0]['LastProfileUpdate'])
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

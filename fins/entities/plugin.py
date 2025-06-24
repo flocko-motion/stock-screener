@@ -5,6 +5,7 @@ Base class for all plugin types in FINS.
 """
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Optional, List
 import pandas as pd
 
@@ -97,16 +98,18 @@ class BasketRuntime:
             raise RuntimeError(f"Field {field_name} is already registered")
         
         # Validate field type
-        valid_types = [float, str, type(None)]
-        if field_type not in valid_types and field_type != Optional[float]:
+        valid_types = [float, str, type(None), datetime, Optional[datetime], Optional[float]]
+        if field_type not in valid_types:
             raise RuntimeError(f"Field {field_name} has invalid type {field_type}")
         
         self._fields[field_name] = field_type
         
-        # Add column to DataFrame with appropriate default value
+        # Add field to DataFrame with appropriate default value
         if field_type == str:
             self._df[field_name] = ""
         elif field_type == float or field_type == Optional[float]:
+            self._df[field_name] = None
+        elif field_type == datetime or field_type == Optional[datetime]:
             self._df[field_name] = None
         else:
             self._df[field_name] = None
@@ -130,6 +133,12 @@ class BasketRuntime:
         elif expected_type == float:
             if not isinstance(value, (int, float)):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: float) for field {field_name}")
+        elif expected_type == Optional[datetime]:
+            if value is not None and not isinstance(value, datetime):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: Optional[datetime]) for field {field_name}")
+        elif expected_type == datetime:
+            if not isinstance(value, datetime):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: datetime) for field {field_name}")
         elif expected_type == str:
             if not isinstance(value, str):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: str) for field {field_name}")

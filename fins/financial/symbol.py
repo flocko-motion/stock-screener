@@ -61,6 +61,7 @@ class Symbol(Base):
 	exchange = Column(String(20), nullable=True)
 	valid_until = Column(DateTime, nullable=False)
 	last_price_update = Column(DateTime, nullable=True)
+	last_profile_update = Column(DateTime, nullable=True)
 
 	# Relationships
 	weekly_prices = relationship("WeeklyPrice", back_populates="symbol")
@@ -107,7 +108,7 @@ class Symbol(Base):
 				session.flush()  # Ensure the symbol is in the database
 				session.expunge(merged_symbol)  # Detach the merged instance from the session
 				# Update the original symbol with the merged one's state
-				for key, value in merged_symbol.__dict__._items():
+				for key, value in merged_symbol.__dict__.items():
 					if not key.startswith('_'):
 						setattr(symbol, key, value)
 
@@ -200,6 +201,7 @@ class Symbol(Base):
 		# Cache the new symbol
 		self._save_to_cache(self)
 
+
 	def _load_profile_data(self):
 		"""Load profile data from appropriate API based on symbol type."""
 		try:
@@ -252,6 +254,9 @@ class Symbol(Base):
 		self.isin = profile.get("isin")
 
 		self.inception = datetime.strptime(profile.get("ipoDate"), '%Y-%m-%d') if profile.get("ipoDate") else None
+		
+		# Update the timestamp when profile data is fetched
+		self.last_profile_update = datetime.now()
 
 	ratios_field_mapping = {
 		"return_on_equity_ttm": "returnOnEquityTTM",
@@ -382,6 +387,12 @@ class Symbol(Base):
 		if not self.analytics:
 			self._load_analytics()
 		return self.analytics.get(field, None)
+
+	def update(self):
+		"""Force refresh of all symbol data from API."""
+		self._load_profile_data()
+		self._load_analytics()
+		self._load_history() # this step includes persistence
 
 	def __str__(self) -> str:
 		"""Return the string representation of the symbol."""

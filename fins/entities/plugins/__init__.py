@@ -7,6 +7,9 @@ All plugin types extend either Plugin or FieldPlugin base classes.
 # FieldPlugin implementations (DataFrame-based)
 from .industry import Industry
 from .name import Name
+from .last_price_update import LastPriceUpdate
+from .last_profile_update import LastProfileUpdate
+from .update import Update
 
 # Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
@@ -22,6 +25,10 @@ from .name import Name
 
 __all__ = [
     'Industry',
+    'LastPriceUpdate',
+    'LastProfileUpdate',
+    'Name',
+    'Update',
 ]
 
 
