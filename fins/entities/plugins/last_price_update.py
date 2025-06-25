@@ -5,7 +5,7 @@ from .. import BasketItem
 from ..plugin import FieldPlugin
 
 
-class LastPriceUpdate(FieldPlugin):
+class LastUpdatePrice(FieldPlugin):
     """ Add 'LastPriceUpdate' field """
 
     def __init__(self, alias: Optional[str] = None):

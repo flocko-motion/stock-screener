@@ -34,7 +34,7 @@ def entity_from_dict(data: dict) -> 'Entity':
         raise ValueError("Class name not provided in data dictionary")
 
     if class_name in globals():
-        cls = globals()[class_name]
+        cls = globals()[str(class_name)]
         return cls.from_dict(data_copy)  # Pass the data without the "class" key
     
     raise ValueError(f"Class {class_name} not found")

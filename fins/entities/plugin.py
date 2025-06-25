@@ -30,6 +30,41 @@ class Plugin(ABC):
         else:
             return NotImplemented
 
+class OutputPlugin(Plugin):
+
+    def __init__(self, alias: Optional[str] = None):
+        super().__init__(alias)
+
+    def output_item(self, data: dict[str, pd.DataFrame]):
+        pass
+
+    def output_all(self, data: 'OutputData'):
+        pass
+
+    def run(self, runtime: 'BasketRuntime'):
+        output_data = runtime.output_data()
+        self.output_all(output_data)
+        items = output_data.items()
+        for idx, basket_item in enumerate(runtime.basket_items()):
+            self.output_item(items[idx])
+
+class OutputData:
+
+    def __init__(self):
+        self._series = list[str]()
+        self._items = dict[int, dict[str, pd.DataFrame]]()
+
+    def register_series(self, field_name: str):
+        self._series.append(field_name)
+
+    def items(self) -> dict[int, dict[str, pd.DataFrame]]:
+        return self._items
+
+    def set_series(self, row_index: int, field_name: str, value: pd.DataFrame):
+        if not row_index in self._series:
+            self._items[row_index] = dict[str, pd.DataFrame]()
+        self._items[row_index][field_name] = value
+
 
 class FieldPlugin(Plugin):
 
@@ -37,7 +72,7 @@ class FieldPlugin(Plugin):
         super().__init__(alias)
 
     @abstractmethod
-    def field_value(self, item: BasketItem) -> Optional[float] | str:
+    def field_value(self, item: BasketItem) -> Optional[float] | str | pd.DataFrame:
         pass
 
     @abstractmethod
@@ -49,6 +84,18 @@ class FieldPlugin(Plugin):
         for idx, basket_item in enumerate(runtime.basket_items()):
             field_value = self.field_value(basket_item)
             runtime.set_field_value(idx, self.alias, field_value)
+
+class SeriesPlugin(FieldPlugin):
+
+    def __init__(self, alias: Optional[str] = None):
+        super().__init__(alias)
+
+    @abstractmethod
+    def field_value(self, item: BasketItem) -> pd.DataFrame:
+        pass
+
+    def field_type(self) -> type:
+        return pd.DataFrame
 
 
 class BasketPipeline:
@@ -78,12 +125,15 @@ class BasketPipeline:
         return runtime
 
 
+
+
 class BasketRuntime:
 
     def __init__(self, basket: Basket):
         self._basket = basket
         self._df = basket.df().copy()  # Start with basket's DataFrame
         self._fields = dict[str, type]()
+        self._output_data = OutputData()
 
     def __repr__(self) -> str:
         return repr(self.df())
@@ -98,7 +148,7 @@ class BasketRuntime:
             raise RuntimeError(f"Field {field_name} is already registered")
         
         # Validate field type
-        valid_types = [float, str, type(None), datetime, Optional[datetime], Optional[float]]
+        valid_types = [float, str, type(None), datetime, Optional[datetime], Optional[float], pd.DataFrame, Optional[pd.DataFrame]]
         if field_type not in valid_types:
             raise RuntimeError(f"Field {field_name} has invalid type {field_type}")
         
@@ -111,6 +161,8 @@ class BasketRuntime:
             self._df[field_name] = None
         elif field_type == datetime or field_type == Optional[datetime]:
             self._df[field_name] = None
+        elif field_type == pd.DataFrame or field_type == Optional[pd.DataFrame]:
+            self._output_data.register_series(field_name)
         else:
             self._df[field_name] = None
 
@@ -120,7 +172,11 @@ class BasketRuntime:
             raise RuntimeError(f"Field {field_name} is not registered")
         
         self.validate_field_value(field_name, value)
-        self._df.iloc[row_index, self._df.columns.get_loc(field_name)] = value
+
+        if self._fields[field_name] == pd.DataFrame:
+            self._output_data.set_series(row_index, field_name, value)
+        else:
+            self._df.iloc[row_index, self._df.columns.get_loc(field_name)] = value
 
     def validate_field_value(self, field_name: str, value):
         """Validate that the value matches the registered field type"""
@@ -142,6 +198,12 @@ class BasketRuntime:
         elif expected_type == str:
             if not isinstance(value, str):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: str) for field {field_name}")
+        elif expected_type == pd.DataFrame:
+            if not isinstance(value, pd.DataFrame):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: pd.DataFrame) for field {field_name}")
+        elif expected_type == Optional[pd.DataFrame]:
+            if value is not None and not isinstance(value, pd.DataFrame):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: Optional[pd.DataFrame]) for field {field_name}")
 
     def df(self) -> pd.DataFrame:
         """Return the enriched DataFrame with all plugin outputs"""
@@ -150,6 +212,10 @@ class BasketRuntime:
     def basket(self) -> Basket:
         """Return the original basket"""
         return self._basket
+
+    def output_data(self):
+        return self._output_data
+
 
 
 

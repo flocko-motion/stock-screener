@@ -115,15 +115,20 @@ class BasketTests(unittest.TestCase):
             assert str(e).startswith('Plugin foo already exists in pipe')
 
     def test_plugins_update(self):
-        res = Basket(AAPL * 1.5)(Name() >> LastPriceUpdate() >> LastProfileUpdate())
+        res = Basket(AAPL * 1.5)(Name() >> LastUpdatePrice() >> LastUpdateProfile())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['LastPriceUpdate'])
         self.assertIsNotNone(df.iloc[0]['LastProfileUpdate'])
 
-        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastPriceUpdate() >> LastProfileUpdate())
+        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdatePrice() >> LastUpdateProfile())
         df2 = res2.df()
         self.assertGreater(df2.iloc[0]['LastPriceUpdate'], df.iloc[0]['LastPriceUpdate'])
         self.assertGreater(df2.iloc[0]['LastProfileUpdate'], df.iloc[0]['LastProfileUpdate'])
+
+    def test_plugins_simple_price(self):
+        res = Basket(AAPL * 1.5)(WeeklyClose() >> MonthlyClose() >> PlotItems())
+        data = res.output_data()
+        self.assertTrue(len(data._series) == 2)
 
     def assertBasket(self, basket: Basket, expected: dict):
         """
