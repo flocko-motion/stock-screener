@@ -12,6 +12,7 @@ from .last_profile_update import LastUpdateProfile
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
 from .plots import PlotEach, PlotAll
+from .crop import Crop
 
 # Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
@@ -26,6 +27,7 @@ from .plots import PlotEach, PlotAll
 # from .vol import VolColumn
 
 __all__ = [
+    'Crop',
     'Industry',
     'LastUpdateProfile',
     'LastUpdatePrice',

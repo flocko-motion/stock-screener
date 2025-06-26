@@ -18,7 +18,7 @@ class Price(SeriesPlugin):
         symbol = item.symbol() if self._ticker is None else Symbol.get(self._ticker)
         df = symbol.get_weekly() if self._resolution == "w" else symbol.get_monthly()
         
-        res = df[['date', self._metric]].copy()
+        res = df[['date', self._metric]]
         res.attrs['type'] = "index"
         res.attrs['title'] = symbol.ticker + " " + self.resolution_name() + " " + self.metric_name()
         return res

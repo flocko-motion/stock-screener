@@ -6,7 +6,11 @@ from fins.data_sources.fmp import all_stocks, all_etfs
 symbols_py_export =  ""
 symbols_py_body = ""
 
+dead_tickers = {"FB"}
+
 def add_ticker(ticker: str):
+	if ticker in dead_tickers:
+		return
 	global symbols_py_export, symbols_py_body
 	alias = (ticker if ticker[0].isalpha() else "_" + ticker).replace("-", "_")
 	symbols_py_export += "    \"" + alias + "\",\n"

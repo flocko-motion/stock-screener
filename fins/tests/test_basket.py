@@ -126,9 +126,13 @@ class BasketTests(unittest.TestCase):
         self.assertGreater(df2.iloc[0]['LastProfileUpdate'], df.iloc[0]['LastProfileUpdate'])
 
     def test_plugins_simple_price(self):
-        res = Basket(AAPL * 1.5)(WeeklyClose() >> MonthlyClose() >> PlotEach())
+        res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
+
+    def test_plugins_cropy_time_series(self):
+        res = Basket(AAPL, GOOG, FB)(WeeklyClose() >> Crop() >> PlotEach())
+        data = res.output_data()
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

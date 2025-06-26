@@ -53,7 +53,7 @@ class PlotEach(OutputPlugin):
         
         # Configure primary axis (price data) - logarithmic scale with fixed range
         ax1.set_yscale('log')
-        ax1.set_ylim(1, 100000)
+        ax1.set_ylim(10, 1000000)
         ax1.set_ylabel('Value')
         ax1.set_xlabel('Date')
         ax1.grid(True, alpha=0.6, which='major')
