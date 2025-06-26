@@ -126,7 +126,7 @@ class BasketTests(unittest.TestCase):
         self.assertGreater(df2.iloc[0]['LastProfileUpdate'], df.iloc[0]['LastProfileUpdate'])
 
     def test_plugins_simple_price(self):
-        res = Basket(AAPL * 1.5)(WeeklyClose() >> MonthlyClose() >> PlotItems())
+        res = Basket(AAPL * 1.5)(WeeklyClose() >> MonthlyClose() >> PlotlyEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
 

@@ -6,19 +6,27 @@ from ...financial import Symbol
 
 class Price(SeriesPlugin):
     def __init__(self, alias: Optional[str] = None, ticker: Optional[str] = None, resolution: str = "m", metric: str = "close"):
-        if alias is None:
-            alias = (ticker or "") + ("Weekly" if resolution == "w" else "Monthly") + metric.capitalize()
-        super().__init__(alias=alias)
-        self._ticker = ticker
         self._resolution = resolution
         self._metric = metric
+        if alias is None:
+            alias = (ticker or "") + self.resolution_name() + self.metric_name()
+        super().__init__(alias=alias)
+        self._ticker = ticker
+
 
     def field_value(self, item: BasketItem):
         symbol = item.symbol() if self._ticker is None else Symbol.get(self._ticker)
         df = symbol.get_weekly() if self._resolution == "w" else symbol.get_monthly()
         res = df[[self._metric]].reset_index()
         res.attrs['type'] = "index"
+        res.attrs['title'] = (self._ticker or "???") + " " + self.resolution_name() + " " + self.metric_name()
         return res
+
+    def resolution_name(self):
+        return "Weekly" if self._resolution == "w" else "Monthly"
+
+    def metric_name(self):
+        return self._metric.capitalize()
 
 class WeeklyClose(Price):
     """ Add 'WeeklyClose' series """

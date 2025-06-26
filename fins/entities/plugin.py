@@ -10,6 +10,7 @@ from typing import Optional, List
 import pandas as pd
 
 from fins.entities import BasketItem, Basket
+from fins.financial import Symbol
 
 
 class Plugin(ABC):
@@ -35,7 +36,7 @@ class OutputPlugin(Plugin):
     def __init__(self, alias: Optional[str] = None):
         super().__init__(alias)
 
-    def output_item(self, data: dict[str, pd.DataFrame]):
+    def output_item(self, symbol: Symbol, data: dict[str, pd.DataFrame]):
         pass
 
     def output_all(self, data: 'OutputData'):
@@ -46,7 +47,7 @@ class OutputPlugin(Plugin):
         self.output_all(output_data)
         items = output_data.items()
         for idx, basket_item in enumerate(runtime.basket_items()):
-            self.output_item(items[idx])
+            self.output_item(basket_item.symbol(), items[idx])
 
 class OutputData:
 

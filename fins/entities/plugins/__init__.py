@@ -11,7 +11,7 @@ from .last_price_update import LastUpdatePrice
 from .last_profile_update import LastUpdateProfile
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
-from .plots import PlotItems, PlotAll
+from .plots import PlotlyEach, PlotlyAll
 
 # Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
@@ -31,8 +31,8 @@ __all__ = [
     'LastUpdatePrice',
     'MonthlyClose',
     'Name',
-    'PlotAll',
-    'PlotItems',
+    'PlotlyAll',
+    'PlotlyEach',
     'Update',
     'WeeklyClose',
 ]
