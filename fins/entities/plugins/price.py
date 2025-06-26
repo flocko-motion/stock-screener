@@ -17,7 +17,8 @@ class Price(SeriesPlugin):
     def field_value(self, item: BasketItem):
         symbol = item.symbol() if self._ticker is None else Symbol.get(self._ticker)
         df = symbol.get_weekly() if self._resolution == "w" else symbol.get_monthly()
-        res = df[[self._metric]].reset_index()
+        
+        res = df[['date', self._metric]].copy()
         res.attrs['type'] = "index"
         res.attrs['title'] = symbol.ticker + " " + self.resolution_name() + " " + self.metric_name()
         return res

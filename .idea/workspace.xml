@@ -8,12 +8,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: first working Plot plugin &quot;PlotlyEach&quot;">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: first working Plot plugin &quot;PlotEach&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/plugins/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/plots.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/plugins/price.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/price.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -439,23 +439,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="6747000" />
-    </task>
-    <task id="LOCAL-00079" summary="feat: fetch and cache price history weekly/monthly">
-      <option name="closed" value="true" />
-      <created>1747987847540</created>
-      <option name="number" value="00079" />
-      <option name="presentableId" value="LOCAL-00079" />
-      <option name="project" value="LOCAL" />
-      <updated>1747987847540</updated>
-    </task>
-    <task id="LOCAL-00080" summary="feat: fetch and cache price history weekly/monthly">
-      <option name="closed" value="true" />
-      <created>1747987855211</created>
-      <option name="number" value="00080" />
-      <option name="presentableId" value="LOCAL-00080" />
-      <option name="project" value="LOCAL" />
-      <updated>1747987855211</updated>
+      <workItem from="1750871494713" duration="8161000" />
     </task>
     <task id="LOCAL-00081" summary="feat: fetch and cache price history weekly/monthly">
       <option name="closed" value="true" />
@@ -833,7 +817,23 @@
       <option name="project" value="LOCAL" />
       <updated>1750918899373</updated>
     </task>
-    <option name="localTasksCounter" value="128" />
+    <task id="LOCAL-00128" summary="feat: first working Plot plugin &quot;PlotEach&quot;">
+      <option name="closed" value="true" />
+      <created>1750919723315</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1750919723315</updated>
+    </task>
+    <task id="LOCAL-00129" summary="feat: first working Plot plugin &quot;PlotEach&quot;">
+      <option name="closed" value="true" />
+      <created>1750919894921</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1750919894921</updated>
+    </task>
+    <option name="localTasksCounter" value="130" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -851,7 +851,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: sqlite cache for Symbol" />
     <MESSAGE value="refactor: moved db path to .config" />
     <MESSAGE value="refactor: moved financial db and cache into seperate file" />
     <MESSAGE value="feat: functions stocks(), etfs(), cryptos() to fetch all symbols of a type" />
@@ -876,7 +875,8 @@
     <MESSAGE value="feat: control data updates in FINS" />
     <MESSAGE value="feat: first working Price plugins - skeleton of OutputPlugin" />
     <MESSAGE value="feat: first working Plot plugin &quot;PlotlyEach&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: first working Plot plugin &quot;PlotlyEach&quot;" />
+    <MESSAGE value="feat: first working Plot plugin &quot;PlotEach&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: first working Plot plugin &quot;PlotEach&quot;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1080,6 +1080,11 @@
           <line>129</line>
           <option name="timeStamp" value="297" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/entities/plugins/price.py</url>
+          <line>18</line>
+          <option name="timeStamp" value="298" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -1159,7 +1164,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_variable_and_multiply.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply Coverage Results" MODIFIED="1743534262138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for test_symbol.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745345711615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747483758332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_simple_price.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_simple_price Coverage Results" MODIFIED="1750877183552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_simple_price.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_simple_price Coverage Results" MODIFIED="1750930571765" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_column_with_alias.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias Coverage Results" MODIFIED="1747511967512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_variable.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable Coverage Results" MODIFIED="1743285444052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

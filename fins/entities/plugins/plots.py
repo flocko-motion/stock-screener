@@ -56,17 +56,19 @@ class PlotEach(OutputPlugin):
         ax1.set_ylim(1, 100000)
         ax1.set_ylabel('Value')
         ax1.set_xlabel('Date')
-        ax1.grid(True, alpha=0.3)
+        ax1.grid(True, alpha=0.6, which='major')
+        ax1.grid(True, alpha=0.25, which='minor')
         ax1.legend(loc='upper left')
         
         # Format secondary axis if exists
         if ax2 is not None:
             ax2.legend(loc='upper right')
         
-        # Format x-axis dates
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
-        plt.xticks(rotation=45)
+        # Format x-axis dates - yearly labels, monthly ticks
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        ax1.xaxis.set_major_locator(mdates.YearLocator(base=2))
+        ax1.xaxis.set_minor_locator(mdates.YearLocator())
+        plt.xticks(rotation=60, fontsize=8)
         
         plt.title(f"{symbol.ticker} {symbol.name}")
         plt.tight_layout()
