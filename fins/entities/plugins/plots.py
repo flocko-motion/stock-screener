@@ -6,21 +6,20 @@ from .. import BasketItem
 from ..plugin import FieldPlugin, SeriesPlugin, Plugin, OutputPlugin, OutputData
 from ...financial import Symbol
 
-class PlotlyEach(OutputPlugin):
+
+class PlotEach(OutputPlugin):
     def __init__(self, alias: Optional[str] = None):
         super().__init__(alias=alias)
 
-    def output_item(self, symbol:Symbol, data: dict[str, pd.DataFrame]):
-        import plotly.graph_objects as go
-        from plotly.subplots import make_subplots
+    def output_item(self, symbol: Symbol, data: dict[str, pd.DataFrame]):
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
         
         if not data:
             return
             
-        # Create subplot with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        
-        has_indicators = False
+        fig, ax1 = plt.subplots(figsize=(6, 4))
+        ax2 = None
         
         for alias, df in data.items():
             if df.empty:
@@ -30,63 +29,50 @@ class PlotlyEach(OutputPlugin):
             time_col = df.columns[0]
             data_cols = df.columns[1:]
             
+            # Ensure date column is datetime
+            if not pd.api.types.is_datetime64_any_dtype(df[time_col]):
+                df[time_col] = pd.to_datetime(df[time_col])
+            
             data_type = df.attrs.get('type', 'index')
             
             for col in data_cols:
+                series_name = df.attrs.get('title', f"{alias}_{col}")
+                
                 if data_type == 'indicator':
-                    # Plot on secondary y-axis
-                    fig.add_trace(
-                        go.Scatter(
-                            x=df[time_col], 
-                            y=df[col], 
-                            name=df.attrs.get('type', 'title'),
-                            line=dict(width=1),
-                            opacity=0.7
-                        ),
-                        secondary_y=True
-                    )
-                    has_indicators = True
+                    # Use secondary y-axis for indicators
+                    if ax2 is None:
+                        ax2 = ax1.twinx()
+                        ax2.set_ylim(-1.1, 1.1)
+                        ax2.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+                        ax2.set_ylabel('Indicators', color='blue')
+                    
+                    ax2.plot(df[time_col], df[col], label=series_name, alpha=0.7, linewidth=1)
+                    
                 else:  # 'index' type - price data
-                    fig.add_trace(
-                        go.Scatter(
-                            x=df[time_col], 
-                            y=df[col], 
-                            name=df.attrs.get('type', 'title'),
-                            line=dict(width=2)
-                        ),
-                        secondary_y=False
-                    )
+                    ax1.plot(df[time_col], df[col], label=series_name, linewidth=2)
         
-        # Configure primary y-axis (price data) - logarithmic scale
-        fig.update_yaxes(title_text="Value", type="log", secondary_y=False)
+        # Configure primary axis (price data) - logarithmic scale
+        ax1.set_yscale('log')
+        ax1.set_ylabel('Value')
+        ax1.set_xlabel('Date')
+        ax1.grid(True, alpha=0.3)
+        ax1.legend(loc='upper left')
         
-        # Configure secondary y-axis if indicators exist
-        if has_indicators:
-            fig.update_yaxes(
-                title_text="Indicators", 
-                range=[-1.1, 1.1],
-                secondary_y=True
-            )
-            # Add zero line for indicators
-            fig.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5, secondary_y=True)
+        # Format secondary axis if exists
+        if ax2 is not None:
+            ax2.legend(loc='upper right')
         
-        # Configure x-axis and layout - format as dates
-        fig.update_xaxes(
-            title_text="Date",
-            tickformat="%Y-%m",
-            dtick="M3"  # Show every 3 months
-        )
-        fig.update_layout(
-            title=f"{symbol.ticker} {symbol.name}",
-            hovermode='x unified',
-            width=700,
-            height=500
-        )
+        # Format x-axis dates
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        ax1.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        plt.xticks(rotation=45)
         
-        fig.show()
+        plt.title(f"{symbol.ticker} {symbol.name}")
+        plt.tight_layout()
+        plt.show()
 
 
-class PlotlyAll(OutputPlugin):
+class PlotAll(OutputPlugin):
     def __init__(self, alias: Optional[str] = None):
         super().__init__(alias=alias)
 
