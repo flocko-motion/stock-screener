@@ -31,7 +31,7 @@ class PlotEach(OutputPlugin):
             
             # Ensure date column is datetime
             if not pd.api.types.is_datetime64_any_dtype(df[time_col]):
-                df[time_col] = pd.to_datetime(df[time_col])
+                df[time_col] = pd.to_datetime(df[time_col], unit='s' if df[time_col].dtype in ['int64', 'float64'] else None)
             
             data_type = df.attrs.get('type', 'index')
             
@@ -51,8 +51,9 @@ class PlotEach(OutputPlugin):
                 else:  # 'index' type - price data
                     ax1.plot(df[time_col], df[col], label=series_name, linewidth=2)
         
-        # Configure primary axis (price data) - logarithmic scale
+        # Configure primary axis (price data) - logarithmic scale with fixed range
         ax1.set_yscale('log')
+        ax1.set_ylim(1, 100000)
         ax1.set_ylabel('Value')
         ax1.set_xlabel('Date')
         ax1.grid(True, alpha=0.3)
