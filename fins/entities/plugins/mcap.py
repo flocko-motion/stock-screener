@@ -4,25 +4,20 @@ Market Cap Column
 
 from typing import Optional
 
-from .. import Plugin
-from ...financial import Symbol
+from .. import BasketItem
+from ..plugin import FieldPlugin
 
 
-class McapColumn(Plugin):
-    @classmethod
-    def name(cls) -> str:
-        return "mcap"
+class Mcap(FieldPlugin):
+    """ Add 'Market Cap' field """
 
-    @classmethod
-    def description(cls) -> str:
-        return "Market Capitalization"
-
-    def __init__(self, alias: str = None):
+    def __init__(self, alias: Optional[str] = None):
+        if alias is None:
+            alias = 'MCap'
         super().__init__(alias=alias)
 
-    def value(self, ticker: str) -> Optional[float]:
-        return Symbol.get(ticker).get_analytics("market_cap")
+    def field_type(self) -> type:
+        return float
 
-    def value_str(self, ticker: str) -> str:
-        v = self.value(ticker)
-        return "n/a" if v is None else  f"{int(v)}"
+    def field_value(self, item: BasketItem):
+        return item.symbol().get_analytics("market_cap")

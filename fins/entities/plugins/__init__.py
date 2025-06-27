@@ -8,6 +8,7 @@ All plugin types extend either Plugin or FieldPlugin base classes.
 from .cagr import Cagr
 from .crop import Crop
 from .industry import Industry
+from .mcap import Mcap
 from .name import Name
 from .last_price_update import LastUpdatePrice
 from .last_profile_update import LastUpdateProfile
@@ -34,6 +35,7 @@ __all__ = [
     'Industry',
     'LastUpdateProfile',
     'LastUpdatePrice',
+    'Mcap',
     'MonthlyClose',
     'Name',
     'PlotAll',

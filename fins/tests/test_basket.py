@@ -137,7 +137,14 @@ class BasketTests(unittest.TestCase):
     def test_plugins_cagr(self):
         res = Basket(AAPL, GOOG, META)(Cagr())
         df = res.df()
-        self.assertIsNotNone(df.iloc[0]['Cagr'])
+        self.assertIsNotNone(df.iloc[0]['CAGR'])
+
+    def test_plugins_mcap(self):
+        res = Basket(AAPL, GOOG, META)(Mcap())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['MCap'])
+        self.assertGreater(df.iloc[0]['MCap'], 0)
+
 
     def assertBasket(self, basket: Basket, expected: dict):
         """
