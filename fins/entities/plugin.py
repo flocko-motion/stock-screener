@@ -6,7 +6,7 @@ Base class for all plugin types in FINS.
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union, Any
 import pandas as pd
 
 from fins.entities import BasketItem, Basket
@@ -67,25 +67,49 @@ class OutputData:
         self._items[row_index][field_name] = value
 
 
-class FilterPlugin(Plugin):
+
+
+class FieldPlugin(Plugin):
 
     def __init__(self, alias: Optional[str] = None):
         super().__init__(alias)
+        self._filters = []  # List of (operator, value) tuples
 
     @abstractmethod
-    def should_keep(self, item: BasketItem) -> bool:
-        """Return True if the item should be kept in the basket"""
+    def field_value(self, item: BasketItem) -> Optional[float] | str | pd.DataFrame:
+        pass
+
+    @abstractmethod
+    def field_type(self) -> type:
         pass
 
     def run(self, runtime: 'BasketRuntime'):
-        # Determine which items to keep
+        # First register and populate the field values
+        runtime.register_field(self.alias, self.field_type())
+        for idx, basket_item in enumerate(runtime.basket_items()):
+            field_value = self.field_value(basket_item)
+            runtime.set_field_value(idx, self.alias, field_value)
+        
+        # Then apply any filters
+        if self._filters:
+            self._apply_filters(runtime)
+    
+    def _apply_filters(self, runtime: 'BasketRuntime'):
+        """Apply all filters to the runtime"""
+        df = runtime.df()
+        field_name = self.alias
+        
+        if field_name not in df.columns:
+            raise RuntimeError(f"Field {field_name} not found in runtime data")
+        
+        # Determine which items to keep based on all filters
         keep_indices = []
         filtered_items = []
         
-        for idx, item in enumerate(runtime.basket_items()):
-            if self.should_keep(item):
+        for idx, (basket_item, field_value) in enumerate(zip(runtime.basket_items(), df[field_name])):
+            if self._passes_all_filters(field_value):
                 keep_indices.append(idx)
-                filtered_items.append(item)
+                filtered_items.append(basket_item)
         
         # Create new basket with filtered items
         filtered_basket = Basket(items=filtered_items, name=runtime.basket()._name)
@@ -103,26 +127,119 @@ class FilterPlugin(Plugin):
         
         # Update the basket reference
         runtime._basket = filtered_basket
-
-
-class FieldPlugin(Plugin):
-
-    def __init__(self, alias: Optional[str] = None):
-        super().__init__(alias)
-
-    @abstractmethod
-    def field_value(self, item: BasketItem) -> Optional[float] | str | pd.DataFrame:
-        pass
-
-    @abstractmethod
-    def field_type(self) -> type:
-        pass
-
-    def run(self, runtime: 'BasketRuntime'):
-        runtime.register_field(self.alias, self.field_type())
-        for idx, basket_item in enumerate(runtime.basket_items()):
-            field_value = self.field_value(basket_item)
-            runtime.set_field_value(idx, self.alias, field_value)
+    
+    def _passes_all_filters(self, field_value: Any) -> bool:
+        """Check if field value passes all filters"""
+        for operator, threshold in self._filters:
+            if not self._compare_value(field_value, operator, threshold):
+                return False
+        return True
+    
+    def _compare_value(self, field_value: Any, operator: str, threshold: Any) -> bool:
+        """Compare field value with threshold using the specified operator"""
+        # Handle None values
+        if field_value is None:
+            return False
+            
+        try:
+            if operator == '>':
+                return field_value > threshold
+            elif operator == '>=':
+                return field_value >= threshold
+            elif operator == '<':
+                return field_value < threshold
+            elif operator == '<=':
+                return field_value <= threshold
+            elif operator == '==':
+                return field_value == threshold
+            elif operator == '!=':
+                return field_value != threshold
+            elif operator == 'contains':
+                return str(threshold) in str(field_value)
+            elif operator == 'in':
+                return field_value in threshold
+            else:
+                raise ValueError(f"Unsupported operator: {operator}")
+        except (TypeError, ValueError):
+            return False
+    
+    # Mathematical filtering methods that return self for chaining
+    def min(self, value: Union[float, int]) -> 'FieldPlugin':
+        """Filter for values >= threshold: plugin.min(value)"""
+        self._filters.append(('>=', value))
+        return self
+    
+    def max(self, value: Union[float, int]) -> 'FieldPlugin':
+        """Filter for values <= threshold: plugin.max(value)"""
+        self._filters.append(('<=', value))
+        return self
+    
+    def equals(self, value: Union[float, int, str]) -> 'FieldPlugin':
+        """Filter for exact equality: plugin.equals(value)"""
+        self._filters.append(('==', value))
+        return self
+    
+    def exclude(self, value: Union[float, int, str, list, tuple, set]) -> 'FieldPlugin':
+        """Filter for inequality: plugin.exclude(value) or plugin.exclude([val1, val2, ...])"""
+        if isinstance(value, (list, tuple, set)):
+            # Add multiple != filters for each value in the collection
+            for item in value:
+                self._filters.append(('!=', item))
+        else:
+            # Single value exclusion
+            self._filters.append(('!=', value))
+        return self
+    
+    def true(self) -> 'FieldPlugin':
+        """Filter for boolean fields that are True: plugin.true()"""
+        self._filters.append(('==', True))
+        return self
+    
+    def false(self) -> 'FieldPlugin':
+        """Filter for boolean fields that are False: plugin.false()"""
+        self._filters.append(('==', False))
+        return self
+    
+    def contains(self, value: Union[float, int, str]) -> 'FieldPlugin':
+        """Filter for substring: plugin.contains(value)"""
+        self._filters.append(('contains', value))
+        return self
+    
+    def any(self, collection: Union[list, tuple, set]) -> 'FieldPlugin':
+        """Filter for membership: plugin.any(collection)"""
+        self._filters.append(('in', collection))
+        return self
+    
+    def within(self, from_value: Union[float, int], to_value: Union[float, int]) -> 'FieldPlugin':
+        """Filter for values within range: plugin.within(from_value, to_value)"""
+        self._filters.append(('>=', from_value))
+        self._filters.append(('<=', to_value))
+        return self
+    
+    def around(self, value: Union[float, int], precision: float = 0.1) -> 'FieldPlugin':
+        """Filter for values within percentage range: plugin.around(value, precision=0.1)"""
+        # precision of 0.1 means +/- 10%
+        lower_bound = value / (1 + precision)
+        upper_bound = value * (1 + precision)
+        self._filters.append(('>=', lower_bound))
+        self._filters.append(('<=', upper_bound))
+        return self
+    
+    def before(self, date: Union[datetime, str]) -> 'FieldPlugin':
+        """Filter for dates before the given date: plugin.before(date)"""
+        if isinstance(date, str):
+            from dateutil.parser import parse
+            date = parse(date)
+        self._filters.append(('<', date))
+        return self
+    
+    def after(self, date: Union[datetime, str]) -> 'FieldPlugin':
+        """Filter for dates after the given date: plugin.after(date)"""
+        if isinstance(date, str):
+            from dateutil.parser import parse
+            date = parse(date)
+        self._filters.append(('>', date))
+        return self
 
 class SeriesPlugin(FieldPlugin):
 

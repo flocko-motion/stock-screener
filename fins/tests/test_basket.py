@@ -1,12 +1,14 @@
 import unittest
-from datetime import datetime
+from datetime import datetime, date
 import numpy as np
+import pandas as pd
 
 from fins.entities.plugins import *
 from fins.terminal.symbols import *
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
 from .tools import time_it, no_cache, unbuffered_output
+
 
 
 class BasketTests(unittest.TestCase):
@@ -201,6 +203,106 @@ class BasketTests(unittest.TestCase):
             self.assertIsInstance(age_value, (float, int))
             self.assertGreater(age_value, 0)  # Should be positive years
 
+    def test_filter_age(self):
+        df = Basket(AAPL, GOOG, META)(Age().min(10)).df()
+        self.assertIn('Age', df.columns)
+        for age in df['Age'].dropna():
+            self.assertGreaterEqual(age, 10)
+
+    def test_filter_mcap(self):
+        df = Basket(AAPL, GOOG, META)(Mcap().min(1_000_000_000)).df()
+        self.assertIn('MCap', df.columns)
+        for mcap in df['MCap'].dropna():
+            self.assertGreaterEqual(mcap, 1_000_000_000)
+
+    def test_filter_chaining(self):
+        df = Basket(AAPL, GOOG, META)(Age().min(10) >> Name() >> Mcap()).df()
+        self.assertIn('Age', df.columns)
+        self.assertIn('Name', df.columns)
+        self.assertIn('MCap', df.columns)
+        for age in df['Age'].dropna():
+            self.assertGreaterEqual(age, 10)
+
+    def test_filter_string_equality(self):
+        df = Basket(AAPL, GOOG, META)(Sector().equals("Technology")).df()
+        for sector in df['Sector'].dropna():
+            self.assertEqual(sector, "Technology")
+
+    def test_filter_none_handling(self):
+        df = Basket(AAPL, GOOG, META)(Pe().min(0)).df()
+        if 'PE' in df.columns:
+            for pe in df['PE'].dropna():
+                self.assertGreaterEqual(pe, 0)
+
+    def test_filter_contains(self):
+        df = Basket(AAPL, GOOG, META)(Name().contains("Inc")).df()
+        if 'Name' in df.columns:
+            for name in df['Name'].dropna():
+                self.assertIn("Inc", name)
+
+    def test_filter_multiple_conditions(self):
+        df = Basket(AAPL, GOOG, META)(Age().min(5).max(50)).df()
+        if 'Age' in df.columns:
+            for age in df['Age'].dropna():
+                self.assertGreaterEqual(age, 5)
+                self.assertLessEqual(age, 50)
+
+    def test_filter_within(self):
+        df = Basket(AAPL, GOOG, META)(Age().within(10, 40)).df()
+        if 'Age' in df.columns:
+            for age in df['Age'].dropna():
+                self.assertGreaterEqual(age, 10)
+                self.assertLessEqual(age, 40)
+
+    def test_filter_any(self):
+        allowed_sectors = ["Technology", "Consumer Cyclical", "Communication Services"]
+        df = Basket(AAPL, GOOG, META)(Sector().any(allowed_sectors)).df()
+        if 'Sector' in df.columns:
+            for sector in df['Sector'].dropna():
+                self.assertIn(sector, allowed_sectors)
+
+    def test_filter_exclude_multiple(self):
+        excluded_sectors = ["Real Estate", "Utilities", "Energy"]
+        df = Basket(AAPL, GOOG, META)(Sector().exclude(excluded_sectors)).df()
+        if 'Sector' in df.columns:
+            for sector in df['Sector'].dropna():
+                self.assertNotIn(sector, excluded_sectors)
+
+    def test_filter_around(self):
+        baseline_df = Basket(AAPL, GOOG, META)(Pe()).df()
+        if 'PE' in baseline_df.columns and not baseline_df['PE'].isna().all():
+            pe_values = baseline_df['PE'].dropna()
+            if len(pe_values) > 0:
+                target_pe = pe_values.iloc[0]
+                df = Basket(AAPL, GOOG, META)(Pe().around(target_pe, precision=0.2)).df()
+                if 'PE' in df.columns:
+                    lower_bound, upper_bound = target_pe * 0.8, target_pe * 1.2
+                    for pe in df['PE'].dropna():
+                        self.assertGreaterEqual(pe, lower_bound)
+                        self.assertLessEqual(pe, upper_bound)
+
+    def test_filter_dates(self):
+        from datetime import datetime
+        df_after = Basket(AAPL, GOOG, META)(Inception().after("2000-01-01")).df()
+        if 'Inception' in df_after.columns:
+            for date in df_after['Inception'].dropna():
+                self.assertGreater(date, datetime(2000, 1, 1))
+        
+        df_before = Basket(AAPL, GOOG, META)(Inception().before(datetime(2020, 1, 1))).df()
+        if 'Inception' in df_before.columns:
+            for date in df_before['Inception'].dropna():
+                self.assertLess(date, datetime(2020, 1, 1))
+
+    def test_filter_boolean(self):
+        df_alive = Basket(AAPL, GOOG, META)(Alive().true()).df()
+        if 'Alive' in df_alive.columns:
+            for value in df_alive['Alive'].dropna():
+                self.assertTrue(value)
+        
+        df_not_alive = Basket(AAPL, GOOG, META)(Alive().false()).df()
+        if 'Alive' in df_not_alive.columns:
+            for value in df_not_alive['Alive'].dropna():
+                self.assertFalse(value)
 
     def assertBasket(self, basket: Basket, expected: dict):
         """
