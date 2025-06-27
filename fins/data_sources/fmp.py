@@ -50,9 +50,6 @@ rate_limit_lock = threading.Lock()
 last_request_time = 0
 use_cache = False
 
-RATE_LIMIT_INTERVAL = 0.2
-log_debug(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", channel=sys.stderr)
-
 class ApiLimitationException(Exception):
     def __init__(self, message):
         self.message = message
@@ -63,7 +60,10 @@ class ApiBadRequestException(Exception):
         self.message = message
         super().__init__(message)
 
-def enforce_rate_limit():
+RATE_LIMIT_INTERVAL = (60 / 300) * 2  # 600/m should be allowed, we slow down by a factor to be safe
+log_debug(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", channel=sys.stderr)
+
+def rate_limit_enforce():
     """Enforce rate limiting between requests."""
     global last_request_time
     with rate_limit_lock:
@@ -75,6 +75,16 @@ def enforce_rate_limit():
         sleep_interval = RATE_LIMIT_INTERVAL - elapsed_time
         # debug_print(f"sleep {sleep_interval} seconds")
         time.sleep(sleep_interval)
+
+
+def rate_limit_recover():
+    with rate_limit_lock:
+        seconds = 60
+        print("")
+        for s in range(seconds):
+            print(f"\rFMP API rate limit exceeded - recover {seconds - s} s              ", end='', flush=True)
+            time.sleep(1)
+            print(f"\rFMP API rate limit recovered for {seconds} s                        ")
 
 
 def api_get(endpoint, params=None, max_retries=5, base_delay=3):
@@ -109,9 +119,10 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
         raise Exception(f"API error: {response.status_code} - {response.content}")
 
     def make_request():
-        enforce_rate_limit()
+        rate_limit_enforce()
         log_debug(f"Fetching {url}?{urlencode(request_params)}")
         return requests.get(url, params=request_params)
+
 
     def fetch_data():
         for attempt in range(max_retries):
@@ -119,8 +130,7 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 response = make_request()
                 return handle_response(response)
             except ApiLimitationException:
-                with rate_limit_lock:
-                    time.sleep(3)
+                rate_limit_recover()
                 continue
             except ApiBadRequestException:
                 raise
@@ -131,6 +141,9 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 log_err(f"Connection error, retrying in {delay}s: {e}")
                 time.sleep(delay)
             except Exception as e:
+                if "API error: 429" in str(e):
+                    rate_limit_recover()
+                    continue
                 raise Exception(f"Request failed: {type(e)} {e}")
         raise Exception("failed to fetch data")
 

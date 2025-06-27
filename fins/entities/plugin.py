@@ -84,11 +84,24 @@ class FieldPlugin(Plugin):
         pass
 
     def run(self, runtime: 'BasketRuntime'):
+        from fins.utils import ProgressTracker
+        
         # First register and populate the field values
         runtime.register_field(self.alias, self.field_type())
-        for idx, basket_item in enumerate(runtime.basket_items()):
-            field_value = self.field_value(basket_item)
-            runtime.set_field_value(idx, self.alias, field_value)
+        
+        basket_items = runtime.basket_items()
+        if len(basket_items) > 10:  # Only show progress for larger datasets
+            tracker = ProgressTracker(len(basket_items), f"Computing {self.alias}")
+            for idx, basket_item in enumerate(basket_items):
+                field_value = self.field_value(basket_item)
+                runtime.set_field_value(idx, self.alias, field_value)
+                tracker.next()
+            tracker.done()
+        else:
+            # For small datasets, don't show progress
+            for idx, basket_item in enumerate(basket_items):
+                field_value = self.field_value(basket_item)
+                runtime.set_field_value(idx, self.alias, field_value)
         
         # Then apply any filters
         if self._filters:
@@ -290,6 +303,9 @@ class BasketRuntime:
         self._df = basket.df().copy()  # Start with basket's DataFrame
         self._fields = dict[str, type]()
         self._output_data = OutputData()
+
+    def __call__(self, arg):
+        self._basket.__call__(arg)
 
     def __repr__(self) -> str:
         return repr(self.df())

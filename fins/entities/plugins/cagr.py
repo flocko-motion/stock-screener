@@ -59,7 +59,7 @@ class Cagr(FieldPlugin):
         self._date_to = date_to
 
     def field_type(self) -> type:
-        return float
+        return Optional[float]
 
     def field_value(self, item: BasketItem):
         df = item.symbol().get_weekly() if self._resolution == 'y' else item.symbol().get_monthly()
