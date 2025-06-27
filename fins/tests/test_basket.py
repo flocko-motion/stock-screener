@@ -145,6 +145,37 @@ class BasketTests(unittest.TestCase):
         self.assertIsNotNone(df.iloc[0]['MCap'])
         self.assertGreater(df.iloc[0]['MCap'], 0)
 
+    def test_plugins_dividend_yield(self):
+        res = Basket(AAPL, GOOG, META)(DividendYield())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['DividendYield'])
+
+    def test_plugins_npm(self):
+        res = Basket(AAPL, GOOG, META)(Npm())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['NPM'])
+
+    def test_plugins_pe(self):
+        res = Basket(AAPL, GOOG, META)(Pe())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['PE'])
+
+    def test_plugins_peg(self):
+        res = Basket(AAPL, GOOG, META)(Peg())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['PEG'])
+
+    def test_plugins_roe(self):
+        res = Basket(AAPL, GOOG, META)(Roe())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['ROE'])
+
+    def test_plugins_vol(self):
+        res = Basket(AAPL, GOOG, META)(Vol())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['Volume'])
+        self.assertGreater(df.iloc[0]['Volume'], 0)
+
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

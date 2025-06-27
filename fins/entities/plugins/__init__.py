@@ -7,9 +7,15 @@ All plugin types extend either Plugin or FieldPlugin base classes.
 # FieldPlugin implementations (DataFrame-based)
 from .cagr import Cagr
 from .crop import Crop
+from .dividend_yield import DividendYield
 from .industry import Industry
 from .mcap import Mcap
 from .name import Name
+from .npm import Npm
+from .pe import Pe
+from .peg import Peg
+from .roe import Roe
+from .vol import Vol
 from .last_price_update import LastUpdatePrice
 from .last_profile_update import LastUpdateProfile
 from .update import Update
@@ -32,16 +38,22 @@ from .sector import Sector
 __all__ = [
     'Cagr',
     'Crop',
+    'DividendYield',
     'Industry',
     'LastUpdateProfile',
     'LastUpdatePrice',
     'Mcap',
     'MonthlyClose',
     'Name',
+    'Npm',
+    'Pe',
+    'Peg',
     'PlotAll',
     'PlotEach',
+    'Roe',
     'Sector',
     'Update',
+    'Vol',
     'WeeklyClose',
 ]
 

@@ -4,25 +4,20 @@ Return On Equity Column
 
 from typing import Optional
 
-from .. import Plugin
-from ...financial import Symbol
+from .. import BasketItem
+from ..plugin import FieldPlugin
 
 
-class RoeColumn(Plugin):
-    @classmethod
-    def name(cls) -> str:
-        return "roe"
+class Roe(FieldPlugin):
+    """ Add 'Return on Equity' field """
 
-    @classmethod
-    def description(cls) -> str:
-        return "Return on Equity"
-
-    def __init__(self, alias: str = None):
+    def __init__(self, alias: Optional[str] = None):
+        if alias is None:
+            alias = 'ROE'
         super().__init__(alias=alias)
 
-    def value(self, ticker: str) -> Optional[float]:
-        return Symbol.get(ticker).get_analytics("return_on_equity_ttm")
+    def field_type(self) -> type:
+        return float
 
-    def value_str(self, ticker: str) -> str:
-        v = self.value(ticker)
-        return "n/a" if v is None else  f"{v:.4f}"
+    def field_value(self, item: BasketItem):
+        return item.symbol().get_analytics("return_on_equity_ttm")

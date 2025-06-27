@@ -8,10 +8,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Cagr() plugin">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Mcap plugin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/npm.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/npm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/pe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/peg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/peg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/roe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/roe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/vol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/vol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/commands.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,9 +84,15 @@
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_name_collision.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cagr.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_dividend_yield.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_npm.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_pe.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_peg.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_roe.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_simple_price.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_update.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_remove_item.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_sub_basket.executor": "Run",
@@ -211,7 +223,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap">
+  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -292,7 +304,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_cagr" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_npm" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -304,11 +316,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_cagr&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_npm&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_pe" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -320,11 +332,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_cropy_time_series&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_pe&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_mcap" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_peg" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -336,11 +348,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_mcap&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_peg&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_simple_price" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_roe" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -352,11 +364,11 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_simple_price&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_roe&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_update" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_plugins_vol" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -368,7 +380,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_update&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_plugins_vol&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -377,19 +389,19 @@
       <item itemvalue="Python.codegen" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cagr" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_simple_price" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_update" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_npm" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_pe" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_peg" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_roe" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cagr" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_simple_price" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_update" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_roe" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_peg" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_pe" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_npm" />
       </list>
     </recent_temporary>
   </component>
@@ -441,15 +453,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="16345000" />
-    </task>
-    <task id="LOCAL-00085" summary="fix: column functions not found">
-      <option name="closed" value="true" />
-      <created>1747988482336</created>
-      <option name="number" value="00085" />
-      <option name="presentableId" value="LOCAL-00085" />
-      <option name="project" value="LOCAL" />
-      <updated>1747988482336</updated>
+      <workItem from="1750871494713" duration="16660000" />
     </task>
     <task id="LOCAL-00086" summary="feat: price history fully implemented">
       <option name="closed" value="true" />
@@ -835,7 +839,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751009309477</updated>
     </task>
-    <option name="localTasksCounter" value="134" />
+    <task id="LOCAL-00134" summary="feat: Mcap plugin">
+      <option name="closed" value="true" />
+      <created>1751009586210</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1751009586210</updated>
+    </task>
+    <option name="localTasksCounter" value="135" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -853,7 +865,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: fetch and cache price history weekly/monthly" />
     <MESSAGE value="fix: column functions not found" />
     <MESSAGE value="feat: price history fully implemented" />
     <MESSAGE value="fix: handle NaN entries in time series" />
@@ -878,7 +889,8 @@
     <MESSAGE value="feat: prettified PlotEach" />
     <MESSAGE value="feat: Crop() normalizes and crops time range" />
     <MESSAGE value="feat: Cagr() plugin" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Cagr() plugin" />
+    <MESSAGE value="feat: Mcap plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Mcap plugin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1109,6 +1121,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_add_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_add_item Coverage Results" MODIFIED="1750596984729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743027268739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_BasketTests_test_basket_item_multiplication.coverage" NAME="pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication Coverage Results" MODIFIED="1750518516466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_roe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_roe Coverage Results" MODIFIED="1751009802983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_financial.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747860741635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1749203835617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_fins_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="Unittests for test_test.TestTests.test_test Coverage Results" MODIFIED="1750592875861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -1132,6 +1145,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$jupyter_frontend.coverage" NAME="jupyter_frontend Coverage Results" MODIFIED="1750512204862" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742333975243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_fmp_py.coverage" NAME="pytest in test_fmp.py Coverage Results" MODIFIED="1747483127717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_npm.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_npm Coverage Results" MODIFIED="1751009789383" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1749019438129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap Coverage Results" MODIFIED="1747595365233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_quote.coverage" NAME="pytest for test_fmp.TestFMP.test_quote Coverage Results" MODIFIED="1747483083530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
@@ -1142,6 +1156,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_stock_cagr.coverage" NAME="pytest for test_symbol.SymbolTests.test_stock_cagr Coverage Results" MODIFIED="1747513712008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_tradeable_symbols.coverage" NAME="pytest for test_fmp.TestFMP.test_tradeable_symbols Coverage Results" MODIFIED="1747483101329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_etf.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747483498696" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_dividend_yield.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_dividend_yield Coverage Results" MODIFIED="1751009782888" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugin_name_collision.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugin_name_collision Coverage Results" MODIFIED="1750742931081" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_asc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc Coverage Results" MODIFIED="1749019991447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_ComplexFlowTests_test_multiple_columns.coverage" NAME="pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns Coverage Results" MODIFIED="1747595708457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -1151,10 +1166,11 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_add_baskets_overlap.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap Coverage Results" MODIFIED="1750597412877" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_creation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation Coverage Results" MODIFIED="1743536184843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_index.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_index Coverage Results" MODIFIED="1745390910779" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_mcap.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_mcap Coverage Results" MODIFIED="1751009479761" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_mcap.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_mcap Coverage Results" MODIFIED="1751009508807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_complex_basket_operation.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation Coverage Results" MODIFIED="1743536188474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_multiple_columns.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns Coverage Results" MODIFIED="1747511506904" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1749018842713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_vol.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_vol Coverage Results" MODIFIED="1751009807653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_basket Coverage Results" MODIFIED="1750598592784" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_remove_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_remove_basket Coverage Results" MODIFIED="1750598702062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
@@ -1165,6 +1181,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1743022534623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_remove_items_from_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket Coverage Results" MODIFIED="1743284490967" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_SortCommandTests_test_sort_by_market_cap_desc.coverage" NAME="pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc Coverage Results" MODIFIED="1747595511809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_pe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_pe Coverage Results" MODIFIED="1751009794032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_item Coverage Results" MODIFIED="1750597520640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1743285476032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_create_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_create_basket Coverage Results" MODIFIED="1750596792881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
@@ -1192,6 +1209,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket Coverage Results" MODIFIED="1742285582773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_SortCommandTests_test_sort_by_market_cap.coverage" NAME="pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap Coverage Results" MODIFIED="1747515385220" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1749018433959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_peg.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_peg Coverage Results" MODIFIED="1751009798827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_api_get.coverage" NAME="pytest for test_fmp.TestFMP.test_api_get Coverage Results" MODIFIED="1747482848388" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1747598155826" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1743284460273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
