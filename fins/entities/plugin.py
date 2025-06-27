@@ -67,6 +67,44 @@ class OutputData:
         self._items[row_index][field_name] = value
 
 
+class FilterPlugin(Plugin):
+
+    def __init__(self, alias: Optional[str] = None):
+        super().__init__(alias)
+
+    @abstractmethod
+    def should_keep(self, item: BasketItem) -> bool:
+        """Return True if the item should be kept in the basket"""
+        pass
+
+    def run(self, runtime: 'BasketRuntime'):
+        # Determine which items to keep
+        keep_indices = []
+        filtered_items = []
+        
+        for idx, item in enumerate(runtime.basket_items()):
+            if self.should_keep(item):
+                keep_indices.append(idx)
+                filtered_items.append(item)
+        
+        # Create new basket with filtered items
+        filtered_basket = Basket(items=filtered_items, name=runtime.basket()._name)
+        
+        # Filter the accumulated DataFrame to keep only the corresponding rows
+        runtime._df = runtime._df.iloc[keep_indices].reset_index(drop=True)
+        
+        # Filter and reindex the output data (time series with date indices)
+        old_items = runtime._output_data._items
+        new_items = {}
+        for new_idx, old_idx in enumerate(keep_indices):
+            if old_idx in old_items:
+                new_items[new_idx] = old_items[old_idx]
+        runtime._output_data._items = new_items
+        
+        # Update the basket reference
+        runtime._basket = filtered_basket
+
+
 class FieldPlugin(Plugin):
 
     def __init__(self, alias: Optional[str] = None):
@@ -149,7 +187,7 @@ class BasketRuntime:
             raise RuntimeError(f"Field {field_name} is already registered")
         
         # Validate field type
-        valid_types = [float, str, type(None), datetime, Optional[datetime], Optional[float], pd.DataFrame, Optional[pd.DataFrame]]
+        valid_types = [float, str, bool, type(None), datetime, Optional[datetime], Optional[float], pd.DataFrame, Optional[pd.DataFrame]]
         if field_type not in valid_types:
             raise RuntimeError(f"Field {field_name} has invalid type {field_type}")
         
@@ -158,6 +196,8 @@ class BasketRuntime:
         # Add field to DataFrame with appropriate default value
         if field_type == str:
             self._df[field_name] = ""
+        elif field_type == bool:
+            self._df[field_name] = False
         elif field_type == float or field_type == Optional[float]:
             self._df[field_name] = None
         elif field_type == datetime or field_type == Optional[datetime]:
@@ -199,6 +239,9 @@ class BasketRuntime:
         elif expected_type == str:
             if not isinstance(value, str):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: str) for field {field_name}")
+        elif expected_type == bool:
+            if not isinstance(value, bool):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: bool) for field {field_name}")
         elif expected_type == pd.DataFrame:
             if not isinstance(value, pd.DataFrame):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: pd.DataFrame) for field {field_name}")

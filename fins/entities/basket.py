@@ -242,3 +242,9 @@ class Basket(Entity):
 
         return basket
 
+    @classmethod
+    def from_tickers(cls, tickers: list[str], name: Optional[str] = None) -> 'Basket':
+        print(f"Creating basket from {len(tickers)} tickers")
+        basket_items = [BasketItem(ticker, amount=1.0) for ticker in tickers]
+        return cls(items=basket_items, name=name)
+

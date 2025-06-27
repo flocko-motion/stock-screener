@@ -1,19 +1,20 @@
 from typing import Optional
+from datetime import datetime
 
 from .. import BasketItem
 from ..plugin import FieldPlugin
 
 
-class Peg(FieldPlugin):
-    """ Add 'PEG Ratio' (Price Earnings Growth) field """
+class Inception(FieldPlugin):
+    """ Add 'Inception Date' field """
 
     def __init__(self, alias: Optional[str] = None):
         if alias is None:
-            alias = 'PEG'
+            alias = 'Inception'
         super().__init__(alias=alias)
 
     def field_type(self) -> type:
-        return float
+        return Optional[datetime]
 
     def field_value(self, item: BasketItem):
-        return item.symbol().get_analytics("peg_ratio_ttm")
+        return item.symbol().inception 

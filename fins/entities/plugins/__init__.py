@@ -5,9 +5,12 @@ All plugin types extend either Plugin or FieldPlugin base classes.
 """
 
 # FieldPlugin implementations (DataFrame-based)
+from .age import Age
+from .alive import Alive
 from .cagr import Cagr
 from .crop import Crop
 from .dividend_yield import DividendYield
+from .inception import Inception
 from .industry import Industry
 from .mcap import Mcap
 from .name import Name
@@ -36,9 +39,12 @@ from .sector import Sector
 # from .vol import VolColumn
 
 __all__ = [
+    'Age',
+    'Alive',
     'Cagr',
     'Crop',
     'DividendYield',
+    'Inception',
     'Industry',
     'LastUpdateProfile',
     'LastUpdatePrice',

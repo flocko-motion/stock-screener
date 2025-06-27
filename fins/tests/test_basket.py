@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+import numpy as np
 
 from fins.entities.plugins import *
 from fins.terminal.symbols import *
@@ -175,6 +176,30 @@ class BasketTests(unittest.TestCase):
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['Volume'])
         self.assertGreater(df.iloc[0]['Volume'], 0)
+
+    def test_plugins_inception(self):
+        res = Basket(AAPL, GOOG, META)(Inception())
+        df = res.df()
+        # Inception date might be None for some symbols
+        inception_date = df.iloc[0]['Inception']
+        if inception_date is not None:
+            from datetime import datetime
+            self.assertIsInstance(inception_date, datetime)
+
+    def test_plugins_alive(self):
+        res = Basket(AAPL, GOOG, META)(Alive())
+        df = res.df()
+        alive_value = df.iloc[0]['Alive']
+        self.assertTrue(isinstance(alive_value, (bool, np.bool_)))
+
+    def test_plugins_age(self):
+        res = Basket(AAPL, GOOG, META)(Age())
+        df = res.df()
+        # Should return age in years as float (or None)
+        age_value = df.iloc[0]['Age']
+        if age_value is not None:
+            self.assertIsInstance(age_value, (float, int))
+            self.assertGreater(age_value, 0)  # Should be positive years
 
 
     def assertBasket(self, basket: Basket, expected: dict):
