@@ -44,14 +44,14 @@ class Crop(OutputPlugin):
                     continue
                     
                 # Crop to common range
-                cropped_df = df[(df['date'] >= common_start) & (df['date'] <= common_end)]
+                cropped_df = df[(df['date'] >= common_start) & (df['date'] <= common_end)].copy()
                 
                 # Normalize to base 100 if it's an index type
                 if cropped_df.attrs.get('type') == 'index':
                     data_col = cropped_df.columns[1]  # Second column is the data
                     first_value = cropped_df[data_col].iloc[0]
                     if first_value != 0:  # Avoid division by zero
-                        cropped_df[data_col] = (cropped_df[data_col] / first_value) * 100
+                        cropped_df.loc[:, data_col] = (cropped_df[data_col] / first_value) * 100
                 
                 series_data[field_name] = cropped_df
                 cropped_count += 1

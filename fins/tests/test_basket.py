@@ -130,9 +130,14 @@ class BasketTests(unittest.TestCase):
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
 
-    def test_plugins_cropy_time_series(self):
-        res = Basket(AAPL, GOOG, FB)(WeeklyClose() >> Crop() >> PlotEach())
+    def test_plugins_crop_time_series(self):
+        res = Basket(AAPL, GOOG, META)(WeeklyClose() >> Crop() >> PlotEach())
         data = res.output_data()
+
+    def test_plugins_cagr(self):
+        res = Basket(AAPL, GOOG, META)(Cagr())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['Cagr'])
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

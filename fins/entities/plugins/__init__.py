@@ -5,6 +5,8 @@ All plugin types extend either Plugin or FieldPlugin base classes.
 """
 
 # FieldPlugin implementations (DataFrame-based)
+from .cagr import Cagr
+from .crop import Crop
 from .industry import Industry
 from .name import Name
 from .last_price_update import LastUpdatePrice
@@ -12,7 +14,7 @@ from .last_profile_update import LastUpdateProfile
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
 from .plots import PlotEach, PlotAll
-from .crop import Crop
+from .sector import Sector
 
 # Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
@@ -27,6 +29,7 @@ from .crop import Crop
 # from .vol import VolColumn
 
 __all__ = [
+    'Cagr',
     'Crop',
     'Industry',
     'LastUpdateProfile',
@@ -35,6 +38,7 @@ __all__ = [
     'Name',
     'PlotAll',
     'PlotEach',
+    'Sector',
     'Update',
     'WeeklyClose',
 ]
