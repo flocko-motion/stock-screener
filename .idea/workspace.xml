@@ -8,16 +8,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: filters for all FieldPlugins">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved multi threading for sqlite and fmp">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket_item.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/industry.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/industry.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/sector.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/sector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/cache.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -476,15 +470,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="23678000" />
-    </task>
-    <task id="LOCAL-00089" summary="fix: bad field name for inception of stock">
-      <option name="closed" value="true" />
-      <created>1748457212786</created>
-      <option name="number" value="00089" />
-      <option name="presentableId" value="LOCAL-00089" />
-      <option name="project" value="LOCAL" />
-      <updated>1748457212786</updated>
+      <workItem from="1750871494713" duration="24206000" />
     </task>
     <task id="LOCAL-00090" summary="feat: price history now has open, high, low, close and avg">
       <option name="closed" value="true" />
@@ -870,7 +856,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751018285549</updated>
     </task>
-    <option name="localTasksCounter" value="138" />
+    <task id="LOCAL-00138" summary="feat: improved multi threading for sqlite and fmp">
+      <option name="closed" value="true" />
+      <created>1751020973046</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1751020973046</updated>
+    </task>
+    <option name="localTasksCounter" value="139" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -888,7 +882,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: bad field name for inception of stock" />
     <MESSAGE value="feat: price history now has open, high, low, close and avg" />
     <MESSAGE value="feat: command ls() to list files" />
     <MESSAGE value="fix: adapted &quot;?&quot; lark grammar to match all function names" />
@@ -913,7 +906,8 @@
     <MESSAGE value="feat: plugins DividendYield, Npm, Pe, Peg, Roe, Vol" />
     <MESSAGE value="feat: New plugins Age(), Alive(), Inception() and command Screen()" />
     <MESSAGE value="feat: filters for all FieldPlugins" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: filters for all FieldPlugins" />
+    <MESSAGE value="feat: improved multi threading for sqlite and fmp" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: improved multi threading for sqlite and fmp" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1126,6 +1120,11 @@
           <url>file://$PROJECT_DIR$/fins/entities/plugins/crop.py</url>
           <line>40</line>
           <option name="timeStamp" value="301" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
+          <line>133</line>
+          <option name="timeStamp" value="302" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

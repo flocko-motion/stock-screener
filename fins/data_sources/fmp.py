@@ -50,7 +50,7 @@ rate_limit_lock = threading.Lock()
 last_request_time = 0
 use_cache = False
 
-RATE_LIMIT_INTERVAL = 0.1
+RATE_LIMIT_INTERVAL = 0.2
 log_debug(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", channel=sys.stderr)
 
 class ApiLimitationException(Exception):
@@ -131,7 +131,7 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 log_err(f"Connection error, retrying in {delay}s: {e}")
                 time.sleep(delay)
             except Exception as e:
-                raise Exception(f"Request failed: {e}")
+                raise Exception(f"Request failed: {type(e)} {e}")
         raise Exception("failed to fetch data")
 
     if use_cache:
