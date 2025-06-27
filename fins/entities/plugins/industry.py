@@ -11,7 +11,7 @@ class Industry(FieldPlugin):
         super().__init__(alias=alias)
 
     def field_type(self) -> type:
-        return str
+        return Optional[str]
 
     def field_value(self, item: BasketItem):
         return item.symbol().industry

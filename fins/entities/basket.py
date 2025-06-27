@@ -7,6 +7,7 @@ with associated data and analysis columns.
 
 from typing import Optional, Iterator
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .entity import Entity
 from .basket_item import BasketItem
@@ -246,5 +247,48 @@ class Basket(Entity):
     def from_tickers(cls, tickers: list[str], name: Optional[str] = None) -> 'Basket':
         print(f"Creating basket from {len(tickers)} tickers")
         basket_items = [BasketItem(ticker, amount=1.0) for ticker in tickers]
-        return cls(items=basket_items, name=name)
+
+        basket = cls(items=basket_items, name=name)
+        basket.fetch_symbols()
+        return basket
+
+    def fetch_symbols(self, max_workers: int = 10) -> None:
+        """
+        Fetch symbols for all basket items concurrently.
+        
+        Args:
+            max_workers: Maximum number of concurrent threads (default: 10)
+        """
+        from fins.financial import Symbol
+        import time
+        
+        total_count = len(self._items)
+        completed_count = 0
+        start_time = time.time()
+        
+        print(f"Fetching {total_count} symbols...")
+        
+        def fetch_symbol_for_item(item: BasketItem):
+            nonlocal completed_count
+            if item._symbol is None:
+                item._symbol = Symbol.get(item.ticker)
+            completed_count += 1
+            
+            # Calculate stats
+            elapsed_time = time.time() - start_time
+            symbols_per_sec = completed_count / elapsed_time if elapsed_time > 0 else 0
+            remaining = total_count - completed_count
+            eta_seconds = remaining / symbols_per_sec if symbols_per_sec > 0 else 0
+            
+            # Format time
+            elapsed_str = f"{int(elapsed_time)}s"
+            eta_str = f"{int(eta_seconds)}s" if eta_seconds > 0 else "0s"
+            
+            print(f"\r{completed_count}/{total_count} ({symbols_per_sec:.1f}/s) - {elapsed_str} elapsed, {eta_str} left", end='', flush=True)
+            return item
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(fetch_symbol_for_item, item): item for item in self._items}
+            for future in as_completed(futures):
+                future.result()  # This will raise any exceptions that occurred
 

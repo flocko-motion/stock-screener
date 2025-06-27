@@ -304,7 +304,7 @@ class BasketRuntime:
             raise RuntimeError(f"Field {field_name} is already registered")
         
         # Validate field type
-        valid_types = [float, str, bool, type(None), datetime, Optional[datetime], Optional[float], pd.DataFrame, Optional[pd.DataFrame]]
+        valid_types = [float, str, bool, type(None), datetime, Optional[datetime], Optional[float], Optional[str], pd.DataFrame, Optional[pd.DataFrame]]
         if field_type not in valid_types:
             raise RuntimeError(f"Field {field_name} has invalid type {field_type}")
         
@@ -318,6 +318,8 @@ class BasketRuntime:
         elif field_type == float or field_type == Optional[float]:
             self._df[field_name] = None
         elif field_type == datetime or field_type == Optional[datetime]:
+            self._df[field_name] = None
+        elif field_type == Optional[str]:
             self._df[field_name] = None
         elif field_type == pd.DataFrame or field_type == Optional[pd.DataFrame]:
             self._output_data.register_series(field_name)
@@ -356,6 +358,9 @@ class BasketRuntime:
         elif expected_type == str:
             if not isinstance(value, str):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: str) for field {field_name}")
+        elif expected_type == Optional[str]:
+            if value is not None and not isinstance(value, str):
+                raise RuntimeError(f"Invalid value of type {type(value)} (expected: Optional[str]) for field {field_name}")
         elif expected_type == bool:
             if not isinstance(value, bool):
                 raise RuntimeError(f"Invalid value of type {type(value)} (expected: bool) for field {field_name}")

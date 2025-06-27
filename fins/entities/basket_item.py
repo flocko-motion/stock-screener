@@ -32,11 +32,13 @@ class BasketItem(Entity):
         Args:
             ticker: The ticker of the financial instrument
             amount: The quantity of the item (default: 1)
+            fetch_symbol: Whether to immediately fetch the symbol data (default: False)
         """
         super().__init__(id=id, created_at=created_at, updated_at=updated_at, tags=tags, metadata=metadata)
         self.ticker = ticker
         self.amount = amount
         self._symbol = None
+
     
     def __str__(self) -> str:
         """Return the string representation of the basket item."""

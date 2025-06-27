@@ -18,22 +18,31 @@ from .cache import (
 )
 from .watchdog import watchdog
 
+DEBUG = False
+
 # Read the API key from the file
 key_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'api-keys', 'financialmodelingprep.key')
+
+def log_debug(out, channel=sys.stdout):
+    if DEBUG:
+        print(out, channel)
+
+def log_err(out):
+    print(out)
 
 try:
     with open(key_file_path, 'r') as file:
         API_KEY = file.read().strip()
     
     # Print the first few characters of the API key for debugging
-    print(f"FMP API key loaded successfully. Length: {len(API_KEY)}, First chars: {API_KEY[:3]}...", file=sys.stderr)
+    log_debug(f"FMP API key loaded successfully. Length: {len(API_KEY)}, First chars: {API_KEY[:3]}...", channel=sys.stderr)
     
     # Crash immediately if API key is empty or too short
     if not API_KEY or len(API_KEY) < 10:
-        print(f"ERROR: Invalid FMP API key found in {key_file_path}. Key is empty or too short.", file=sys.stderr)
+        log_debug(f"ERROR: Invalid FMP API key found in {key_file_path}. Key is empty or too short.", channel=sys.stderr)
         sys.exit(1)
 except Exception as e:
-    print(f"ERROR loading FMP API key from {key_file_path}: {str(e)}", file=sys.stderr)
+    log_debug(f"ERROR loading FMP API key from {key_file_path}: {str(e)}", channel=sys.stderr)
     sys.exit(1)
 
 # Initialize a lock and a variable to store the last request time
@@ -42,7 +51,7 @@ last_request_time = 0
 use_cache = False
 
 RATE_LIMIT_INTERVAL = 0.1
-print(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", file=sys.stderr)
+log_debug(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", channel=sys.stderr)
 
 class ApiLimitationException(Exception):
     def __init__(self, message):
@@ -57,13 +66,16 @@ class ApiBadRequestException(Exception):
 def enforce_rate_limit():
     """Enforce rate limiting between requests."""
     global last_request_time
-    current_time = time.time()
-    elapsed_time = current_time - last_request_time
+    with rate_limit_lock:
+        current_time = time.time()
+        elapsed_time = current_time - last_request_time
+        last_request_time = time.time()
+
     if elapsed_time < RATE_LIMIT_INTERVAL:
         sleep_interval = RATE_LIMIT_INTERVAL - elapsed_time
-        print(f"sleep {sleep_interval} seconds")
+        # debug_print(f"sleep {sleep_interval} seconds")
         time.sleep(sleep_interval)
-    last_request_time = time.time()
+
 
 def api_get(endpoint, params=None, max_retries=5, base_delay=3):
     """
@@ -97,23 +109,26 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
         raise Exception(f"API error: {response.status_code} - {response.content}")
 
     def make_request():
-        with rate_limit_lock:
-            enforce_rate_limit()
-            print(f"Fetching {url}?{urlencode(request_params)}")
-            return requests.get(url, params=request_params)
+        enforce_rate_limit()
+        log_debug(f"Fetching {url}?{urlencode(request_params)}")
+        return requests.get(url, params=request_params)
 
     def fetch_data():
         for attempt in range(max_retries):
             try:
                 response = make_request()
                 return handle_response(response)
-            except (ApiBadRequestException, ApiLimitationException):
+            except ApiLimitationException:
+                with rate_limit_lock:
+                    time.sleep(3)
+                continue
+            except ApiBadRequestException:
                 raise
             except requests.exceptions.ConnectionError as e:
                 if attempt == max_retries - 1:
                     raise Exception(f"Connection failed after {max_retries} attempts: {e}")
                 delay = base_delay * (2 ** attempt)  # Exponential backoff
-                print(f"Connection error, retrying in {delay}s: {e}")
+                log_err(f"Connection error, retrying in {delay}s: {e}")
                 time.sleep(delay)
             except Exception as e:
                 raise Exception(f"Request failed: {e}")

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine, event, Column, String, DateTime, JSON, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool, QueuePool
 
 from fins.config import PATH_DB
 
@@ -37,7 +37,10 @@ def init_db():
                 'check_same_thread': False,
                 'timeout': 30,  # Wait up to 30 seconds for locks
             },
-            poolclass=StaticPool
+            poolclass=QueuePool,
+            pool_size=10,  # Allow up to 10 concurrent connections
+            max_overflow=20,  # Allow 20 additional connections if needed
+            pool_pre_ping=True  # Verify connections before use
         )
         
         # Configure SQLite for maximum durability
@@ -49,7 +52,7 @@ def init_db():
             cursor.execute("PRAGMA busy_timeout=30000")   # 30 second timeout
             cursor.close()
         
-        _Session = sessionmaker(bind=_engine)
+        _Session = scoped_session(sessionmaker(bind=_engine))
         
         Base.metadata.create_all(_engine)
 
