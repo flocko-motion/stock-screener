@@ -17,6 +17,7 @@ from .cache import (
     set_cache_expiry
 )
 from .watchdog import watchdog
+from ..exceptions import NoPriceDataError
 
 DEBUG = False
 
@@ -297,8 +298,12 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
         "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1900-01-01",
     }
     prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
+    if len(prices_data) == 0:
+        raise NoPriceDataError(f"No price data found for {ticker}" + (f"starting from {date_from}" if date_from else ""))
 
     prices_df = pd.DataFrame(prices_data)
+    if not "date" in prices_df.columns:
+        raise Exception("No data found")
     prices_df["date"] = pd.to_datetime(prices_df["date"])
     prices_df = prices_df.sort_values(by="date")
 

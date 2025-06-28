@@ -17,25 +17,58 @@ class Update(Plugin):
     """
 
     def run(self, runtime: 'BasketRuntime'):
-        updates_count = 0
-        for item in runtime.basket_items():
-            symbol = item.symbol()
-            if self._update_required(symbol):
-                symbol.update()
-                updates_count += 1
-                if updates_count > self.max_updates:
-                    print('Max updates reached')
-                    break
+        from fins.utils import ProgressTracker
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        
+        basket_items = runtime.basket_items()
+        
+        # Count how many items actually need updates
+        print(f"Checking {len(basket_items)} symbols for update requirement")
+        items_needing_update = [item for item in basket_items if self._update_required(item.symbol())]
+        actual_update_count = min(len(items_needing_update), self.max_updates)
+        print(f"{len(items_needing_update)} symbols need updating, updating {actual_update_count} of them according to max_updates")
+        
+        if actual_update_count == 0:
+            print("No symbols need updating")
+            return
+        
+        tracker = ProgressTracker(actual_update_count, f"Updating symbols (max {self.max_updates})")
+        
+        def update_symbol_for_item(item: BasketItem):
+            try:
+                symbol = item.symbol()
+                if self._update_required(symbol):
+                    symbol.update()
+                    tracker.next()
+                return item
+            except Exception as e:
+                print(f"Error updating {item.ticker}: {e}")
+                tracker.next()  # Still count it as processed
+                return item
+        
+        # Take only the items that need updates, limited by max_updates
+        items_to_update = items_needing_update[:self.max_updates]
+        
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(update_symbol_for_item, item): item for item in items_to_update}
+            for future in as_completed(futures):
+                future.result()  # This will raise any exceptions that occurred
+        
+        tracker.done()
 
     def _update_required(self, symbol: Symbol):
-        return (symbol.last_price_update is None or symbol.last_price_update < self.older_than
-                or symbol.last_profile_update is None or symbol.last_profile_update < self.older_than)
+        last_update = symbol.last_update()
+        return last_update is None or last_update < self.older_than
 
 
-    def __init__(self, alias: Optional[str] = None, older_than: datetime.datetime | None = None, max_updates: int = 100) -> None:
+
+    def __init__(self, alias: Optional[str] = None, older_than: str | datetime.datetime | datetime.date | None = None, max: int = 100) -> None:
         super().__init__(alias=alias)
+        if isinstance(older_than, str):
+            older_than = datetime.datetime.fromisoformat(older_than)
         self.older_than = older_than if older_than else beginning_of_current_month()
-        self.max_updates = max_updates
+
+        self.max_updates = max
 
 
 

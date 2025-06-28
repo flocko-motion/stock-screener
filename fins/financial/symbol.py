@@ -13,6 +13,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
 from fins.data_sources import fmp
+from fins.exceptions import NoPriceDataError
 from fins.financial.cache import Base, session_scope, get_expiration_time
 
 TYPE_STOCK = "stock"
@@ -201,6 +202,10 @@ class Symbol(Base):
 		# Cache the new symbol
 		self._save_to_cache(self)
 
+	def last_update(self) -> datetime | None:
+		if self.last_price_update is None or self.last_profile_update is None:
+			return None
+		return min(self.last_price_update, self.last_profile_update)
 
 	def _load_profile_data(self):
 		"""Load profile data from appropriate API based on symbol type."""
@@ -283,41 +288,63 @@ class Symbol(Base):
 	def _load_history(self):
 		start_date = self.inception if self.last_price_update is None else self.last_price_update - pd.DateOffset(
 			months=1)
-		monthly_df, weekly_df = fmp.price_history(self.ticker, start_date)
-
 		try:
-			with session_scope() as session:
-				for _, row in monthly_df.iterrows():
-					try:
-						price = MonthlyPrice(
-							date=row['date'],
-							open=row['open'],
-							high=row['high'],
-							low=row['low'],
-							avg=row['avg'],
-							close=row['close'],
-							symbol_ticker=self.ticker
-						)
-						session.merge(price)
-					except Exception as e:
-						raise e
+			monthly_df, weekly_df = fmp.price_history(self.ticker, start_date)
+		except NoPriceDataError:
+			self.last_price_update = datetime.now()
+			self._save_to_cache(self)
+			return
 
-				for _, row in weekly_df.iterrows():
-					try:
-						price = WeeklyPrice(
-							date=row['date'],
-							open=row['open'],
-							high=row['high'],
-							low=row['low'],
-							avg=row['avg'],
-							close=row['close'],
-							symbol_ticker=self.ticker
-						)
-						session.merge(price)
-					except Exception as e:
-						raise e
-		except Exception as e:
-			raise e
+		import time
+		import random
+		
+		max_retries = 3
+		for attempt in range(max_retries):
+			try:
+				with session_scope() as session:
+					with session.no_autoflush:
+						# Clear existing price data for this symbol first to avoid conflicts
+						session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).delete()
+						session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).delete()
+						
+						# Bulk insert new price data
+						monthly_data = [
+							{
+								'date': row['date'],
+								'open': row['open'],
+								'high': row['high'],
+								'low': row['low'],
+								'avg': row['avg'],
+								'close': row['close'],
+								'symbol_ticker': self.ticker
+							} for _, row in monthly_df.iterrows()
+						]
+						
+						weekly_data = [
+							{
+								'date': row['date'],
+								'open': row['open'],
+								'high': row['high'],
+								'low': row['low'],
+								'avg': row['avg'],
+								'close': row['close'],
+								'symbol_ticker': self.ticker
+							} for _, row in weekly_df.iterrows()
+						]
+						
+						if monthly_data:
+							session.bulk_insert_mappings(MonthlyPrice, monthly_data)
+						if weekly_data:
+							session.bulk_insert_mappings(WeeklyPrice, weekly_data)
+						break  # Success, exit retry loop
+			except Exception as e:
+				if "database is locked" in str(e) and attempt < max_retries - 1:
+					# Random backoff to reduce concurrent pressure
+					wait_time = random.uniform(0.1, 1.0) * (2 ** attempt)
+					time.sleep(wait_time)
+					continue
+				else:
+					raise e
 
 		if self.last_price_update is None:
 			# First load - cache API data directly
@@ -347,18 +374,19 @@ class Symbol(Base):
             frequency: Frequency to load ('weekly' or 'monthly')
         """
 		with session_scope() as session:
-			if frequency == 'weekly':
-				prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(
-					WeeklyPrice.date).all()
-				self._weekly_prices = pd.DataFrame(
-					[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
-					 p in prices])
-			else:  # monthly
-				prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(
-					MonthlyPrice.date).all()
-				self._monthly_prices = pd.DataFrame(
-					[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
-					 p in prices])
+			with session.no_autoflush:
+				if frequency == 'weekly':
+					prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(
+						WeeklyPrice.date).all()
+					self._weekly_prices = pd.DataFrame(
+						[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
+						 p in prices])
+				else:  # monthly
+					prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(
+						MonthlyPrice.date).all()
+					self._monthly_prices = pd.DataFrame(
+						[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
+						 p in prices])
 
 	def _needs_price_update(self) -> bool:
 		"""Check if price data needs to be updated."""

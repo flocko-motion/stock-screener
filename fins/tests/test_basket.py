@@ -1,9 +1,12 @@
+import time
 import unittest
 from datetime import datetime, date
 import numpy as np
 import pandas as pd
 
+from fins.data_sources import fmp
 from fins.entities.plugins import *
+from fins.terminal import *
 from fins.terminal.symbols import *
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
@@ -303,6 +306,18 @@ class BasketTests(unittest.TestCase):
         if 'Alive' in df_not_alive.columns:
             for value in df_not_alive['Alive'].dropna():
                 self.assertFalse(value)
+
+    def test_big_update(self):
+        fmp.DEBUG = True
+        candidates = Screen(mcap_min=2 * Billion, limit=5000)
+        print(f"Candidates for further screening: {len(candidates)}")
+        print(candidates.to_dict())
+        while True:
+            try:
+                candidates(Update(older_than="2025-06-01", max=100))
+            except Exception as e:
+                print(f"Exception during update: {e}")
+                time.sleep(120)
 
     def assertBasket(self, basket: Basket, expected: dict):
         """

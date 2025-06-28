@@ -5,7 +5,7 @@ This module defines the Basket class, which represents a collection of financial
 with associated data and analysis columns.
 """
 
-from typing import Optional, Iterator
+from typing import Optional, Iterator, List
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -213,6 +213,9 @@ class Basket(Entity):
     def items(self):
         return self._items
 
+    def tickers(self) -> List[str]:
+        """Return a list of all ticker symbols in the basket."""
+        return [item.ticker for item in self._items]
 
     def df(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""
