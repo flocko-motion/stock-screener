@@ -18,14 +18,7 @@ Base = declarative_base()
 _engine = None
 _Session = None
 
-def get_expiration_time() -> datetime:
-    """Get the expiration time for cached data (noon on first day of next month)."""
-    now = datetime.now()
-    if now.month == 12:
-        next_month = datetime(now.year + 1, 1, 1)
-    else:
-        next_month = datetime(now.year, now.month + 1, 1)
-    return next_month + timedelta(hours=12)
+
 
 def init_db():
     """Initialize the database connection and ensure schema is up to date."""

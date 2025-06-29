@@ -8,13 +8,13 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, ClassVar
 
 import pandas as pd
-from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float
+from sqlalchemy import Column, String, DateTime, JSON, Text, ForeignKey, Float, Index
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
 from fins.data_sources import fmp
 from fins.exceptions import NoPriceDataError
-from fins.financial.cache import Base, session_scope, get_expiration_time
+from fins.financial.cache import Base, session_scope
 
 TYPE_STOCK = "stock"
 TYPE_CRYPTO = "crypto"
@@ -42,11 +42,17 @@ class PriceData(Base):
 class WeeklyPrice(PriceData):
 	"""Weekly price data."""
 	__tablename__ = 'weekly_prices'
+	__table_args__ = (
+		Index('idx_weekly_symbol_date', 'symbol_ticker', 'date'),
+	)
 
 
 class MonthlyPrice(PriceData):
 	"""Monthly price data."""
 	__tablename__ = 'monthly_prices'
+	__table_args__ = (
+		Index('idx_monthly_symbol_date', 'symbol_ticker', 'date'),
+	)
 
 
 class Symbol(Base):
@@ -60,7 +66,6 @@ class Symbol(Base):
 	# Core fields that are unlikely to change
 	ticker = Column(String(20), primary_key=True)
 	exchange = Column(String(20), nullable=True)
-	valid_until = Column(DateTime, nullable=False)
 	last_price_update = Column(DateTime, nullable=True)
 	last_profile_update = Column(DateTime, nullable=True)
 
@@ -93,7 +98,7 @@ class Symbol(Base):
 		"""Get a symbol from the cache."""
 		with session_scope() as session:
 			symbol = session.query(cls).filter_by(ticker=ticker).first()
-			if symbol and symbol.valid_until > datetime.now():
+			if symbol:
 				# Detach the symbol from the session and return a copy
 				session.expunge(symbol)
 				return symbol
@@ -119,11 +124,7 @@ class Symbol(Base):
 		with session_scope() as session:
 			session.query(cls).filter_by(ticker=ticker).delete()
 
-	@classmethod
-	def _clear_expired_cache(cls) -> None:
-		"""Remove all expired entries from the cache."""
-		with session_scope() as session:
-			session.query(cls).filter(cls.valid_until <= datetime.now()).delete()
+
 
 	@classmethod
 	def _clear_all_cache(cls) -> None:
@@ -193,7 +194,6 @@ class Symbol(Base):
 
 		# Otherwise, initialize a new symbol
 		self.exchange = ticker.split(":", 1)[1] if ":" in ticker else None
-		self.valid_until = get_expiration_time()
 
 		# Load data from API
 		self._load_profile_data()
@@ -352,25 +352,40 @@ class Symbol(Base):
 		self._save_to_cache(self)
 
 	def _load_from_db(self, frequency: str):
-		"""Load price data from database into memory.
+		"""Load price data from database into memory using optimized SQL queries.
         
         Args:
             frequency: Frequency to load ('weekly' or 'monthly')
         """
 		with session_scope() as session:
-			with session.no_autoflush:
-				if frequency == 'weekly':
-					prices = session.query(WeeklyPrice).filter_by(symbol_ticker=self.ticker).order_by(
-						WeeklyPrice.date).all()
-					self._weekly_prices = pd.DataFrame(
-						[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
-						 p in prices])
-				else:  # monthly
-					prices = session.query(MonthlyPrice).filter_by(symbol_ticker=self.ticker).order_by(
-						MonthlyPrice.date).all()
-					self._monthly_prices = pd.DataFrame(
-						[{'date': p.date, 'open': p.open, 'high': p.high, 'low': p.low, 'avg': p.avg, 'close': p.close} for
-						 p in prices])
+			if frequency == 'weekly':
+				# Use direct SQL query for better performance
+				# With index on (symbol_ticker, date), ORDER BY will be very fast
+				sql = """
+				SELECT date, open, high, low, avg, close 
+				FROM weekly_prices 
+				WHERE symbol_ticker = ? 
+				ORDER BY date
+				"""
+				self._weekly_prices = pd.read_sql_query(
+					sql, 
+					session.bind, 
+					params=[self.ticker],
+					parse_dates=['date']
+				)
+			else:  # monthly
+				sql = """
+				SELECT date, open, high, low, avg, close 
+				FROM monthly_prices 
+				WHERE symbol_ticker = ? 
+				ORDER BY date
+				"""
+				self._monthly_prices = pd.read_sql_query(
+					sql, 
+					session.bind, 
+					params=[self.ticker],
+					parse_dates=['date']
+				)
 
 	def _needs_price_update(self) -> bool:
 		"""Check if price data needs to be updated."""

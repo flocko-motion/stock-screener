@@ -282,6 +282,7 @@ class BasketPipeline:
     def run(self, basket: Basket) -> 'BasketRuntime':
         runtime = BasketRuntime(basket)
         for plugin in self._plugins:
+            print(f"Plugin: {plugin}")
             plugin.run(runtime)
         return runtime
 
