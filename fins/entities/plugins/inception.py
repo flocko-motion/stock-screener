@@ -9,6 +9,7 @@ class Inception(FieldPlugin):
     """ Add 'Inception Date' field """
 
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         if alias is None:
             alias = 'Inception'
         super().__init__(alias=alias)

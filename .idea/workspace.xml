@@ -10,6 +10,31 @@
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/age.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/age.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/alive.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/alive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/crop.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/crop.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/inception.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/inception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/industry.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/industry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/name.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/name.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/npm.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/npm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/pe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/peg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/peg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/price.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/price.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/roe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/roe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/sector.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/sector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/top.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/top.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/vol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/vol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/persistence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/persistence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -474,15 +499,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="41022000" />
-    </task>
-    <task id="LOCAL-00098" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
-      <option name="closed" value="true" />
-      <created>1748971080201</created>
-      <option name="number" value="00098" />
-      <option name="presentableId" value="LOCAL-00098" />
-      <option name="project" value="LOCAL" />
-      <updated>1748971080201</updated>
+      <workItem from="1750871494713" duration="43155000" />
     </task>
     <task id="LOCAL-00099" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <option name="closed" value="true" />
@@ -868,7 +885,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751199331705</updated>
     </task>
-    <option name="localTasksCounter" value="147" />
+    <task id="LOCAL-00147" summary="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
+      <option name="closed" value="true" />
+      <created>1751199419332</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1751199419332</updated>
+    </task>
+    <option name="localTasksCounter" value="148" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1107,12 +1132,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugins/crop.py</url>
-          <line>16</line>
+          <line>17</line>
           <option name="timeStamp" value="299" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugins/crop.py</url>
-          <line>40</line>
+          <line>41</line>
           <option name="timeStamp" value="301" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1137,7 +1162,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugin.py</url>
-          <line>284</line>
+          <line>356</line>
           <option name="timeStamp" value="309" />
         </line-breakpoint>
       </breakpoints>

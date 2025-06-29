@@ -12,6 +12,7 @@ class Pe(FieldPlugin):
     """ Add 'P/E Ratio' field """
 
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         if alias is None:
             alias = 'PE'
         super().__init__(alias=alias)

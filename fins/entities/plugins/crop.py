@@ -8,6 +8,7 @@ from ...financial import Symbol
 
 class Crop(OutputPlugin):
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         super().__init__(alias=alias)
 
     def output_all(self, data: 'OutputData'):

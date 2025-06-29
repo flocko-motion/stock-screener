@@ -9,6 +9,7 @@ class Age(FieldPlugin):
     """ Add 'Age' field showing company age in years since inception """
 
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         if alias is None:
             alias = 'Age'
         super().__init__(alias=alias)

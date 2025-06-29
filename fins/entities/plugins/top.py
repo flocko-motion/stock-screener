@@ -25,6 +25,9 @@ class Top(Plugin):
         if not isinstance(n, int) or n <= 0:
             raise ValueError("n must be a positive integer")
         
+        # Register call arguments for __str__ representation
+        self._register_call_args(n, alias=alias)
+        
         super().__init__(alias)
         self.n = n
     

@@ -22,6 +22,71 @@ class Plugin(ABC):
     def run(self, runtime: 'BasketRuntime'):
         pass
 
+    def __str__(self) -> str:
+        """Return Python code to recreate this plugin with its current configuration."""
+        if not hasattr(self, '_call_args') or not hasattr(self, '_call_kwargs'):
+            raise RuntimeError(f"Plugin {self.__class__.__name__} must call self._register_call_args() in __init__")
+        
+        class_name = self.__class__.__name__
+        
+        # Format positional arguments
+        formatted_args = [self._format_value(arg) for arg in self._call_args]
+        
+        # Format keyword arguments
+        formatted_kwargs = [f"{key}={self._format_value(value)}" for key, value in self._call_kwargs.items()]
+        
+        # Combine all arguments
+        all_args = formatted_args + formatted_kwargs
+        
+        if not all_args:
+            return f"{class_name}()"
+        
+        args_str = ", ".join(all_args)
+        return f"{class_name}({args_str})"
+
+    def _register_call_args(self, *args, **kwargs):
+        """
+        Register the constructor arguments for this plugin instance.
+        
+        Plugins should call this method in their __init__ to enable accurate __str__ representation.
+        
+        Args:
+            *args: Positional arguments passed to constructor
+            **kwargs: Keyword arguments passed to constructor
+        """
+        self._call_args = args
+        self._call_kwargs = kwargs
+
+    def _format_value(self, value) -> str:
+        """Format a value for inclusion in Python code."""
+        if value is None:
+            return "None"
+        elif isinstance(value, str):
+            return f"'{value}'"
+        elif isinstance(value, bool):
+            return str(value)
+        elif isinstance(value, (int, float)):
+            return str(value)
+        elif isinstance(value, (list, tuple)):
+            formatted_items = [self._format_value(item) for item in value]
+            if isinstance(value, list):
+                return f"[{', '.join(formatted_items)}]"
+            else:
+                return f"({', '.join(formatted_items)})"
+        elif isinstance(value, dict):
+            formatted_items = [f"{self._format_value(k)}: {self._format_value(v)}" for k, v in value.items()]
+            return f"{{{', '.join(formatted_items)}}}"
+        elif hasattr(value, 'isoformat') and hasattr(value, 'date'):  # datetime.date objects
+            if hasattr(value, 'time'):  # datetime.datetime
+                return f"datetime.datetime.fromisoformat('{value.isoformat()}')"
+            else:  # datetime.date
+                return f"datetime.date.fromisoformat('{value.isoformat()}')"
+        elif hasattr(value, '__class__'):
+            # For other objects, try to represent them reasonably
+            return f"{value.__class__.__name__}(...)"
+        else:
+            return repr(value)
+
     def __rshift__(self, other: 'Plugin') -> 'BasketPipeline':
         """Chain plugins using >> operator"""
         if isinstance(other, Plugin):
@@ -101,16 +166,23 @@ class FieldPlugin(Plugin):
         if len(basket_items) > 10:  # Only show progress for larger datasets
             tracker = ProgressTracker(len(basket_items), f"Computing {self.alias}")
             for idx, basket_item in enumerate(basket_items):
-                field_value = self.field_value(basket_item)
-                runtime.set_field_value(idx, self.alias, field_value)
-                tracker.next()
+                try:
+                    field_value = self.field_value(basket_item)
+                    runtime.set_field_value(idx, self.alias, field_value)
+                except Exception as e:
+                    raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
+                finally:
+                    tracker.next()
             tracker.done()
         else:
             # For small datasets, don't show progress
             for idx, basket_item in enumerate(basket_items):
-                field_value = self.field_value(basket_item)
-                runtime.set_field_value(idx, self.alias, field_value)
-        
+                try:
+                    field_value = self.field_value(basket_item)
+                    runtime.set_field_value(idx, self.alias, field_value)
+                except Exception as e:
+                    raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
+
         # Then apply any filters
         if self._filters:
             self._apply_filters(runtime)

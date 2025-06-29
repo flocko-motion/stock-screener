@@ -63,6 +63,7 @@ class Update(Plugin):
 
 
     def __init__(self, alias: Optional[str] = None, older_than: str | datetime.datetime | datetime.date | None = None, max: int = 100) -> None:
+        self._register_call_args(alias=alias, older_than=older_than, max=max)
         super().__init__(alias=alias)
         if isinstance(older_than, str):
             older_than = datetime.datetime.fromisoformat(older_than)

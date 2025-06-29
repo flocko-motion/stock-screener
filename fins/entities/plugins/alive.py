@@ -8,6 +8,7 @@ class Alive(FieldPlugin):
     """ Add 'Alive' field indicating if symbol is still actively traded """
 
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         if alias is None:
             alias = 'Alive'
         super().__init__(alias=alias)

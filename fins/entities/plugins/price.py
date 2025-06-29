@@ -6,6 +6,7 @@ from ...financial import Symbol
 
 class Price(SeriesPlugin):
     def __init__(self, alias: Optional[str] = None, ticker: Optional[str] = None, resolution: str = "m", metric: str = "close"):
+        self._register_call_args(alias=alias, ticker=ticker, resolution=resolution, metric=metric)
         self._resolution = resolution
         self._metric = metric
         if alias is None:
@@ -33,12 +34,14 @@ class WeeklyClose(Price):
     """ Add 'WeeklyClose' series """
 
     def __init__(self, alias: Optional[str] = None, ticker: Optional[str] = None):
+        self._register_call_args(alias=alias, ticker=ticker)
         super().__init__(alias=alias, ticker=ticker, resolution="w", metric="close")
 
 
 class MonthlyClose(Price):
     """ Add 'MonthlyClose' series """
-    def __init__(self, alias: Optional[str] = None,    ticker: Optional[str] = None):
+    def __init__(self, alias: Optional[str] = None, ticker: Optional[str] = None):
+        self._register_call_args(alias=alias, ticker=ticker)
         super().__init__(alias=alias, ticker=ticker, resolution="m", metric="close")
 
 

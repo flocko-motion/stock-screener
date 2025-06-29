@@ -2,7 +2,7 @@
 Compound Annual Growth Rate Column
 """
 import datetime
-from typing import Optional
+from typing import Optional, Union
 import pandas as pd
 
 from .. import Plugin, BasketItem
@@ -16,14 +16,42 @@ class Cagr(FieldPlugin):
     CAGR represents the mean annual growth rate of an investment over a specified time period.
     Supports filtering by date range (date_from/date_to) or a specific year shortcut.
     Resolution can be monthly ('m') or yearly ('y') data.
+    
+    Args:
+        alias: Custom field name (auto-generated if None)
+        date_from: Start date (datetime.date or ISO string like "2023-01-01")
+        date_to: End date (datetime.date or ISO string like "2023-12-31")
+        year: Shortcut for full year analysis (cannot use with date_from/date_to)
+        resolution: Data resolution ('m' for monthly, 'y' for yearly)
+        
+    Examples:
+        Cagr()                              # Full history CAGR
+        Cagr(year=2023)                     # CAGR for 2023
+        Cagr(date_from="2020-01-01")        # CAGR from 2020 start
+        Cagr(date_from="2020-01-01", date_to="2023-12-31")  # Custom range
     """
 
     def __init__(self, alias: str = None,
-                 date_from: Optional[datetime.date] = None,
-                 date_to: Optional[datetime.date] = None,
+                 date_from: Union[datetime.date, str, None] = None,
+                 date_to: Union[datetime.date, str, None] = None,
                  year: Optional[int] = None,
                  resolution: str = 'm'
                  ):
+        # Register call arguments for __str__ representation
+        self._register_call_args(alias=alias, date_from=date_from, date_to=date_to, year=year, resolution=resolution)
+        
+        # Convert string dates to date objects
+        if isinstance(date_from, str):
+            try:
+                date_from = datetime.date.fromisoformat(date_from)
+            except ValueError as e:
+                raise ValueError(f"Invalid date_from format '{date_from}'. Expected ISO format 'YYYY-MM-DD'") from e
+        if isinstance(date_to, str):
+            try:
+                date_to = datetime.date.fromisoformat(date_to)
+            except ValueError as e:
+                raise ValueError(f"Invalid date_to format '{date_to}'. Expected ISO format 'YYYY-MM-DD'") from e
+        
         # Validate year parameter usage
         if year is not None:
             if date_from is not None or date_to is not None:

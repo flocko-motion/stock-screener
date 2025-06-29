@@ -16,7 +16,7 @@ import shutil
 from pathlib import Path
 from typing import Any, List, Optional, Union
 from fins.storage import Storage
-from fins.entities import Entity, entity_from_dict
+from fins.entities import Entity, entity_from_dict, BasketRuntime
 from fins.config import DIR_DATA
 
 
@@ -77,6 +77,9 @@ def Put(entity: Entity, path: str, silent: bool = False) -> bool | None:
         Put(my_note, "research/apple_analysis")   # Saves as apple_analysis.Note
         Put(my_basket, "test/basket", silent=True)  # For testing
     """
+    if isinstance(entity, BasketRuntime):
+        entity = entity.basket()
+
     if not isinstance(entity, Entity):
         raise TypeError(f"Expected Entity, got {type(entity)}")
     

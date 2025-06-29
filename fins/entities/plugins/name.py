@@ -8,6 +8,7 @@ class Name(FieldPlugin):
     """ Add 'Name' field """
 
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         super().__init__(alias=alias)
 
     def field_type(self) -> type:

@@ -9,6 +9,7 @@ from ...financial import Symbol
 
 class PlotEach(OutputPlugin):
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         super().__init__(alias=alias)
 
     def output_item(self, symbol: Symbol, data: dict[str, pd.DataFrame]):
@@ -77,6 +78,7 @@ class PlotEach(OutputPlugin):
 
 class PlotAll(OutputPlugin):
     def __init__(self, alias: Optional[str] = None):
+        self._register_call_args(alias=alias)
         super().__init__(alias=alias)
 
 
