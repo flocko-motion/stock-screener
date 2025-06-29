@@ -10,9 +10,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -247,7 +244,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests">
+  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_alive">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -421,8 +418,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_alive" />
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
         <item itemvalue="Python tests.Unittests for test_terminal.TerminalPersistenceTests" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_big_update" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_screen" />
@@ -477,15 +474,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="40427000" />
-    </task>
-    <task id="LOCAL-00097" summary="feat: online help base">
-      <option name="closed" value="true" />
-      <created>1748616180290</created>
-      <option name="number" value="00097" />
-      <option name="presentableId" value="LOCAL-00097" />
-      <option name="project" value="LOCAL" />
-      <updated>1748616180290</updated>
+      <workItem from="1750871494713" duration="41022000" />
     </task>
     <task id="LOCAL-00098" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <option name="closed" value="true" />
@@ -871,7 +860,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751197620373</updated>
     </task>
-    <option name="localTasksCounter" value="146" />
+    <task id="LOCAL-00146" summary="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
+      <option name="closed" value="true" />
+      <created>1751199331705</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1751199331705</updated>
+    </task>
+    <option name="localTasksCounter" value="147" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1224,7 +1221,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_basket Coverage Results" MODIFIED="1750598592784" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_remove_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_remove_basket Coverage Results" MODIFIED="1750598702062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests.coverage" NAME="Unittests for tests.test_basket.BasketTests Coverage Results" MODIFIED="1751198356808" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests.coverage" NAME="Unittests for tests.test_basket.BasketTests Coverage Results" MODIFIED="1751199310512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugin_alias_collision.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugin_alias_collision Coverage Results" MODIFIED="1750742897852" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_stock.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747485467837" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_cache_py.coverage" NAME="pytest in test_cache.py Coverage Results" MODIFIED="1743024501480" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
@@ -1234,7 +1231,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_pe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_pe Coverage Results" MODIFIED="1751009794032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_age.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_age Coverage Results" MODIFIED="1751012038882" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_item Coverage Results" MODIFIED="1750597520640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_alive.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_alive Coverage Results" MODIFIED="1751197502550" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_alive.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_alive Coverage Results" MODIFIED="1751199402607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_chaining.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_chaining Coverage Results" MODIFIED="1751018220930" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1743285476032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_create_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_create_basket Coverage Results" MODIFIED="1750596792881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />

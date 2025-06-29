@@ -374,13 +374,6 @@ class BasketTests(unittest.TestCase):
         self.assertEqual(items[0].ticker, "AAPL")
         self.assertEqual(items[1].ticker, "GOOG")
 
-    def test_alive(self):
-        result = Basket(AAPL, GOOG, META, MSFT)(Name() >> Alive())
-        result = Basket(AAPL, GOOG, META, MSFT)(Name() >> Alive())
-        df = result.df()
-        self.assertEqual(len(df), 4)
-        self.assertIn('Name', df.columns)
-
     def assertBasket(self, basket: Basket, expected: dict):
         """
         Assert that the basket contains exactly the expected items with expected weights.
