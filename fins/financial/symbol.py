@@ -370,7 +370,7 @@ class Symbol(Base):
 				self._weekly_prices = pd.read_sql_query(
 					sql, 
 					session.bind, 
-					params=[self.ticker],
+					params=(self.ticker,),
 					parse_dates=['date']
 				)
 			else:  # monthly
@@ -383,7 +383,7 @@ class Symbol(Base):
 				self._monthly_prices = pd.read_sql_query(
 					sql, 
 					session.bind, 
-					params=[self.ticker],
+					params=(self.ticker,),
 					parse_dates=['date']
 				)
 

@@ -123,13 +123,13 @@ class BasketTests(unittest.TestCase):
     def test_plugins_update(self):
         res = Basket(AAPL * 1.5)(Name() >> LastUpdatePrice() >> LastUpdateProfile())
         df = res.df()
-        self.assertIsNotNone(df.iloc[0]['LastPriceUpdate'])
-        self.assertIsNotNone(df.iloc[0]['LastProfileUpdate'])
+        self.assertIsNotNone(df.iloc[0]['LastUpdatePrice'])
+        self.assertIsNotNone(df.iloc[0]['LastUpdateProfile'])
 
         res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdatePrice() >> LastUpdateProfile())
         df2 = res2.df()
-        self.assertGreater(df2.iloc[0]['LastPriceUpdate'], df.iloc[0]['LastPriceUpdate'])
-        self.assertGreater(df2.iloc[0]['LastProfileUpdate'], df.iloc[0]['LastProfileUpdate'])
+        self.assertGreater(df2.iloc[0]['LastUpdatePrice'], df.iloc[0]['LastUpdatePrice'])
+        self.assertGreater(df2.iloc[0]['LastUpdateProfile'], df.iloc[0]['LastUpdateProfile'])
 
     def test_plugins_simple_price(self):
         res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
@@ -286,12 +286,12 @@ class BasketTests(unittest.TestCase):
 
     def test_filter_dates(self):
         from datetime import datetime
-        df_after = Basket(AAPL, GOOG, META)(Inception().after("2000-01-01")).df()
+        df_after = Basket(AAPL, GOOG, META)(Inception().min("2000-01-01")).df()
         if 'Inception' in df_after.columns:
             for date in df_after['Inception'].dropna():
                 self.assertGreater(date, datetime(2000, 1, 1))
         
-        df_before = Basket(AAPL, GOOG, META)(Inception().before(datetime(2020, 1, 1))).df()
+        df_before = Basket(AAPL, GOOG, META)(Inception().max(datetime(2020, 1, 1))).df()
         if 'Inception' in df_before.columns:
             for date in df_before['Inception'].dropna():
                 self.assertLess(date, datetime(2020, 1, 1))
@@ -307,17 +307,17 @@ class BasketTests(unittest.TestCase):
             for value in df_not_alive['Alive'].dropna():
                 self.assertFalse(value)
 
-    def test_big_update(self):
-        fmp.DEBUG = True
-        candidates = Screen(mcap_min=2 * Billion, limit=5000)
-        print(f"Candidates for further screening: {len(candidates)}")
-        print(candidates.to_dict())
-        while True:
-            try:
-                candidates(Update(older_than="2025-06-01", max=100))
-            except Exception as e:
-                print(f"Exception during update: {e}")
-                time.sleep(120)
+    # def test_big_update(self):
+    #     fmp.DEBUG = True
+    #     candidates = Screen(mcap_min=2 * Billion, limit=5000)
+    #     print(f"Candidates for further screening: {len(candidates)}")
+    #     print(candidates.to_dict())
+    #     while True:
+    #         try:
+    #             candidates(Update(older_than="2025-06-01", max=100))
+    #         except Exception as e:
+    #             print(f"Exception during update: {e}")
+    #             time.sleep(120)
 
     def test_top_plugin(self):
         """Test the Top plugin keeps only the first n items"""
