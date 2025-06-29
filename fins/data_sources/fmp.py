@@ -291,15 +291,14 @@ def clean_time_series_data(df: pd.DataFrame) -> pd.DataFrame:
     
     return df_clean
 
-def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
-    # Fetch full history without date parameters
+def price_history(ticker: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    # Fetch full history - don't specify 'from' parameter to get clean data
     params = {
         "symbol": ticker,
-        "from":(date_from - pd.DateOffset(months=1)).strftime("%Y-%m-%d") if date_from else "1900-01-01",
     }
     prices_data = api_get(f"stable/historical-price-eod/dividend-adjusted", params)
     if len(prices_data) == 0:
-        raise NoPriceDataError(f"No price data found for {ticker}" + (f"starting from {date_from}" if date_from else ""))
+        raise NoPriceDataError(f"No price data found for {ticker}")
 
     prices_df = pd.DataFrame(prices_data)
     if not "date" in prices_df.columns:
@@ -323,8 +322,6 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
         'close': 'last'
     }).reset_index()
     df_monthly = df_monthly[df_monthly['date'] < pd.Timestamp(datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0))]
-    if date_from:
-        df_monthly = df_monthly[df_monthly['date'] >= date_from]
     df_monthly = clean_time_series_data(df_monthly)
 
     df_weekly = df.resample('W').agg({
@@ -335,8 +332,6 @@ def price_history(ticker: str, date_from: datetime | None = None) -> tuple[pd.Da
         'close': 'last'
     }).reset_index()
     df_weekly = df_weekly[df_weekly['date'] < pd.Timestamp(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))]
-    if date_from:        
-        df_weekly = df_weekly[df_weekly['date'] >= date_from]
     df_weekly = clean_time_series_data(df_weekly)
 
     return df_monthly, df_weekly

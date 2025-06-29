@@ -3,6 +3,8 @@ Tests for BasketItem operations.
 """
 
 import unittest
+
+import fins
 from fins.financial import Symbol, TYPE_INDEX, TYPE_STOCK, TYPE_CRYPTO, TYPE_ETF
 
 class SymbolTests(unittest.TestCase):
@@ -50,8 +52,11 @@ class SymbolTests(unittest.TestCase):
         assert s.type == TYPE_CRYPTO
 
     def test_get_prices(self):
-        s = Symbol.get("AAPL")
-        s.get_monthly()
+        fins.DEBUG = True
+        s = Symbol.get("THRO")
+        s.update()
+        weekly = s.get_weekly()
+        pass
 
 
 

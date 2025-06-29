@@ -288,7 +288,7 @@ class Symbol(Base):
 	def _load_history(self):
 		# Always fetch full history since dividend adjustments affect entire series
 		try:
-			monthly_df, weekly_df = fmp.price_history(self.ticker, None)
+			monthly_df, weekly_df = fmp.price_history(self.ticker)
 		except NoPriceDataError:
 			self.last_price_update = datetime.now()
 			self._save_to_cache(self)
@@ -353,37 +353,39 @@ class Symbol(Base):
 
 	def _load_from_db(self, frequency: str):
 		"""Load price data from database into memory using optimized SQL queries.
+        Always filters data from inception date onwards.
         
         Args:
             frequency: Frequency to load ('weekly' or 'monthly')
         """
+		if not self.inception:
+			raise ValueError(f"No inception date available for {self.ticker} - cannot load price data safely")
+			
 		with session_scope() as session:
 			if frequency == 'weekly':
-				# Use direct SQL query for better performance
-				# With index on (symbol_ticker, date), ORDER BY will be very fast
 				sql = """
 				SELECT date, open, high, low, avg, close 
 				FROM weekly_prices 
-				WHERE symbol_ticker = ? 
+				WHERE symbol_ticker = ? AND date >= ?
 				ORDER BY date
 				"""
 				self._weekly_prices = pd.read_sql_query(
 					sql, 
 					session.bind, 
-					params=(self.ticker,),
+					params=(self.ticker, self.inception),
 					parse_dates=['date']
 				)
 			else:  # monthly
 				sql = """
 				SELECT date, open, high, low, avg, close 
 				FROM monthly_prices 
-				WHERE symbol_ticker = ? 
+				WHERE symbol_ticker = ? AND date >= ?
 				ORDER BY date
 				"""
 				self._monthly_prices = pd.read_sql_query(
 					sql, 
 					session.bind, 
-					params=(self.ticker,),
+					params=(self.ticker, self.inception),
 					parse_dates=['date']
 				)
 

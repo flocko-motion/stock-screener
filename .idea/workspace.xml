@@ -8,10 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: Alive()">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: persistence overwrite warning">
+      <change beforePath="$PROJECT_DIR$/.cursor/rules/paths.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/paths.mdc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_financial.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_financial.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +65,7 @@
     "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
     "Python tests.Python tests in test_dsl.py.executor": "Debug",
     "Python tests.Unittests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.Unittests for test_financial.SymbolTests.test_get_prices.executor": "Debug",
     "Python tests.Unittests for test_terminal.TerminalPersistenceTests.executor": "Run",
     "Python tests.Unittests for test_test.TestTests.test_test.executor": "Debug",
     "Python tests.Unittests for tests.test_basket.BasketTests.executor": "Run",
@@ -245,7 +247,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_alive">
+  <component name="RunManager" selected="Python tests.Unittests for test_financial.SymbolTests.test_get_prices">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -305,6 +307,22 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;--no-cov&quot;" />
       <option name="_new_target" value="&quot;fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test_financial.SymbolTests.test_get_prices" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="stock-screener" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_financial.SymbolTests.test_get_prices&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -390,40 +408,24 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_screen" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="stock-screener" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_screen&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.terminal" />
       <item itemvalue="Python.codegen" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
+      <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_prices" />
       <item itemvalue="Python tests.Unittests for test_terminal.TerminalPersistenceTests" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_alive" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_big_update" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_screen" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_prices" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_alive" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests" />
         <item itemvalue="Python tests.Unittests for test_terminal.TerminalPersistenceTests" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_big_update" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_screen" />
       </list>
     </recent_temporary>
   </component>
@@ -475,15 +477,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="43765000" />
-    </task>
-    <task id="LOCAL-00101" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
-      <option name="closed" value="true" />
-      <created>1748974199557</created>
-      <option name="number" value="00101" />
-      <option name="presentableId" value="LOCAL-00101" />
-      <option name="project" value="LOCAL" />
-      <updated>1748974199557</updated>
+      <workItem from="1750871494713" duration="45520000" />
     </task>
     <task id="LOCAL-00102" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <option name="closed" value="true" />
@@ -869,7 +863,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751201987994</updated>
     </task>
-    <option name="localTasksCounter" value="150" />
+    <task id="LOCAL-00150" summary="fix: persistence overwrite warning">
+      <option name="closed" value="true" />
+      <created>1751202456035</created>
+      <option name="number" value="00150" />
+      <option name="presentableId" value="LOCAL-00150" />
+      <option name="project" value="LOCAL" />
+      <updated>1751202456035</updated>
+    </task>
+    <option name="localTasksCounter" value="151" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -887,7 +889,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: all tests work" />
     <MESSAGE value="docs: updated todo" />
     <MESSAGE value="feat: multithreaded basket creation" />
     <MESSAGE value="feat: complete restart ... now with Python instead of a DSL" />
@@ -912,7 +913,8 @@
     <MESSAGE value="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries" />
     <MESSAGE value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
     <MESSAGE value="fix: Alive()" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Alive()" />
+    <MESSAGE value="fix: persistence overwrite warning" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: persistence overwrite warning" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -984,7 +986,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
-          <line>53</line>
+          <line>54</line>
           <option name="timeStamp" value="188" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1141,6 +1143,11 @@
           <line>26</line>
           <option name="timeStamp" value="310" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/fins/tests/test_financial.py</url>
+          <line>52</line>
+          <option name="timeStamp" value="311" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -1164,6 +1171,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1749203835617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_age_filter.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_age_filter Coverage Results" MODIFIED="1751011902528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_fins_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="Unittests for test_test.TestTests.test_test Coverage Results" MODIFIED="1750592875861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_financial_SymbolTests_test_get_prices.coverage" NAME="Unittests for test_financial.SymbolTests.test_get_prices Coverage Results" MODIFIED="1751203617028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_age.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_age Coverage Results" MODIFIED="1751018209991" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_explicit_add_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax Coverage Results" MODIFIED="1742287209103" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_column_with_args.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args Coverage Results" MODIFIED="1747512782294" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
