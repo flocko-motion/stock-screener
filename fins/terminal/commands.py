@@ -1,5 +1,6 @@
 from typing import Optional
 from fins.entities.basket import Basket
+from fins.entities.plugins import Inception
 from fins.data_sources import fmp
 
 # Market cap convenience constants
@@ -20,6 +21,7 @@ def Screen(
 ) -> Basket:
     """
     Screen stocks using Financial Modeling Prep filters and create a Basket.
+    Automatically excludes exotic derivatives (warrants, rights, units) without inception dates.
     
     Args:
         mcap_min: Minimum market capitalization filter
@@ -32,7 +34,7 @@ def Screen(
         limit: Maximum number of results (default 1000)
         
     Returns:
-        Basket containing the screened symbols with equal weights
+        Basket containing the screened symbols with equal weights (excluding derivatives)
         
     Examples:
         Screen(mcap_min=Billion)  # Large cap stocks (>$1B)
@@ -51,4 +53,9 @@ def Screen(
         limit=limit
     )
     
-    return Basket.from_tickers(tickers)
+    basket = Basket.from_tickers(tickers)
+    
+    # Automatically filter out exotic derivatives without inception dates
+    filtered_basket = basket(Inception().not_none()).basket()
+    
+    return filtered_basket

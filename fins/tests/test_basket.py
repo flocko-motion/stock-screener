@@ -379,6 +379,11 @@ class BasketTests(unittest.TestCase):
         result = Basket(AAPL, VBLTX, GOOG)(Alive().true()).basket()
         self.assertEqual(len(result), 2)
 
+    def test_no_inception(self):
+        # The Screen() command should automatically filter out invalid (without inception) symbols
+        no_inception = Screen(mcap_min=2 * Billion, limit=6000)(Inception().none()).basket()
+        assert len(no_inception) == 0
+
     def assertBasket(self, basket: Basket, expected: dict):
         """
         Assert that the basket contains exactly the expected items with expected weights.

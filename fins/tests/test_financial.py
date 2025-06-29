@@ -58,6 +58,12 @@ class SymbolTests(unittest.TestCase):
         weekly = s.get_weekly()
         pass
 
+    def test_get_inception(self):
+        fins.DEBUG = True
+        s = Symbol.get("EXEEW")
+        s.update()
+        assert s.inception() is not None
+
 
 
 if __name__ == "__main__":

@@ -231,7 +231,11 @@ class FieldPlugin(Plugin):
     def _compare_value(self, field_value: Any, operator: str, threshold: Any) -> bool:
         """Compare field value with threshold using the specified operator"""
         # Handle None values
-        if field_value is None:
+        if operator == 'is_none':
+            return field_value is None
+        elif operator == 'is_not_none':
+            return field_value is not None
+        elif field_value is None:
             return False
             
         try:
@@ -316,6 +320,16 @@ class FieldPlugin(Plugin):
         upper_bound = _parse_filter_value(value) * (1 + precision)
         self._filters.append(('>=', lower_bound))
         self._filters.append(('<=', upper_bound))
+        return self
+    
+    def none(self) -> 'FieldPlugin':
+        """Filter for None/null values: plugin.none()"""
+        self._filters.append(('is_none', None))
+        return self
+    
+    def not_none(self) -> 'FieldPlugin':
+        """Filter for non-None values: plugin.not_none()"""
+        self._filters.append(('is_not_none', None))
         return self
 
 class SeriesPlugin(FieldPlugin):
