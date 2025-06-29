@@ -469,15 +469,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="33679000" />
-    </task>
-    <task id="LOCAL-00093" summary="feat: price history now has open, high, low, close and avg">
-      <option name="closed" value="true" />
-      <created>1748610194721</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
-      <option name="project" value="LOCAL" />
-      <updated>1748610194721</updated>
+      <workItem from="1750871494713" duration="34552000" />
     </task>
     <task id="LOCAL-00094" summary="feat: command ls() to list files">
       <option name="closed" value="true" />
@@ -863,7 +855,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751143598902</updated>
     </task>
-    <option name="localTasksCounter" value="142" />
+    <task id="LOCAL-00142" summary="feat: improved performance for Update()">
+      <option name="closed" value="true" />
+      <created>1751192766369</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1751192766369</updated>
+    </task>
+    <option name="localTasksCounter" value="143" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -18,10 +18,11 @@ class Basket(Entity):
     A weighted list of BasketItems (wrapped Symbols) and a lot of column-functions for analytics.
     """
     
-    def __init__(self, *symbols, items: list[BasketItem] = None, name: Optional[str] = None):
+    def __init__(self, *symbols, items: list[BasketItem] = None, name: Optional[str] = None, description: Optional[str] = None):
         """Initialize a basket."""
         super().__init__()
         self._name = name
+        self._description = description
         self._items = list(symbols) if len(symbols) > 0 else (items or [])
 
     def __str__(self) -> str:
@@ -83,7 +84,7 @@ class Basket(Entity):
                 if item.ticker not in this_tickers
             ]
             
-            return Basket(name=self._name, items=updated_items + new_items)
+            return Basket(name=self._name, description=self._description, items=updated_items + new_items)
             
         elif isinstance(other, BasketItem):
             # Simple: update existing or append new
@@ -94,7 +95,7 @@ class Basket(Entity):
                 for item in self._items
             ] + ([] if has_item else [other])
             
-            return Basket(name=self._name, items=new_items)
+            return Basket(name=self._name, description=self._description, items=new_items)
         else:
             return NotImplemented
 
@@ -110,7 +111,7 @@ class Basket(Entity):
                 if item.ticker not in other_dict or (new_amount := item.amount - other_dict[item.ticker]) > 0
             ]
             
-            return Basket(name=self._name, items=new_items)
+            return Basket(name=self._name, description=self._description, items=new_items)
         
         elif isinstance(other, BasketItem):
             new_items = [
@@ -120,7 +121,7 @@ class Basket(Entity):
                 if item.ticker != other.ticker or (new_amount := item.amount - other.amount) > 0
             ]
             
-            return Basket(name=self._name, items=new_items)
+            return Basket(name=self._name, description=self._description, items=new_items)
         else:
             return NotImplemented
 
@@ -130,12 +131,12 @@ class Basket(Entity):
             # Basket / Basket - remove all items that exist in other basket
             other_tickers = {item.ticker for item in other._items}
             remaining_items = [item for item in self._items if item.ticker not in other_tickers]
-            return Basket(items=remaining_items, name=self._name)
+            return Basket(items=remaining_items, name=self._name, description=self._description)
         
         elif isinstance(other, BasketItem):
             # Basket / BasketItem - remove the specific item completely
             remaining_items = [item for item in self._items if item.ticker != other.ticker]
-            return Basket(items=remaining_items, name=self._name)
+            return Basket(items=remaining_items, name=self._name, description=self._description)
         else:
             return NotImplemented
 
@@ -148,7 +149,7 @@ class Basket(Entity):
                 BasketItem(item.ticker, item.amount + other_dict[item.ticker].amount)
                 for item in self._items if item.ticker in other_dict
             ]
-            return Basket(items=intersection_items, name=self._name)
+            return Basket(items=intersection_items, name=self._name, description=self._description)
 
         elif isinstance(other, BasketItem):
             # Basket & BasketItem - return basket with item if it exists, with summed weight
@@ -156,7 +157,7 @@ class Basket(Entity):
                 BasketItem(item.ticker, item.amount + other.amount)
                 for item in self._items if item.ticker == other.ticker
             ]
-            return Basket(items=matching_items, name=self._name)
+            return Basket(items=matching_items, name=self._name, description=self._description)
         else:
             return NotImplemented
 
@@ -172,17 +173,17 @@ class Basket(Entity):
                 [item for item in self._items if item.ticker not in other_symbols] +
                 [item for item in other._items if item.ticker not in this_symbols]
             )
-            return Basket(items=symmetric_diff_items, name=self._name)
+            return Basket(items=symmetric_diff_items, name=self._name, description=self._description)
 
         elif isinstance(other, BasketItem):
             # Basket ^ BasketItem - toggle the item (remove if exists, add if doesn't)
             if other.ticker in self:
                 # Remove the item
                 remaining_items = [item for item in self._items if item.ticker != other.ticker]
-                return Basket(items=remaining_items, name=self._name)
+                return Basket(items=remaining_items, name=self._name, description=self._description)
             else:
                 # Add the item
-                return Basket(items=self._items + [other], name=self._name)
+                return Basket(items=self._items + [other], name=self._name, description=self._description)
         else:
             return NotImplemented
 
@@ -190,7 +191,7 @@ class Basket(Entity):
         """Multiplication operator: Basket * number to scale all weights."""
         if isinstance(other, (int, float)):
             scaled_items = [BasketItem(item.ticker, item.amount * other) for item in self._items]
-            return Basket(items=scaled_items, name=self._name)
+            return Basket(items=scaled_items, name=self._name, description=self._description)
         else:
             return NotImplemented
 
@@ -217,6 +218,20 @@ class Basket(Entity):
         """Return a list of all ticker symbols in the basket."""
         return [item.ticker for item in self._items]
 
+    def description(self, *args) -> Optional[str]:
+        """Get or set the basket description."""
+        if len(args) == 0:
+            return self._description
+        elif len(args) == 1:
+            value = args[0]
+            if value is None:
+                self._description = None
+            else:
+                self._description = str(value)
+            return self._description
+        else:
+            raise ValueError("description() takes 0 (get) or 1 (set) arguments")
+
     def df(self) -> pd.DataFrame:
         """Convert basket to DataFrame with all column values."""
         data = {
@@ -230,6 +245,7 @@ class Basket(Entity):
         return {
             "class": "Basket",
             "name": self._name,
+            "description": self._description,
             "items": [item.to_dict() for item in self._items],
         }
 
@@ -242,7 +258,7 @@ class Basket(Entity):
         for item_data in data.get('items', []):
             items.append(entity_from_dict(item_data))
 
-        basket = cls(items=items, name=data.get('name'))
+        basket = cls(items=items, name=data.get('name'), description=data.get('description'))
 
         return basket
 
