@@ -356,6 +356,7 @@ class BasketPipeline:
         for plugin in self._plugins:
             print(f"Plugin: {plugin}")
             plugin.run(runtime)
+        print(f"Finished pipeline - final basket has {len(runtime.basket())} items")
         return runtime
 
 

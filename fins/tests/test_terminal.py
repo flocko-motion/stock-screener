@@ -332,6 +332,69 @@ class TerminalPersistenceTests(unittest.TestCase):
         self.assertIsNotNone(loaded)
         self.assertEqual(loaded.description(), 'This is a test basket with a description')
 
+    def test_put_overwrite_behavior(self):
+        """Test Put function overwrite behavior."""
+        # Create two different baskets
+        basket1 = Basket(AAPL * 1.0, name='original')
+        basket2 = Basket(MSFT * 1.0, name='replacement')
+        
+        # Save first basket
+        success1 = Put(basket1, 'overwrite_test/basket', silent=True)
+        self.assertTrue(success1)
+        
+        # Verify it was saved
+        loaded1 = Get('overwrite_test/basket.Basket', silent=True)
+        self.assertIsNotNone(loaded1)
+        self.assertEqual(loaded1._name, 'original')
+        
+        # Try to save second basket without overwrite flag - should fail
+        success2 = Put(basket2, 'overwrite_test/basket', silent=True)
+        self.assertFalse(success2)
+        
+        # Verify original is still there
+        loaded_still_original = Get('overwrite_test/basket.Basket', silent=True)
+        self.assertIsNotNone(loaded_still_original)
+        self.assertEqual(loaded_still_original._name, 'original')
+        
+        # Now save with overwrite=True - should succeed
+        success3 = Put(basket2, 'overwrite_test/basket', overwrite=True, silent=True)
+        self.assertTrue(success3)
+        
+        # Verify it was replaced
+        loaded_replaced = Get('overwrite_test/basket.Basket', silent=True)
+        self.assertIsNotNone(loaded_replaced)
+        self.assertEqual(loaded_replaced._name, 'replacement')
+
+    def test_put_overwrite_warning_message(self):
+        """Test that Put function shows warning when overwrite is needed."""
+        from io import StringIO
+        import sys
+        
+        # Create basket
+        basket1 = Basket(AAPL * 1.0, name='first')
+        basket2 = Basket(MSFT * 1.0, name='second')
+        
+        # Save first basket (silent mode)
+        Put(basket1, 'warning_test/basket', silent=True)
+        
+        # Capture stdout for warning test
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        try:
+            # Try to save second basket without overwrite - should show warning
+            result = Put(basket2, 'warning_test/basket')
+            self.assertIsNone(result)  # Should return None in non-silent mode
+            
+            # Check warning message was printed
+            output = captured_output.getvalue()
+            self.assertIn("Warning:", output)
+            self.assertIn("already exists", output)
+            self.assertIn("overwrite=True", output)
+            
+        finally:
+            sys.stdout = sys.__stdout__
+
 
 if __name__ == '__main__':
     unittest.main() 

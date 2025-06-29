@@ -60,13 +60,14 @@ def Get(path: str, silent: bool = False) -> Optional[Entity]:
         return None
 
 
-def Put(entity: Entity, path: str, silent: bool = False) -> bool | None:
+def Put(entity: Entity, path: str, overwrite: bool = False, silent: bool = False) -> bool | None:
     """
     Save an entity to persistence with automatic file extension.
     
     Args:
         entity: The entity to save
         path: Relative path in persistence directory (extension added automatically)
+        overwrite: If True, allow overwriting existing entities; if False, prevent overwrite
         silent: If True, return result only; if False, print status and return result
         
     Returns:
@@ -75,6 +76,7 @@ def Put(entity: Entity, path: str, silent: bool = False) -> bool | None:
     Examples:
         Put(my_basket, "portfolios/tech_stocks")  # Saves as tech_stocks.Basket
         Put(my_note, "research/apple_analysis")   # Saves as apple_analysis.Note
+        Put(my_basket, "portfolios/tech_stocks", overwrite=True)  # Force overwrite
         Put(my_basket, "test/basket", silent=True)  # For testing
     """
     if isinstance(entity, BasketRuntime):
@@ -91,11 +93,20 @@ def Put(entity: Entity, path: str, silent: bool = False) -> bool | None:
     if not path.startswith('/'):
         path = '/' + path
     
+    # Check if entity already exists
+    existing = _storage.get_storage_value(path)
+    if existing and not overwrite:
+        error_msg = f"Entity already exists at '{path}'. Use overwrite=True to replace it."
+        if not silent:
+            print(f"Warning: {error_msg}")
+        return False
+    
     success = _storage.set(path, entity)
     if silent:
         return success
     if success:
-        print(f"Saved {class_name}: {path}")
+        action = "Overwritten" if existing else "Saved"
+        print(f"{action} {class_name}: {path}")
     else:
         print(f"Failed to save {class_name}: {path}")
     return None
