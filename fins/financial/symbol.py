@@ -286,10 +286,9 @@ class Symbol(Base):
 		self.analytics = analytics
 
 	def _load_history(self):
-		start_date = self.inception if self.last_price_update is None else self.last_price_update - pd.DateOffset(
-			months=1)
+		# Always fetch full history since dividend adjustments affect entire series
 		try:
-			monthly_df, weekly_df = fmp.price_history(self.ticker, start_date)
+			monthly_df, weekly_df = fmp.price_history(self.ticker, None)
 		except NoPriceDataError:
 			self.last_price_update = datetime.now()
 			self._save_to_cache(self)
@@ -346,24 +345,9 @@ class Symbol(Base):
 				else:
 					raise e
 
-		if self.last_price_update is None:
-			# First load - cache API data directly
-			self._monthly_prices = monthly_df
-			self._weekly_prices = weekly_df
-		else:
-			# Incremental load - merge with existing data
-			if self._monthly_prices is not None:
-				self._monthly_prices = pd.concat([self._monthly_prices, monthly_df]).drop_duplicates(
-					subset=['date']).sort_values('date').reset_index(drop=True)
-			else:
-				self._load_from_db('monthly')
-
-			if self._weekly_prices is not None:
-				self._weekly_prices = pd.concat([self._weekly_prices, weekly_df]).drop_duplicates(
-					subset=['date']).sort_values('date').reset_index(drop=True)
-			else:
-				self._load_from_db('weekly')
-
+		# Always replace full dataset since dividend adjustments affect entire history
+		self._monthly_prices = monthly_df
+		self._weekly_prices = weekly_df
 		self.last_price_update = datetime.now()
 		self._save_to_cache(self)
 

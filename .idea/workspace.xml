@@ -8,16 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved multi threading for sqlite and fmp">
-      <change afterPath="$PROJECT_DIR$/fins/exceptions/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
-    </list>
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved performance for Update()" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -478,15 +469,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="33272000" />
-    </task>
-    <task id="LOCAL-00092" summary="feat: price history now has open, high, low, close and avg">
-      <option name="closed" value="true" />
-      <created>1748609611829</created>
-      <option name="number" value="00092" />
-      <option name="presentableId" value="LOCAL-00092" />
-      <option name="project" value="LOCAL" />
-      <updated>1748609611829</updated>
+      <workItem from="1750871494713" duration="33679000" />
     </task>
     <task id="LOCAL-00093" summary="feat: price history now has open, high, low, close and avg">
       <option name="closed" value="true" />
@@ -872,7 +855,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751024990016</updated>
     </task>
-    <option name="localTasksCounter" value="141" />
+    <task id="LOCAL-00141" summary="feat: improved performance for Update()">
+      <option name="closed" value="true" />
+      <created>1751143598902</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1751143598902</updated>
+    </task>
+    <option name="localTasksCounter" value="142" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -890,7 +881,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: price history now has open, high, low, close and avg" />
     <MESSAGE value="feat: command ls() to list files" />
     <MESSAGE value="fix: adapted &quot;?&quot; lark grammar to match all function names" />
     <MESSAGE value="feat: online help base" />
@@ -915,7 +905,8 @@
     <MESSAGE value="feat: New plugins Age(), Alive(), Inception() and command Screen()" />
     <MESSAGE value="feat: filters for all FieldPlugins" />
     <MESSAGE value="feat: improved multi threading for sqlite and fmp" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: improved multi threading for sqlite and fmp" />
+    <MESSAGE value="feat: improved performance for Update()" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: improved performance for Update()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
