@@ -5,7 +5,7 @@ Base class for all plugin types in FINS.
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List, Union, Any
 import pandas as pd
 
@@ -67,6 +67,14 @@ class OutputData:
         self._items[row_index][field_name] = value
 
 
+def _parse_filter_value(value):
+    if isinstance(value, str):
+        try:
+            d = date.fromisoformat(value)
+            return d
+        except ValueError:
+            pass
+    return value
 
 
 class FieldPlugin(Plugin):
@@ -175,21 +183,21 @@ class FieldPlugin(Plugin):
                 raise ValueError(f"Unsupported operator: {operator}")
         except (TypeError, ValueError):
             return False
-    
+
     # Mathematical filtering methods that return self for chaining
-    def min(self, value: Union[float, int]) -> 'FieldPlugin':
+    def min(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
         """Filter for values >= threshold: plugin.min(value)"""
-        self._filters.append(('>=', value))
+        self._filters.append(('>=', _parse_filter_value(value)))
         return self
     
-    def max(self, value: Union[float, int]) -> 'FieldPlugin':
+    def max(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
         """Filter for values <= threshold: plugin.max(value)"""
-        self._filters.append(('<=', value))
+        self._filters.append(('<=', _parse_filter_value(value)))
         return self
     
-    def equals(self, value: Union[float, int, str]) -> 'FieldPlugin':
+    def equals(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
         """Filter for exact equality: plugin.equals(value)"""
-        self._filters.append(('==', value))
+        self._filters.append(('==', _parse_filter_value(value)))
         return self
     
     def exclude(self, value: Union[float, int, str, list, tuple, set]) -> 'FieldPlugin':
@@ -200,7 +208,7 @@ class FieldPlugin(Plugin):
                 self._filters.append(('!=', item))
         else:
             # Single value exclusion
-            self._filters.append(('!=', value))
+            self._filters.append(('!=', _parse_filter_value(value)))
         return self
     
     def true(self) -> 'FieldPlugin':
@@ -215,7 +223,7 @@ class FieldPlugin(Plugin):
     
     def contains(self, value: Union[float, int, str]) -> 'FieldPlugin':
         """Filter for substring: plugin.contains(value)"""
-        self._filters.append(('contains', value))
+        self._filters.append(('contains', _parse_filter_value(value)))
         return self
     
     def any(self, collection: Union[list, tuple, set]) -> 'FieldPlugin':
@@ -225,33 +233,17 @@ class FieldPlugin(Plugin):
     
     def within(self, from_value: Union[float, int], to_value: Union[float, int]) -> 'FieldPlugin':
         """Filter for values within range: plugin.within(from_value, to_value)"""
-        self._filters.append(('>=', from_value))
-        self._filters.append(('<=', to_value))
+        self._filters.append(('>=', _parse_filter_value(from_value)))
+        self._filters.append(('<=', _parse_filter_value(to_value)))
         return self
     
     def around(self, value: Union[float, int], precision: float = 0.1) -> 'FieldPlugin':
         """Filter for values within percentage range: plugin.around(value, precision=0.1)"""
         # precision of 0.1 means +/- 10%
-        lower_bound = value / (1 + precision)
-        upper_bound = value * (1 + precision)
+        lower_bound = _parse_filter_value(value) / (1 + precision)
+        upper_bound = _parse_filter_value(value) * (1 + precision)
         self._filters.append(('>=', lower_bound))
         self._filters.append(('<=', upper_bound))
-        return self
-    
-    def before(self, date: Union[datetime, str]) -> 'FieldPlugin':
-        """Filter for dates before the given date: plugin.before(date)"""
-        if isinstance(date, str):
-            from dateutil.parser import parse
-            date = parse(date)
-        self._filters.append(('<', date))
-        return self
-    
-    def after(self, date: Union[datetime, str]) -> 'FieldPlugin':
-        """Filter for dates after the given date: plugin.after(date)"""
-        if isinstance(date, str):
-            from dateutil.parser import parse
-            date = parse(date)
-        self._filters.append(('>', date))
         return self
 
 class SeriesPlugin(FieldPlugin):

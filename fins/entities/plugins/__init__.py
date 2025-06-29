@@ -19,12 +19,14 @@ from .pe import Pe
 from .peg import Peg
 from .roe import Roe
 from .vol import Vol
+from .last_update import LastUpdate
 from .last_price_update import LastUpdatePrice
 from .last_profile_update import LastUpdateProfile
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
 from .plots import PlotEach, PlotAll
 from .sector import Sector
+from .top import Top
 
 # Legacy plugin implementations (commented out until migrated to FieldPlugin)
 # from .cagr import CagrColumn
@@ -46,6 +48,7 @@ __all__ = [
     'DividendYield',
     'Inception',
     'Industry',
+    'LastUpdate',
     'LastUpdateProfile',
     'LastUpdatePrice',
     'Mcap',
@@ -58,6 +61,7 @@ __all__ = [
     'PlotEach',
     'Roe',
     'Sector',
+    'Top',
     'Update',
     'Vol',
     'WeeklyClose',

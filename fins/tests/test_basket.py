@@ -319,6 +319,61 @@ class BasketTests(unittest.TestCase):
                 print(f"Exception during update: {e}")
                 time.sleep(120)
 
+    def test_top_plugin(self):
+        """Test the Top plugin keeps only the first n items"""
+        # Create a basket with 5 items
+        original_basket = Basket(AAPL, GOOG, META, MSFT, TSLA)
+        self.assertEqual(len(original_basket._items), 5)
+        
+        # Apply Top(3) to keep only first 3 items
+        result = original_basket(Top(3))
+        result_items = result.basket_items()
+        
+        # Should have exactly 3 items
+        self.assertEqual(len(result_items), 3)
+        
+        # Should be the first 3 items in original order
+        original_items = original_basket._items
+        for i in range(3):
+            self.assertEqual(result_items[i].ticker, original_items[i].ticker)
+            self.assertEqual(result_items[i].amount, original_items[i].amount)
+
+    def test_top_plugin_larger_than_basket(self):
+        """Test Top plugin when n is larger than basket size"""
+        basket = Basket(AAPL, GOOG)
+        result = basket(Top(5))
+        
+        # Should keep all items when n > basket size
+        self.assertEqual(len(result.basket_items()), 2)
+        self.assertEqual(result.basket_items()[0].ticker, "AAPL")
+        self.assertEqual(result.basket_items()[1].ticker, "GOOG")
+
+    def test_top_plugin_validation(self):
+        """Test Top plugin input validation"""
+        with self.assertRaises(ValueError):
+            Top(0)  # Should reject zero
+        
+        with self.assertRaises(ValueError):
+            Top(-1)  # Should reject negative numbers
+        
+        with self.assertRaises(ValueError):
+            Top("5")  # Should reject non-integers
+
+    def test_top_plugin_chaining(self):
+        """Test Top plugin works in chains"""
+        # Create basket and apply Name plugin then Top
+        result = Basket(AAPL, GOOG, META, MSFT)(Name() >> Top(2))
+        
+        # Should have Name field and only 2 items
+        df = result.df()
+        self.assertEqual(len(df), 2)
+        self.assertIn('Name', df.columns)
+        
+        # Should be first 2 items
+        items = result.basket_items()
+        self.assertEqual(items[0].ticker, "AAPL")
+        self.assertEqual(items[1].ticker, "GOOG")
+
     def assertBasket(self, basket: Basket, expected: dict):
         """
         Assert that the basket contains exactly the expected items with expected weights.
