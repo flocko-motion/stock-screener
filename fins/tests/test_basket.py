@@ -376,7 +376,7 @@ class BasketTests(unittest.TestCase):
 
     def test_alive(self):
         # we test with a symbol of which we know, that is has no data - it shouldn't pass the Alive() filter
-        result = Basket(AAPL, VBLTX, GOOG)(Alive()).basket()
+        result = Basket(AAPL, VBLTX, GOOG)(Alive().true()).basket()
         self.assertEqual(len(result), 2)
 
     def assertBasket(self, basket: Basket, expected: dict):

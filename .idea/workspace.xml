@@ -8,33 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/age.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/age.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/plugins/alive.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/alive.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/crop.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/crop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/inception.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/inception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/industry.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/industry.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_price_update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_profile_update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/name.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/name.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/npm.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/npm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/pe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/peg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/peg.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/price.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/price.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/roe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/roe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/sector.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/sector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/top.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/top.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/update.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/vol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/vol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/persistence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/persistence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +70,7 @@
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets.executor": "Debug",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_add_item.executor": "Run",
-    "Python tests.Unittests for tests.test_basket.BasketTests.test_alive.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_alive.executor": "Debug",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_basket_item_multiplication.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_big_update.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_age.executor": "Run",
@@ -499,15 +475,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="43155000" />
-    </task>
-    <task id="LOCAL-00099" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
-      <option name="closed" value="true" />
-      <created>1748972754956</created>
-      <option name="number" value="00099" />
-      <option name="presentableId" value="LOCAL-00099" />
-      <option name="project" value="LOCAL" />
-      <updated>1748972754956</updated>
+      <workItem from="1750871494713" duration="43526000" />
     </task>
     <task id="LOCAL-00100" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <option name="closed" value="true" />
@@ -893,7 +861,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751199419332</updated>
     </task>
-    <option name="localTasksCounter" value="148" />
+    <task id="LOCAL-00148" summary="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin">
+      <option name="closed" value="true" />
+      <created>1751201617107</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1751201617107</updated>
+    </task>
+    <option name="localTasksCounter" value="149" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -911,7 +887,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching" />
     <MESSAGE value="fix: asc() and desc()" />
     <MESSAGE value="fix: all tests work" />
     <MESSAGE value="docs: updated todo" />
@@ -936,7 +911,8 @@
     <MESSAGE value="feat: basket.description()" />
     <MESSAGE value="feat: Get() Set() Dir() Ls() Top()" />
     <MESSAGE value="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries" />
+    <MESSAGE value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1161,9 +1137,9 @@
           <option name="timeStamp" value="308" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/entities/plugin.py</url>
-          <line>356</line>
-          <option name="timeStamp" value="309" />
+          <url>file://$PROJECT_DIR$/fins/entities/plugins/alive.py</url>
+          <line>26</line>
+          <option name="timeStamp" value="310" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -1256,7 +1232,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_pe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_pe Coverage Results" MODIFIED="1751009794032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_age.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_age Coverage Results" MODIFIED="1751012038882" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_item Coverage Results" MODIFIED="1750597520640" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_alive.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_alive Coverage Results" MODIFIED="1751199402607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_alive.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_alive Coverage Results" MODIFIED="1751201844376" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_chaining.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_chaining Coverage Results" MODIFIED="1751018220930" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file Coverage Results" MODIFIED="1743285476032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_create_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_create_basket Coverage Results" MODIFIED="1750596792881" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
