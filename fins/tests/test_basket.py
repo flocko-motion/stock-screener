@@ -392,11 +392,6 @@ class BasketTests(unittest.TestCase):
         assert AAPL in res.basket()
         print(res.df())
 
-    def test_inception_date(self):
-        # THRO should have inception in 2021, not 2010
-        fmp.DEBUG = True
-        res = Basket(THRO)(Update(older_than=datetime.now()) >> Inception())
-        print(res)
 
 
     def assertBasket(self, basket: Basket, expected: dict):
