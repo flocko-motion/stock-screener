@@ -164,6 +164,16 @@ class BasketTests(unittest.TestCase):
         if ragr_sigma is not None:
             self.assertIsInstance(ragr_sigma, (float, int))
 
+    def test_plugins_ratio(self):
+        res = Basket(CVBF)(Ragr() >> Ratio("RAGR[Med]", "RAGR[Sigma]", alias="efficiency"))
+        df = res.df()
+        self.assertIn('efficiency', df.columns)
+        
+        efficiency = df.iloc[0]['efficiency']
+        if efficiency is not None:
+            self.assertIsInstance(efficiency, (float, int))
+            self.assertGreater(efficiency, 0)  # Should be positive for our test data
+
     def test_plugins_mcap(self):
         res = Basket(AAPL, GOOG, META)(Mcap())
         df = res.df()

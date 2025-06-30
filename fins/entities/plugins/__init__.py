@@ -19,6 +19,7 @@ from .npm import Npm
 from .pe import Pe
 from .peg import Peg
 from .ragr import Ragr
+from .ratio import Ratio
 from .roe import Roe
 from .vol import Vol
 from .last_update import LastUpdate
@@ -63,6 +64,7 @@ __all__ = [
     'PlotAll',
     'PlotEach',
     'Ragr',
+    'Ratio',
     'Roe',
     'Sector',
     'Top',

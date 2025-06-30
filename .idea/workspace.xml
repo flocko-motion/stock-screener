@@ -8,11 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="docs: working on my baskets">
-      <change beforePath="$PROJECT_DIR$/.cursor/rules/paths.mdc" beforeDir="false" afterPath="$PROJECT_DIR$/.cursor/rules/paths.mdc" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Ragr() plugin and subfields with filtering">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/plugin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
@@ -487,15 +485,7 @@
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
       <workItem from="1750871494713" duration="51984000" />
-      <workItem from="1751296912030" duration="5075000" />
-    </task>
-    <task id="LOCAL-00110" summary="docs: updated todo">
-      <option name="closed" value="true" />
-      <created>1749020550961</created>
-      <option name="number" value="00110" />
-      <option name="presentableId" value="LOCAL-00110" />
-      <option name="project" value="LOCAL" />
-      <updated>1749020550961</updated>
+      <workItem from="1751296912030" duration="7617000" />
     </task>
     <task id="LOCAL-00111" summary="feat: multithreaded basket creation">
       <option name="closed" value="true" />
@@ -881,7 +871,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751267714232</updated>
     </task>
-    <option name="localTasksCounter" value="159" />
+    <task id="LOCAL-00159" summary="feat: Ragr() plugin and subfields with filtering">
+      <option name="closed" value="true" />
+      <created>1751306419396</created>
+      <option name="number" value="00159" />
+      <option name="presentableId" value="LOCAL-00159" />
+      <option name="project" value="LOCAL" />
+      <updated>1751306419396</updated>
+    </task>
+    <option name="localTasksCounter" value="160" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -899,7 +897,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: control data updates in FINS" />
     <MESSAGE value="feat: first working Price plugins - skeleton of OutputPlugin" />
     <MESSAGE value="feat: first working Plot plugin &quot;PlotlyEach&quot;" />
     <MESSAGE value="feat: first working Plot plugin &quot;PlotEach&quot;" />
@@ -924,7 +921,8 @@
     <MESSAGE value="fix: candidates now filter properly by inception" />
     <MESSAGE value="feat: plugin Description()" />
     <MESSAGE value="docs: working on my baskets" />
-    <option name="LAST_COMMIT_MESSAGE" value="docs: working on my baskets" />
+    <MESSAGE value="feat: Ragr() plugin and subfields with filtering" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Ragr() plugin and subfields with filtering" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1160,7 +1158,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>399</line>
+          <line>413</line>
           <option name="timeStamp" value="315" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
