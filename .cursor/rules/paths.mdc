@@ -16,3 +16,7 @@ The sqlite3 database is located at  ~/.fins/db/symbols.db
 Entities are persited to  ~/.fins/persistence/ in json format. 
 
 Before executing anything, make sure to be in the project root /r/priv/stock-screener/
+
+Tests are in fins.tests and can be executed with: 
+/home/flo/.cache/pypoetry/virtualenvs/fins-YwmRDpgI-py3.10/bin/python /home/flo/.pycharm_helpers/pycharm/_jb_unittest_runner.py --target fins.tests.<test-module>.<test-class>.<test-name> 
+Example: /home/flo/.cache/pypoetry/virtualenvs/fins-YwmRDpgI-py3.10/bin/python /home/flo/.pycharm_helpers/pycharm/_jb_unittest_runner.py --target fins.tests.test_basket.BasketTests.test_plugins_ragr 

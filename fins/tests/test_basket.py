@@ -145,6 +145,25 @@ class BasketTests(unittest.TestCase):
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['CAGR'])
 
+    def test_plugins_ragr(self):
+        res = Basket(CVBF)(Ragr())
+        df = res.df()
+        self.assertIn('RAGR[Avg]', df.columns)
+        self.assertIn('RAGR[Med]', df.columns)
+        self.assertIn('RAGR[Sigma]', df.columns)
+        
+        ragr_avg = df.iloc[0]['RAGR[Avg]']
+        ragr_med = df.iloc[0]['RAGR[Med]']
+        ragr_sigma = df.iloc[0]['RAGR[Sigma]']
+        print(df)
+        
+        if ragr_avg is not None:
+            self.assertIsInstance(ragr_avg, (float, int))
+        if ragr_med is not None:
+            self.assertIsInstance(ragr_med, (float, int))
+        if ragr_sigma is not None:
+            self.assertIsInstance(ragr_sigma, (float, int))
+
     def test_plugins_mcap(self):
         res = Basket(AAPL, GOOG, META)(Mcap())
         df = res.df()

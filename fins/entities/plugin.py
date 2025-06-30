@@ -156,14 +156,27 @@ class FieldPlugin(Plugin):
         pass
 
     @abstractmethod
-    def field_type(self) -> type:
+    def field_type(self) -> type | dict[str, type]:
         pass
 
     def run(self, runtime: 'BasketRuntime'):
         from fins.utils import ProgressTracker
         
-        # First register and populate the field values
-        runtime.register_field(self.alias, self.field_type())
+        # Check if field_type returns a dictionary (for multi-field plugins)
+        field_type_result = self.field_type()
+        is_multi_field = isinstance(field_type_result, dict)
+        
+        if is_multi_field:
+            # Register multiple fields with suffixes
+            field_names = []
+            for suffix, field_type in field_type_result.items():
+                field_name = f"{self.alias}[{suffix}]"
+                runtime.register_field(field_name, field_type)
+                field_names.append(field_name)
+        else:
+            # Single field registration
+            runtime.register_field(self.alias, field_type_result)
+            field_names = [self.alias]
         
         basket_items = runtime.basket_items()
         if len(basket_items) > 10:  # Only show progress for larger datasets
@@ -171,7 +184,10 @@ class FieldPlugin(Plugin):
             for idx, basket_item in enumerate(basket_items):
                 try:
                     field_value = self.field_value(basket_item)
-                    runtime.set_field_value(idx, self.alias, field_value)
+                    if is_multi_field:
+                        self._set_multi_field_values(runtime, idx, field_names, field_value, field_type_result)
+                    else:
+                        runtime.set_field_value(idx, self.alias, field_value)
                 except Exception as e:
                     raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
                 finally:
@@ -182,13 +198,41 @@ class FieldPlugin(Plugin):
             for idx, basket_item in enumerate(basket_items):
                 try:
                     field_value = self.field_value(basket_item)
-                    runtime.set_field_value(idx, self.alias, field_value)
+                    if is_multi_field:
+                        self._set_multi_field_values(runtime, idx, field_names, field_value, field_type_result)
+                    else:
+                        runtime.set_field_value(idx, self.alias, field_value)
                 except Exception as e:
                     raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
 
         # Then apply any filters
         if self._filters:
-            self._apply_filters(runtime)
+            if is_multi_field:
+                self._apply_multi_field_filters(runtime, field_names, field_type_result)
+            else:
+                self._apply_filters(runtime)
+    
+    def _set_multi_field_values(self, runtime: 'BasketRuntime', idx: int, field_names: list, field_value, field_type_dict: dict):
+        """Set values for multi-field plugins that return tuples or dicts"""
+        if field_value is None:
+            # Set all fields to None
+            for field_name in field_names:
+                runtime.set_field_value(idx, field_name, None)
+        elif isinstance(field_value, tuple):
+            # Decompose tuple into individual field values
+            suffixes = list(field_type_dict.keys())
+            if len(field_value) != len(suffixes):
+                raise ValueError(f"Tuple length {len(field_value)} doesn't match field count {len(suffixes)}")
+            for field_name, value in zip(field_names, field_value):
+                runtime.set_field_value(idx, field_name, value)
+        elif isinstance(field_value, dict):
+            # Use dict keys to map to field names
+            suffixes = list(field_type_dict.keys())
+            for suffix, field_name in zip(suffixes, field_names):
+                value = field_value.get(suffix)
+                runtime.set_field_value(idx, field_name, value)
+        else:
+            raise ValueError(f"Multi-field plugin returned unexpected type: {type(field_value)}")
     
     def _apply_filters(self, runtime: 'BasketRuntime'):
         """Apply all filters to the runtime"""
@@ -207,6 +251,34 @@ class FieldPlugin(Plugin):
                 keep_indices.append(idx)
                 filtered_items.append(basket_item)
         
+        self._update_runtime_with_filtered_items(runtime, keep_indices, filtered_items)
+    
+    def _apply_multi_field_filters(self, runtime: 'BasketRuntime', field_names: list, field_type_dict: dict):
+        """Apply all filters to multi-field plugins"""
+        df = runtime.df()
+        
+        # Check that all specified subfields exist
+        for operator, threshold, subfield in self._filters:
+            if subfield is None:
+                raise RuntimeError(f"Multi-field plugin {self.alias} requires subfield specification for filters")
+            expected_field_name = f"{self.alias}[{subfield}]"
+            if expected_field_name not in df.columns:
+                available_subfields = list(field_type_dict.keys())
+                raise RuntimeError(f"Subfield '{subfield}' not found. Available subfields: {available_subfields}")
+        
+        # Determine which items to keep based on all filters
+        keep_indices = []
+        filtered_items = []
+        
+        for idx, basket_item in enumerate(runtime.basket_items()):
+            if self._passes_all_multi_field_filters(df, idx, field_type_dict):
+                keep_indices.append(idx)
+                filtered_items.append(basket_item)
+        
+        self._update_runtime_with_filtered_items(runtime, keep_indices, filtered_items)
+    
+    def _update_runtime_with_filtered_items(self, runtime: 'BasketRuntime', keep_indices: list, filtered_items: list):
+        """Update runtime with filtered items"""
         # Create new basket with filtered items
         filtered_basket = Basket(items=filtered_items, name=runtime.basket()._name)
         
@@ -226,7 +298,20 @@ class FieldPlugin(Plugin):
     
     def _passes_all_filters(self, field_value: Any) -> bool:
         """Check if field value passes all filters"""
-        for operator, threshold in self._filters:
+        for filter_tuple in self._filters:
+            if len(filter_tuple) == 2:
+                operator, threshold = filter_tuple
+            else:
+                operator, threshold, _ = filter_tuple  # Ignore subfield for single-field plugins
+            if not self._compare_value(field_value, operator, threshold):
+                return False
+        return True
+    
+    def _passes_all_multi_field_filters(self, df: pd.DataFrame, row_idx: int, field_type_dict: dict) -> bool:
+        """Check if multi-field values pass all filters"""
+        for operator, threshold, subfield in self._filters:
+            field_name = f"{self.alias}[{subfield}]"
+            field_value = df.iloc[row_idx][field_name]
             if not self._compare_value(field_value, operator, threshold):
                 return False
         return True
@@ -264,75 +349,75 @@ class FieldPlugin(Plugin):
             return False
 
     # Mathematical filtering methods that return self for chaining
-    def min(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
-        """Filter for values >= threshold: plugin.min(value)"""
-        self._filters.append(('>=', _parse_filter_value(value)))
+    def min(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for values >= threshold: plugin.min(value) or plugin.min(value, subfield="fieldname")"""
+        self._filters.append(('>=', _parse_filter_value(value), subfield))
         return self
     
-    def max(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
-        """Filter for values <= threshold: plugin.max(value)"""
-        self._filters.append(('<=', _parse_filter_value(value)))
+    def max(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for values <= threshold: plugin.max(value) or plugin.max(value, subfield="fieldname")"""
+        self._filters.append(('<=', _parse_filter_value(value), subfield))
         return self
     
-    def equals(self, value: Union[float, int, str, datetime]) -> 'FieldPlugin':
-        """Filter for exact equality: plugin.equals(value)"""
-        self._filters.append(('==', _parse_filter_value(value)))
+    def equals(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for exact equality: plugin.equals(value) or plugin.equals(value, subfield="fieldname")"""
+        self._filters.append(('==', _parse_filter_value(value), subfield))
         return self
     
-    def exclude(self, value: Union[float, int, str, list, tuple, set]) -> 'FieldPlugin':
-        """Filter for inequality: plugin.exclude(value) or plugin.exclude([val1, val2, ...])"""
+    def exclude(self, value: Union[float, int, str, list, tuple, set], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for inequality: plugin.exclude(value) or plugin.exclude(value, subfield="fieldname")"""
         if isinstance(value, (list, tuple, set)):
             # Add multiple != filters for each value in the collection
             for item in value:
-                self._filters.append(('!=', item))
+                self._filters.append(('!=', item, subfield))
         else:
             # Single value exclusion
-            self._filters.append(('!=', _parse_filter_value(value)))
+            self._filters.append(('!=', _parse_filter_value(value), subfield))
         return self
     
-    def true(self) -> 'FieldPlugin':
-        """Filter for boolean fields that are True: plugin.true()"""
-        self._filters.append(('==', True))
+    def true(self, *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for boolean fields that are True: plugin.true() or plugin.true(subfield="fieldname")"""
+        self._filters.append(('==', True, subfield))
         return self
     
-    def false(self) -> 'FieldPlugin':
-        """Filter for boolean fields that are False: plugin.false()"""
-        self._filters.append(('==', False))
+    def false(self, *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for boolean fields that are False: plugin.false() or plugin.false(subfield="fieldname")"""
+        self._filters.append(('==', False, subfield))
         return self
     
-    def contains(self, value: Union[float, int, str]) -> 'FieldPlugin':
-        """Filter for substring: plugin.contains(value)"""
-        self._filters.append(('contains', _parse_filter_value(value)))
+    def contains(self, value: Union[float, int, str], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for substring: plugin.contains(value) or plugin.contains(value, subfield="fieldname")"""
+        self._filters.append(('contains', _parse_filter_value(value), subfield))
         return self
     
-    def any(self, collection: Union[list, tuple, set]) -> 'FieldPlugin':
-        """Filter for membership: plugin.any(collection)"""
-        self._filters.append(('in', collection))
+    def any(self, collection: Union[list, tuple, set], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for membership: plugin.any(collection) or plugin.any(collection, subfield="fieldname")"""
+        self._filters.append(('in', collection, subfield))
         return self
     
-    def within(self, from_value: Union[float, int], to_value: Union[float, int]) -> 'FieldPlugin':
-        """Filter for values within range: plugin.within(from_value, to_value)"""
-        self._filters.append(('>=', _parse_filter_value(from_value)))
-        self._filters.append(('<=', _parse_filter_value(to_value)))
+    def within(self, from_value: Union[float, int], to_value: Union[float, int], *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for values within range: plugin.within(from_value, to_value) or plugin.within(from_value, to_value, subfield="fieldname")"""
+        self._filters.append(('>=', _parse_filter_value(from_value), subfield))
+        self._filters.append(('<=', _parse_filter_value(to_value), subfield))
         return self
     
-    def around(self, value: Union[float, int], precision: float = 0.1) -> 'FieldPlugin':
-        """Filter for values within percentage range: plugin.around(value, precision=0.1)"""
+    def around(self, value: Union[float, int], precision: float = 0.1, *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for values within percentage range: plugin.around(value, precision=0.1) or plugin.around(value, precision=0.1, subfield="fieldname")"""
         # precision of 0.1 means +/- 10%
         lower_bound = _parse_filter_value(value) / (1 + precision)
         upper_bound = _parse_filter_value(value) * (1 + precision)
-        self._filters.append(('>=', lower_bound))
-        self._filters.append(('<=', upper_bound))
+        self._filters.append(('>=', lower_bound, subfield))
+        self._filters.append(('<=', upper_bound, subfield))
         return self
     
-    def none(self) -> 'FieldPlugin':
-        """Filter for None/null values: plugin.none()"""
-        self._filters.append(('is_none', None))
+    def none(self, *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for None/null values: plugin.none() or plugin.none(subfield="fieldname")"""
+        self._filters.append(('is_none', None, subfield))
         return self
     
-    def not_none(self) -> 'FieldPlugin':
-        """Filter for non-None values: plugin.not_none()"""
-        self._filters.append(('is_not_none', None))
+    def not_none(self, *, subfield: str = None) -> 'FieldPlugin':
+        """Filter for non-None values: plugin.not_none() or plugin.not_none(subfield="fieldname")"""
+        self._filters.append(('is_not_none', None, subfield))
         return self
 
 class SeriesPlugin(FieldPlugin):
