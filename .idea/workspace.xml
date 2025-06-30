@@ -8,9 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: filters now auto-convert all dates to datetimes to guarantee comparability">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: candidates now filter properly by inception">
       <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,6 +96,7 @@
     "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_string_equality.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_within.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_fluent_filter_age.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_minimal_plugin_application.executor": "Run",
     "Python tests.Unittests for tests.test_basket.BasketTests.test_multiply_weights.executor": "Run",
@@ -249,7 +250,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter">
+  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -362,7 +363,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_basket.BasketTests.test_alive" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for tests.test_basket.BasketTests.test_inception_date" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -374,7 +375,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_alive&quot;" />
+      <option name="_new_target" value="&quot;tests.test_basket.BasketTests.test_inception_date&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -417,17 +418,17 @@
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
       <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_inception" />
       <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_prices" />
-      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_alive" />
+      <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter" />
       <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_no_inception" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter" />
         <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_no_inception" />
         <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_inception" />
         <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_prices" />
-        <item itemvalue="Python tests.Unittests for tests.test_basket.BasketTests.test_alive" />
       </list>
     </recent_temporary>
   </component>
@@ -479,15 +480,7 @@
       <workItem from="1750517981093" duration="18637000" />
       <workItem from="1750665913892" duration="2513000" />
       <workItem from="1750669647375" duration="16795000" />
-      <workItem from="1750871494713" duration="48526000" />
-    </task>
-    <task id="LOCAL-00106" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
-      <option name="closed" value="true" />
-      <created>1749018847142</created>
-      <option name="number" value="00106" />
-      <option name="presentableId" value="LOCAL-00106" />
-      <option name="project" value="LOCAL" />
-      <updated>1749018847142</updated>
+      <workItem from="1750871494713" duration="48818000" />
     </task>
     <task id="LOCAL-00107" summary="feat: improved function handling with proper CommandArg definition, online help, named argument validation and fetching">
       <option name="closed" value="true" />
@@ -873,7 +866,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751261554120</updated>
     </task>
-    <option name="localTasksCounter" value="155" />
+    <task id="LOCAL-00155" summary="fix: candidates now filter properly by inception">
+      <option name="closed" value="true" />
+      <created>1751261741997</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1751261741997</updated>
+    </task>
+    <option name="localTasksCounter" value="156" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -891,7 +892,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactor: reworking plugins to new concept" />
     <MESSAGE value="feat: Industry() and Name() plugins now work.. next: build pipes with &gt;&gt;" />
     <MESSAGE value="feat: compose pipelines with &gt;&gt;" />
     <MESSAGE value="feat: control data updates in FINS" />
@@ -916,7 +916,8 @@
     <MESSAGE value="fix: fmt delivered invalid datapoints pre-inception if from=1900-01-01 was given at api request" />
     <MESSAGE value="fix: remove no-inception symbols" />
     <MESSAGE value="fix: filters now auto-convert all dates to datetimes to guarantee comparability" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: filters now auto-convert all dates to datetimes to guarantee comparability" />
+    <MESSAGE value="fix: candidates now filter properly by inception" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: candidates now filter properly by inception" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1196,6 +1197,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_roe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_roe Coverage Results" MODIFIED="1751009802983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_financial.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747860741635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_dsl_py.coverage" NAME="pytest in test_dsl.py Coverage Results" MODIFIED="1749203835617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_inception_date.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_inception_date Coverage Results" MODIFIED="1751261986729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_age_filter.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_age_filter Coverage Results" MODIFIED="1751011902528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_fins_tests_test_dsl_BasicFlowTests_test_add_symbol_to_basket.coverage" NAME="Unittests for test_test.TestTests.test_test Coverage Results" MODIFIED="1750592875861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_financial_SymbolTests_test_get_prices.coverage" NAME="Unittests for test_financial.SymbolTests.test_get_prices Coverage Results" MODIFIED="1751204432243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

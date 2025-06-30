@@ -385,11 +385,18 @@ class BasketTests(unittest.TestCase):
         assert len(no_inception) == 0
 
     def test_inception_filter(self):
+        # CRCL should be filtered out, because it's inception is in 2025
         res = Basket(GOOG, CRCL, AAPL)(Inception().max("2015-01-01"))
         assert len(res.basket()) == 2
         assert GOOG in res.basket()
         assert AAPL in res.basket()
         print(res.df())
+
+    def test_inception_date(self):
+        # THRO should have inception in 2021, not 2010
+        fmp.DEBUG = True
+        res = Basket(THRO)(Update(older_than=datetime.now()) >> Inception())
+        print(res)
 
 
     def assertBasket(self, basket: Basket, expected: dict):
