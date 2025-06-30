@@ -384,6 +384,14 @@ class BasketTests(unittest.TestCase):
         no_inception = Screen(mcap_min=2 * Billion, limit=6000)(Inception().none()).basket()
         assert len(no_inception) == 0
 
+    def test_inception_filter(self):
+        res = Basket(GOOG, CRCL, AAPL)(Inception().max("2015-01-01"))
+        assert len(res.basket()) == 2
+        assert GOOG in res.basket()
+        assert AAPL in res.basket()
+        print(res.df())
+
+
     def assertBasket(self, basket: Basket, expected: dict):
         """
         Assert that the basket contains exactly the expected items with expected weights.

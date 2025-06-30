@@ -135,10 +135,13 @@ class OutputData:
 def _parse_filter_value(value):
     if isinstance(value, str):
         try:
-            d = date.fromisoformat(value)
+            d = datetime.fromisoformat(value)
             return d
         except ValueError:
             pass
+    if isinstance(value, date) and not isinstance(value, datetime):
+        # Convert date to datetime (midnight of that date)
+        return datetime.combine(value, datetime.min.time())
     return value
 
 
