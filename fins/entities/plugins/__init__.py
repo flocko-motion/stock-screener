@@ -9,6 +9,7 @@ from .age import Age
 from .alive import Alive
 from .cagr import Cagr
 from .crop import Crop
+from .description import Description
 from .dividend_yield import DividendYield
 from .inception import Inception
 from .industry import Industry
@@ -45,6 +46,7 @@ __all__ = [
     'Alive',
     'Cagr',
     'Crop',
+    'Description',
     'DividendYield',
     'Inception',
     'Industry',
