@@ -21,7 +21,7 @@ from .peg import Peg
 from .ragr import Ragr
 from .ratio import Ratio
 from .roe import Roe
-from .vol import Vol
+from .volume import Volume
 from .last_update import LastUpdate
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
@@ -29,17 +29,6 @@ from .plots import PlotEach, PlotAll
 from .sector import Sector
 from .top import Top
 
-# Legacy plugin implementations (commented out until migrated to FieldPlugin)
-# from .cagr import CagrColumn
-# from .dividend_yield import YieldColumn
-# from .mcap import McapColumn
-# from .name import NameColumn
-# from .npm import NpmColumn
-# from .pe import PeColumn
-# from .peg import PegColumn
-# from .roe import RoeColumn
-# from .sector import SectorColumn
-# from .vol import VolColumn
 
 __all__ = [
     'Age',
@@ -65,7 +54,7 @@ __all__ = [
     'Sector',
     'Top',
     'Update',
-    'Vol',
+    'Volume',
     'WeeklyClose',
 ]
 

@@ -296,8 +296,8 @@ class BasketTests(unittest.TestCase):
         for sector in df['Sector'].dropna():
             self.assertEqual(sector, "Technology")
 
-    def test_plugins_vol(self):
-        res = Basket(AAPL, GOOG, META)(Vol())
+    def test_plugins_volume(self):
+        res = Basket(AAPL, GOOG, META)(Volume())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['Volume'])
         self.assertGreater(df.iloc[0]['Volume'], 0)
