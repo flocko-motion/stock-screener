@@ -4,7 +4,7 @@ Ratio Plugin - Calculate ratio between two fields from previous pipeline steps
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin, FILTER_OUT
 
 
 class Ratio(FieldPlugin):
@@ -38,13 +38,13 @@ class Ratio(FieldPlugin):
         self.numerator_field = numerator_field
         self.denominator_field = denominator_field
 
-    def field_type(self) -> type:
-        return Optional[float]
+    def field_types(self):
+        return [("", Optional[float])]
 
     def run(self, runtime: 'BasketRuntime'):
         """Override run method to access DataFrame with calculated field values"""
         # Register the ratio field
-        runtime.register_field(self.alias, self.field_type())
+        runtime.register_field(self.alias, Optional[float])
         
         # Get the current DataFrame with all previously calculated fields
         df = runtime.df()
@@ -66,12 +66,11 @@ class Ratio(FieldPlugin):
             else:
                 ratio_value = numerator / denominator
             
-            runtime.set_field_value(idx, self.alias, ratio_value)
-        
-        # Apply any filters if they exist
-        if self._filters:
-            self._apply_filters(runtime)
+            # Apply operators and set field value
+            processed_value = self._apply_operators(ratio_value)
+            if processed_value is not FILTER_OUT:
+                runtime.set_field_value(idx, self.alias, processed_value)
 
-    def field_value(self, item: BasketItem):
+    def field_values(self, item: BasketItem):
         """Not used - we override run() method instead"""
         raise NotImplementedError("Ratio plugin uses run() method override") 

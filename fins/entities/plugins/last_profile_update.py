@@ -1,21 +1,26 @@
+"""
+Last Profile Update Column
+"""
 from datetime import datetime
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class LastUpdateProfile(FieldPlugin):
-    """ Add 'LastProfileUpdate' field """
+    """ Add 'Last Profile Update' field """
 
     def __init__(self, alias: Optional[str] = None):
         self._register_call_args(alias=alias)
+        if alias is None:
+            alias = 'LastProfileUpdate'
         super().__init__(alias=alias)
 
-    def field_type(self) -> type:
-        return Optional[datetime]
+    def field_types(self):
+        return [("", Optional[datetime])]
 
-    def field_value(self, item: BasketItem):
-        return item.symbol().last_profile_update
+    def field_values(self, item: BasketItem):
+        return [item.symbol().last_profile_update]
 
 

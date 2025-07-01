@@ -5,7 +5,7 @@ Market Cap Column
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class Mcap(FieldPlugin):
@@ -17,8 +17,8 @@ class Mcap(FieldPlugin):
             alias = 'MCap'
         super().__init__(alias=alias)
 
-    def field_type(self) -> type:
-        return float
+    def field_types(self):
+        return [("", float)]
 
-    def field_value(self, item: BasketItem):
-        return item.symbol().get_analytics("market_cap")
+    def field_values(self, item: BasketItem):
+        return [item.symbol().get_analytics("market_cap")]

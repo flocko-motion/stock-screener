@@ -11,6 +11,7 @@ import pandas as pd
 
 from fins.entities import BasketItem, Basket
 from fins.financial import Symbol
+from fins.utils import format_value
 
 
 class Plugin(ABC):
@@ -30,10 +31,10 @@ class Plugin(ABC):
         class_name = self.__class__.__name__
         
         # Format positional arguments
-        formatted_args = [self._format_value(arg) for arg in self._call_args]
+        formatted_args = [format_value(arg) for arg in self._call_args]
         
         # Format keyword arguments
-        formatted_kwargs = [f"{key}={self._format_value(value)}" for key, value in self._call_kwargs.items()]
+        formatted_kwargs = [f"{key}={format_value(value)}" for key, value in self._call_kwargs.items()]
         
         # Combine all arguments
         all_args = formatted_args + formatted_kwargs
@@ -56,36 +57,6 @@ class Plugin(ABC):
         """
         self._call_args = args
         self._call_kwargs = kwargs
-
-    def _format_value(self, value) -> str:
-        """Format a value for inclusion in Python code."""
-        if value is None:
-            return "None"
-        elif isinstance(value, str):
-            return f"'{value}'"
-        elif isinstance(value, bool):
-            return str(value)
-        elif isinstance(value, (int, float)):
-            return str(value)
-        elif isinstance(value, (list, tuple)):
-            formatted_items = [self._format_value(item) for item in value]
-            if isinstance(value, list):
-                return f"[{', '.join(formatted_items)}]"
-            else:
-                return f"({', '.join(formatted_items)})"
-        elif isinstance(value, dict):
-            formatted_items = [f"{self._format_value(k)}: {self._format_value(v)}" for k, v in value.items()]
-            return f"{{{', '.join(formatted_items)}}}"
-        elif hasattr(value, 'isoformat') and hasattr(value, 'date'):  # datetime.date objects
-            if hasattr(value, 'time'):  # datetime.datetime
-                return f"datetime.datetime.fromisoformat('{value.isoformat()}')"
-            else:  # datetime.date
-                return f"datetime.date.fromisoformat('{value.isoformat()}')"
-        elif hasattr(value, '__class__'):
-            # For other objects, try to represent them reasonably
-            return f"{value.__class__.__name__}(...)"
-        else:
-            return repr(value)
 
     def __rshift__(self, other: 'Plugin') -> 'BasketPipeline':
         """Chain plugins using >> operator"""
@@ -145,294 +116,6 @@ def _parse_filter_value(value):
     return value
 
 
-class FieldPlugin(Plugin):
-
-    def __init__(self, alias: Optional[str] = None):
-        super().__init__(alias)
-        self._filters = []  # List of (operator, value) tuples
-
-    @abstractmethod
-    def field_value(self, item: BasketItem) -> Optional[float] | str | pd.DataFrame:
-        pass
-
-    @abstractmethod
-    def field_type(self) -> type | dict[str, type]:
-        pass
-
-    def run(self, runtime: 'BasketRuntime'):
-        from fins.utils import ProgressTracker
-        
-        # Check if field_type returns a dictionary (for multi-field plugins)
-        field_type_result = self.field_type()
-        is_multi_field = isinstance(field_type_result, dict)
-        
-        if is_multi_field:
-            # Register multiple fields with suffixes
-            field_names = []
-            for suffix, field_type in field_type_result.items():
-                field_name = f"{self.alias}[{suffix}]"
-                runtime.register_field(field_name, field_type)
-                field_names.append(field_name)
-        else:
-            # Single field registration
-            runtime.register_field(self.alias, field_type_result)
-            field_names = [self.alias]
-        
-        basket_items = runtime.basket_items()
-        if len(basket_items) > 10:  # Only show progress for larger datasets
-            tracker = ProgressTracker(len(basket_items), f"Computing {self.alias}")
-            for idx, basket_item in enumerate(basket_items):
-                try:
-                    field_value = self.field_value(basket_item)
-                    if is_multi_field:
-                        self._set_multi_field_values(runtime, idx, field_names, field_value, field_type_result)
-                    else:
-                        runtime.set_field_value(idx, self.alias, field_value)
-                except Exception as e:
-                    raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
-                finally:
-                    tracker.next()
-            tracker.done()
-        else:
-            # For small datasets, don't show progress
-            for idx, basket_item in enumerate(basket_items):
-                try:
-                    field_value = self.field_value(basket_item)
-                    if is_multi_field:
-                        self._set_multi_field_values(runtime, idx, field_names, field_value, field_type_result)
-                    else:
-                        runtime.set_field_value(idx, self.alias, field_value)
-                except Exception as e:
-                    raise Exception(f"Failed to compute {self.alias} for {basket_item.ticker}: {e}") from e
-
-        # Then apply any filters
-        if self._filters:
-            if is_multi_field:
-                self._apply_multi_field_filters(runtime, field_names, field_type_result)
-            else:
-                self._apply_filters(runtime)
-    
-    def _set_multi_field_values(self, runtime: 'BasketRuntime', idx: int, field_names: list, field_value, field_type_dict: dict):
-        """Set values for multi-field plugins that return tuples or dicts"""
-        if field_value is None:
-            # Set all fields to None
-            for field_name in field_names:
-                runtime.set_field_value(idx, field_name, None)
-        elif isinstance(field_value, tuple):
-            # Decompose tuple into individual field values
-            suffixes = list(field_type_dict.keys())
-            if len(field_value) != len(suffixes):
-                raise ValueError(f"Tuple length {len(field_value)} doesn't match field count {len(suffixes)}")
-            for field_name, value in zip(field_names, field_value):
-                runtime.set_field_value(idx, field_name, value)
-        elif isinstance(field_value, dict):
-            # Use dict keys to map to field names
-            suffixes = list(field_type_dict.keys())
-            for suffix, field_name in zip(suffixes, field_names):
-                value = field_value.get(suffix)
-                runtime.set_field_value(idx, field_name, value)
-        else:
-            raise ValueError(f"Multi-field plugin returned unexpected type: {type(field_value)}")
-    
-    def _apply_filters(self, runtime: 'BasketRuntime'):
-        """Apply all filters to the runtime"""
-        df = runtime.df()
-        field_name = self.alias
-        
-        if field_name not in df.columns:
-            raise RuntimeError(f"Field {field_name} not found in runtime data")
-        
-        # Determine which items to keep based on all filters
-        keep_indices = []
-        filtered_items = []
-        
-        for idx, (basket_item, field_value) in enumerate(zip(runtime.basket_items(), df[field_name])):
-            if self._passes_all_filters(field_value):
-                keep_indices.append(idx)
-                filtered_items.append(basket_item)
-        
-        self._update_runtime_with_filtered_items(runtime, keep_indices, filtered_items)
-    
-    def _apply_multi_field_filters(self, runtime: 'BasketRuntime', field_names: list, field_type_dict: dict):
-        """Apply all filters to multi-field plugins"""
-        df = runtime.df()
-        
-        # Check that all specified subfields exist
-        for operator, threshold, subfield in self._filters:
-            if subfield is None:
-                raise RuntimeError(f"Multi-field plugin {self.alias} requires subfield specification for filters")
-            expected_field_name = f"{self.alias}[{subfield}]"
-            if expected_field_name not in df.columns:
-                available_subfields = list(field_type_dict.keys())
-                raise RuntimeError(f"Subfield '{subfield}' not found. Available subfields: {available_subfields}")
-        
-        # Determine which items to keep based on all filters
-        keep_indices = []
-        filtered_items = []
-        
-        for idx, basket_item in enumerate(runtime.basket_items()):
-            if self._passes_all_multi_field_filters(df, idx, field_type_dict):
-                keep_indices.append(idx)
-                filtered_items.append(basket_item)
-        
-        self._update_runtime_with_filtered_items(runtime, keep_indices, filtered_items)
-    
-    def _update_runtime_with_filtered_items(self, runtime: 'BasketRuntime', keep_indices: list, filtered_items: list):
-        """Update runtime with filtered items"""
-        # Create new basket with filtered items
-        filtered_basket = Basket(items=filtered_items, name=runtime.basket()._name)
-        
-        # Filter the accumulated DataFrame to keep only the corresponding rows
-        runtime._df = runtime._df.iloc[keep_indices].reset_index(drop=True)
-        
-        # Filter and reindex the output data (time series with date indices)
-        old_items = runtime._output_data._items
-        new_items = {}
-        for new_idx, old_idx in enumerate(keep_indices):
-            if old_idx in old_items:
-                new_items[new_idx] = old_items[old_idx]
-        runtime._output_data._items = new_items
-        
-        # Update the basket reference
-        runtime._basket = filtered_basket
-    
-    def _passes_all_filters(self, field_value: Any) -> bool:
-        """Check if field value passes all filters"""
-        for filter_tuple in self._filters:
-            if len(filter_tuple) == 2:
-                operator, threshold = filter_tuple
-            else:
-                operator, threshold, _ = filter_tuple  # Ignore subfield for single-field plugins
-            if not self._compare_value(field_value, operator, threshold):
-                return False
-        return True
-    
-    def _passes_all_multi_field_filters(self, df: pd.DataFrame, row_idx: int, field_type_dict: dict) -> bool:
-        """Check if multi-field values pass all filters"""
-        for operator, threshold, subfield in self._filters:
-            field_name = f"{self.alias}[{subfield}]"
-            field_value = df.iloc[row_idx][field_name]
-            if not self._compare_value(field_value, operator, threshold):
-                return False
-        return True
-    
-    def _compare_value(self, field_value: Any, operator: str, threshold: Any) -> bool:
-        """Compare field value with threshold using the specified operator"""
-        # Handle None values
-        if operator == 'is_none':
-            return field_value is None
-        elif operator == 'is_not_none':
-            return field_value is not None
-        elif field_value is None:
-            return False
-            
-        try:
-            if operator == '>':
-                return field_value > threshold
-            elif operator == '>=':
-                return field_value >= threshold
-            elif operator == '<':
-                return field_value < threshold
-            elif operator == '<=':
-                return field_value <= threshold
-            elif operator == '==':
-                return field_value == threshold
-            elif operator == '!=':
-                return field_value != threshold
-            elif operator == 'contains':
-                return str(threshold) in str(field_value)
-            elif operator == 'in':
-                return field_value in threshold
-            else:
-                raise ValueError(f"Unsupported operator: {operator}")
-        except (TypeError, ValueError):
-            return False
-
-    # Mathematical filtering methods that return self for chaining
-    def min(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for values >= threshold: plugin.min(value) or plugin.min(value, subfield="fieldname")"""
-        self._filters.append(('>=', _parse_filter_value(value), subfield))
-        return self
-    
-    def max(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for values <= threshold: plugin.max(value) or plugin.max(value, subfield="fieldname")"""
-        self._filters.append(('<=', _parse_filter_value(value), subfield))
-        return self
-    
-    def equals(self, value: Union[float, int, str, datetime], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for exact equality: plugin.equals(value) or plugin.equals(value, subfield="fieldname")"""
-        self._filters.append(('==', _parse_filter_value(value), subfield))
-        return self
-    
-    def exclude(self, value: Union[float, int, str, list, tuple, set], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for inequality: plugin.exclude(value) or plugin.exclude(value, subfield="fieldname")"""
-        if isinstance(value, (list, tuple, set)):
-            # Add multiple != filters for each value in the collection
-            for item in value:
-                self._filters.append(('!=', item, subfield))
-        else:
-            # Single value exclusion
-            self._filters.append(('!=', _parse_filter_value(value), subfield))
-        return self
-    
-    def true(self, *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for boolean fields that are True: plugin.true() or plugin.true(subfield="fieldname")"""
-        self._filters.append(('==', True, subfield))
-        return self
-    
-    def false(self, *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for boolean fields that are False: plugin.false() or plugin.false(subfield="fieldname")"""
-        self._filters.append(('==', False, subfield))
-        return self
-    
-    def contains(self, value: Union[float, int, str], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for substring: plugin.contains(value) or plugin.contains(value, subfield="fieldname")"""
-        self._filters.append(('contains', _parse_filter_value(value), subfield))
-        return self
-    
-    def any(self, collection: Union[list, tuple, set], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for membership: plugin.any(collection) or plugin.any(collection, subfield="fieldname")"""
-        self._filters.append(('in', collection, subfield))
-        return self
-    
-    def within(self, from_value: Union[float, int], to_value: Union[float, int], *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for values within range: plugin.within(from_value, to_value) or plugin.within(from_value, to_value, subfield="fieldname")"""
-        self._filters.append(('>=', _parse_filter_value(from_value), subfield))
-        self._filters.append(('<=', _parse_filter_value(to_value), subfield))
-        return self
-    
-    def around(self, value: Union[float, int], precision: float = 0.1, *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for values within percentage range: plugin.around(value, precision=0.1) or plugin.around(value, precision=0.1, subfield="fieldname")"""
-        # precision of 0.1 means +/- 10%
-        lower_bound = _parse_filter_value(value) / (1 + precision)
-        upper_bound = _parse_filter_value(value) * (1 + precision)
-        self._filters.append(('>=', lower_bound, subfield))
-        self._filters.append(('<=', upper_bound, subfield))
-        return self
-    
-    def none(self, *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for None/null values: plugin.none() or plugin.none(subfield="fieldname")"""
-        self._filters.append(('is_none', None, subfield))
-        return self
-    
-    def not_none(self, *, subfield: str = None) -> 'FieldPlugin':
-        """Filter for non-None values: plugin.not_none() or plugin.not_none(subfield="fieldname")"""
-        self._filters.append(('is_not_none', None, subfield))
-        return self
-
-class SeriesPlugin(FieldPlugin):
-
-    def __init__(self, alias: Optional[str] = None):
-        super().__init__(alias)
-
-    @abstractmethod
-    def field_value(self, item: BasketItem) -> pd.DataFrame:
-        pass
-
-    def field_type(self) -> type:
-        return pd.DataFrame
-
-
 class BasketPipeline:
     """A pipeline of several chained plugins"""
 
@@ -474,6 +157,9 @@ class BasketRuntime:
 
     def __call__(self, arg):
         self._basket.__call__(arg)
+
+    def __len__(self):
+        return self._basket.__len__()
 
     def __repr__(self) -> str:
         return repr(self.df())
@@ -565,6 +251,39 @@ class BasketRuntime:
 
     def output_data(self):
         return self._output_data
+
+    def remove_items(self, indices_to_remove: List[int]):
+        """
+        Remove items from the runtime by their indices.
+        
+        Args:
+            indices_to_remove: List of row indices to remove (sorted in descending order)
+        """
+        if not indices_to_remove:
+            return
+            
+        # Remove from DataFrame (must be done in reverse order to maintain indices)
+        indices_to_remove.sort(reverse=True)
+        for idx in indices_to_remove:
+            self._df = self._df.drop(self._df.index[idx]).reset_index(drop=True)
+        
+        # Remove from output data
+        if hasattr(self, '_output_data') and self._output_data is not None:
+            old_items = self._output_data._items
+            new_items = {}
+            
+            # Remap remaining items with new indices
+            remaining_indices = [i for i in range(len(self._basket.items())) if i not in set(indices_to_remove)]
+            for new_idx, old_idx in enumerate(remaining_indices):
+                if old_idx in old_items:
+                    new_items[new_idx] = old_items[old_idx]
+            
+            self._output_data._items = new_items
+        
+        # Create new basket with remaining items
+        remaining_items = [item for i, item in enumerate(self._basket.items()) if i not in set(indices_to_remove)]
+        from fins.entities import Basket  # Import here to avoid circular import
+        self._basket = Basket(items=remaining_items, name=self._basket._name)
 
 
 

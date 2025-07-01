@@ -5,7 +5,7 @@ PE (Price/Earnings) Column
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class Pe(FieldPlugin):
@@ -17,8 +17,8 @@ class Pe(FieldPlugin):
             alias = 'PE'
         super().__init__(alias=alias)
 
-    def field_type(self) -> type:
-        return float
+    def field_types(self):
+        return [("", float)]
 
-    def field_value(self, item: BasketItem):
-        return item.symbol().get_analytics("pe_ratio_ttm")
+    def field_values(self, item: BasketItem):
+        return [item.symbol().get_analytics("pe_ratio_ttm")]

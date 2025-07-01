@@ -5,7 +5,7 @@ Net Profit Margin Column
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class Npm(FieldPlugin):
@@ -17,8 +17,8 @@ class Npm(FieldPlugin):
             alias = 'NPM'
         super().__init__(alias=alias)
 
-    def field_type(self) -> type:
-        return float
+    def field_types(self):
+        return [("", float)]
 
-    def field_value(self, item: BasketItem):
-        return item.symbol().get_analytics("net_profit_margin_ttm")
+    def field_values(self, item: BasketItem):
+        return [item.symbol().get_analytics("net_profit_margin_ttm")]

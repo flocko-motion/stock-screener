@@ -5,6 +5,48 @@ Utility functions and classes for the FINS application.
 import time
 
 
+def format_value(value) -> str:
+    """
+    Format a value for inclusion in Python code.
+    
+    Args:
+        value: Any value to format
+        
+    Returns:
+        String representation suitable for Python code
+    """
+    if value is None:
+        return "None"
+    elif isinstance(value, str):
+        return f"'{value}'"
+    elif isinstance(value, bool):
+        return str(value)
+    elif isinstance(value, (int, float)):
+        return str(value)
+    elif isinstance(value, (list, tuple)):
+        formatted_items = [format_value(item) for item in value]
+        if isinstance(value, list):
+            return f"[{', '.join(formatted_items)}]"
+        else:
+            return f"({', '.join(formatted_items)})"
+    elif isinstance(value, dict):
+        formatted_items = [f"{format_value(k)}: {format_value(v)}" for k, v in value.items()]
+        return f"{{{', '.join(formatted_items)}}}"
+    elif isinstance(value, set):
+        formatted_items = [format_value(item) for item in value]
+        return f"[{', '.join(formatted_items)}]"  # Represent as list for readability
+    elif hasattr(value, 'isoformat') and hasattr(value, 'date'):  # datetime.date objects
+        if hasattr(value, 'time'):  # datetime.datetime
+            return f"datetime.datetime.fromisoformat('{value.isoformat()}')"
+        else:  # datetime.date
+            return f"datetime.date.fromisoformat('{value.isoformat()}')"
+    elif hasattr(value, '__class__'):
+        # For other objects, try to represent them reasonably
+        return f"{value.__class__.__name__}(...)"
+    else:
+        return repr(value)
+
+
 def format_duration(seconds: float) -> str:
     """
     Format duration in seconds to a human-readable string.

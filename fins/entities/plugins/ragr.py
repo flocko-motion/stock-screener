@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from .. import Plugin, BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class Ragr(FieldPlugin):
@@ -66,10 +66,10 @@ class Ragr(FieldPlugin):
         self._date_from = date_from
         self._date_to = date_to
 
-    def field_type(self) -> Union[type, dict]:
-        return {"Avg": Optional[float], "Med": Optional[float], "Sigma": Optional[float]}
+    def field_types(self):
+        return [("Avg", Optional[float]), ("Med", Optional[float]), ("Sigma", Optional[float])]
 
-    def field_value(self, item: BasketItem):
+    def field_values(self, item: BasketItem):
         df = item.symbol().get_monthly()
         
         if df.empty:
@@ -83,7 +83,7 @@ class Ragr(FieldPlugin):
             df = df[df['date'] <= pd.to_datetime(self._date_to)]
         
         if df.empty or len(df) < 13:  # Need at least 13 months for 12-month rolling
-            return None
+            return [None, None, None]
         
         # QUALITY FILTER LAYER 1: Remove unreasonable price data
         # Filter out prices below $0.10 (likely data errors, splits not adjusted, etc.)
@@ -91,7 +91,7 @@ class Ragr(FieldPlugin):
         df_clean = df[df.iloc[:, 1] >= min_reasonable_price].copy()
         
         if df_clean.empty or len(df_clean) < 13:
-            return None
+            return [None, None, None]
         
         # QUALITY FILTER LAYER 2: Calculate rolling AGR with outlier detection
         rolling_agr_values = []
@@ -116,7 +116,7 @@ class Ragr(FieldPlugin):
             rolling_agr_values.append(agr)
         
         if len(rolling_agr_values) < 5:  # Need minimum viable sample
-            return None
+            return [None, None, None]
         
         # QUALITY FILTER LAYER 4: Remove only the most extreme outliers (preserve financial volatility)
         rolling_agr_array = np.array(rolling_agr_values)
@@ -127,11 +127,11 @@ class Ragr(FieldPlugin):
         filtered_agr_values = rolling_agr_array[extreme_outlier_mask]
         
         if len(filtered_agr_values) < 5:  # Need minimum viable sample after filtering
-            return None
+            return [None, None, None]
             
         # Calculate mean, median, and standard deviation on lightly filtered data
         mean_agr = np.mean(filtered_agr_values)
         median_agr = np.median(filtered_agr_values)
         sigma_agr = np.std(filtered_agr_values, ddof=1)  # Sample standard deviation
         
-        return (mean_agr, median_agr, sigma_agr) 
+        return [mean_agr, median_agr, sigma_agr] 

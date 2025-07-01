@@ -1,7 +1,7 @@
 from typing import Optional
 
 from .. import BasketItem
-from ..plugin import FieldPlugin, SeriesPlugin
+from ..plugin_series import SeriesPlugin
 from ...financial import Symbol
 
 class Price(SeriesPlugin):

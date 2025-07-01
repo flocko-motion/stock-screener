@@ -6,7 +6,7 @@ from typing import Optional, Union
 import pandas as pd
 
 from .. import Plugin, BasketItem
-from ..plugin import FieldPlugin
+from ..plugin_field import FieldPlugin
 
 
 class Cagr(FieldPlugin):
@@ -86,10 +86,10 @@ class Cagr(FieldPlugin):
         self._date_from = date_from
         self._date_to = date_to
 
-    def field_type(self) -> type:
-        return Optional[float]
+    def field_types(self):
+        return [("", Optional[float])]
 
-    def field_value(self, item: BasketItem):
+    def field_values(self, item: BasketItem):
         df = item.symbol().get_weekly() if self._resolution == 'y' else item.symbol().get_monthly()
         
         if df.empty:
@@ -103,7 +103,7 @@ class Cagr(FieldPlugin):
             df = df[df['date'] <= pd.to_datetime(self._date_to)]
         
         if df.empty:
-            return None
+            return [None]
             
         start_price = df.iloc[0, 1]  # First price in range
         end_price = df.iloc[-1, 1]   # Last price in range
@@ -111,17 +111,17 @@ class Cagr(FieldPlugin):
         end_date = df.iloc[-1, 0]    # Last date in range
         
         if start_price <= 0 or end_price <= 0:
-            return None
+            return [None]
             
         # Calculate years between dates
         time_diff = end_date - start_date
         years = time_diff.days / 365.25
         
         if years <= 0:
-            return None
+            return [None]
             
         # Calculate CAGR
         cagr = (end_price / start_price) ** (1 / years) - 1
         
-        return cagr
+        return [cagr]
 

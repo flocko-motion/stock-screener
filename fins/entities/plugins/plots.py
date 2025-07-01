@@ -3,7 +3,7 @@ from typing import Optional
 import pandas as pd
 
 from .. import BasketItem
-from ..plugin import FieldPlugin, SeriesPlugin, Plugin, OutputPlugin, OutputData
+from ..plugin import OutputPlugin, OutputData
 from ...financial import Symbol
 
 

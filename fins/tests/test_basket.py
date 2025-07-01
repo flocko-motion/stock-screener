@@ -120,6 +120,39 @@ class BasketTests(unittest.TestCase):
         except RuntimeError as e:
             assert str(e).startswith('Plugin foo already exists in pipe')
 
+    def test_plugins_alive(self):
+        res = Basket(AAPL, VBLTX, GOOG)(Alive().true())
+        df = res.df()
+        self.assertEqual(len(res), 2)
+        alive_value = df.iloc[0]['Alive']
+        self.assertTrue(isinstance(alive_value, (bool, np.bool_)))
+        print(df)
+
+    def test_plugins_age(self):
+        res = Basket(AAPL, GOOG, META, CRCL)(Age().min(10))
+        df = res.df()
+        assert len(df) == 3
+        for age in df['Age']:
+            self.assertGreaterEqual(age, 10)
+            self.assertIsInstance(age, (float, int))
+
+    def test_plugins_cagr(self):
+        res = Basket(AAPL, GOOG, META)(Cagr())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['CAGR'])
+
+    def test_plugins_crop(self):
+        res = Basket(AAPL, GOOG, META)(WeeklyClose() >> Crop() >> PlotEach())
+        data = res.output_data()
+
+
+    def test_plugins_description(self):
+        res = Basket(AAPL, GOOG, META)(Description().contains("designs"))
+        df = res.df()
+        assert len(df) == 1
+        for d in df['Description']:
+            self.assertIsInstance(d, str)
+
     def test_plugins_update(self):
         res = Basket(AAPL * 1.5)(Name() >> LastUpdatePrice() >> LastUpdateProfile())
         df = res.df()
@@ -131,19 +164,13 @@ class BasketTests(unittest.TestCase):
         self.assertGreater(df2.iloc[0]['LastUpdatePrice'], df.iloc[0]['LastUpdatePrice'])
         self.assertGreater(df2.iloc[0]['LastUpdateProfile'], df.iloc[0]['LastUpdateProfile'])
 
+
     def test_plugins_simple_price(self):
         res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
 
-    def test_plugins_crop_time_series(self):
-        res = Basket(AAPL, GOOG, META)(WeeklyClose() >> Crop() >> PlotEach())
-        data = res.output_data()
 
-    def test_plugins_cagr(self):
-        res = Basket(AAPL, GOOG, META)(Cagr())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['CAGR'])
 
     def test_plugins_ragr(self):
         res = Basket(CVBF)(Ragr())
@@ -173,6 +200,42 @@ class BasketTests(unittest.TestCase):
         if efficiency is not None:
             self.assertIsInstance(efficiency, (float, int))
             self.assertGreater(efficiency, 0)  # Should be positive for our test data
+
+    def test_plugins_log_transformation(self):
+        # Test log transformation on MCap
+        res = Basket(AAPL)(Mcap().log())
+        df = res.df()
+        self.assertIn('MCap', df.columns)
+        
+        log_mcap = df.iloc[0]['MCap']
+        if log_mcap is not None:
+            self.assertIsInstance(log_mcap, (float, int))
+            # log10 of market cap should be much smaller than original
+            # AAPL market cap is typically >1 trillion, so log10 should be ~12
+            self.assertGreater(log_mcap, 10)  # Should be > 10 
+            self.assertLess(log_mcap, 15)     # Should be < 15
+            
+    def test_plugins_log_with_filter(self):
+        # Test log transformation with subsequent filtering
+        res = Basket(AAPL, GOOG)(Mcap().log().min(11))
+        df = res.df()
+        self.assertIn('MCap', df.columns)
+        
+        # All values should be >= 11 (log10 scale)
+        for mcap_log in df['MCap'].dropna():
+            self.assertGreaterEqual(mcap_log, 11)
+            
+    def test_plugins_ragr_log_subfield(self):
+        # Test log transformation on multi-field plugin subfield
+        res = Basket(CVBF)(Ragr().log(subfield="Sigma"))
+        df = res.df()
+        self.assertIn('RAGR[Sigma]', df.columns)
+        
+        log_sigma = df.iloc[0]['RAGR[Sigma]']
+        if log_sigma is not None:
+            self.assertIsInstance(log_sigma, (float, int))
+            # log10 of sigma (typically 0.6) should be negative
+            self.assertLess(log_sigma, 0)
 
     def test_plugins_mcap(self):
         res = Basket(AAPL, GOOG, META)(Mcap())
@@ -220,26 +283,7 @@ class BasketTests(unittest.TestCase):
             from datetime import datetime
             self.assertIsInstance(inception_date, datetime)
 
-    def test_plugins_alive(self):
-        res = Basket(AAPL, GOOG, META)(Alive())
-        df = res.df()
-        alive_value = df.iloc[0]['Alive']
-        self.assertTrue(isinstance(alive_value, (bool, np.bool_)))
 
-    def test_plugins_age(self):
-        res = Basket(AAPL, GOOG, META)(Age())
-        df = res.df()
-        # Should return age in years as float (or None)
-        age_value = df.iloc[0]['Age']
-        if age_value is not None:
-            self.assertIsInstance(age_value, (float, int))
-            self.assertGreater(age_value, 0)  # Should be positive years
-
-    def test_filter_age(self):
-        df = Basket(AAPL, GOOG, META)(Age().min(10)).df()
-        self.assertIn('Age', df.columns)
-        for age in df['Age'].dropna():
-            self.assertGreaterEqual(age, 10)
 
     def test_filter_mcap(self):
         df = Basket(AAPL, GOOG, META)(Mcap().min(1_000_000_000)).df()
@@ -403,10 +447,6 @@ class BasketTests(unittest.TestCase):
         self.assertEqual(items[0].ticker, "AAPL")
         self.assertEqual(items[1].ticker, "GOOG")
 
-    def test_alive(self):
-        # we test with a symbol of which we know, that is has no data - it shouldn't pass the Alive() filter
-        result = Basket(AAPL, VBLTX, GOOG)(Alive().true()).basket()
-        self.assertEqual(len(result), 2)
 
     def test_no_inception(self):
         # The Screen() command should automatically filter out invalid (without inception) symbols
