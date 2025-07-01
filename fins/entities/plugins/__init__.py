@@ -10,7 +10,7 @@ from .alive import Alive
 from .cagr import Cagr
 from .crop import Crop
 from .description import Description
-from .dividend_yield import DividendYield
+from .dividend_yield import DivYield
 from .inception import Inception
 from .industry import Industry
 from .mcap import Mcap
@@ -23,8 +23,6 @@ from .ratio import Ratio
 from .roe import Roe
 from .vol import Vol
 from .last_update import LastUpdate
-from .last_price_update import LastUpdatePrice
-from .last_profile_update import LastUpdateProfile
 from .update import Update
 from .price import MonthlyClose, WeeklyClose
 from .plots import PlotEach, PlotAll
@@ -49,12 +47,10 @@ __all__ = [
     'Cagr',
     'Crop',
     'Description',
-    'DividendYield',
+	'DivYield',
     'Inception',
     'Industry',
     'LastUpdate',
-    'LastUpdateProfile',
-    'LastUpdatePrice',
     'Mcap',
     'MonthlyClose',
     'Name',

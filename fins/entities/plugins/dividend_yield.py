@@ -8,7 +8,7 @@ from .. import BasketItem
 from ..plugin_field import FieldPlugin
 
 
-class DividendYield(FieldPlugin):
+class DivYield(FieldPlugin):
     """ Add 'Dividend Yield' field """
 
     def __init__(self, alias: Optional[str] = None):

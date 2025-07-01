@@ -89,7 +89,7 @@ class BasketTests(unittest.TestCase):
             "GOOG": 1.5,
         })
 
-    def test_minimal_plugin_application(self):
+    def test_plugin_minimal_plugin_application(self):
         res = Basket(AAPL * 1.5, GOOG * 10)(Industry())
         df = res.df()
         
@@ -120,6 +120,15 @@ class BasketTests(unittest.TestCase):
         except RuntimeError as e:
             assert str(e).startswith('Plugin foo already exists in pipe')
 
+    def test_plugins_chaining(self):
+        df = Basket(AAPL, GOOG, META)(Age().min(10) >> Name() >> Mcap()).df()
+        self.assertIn('Age', df.columns)
+        self.assertIn('Name', df.columns)
+        self.assertIn('MCap', df.columns)
+        for age in df['Age'].dropna():
+            self.assertGreaterEqual(age, 10)
+
+
     def test_plugins_alive(self):
         res = Basket(AAPL, VBLTX, GOOG)(Alive().true())
         df = res.df()
@@ -145,7 +154,6 @@ class BasketTests(unittest.TestCase):
         res = Basket(AAPL, GOOG, META)(WeeklyClose() >> Crop() >> PlotEach())
         data = res.output_data()
 
-
     def test_plugins_description(self):
         res = Basket(AAPL, GOOG, META)(Description().contains("designs"))
         df = res.df()
@@ -153,24 +161,94 @@ class BasketTests(unittest.TestCase):
         for d in df['Description']:
             self.assertIsInstance(d, str)
 
-    def test_plugins_update(self):
-        res = Basket(AAPL * 1.5)(Name() >> LastUpdatePrice() >> LastUpdateProfile())
+    def test_plugins_dividend_yield(self):
+        res = Basket(AAPL, GOOG, META)(DivYield())
         df = res.df()
-        self.assertIsNotNone(df.iloc[0]['LastUpdatePrice'])
-        self.assertIsNotNone(df.iloc[0]['LastUpdateProfile'])
+        self.assertIsNotNone(df.iloc[0]['DivYield'])
 
-        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdatePrice() >> LastUpdateProfile())
+    def test_plugins_inception(self):
+        res = Basket(AAPL, GOOG, META)(Inception())
+        df = res.df()
+        # Inception date might be None for some symbols
+        inception_date = df.iloc[0]['Inception']
+        if inception_date is not None:
+            from datetime import datetime
+            self.assertIsInstance(inception_date, datetime)
+
+    def test_no_inception(self):
+        # The Screen() command should automatically filter out invalid (without inception) symbols
+        no_inception = Screen(mcap_min=2 * Billion, limit=6000)(Inception().none()).basket()
+        assert len(no_inception) == 0
+
+    def test_inception_filter(self):
+        # CRCL should be filtered out, because it's inception is in 2025
+        res = Basket(GOOG, CRCL, AAPL)(Inception().max("2015-01-01"))
+        assert len(res.basket()) == 2
+        assert GOOG in res.basket()
+        assert AAPL in res.basket()
+        print(res.df())
+
+    def test_plugin_industry(self):
+        res = Basket(AAPL * 1.5, GOOG * 10)(Industry())
+        df = res.df()
+
+        self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
+        self.assertEqual(df.iloc[1]['Industry'], 'Internet Content & Information')
+
+    def test_plugins_update(self):
+        res = Basket(AAPL * 1.5)(Name() >> LastUpdate())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['LastUpdate'])
+
+        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdate(combined=False))
         df2 = res2.df()
-        self.assertGreater(df2.iloc[0]['LastUpdatePrice'], df.iloc[0]['LastUpdatePrice'])
-        self.assertGreater(df2.iloc[0]['LastUpdateProfile'], df.iloc[0]['LastUpdateProfile'])
+        self.assertGreater(df2.iloc[0]['LastUpdate[Price]'], df.iloc[0]['LastUpdate'])
+        self.assertGreater(df2.iloc[0]['LastUpdate[Profile]'], df.iloc[0]['LastUpdate'])
 
+
+    def test_plugins_mcap(self):
+        res = Basket(AAPL, GOOG, META)(Mcap())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['MCap'])
+        self.assertGreater(df.iloc[0]['MCap'], 0)
+
+    def test_plugins_mcap_log(self):
+        res = Basket(AAPL)(Mcap().log())
+        df = res.df()
+        self.assertIn('MCap', df.columns)
+        log_mcap = df.iloc[0]['MCap']
+        if log_mcap is not None:
+            self.assertIsInstance(log_mcap, (float, int))
+            self.assertGreater(log_mcap, 10)  # Should be > 10
+            self.assertLess(log_mcap, 15)  # Should be < 15
+
+    def test_plugins_mcap_log_filtered(self):
+        # Test log transformation with subsequent filtering
+        res = Basket(AAPL, GOOG)(Mcap().log().min(11))
+        df = res.df()
+        self.assertIn('MCap', df.columns)
+        for mcap_log in df['MCap'].dropna():
+            self.assertGreaterEqual(mcap_log, 11)
+
+    def test_plugins_npm(self):
+        res = Basket(AAPL, GOOG, META)(Npm())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['NPM'])
+
+    def test_plugins_pe(self):
+        res = Basket(AAPL, GOOG, META)(Pe())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['PE'])
+
+    def test_plugins_peg(self):
+        res = Basket(AAPL, GOOG, META)(Peg())
+        df = res.df()
+        self.assertIsNotNone(df.iloc[0]['PEG'])
 
     def test_plugins_simple_price(self):
         res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
-
-
 
     def test_plugins_ragr(self):
         res = Basket(CVBF)(Ragr())
@@ -191,6 +269,18 @@ class BasketTests(unittest.TestCase):
         if ragr_sigma is not None:
             self.assertIsInstance(ragr_sigma, (float, int))
 
+    def test_plugins_ragr_log_subfield(self):
+        # Test log transformation on multi-field plugin subfield
+        res = Basket(CVBF)(Ragr().log(subfield="Sigma"))
+        df = res.df()
+        self.assertIn('RAGR[Sigma]', df.columns)
+
+        log_sigma = df.iloc[0]['RAGR[Sigma]']
+        if log_sigma is not None:
+            self.assertIsInstance(log_sigma, (float, int))
+            # log10 of sigma (typically 0.6) should be negative
+            self.assertLess(log_sigma, 0)
+
     def test_plugins_ratio(self):
         res = Basket(CVBF)(Ragr() >> Ratio("RAGR[Med]", "RAGR[Sigma]", alias="efficiency"))
         df = res.df()
@@ -201,72 +291,15 @@ class BasketTests(unittest.TestCase):
             self.assertIsInstance(efficiency, (float, int))
             self.assertGreater(efficiency, 0)  # Should be positive for our test data
 
-    def test_plugins_log_transformation(self):
-        # Test log transformation on MCap
-        res = Basket(AAPL)(Mcap().log())
-        df = res.df()
-        self.assertIn('MCap', df.columns)
-        
-        log_mcap = df.iloc[0]['MCap']
-        if log_mcap is not None:
-            self.assertIsInstance(log_mcap, (float, int))
-            # log10 of market cap should be much smaller than original
-            # AAPL market cap is typically >1 trillion, so log10 should be ~12
-            self.assertGreater(log_mcap, 10)  # Should be > 10 
-            self.assertLess(log_mcap, 15)     # Should be < 15
-            
-    def test_plugins_log_with_filter(self):
-        # Test log transformation with subsequent filtering
-        res = Basket(AAPL, GOOG)(Mcap().log().min(11))
-        df = res.df()
-        self.assertIn('MCap', df.columns)
-        
-        # All values should be >= 11 (log10 scale)
-        for mcap_log in df['MCap'].dropna():
-            self.assertGreaterEqual(mcap_log, 11)
-            
-    def test_plugins_ragr_log_subfield(self):
-        # Test log transformation on multi-field plugin subfield
-        res = Basket(CVBF)(Ragr().log(subfield="Sigma"))
-        df = res.df()
-        self.assertIn('RAGR[Sigma]', df.columns)
-        
-        log_sigma = df.iloc[0]['RAGR[Sigma]']
-        if log_sigma is not None:
-            self.assertIsInstance(log_sigma, (float, int))
-            # log10 of sigma (typically 0.6) should be negative
-            self.assertLess(log_sigma, 0)
-
-    def test_plugins_mcap(self):
-        res = Basket(AAPL, GOOG, META)(Mcap())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['MCap'])
-        self.assertGreater(df.iloc[0]['MCap'], 0)
-
-    def test_plugins_dividend_yield(self):
-        res = Basket(AAPL, GOOG, META)(DividendYield())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['DividendYield'])
-
-    def test_plugins_npm(self):
-        res = Basket(AAPL, GOOG, META)(Npm())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['NPM'])
-
-    def test_plugins_pe(self):
-        res = Basket(AAPL, GOOG, META)(Pe())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['PE'])
-
-    def test_plugins_peg(self):
-        res = Basket(AAPL, GOOG, META)(Peg())
-        df = res.df()
-        self.assertIsNotNone(df.iloc[0]['PEG'])
-
     def test_plugins_roe(self):
         res = Basket(AAPL, GOOG, META)(Roe())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['ROE'])
+
+    def test_plugins_sector_string_equality(self):
+        df = Basket(AAPL, GOOG, META)(Sector().equals("Technology")).df()
+        for sector in df['Sector'].dropna():
+            self.assertEqual(sector, "Technology")
 
     def test_plugins_vol(self):
         res = Basket(AAPL, GOOG, META)(Vol())
@@ -274,35 +307,7 @@ class BasketTests(unittest.TestCase):
         self.assertIsNotNone(df.iloc[0]['Volume'])
         self.assertGreater(df.iloc[0]['Volume'], 0)
 
-    def test_plugins_inception(self):
-        res = Basket(AAPL, GOOG, META)(Inception())
-        df = res.df()
-        # Inception date might be None for some symbols
-        inception_date = df.iloc[0]['Inception']
-        if inception_date is not None:
-            from datetime import datetime
-            self.assertIsInstance(inception_date, datetime)
 
-
-
-    def test_filter_mcap(self):
-        df = Basket(AAPL, GOOG, META)(Mcap().min(1_000_000_000)).df()
-        self.assertIn('MCap', df.columns)
-        for mcap in df['MCap'].dropna():
-            self.assertGreaterEqual(mcap, 1_000_000_000)
-
-    def test_filter_chaining(self):
-        df = Basket(AAPL, GOOG, META)(Age().min(10) >> Name() >> Mcap()).df()
-        self.assertIn('Age', df.columns)
-        self.assertIn('Name', df.columns)
-        self.assertIn('MCap', df.columns)
-        for age in df['Age'].dropna():
-            self.assertGreaterEqual(age, 10)
-
-    def test_filter_string_equality(self):
-        df = Basket(AAPL, GOOG, META)(Sector().equals("Technology")).df()
-        for sector in df['Sector'].dropna():
-            self.assertEqual(sector, "Technology")
 
     def test_filter_none_handling(self):
         df = Basket(AAPL, GOOG, META)(Pe().min(0)).df()
@@ -380,19 +385,8 @@ class BasketTests(unittest.TestCase):
             for value in df_not_alive['Alive'].dropna():
                 self.assertFalse(value)
 
-    # def test_big_update(self):
-    #     fmp.DEBUG = True
-    #     candidates = Screen(mcap_min=2 * Billion, limit=5000)
-    #     print(f"Candidates for further screening: {len(candidates)}")
-    #     print(candidates.to_dict())
-    #     while True:
-    #         try:
-    #             candidates(Update(older_than="2025-06-01", max=100))
-    #         except Exception as e:
-    #             print(f"Exception during update: {e}")
-    #             time.sleep(120)
 
-    def test_top_plugin(self):
+    def test_plugin_top(self):
         """Test the Top plugin keeps only the first n items"""
         # Create a basket with 5 items
         original_basket = Basket(AAPL, GOOG, META, MSFT, TSLA)
@@ -446,20 +440,6 @@ class BasketTests(unittest.TestCase):
         items = result.basket_items()
         self.assertEqual(items[0].ticker, "AAPL")
         self.assertEqual(items[1].ticker, "GOOG")
-
-
-    def test_no_inception(self):
-        # The Screen() command should automatically filter out invalid (without inception) symbols
-        no_inception = Screen(mcap_min=2 * Billion, limit=6000)(Inception().none()).basket()
-        assert len(no_inception) == 0
-
-    def test_inception_filter(self):
-        # CRCL should be filtered out, because it's inception is in 2025
-        res = Basket(GOOG, CRCL, AAPL)(Inception().max("2015-01-01"))
-        assert len(res.basket()) == 2
-        assert GOOG in res.basket()
-        assert AAPL in res.basket()
-        print(res.df())
 
 
 
