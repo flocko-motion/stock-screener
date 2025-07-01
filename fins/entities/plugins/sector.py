@@ -21,4 +21,4 @@ class Sector(FieldPlugin):
         return [("", Optional[str])]
         
     def field_values(self, item: BasketItem):
-        return [item.symbol().get_profile("sector")]
+        return [item.symbol().sector]
