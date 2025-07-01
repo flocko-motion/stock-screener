@@ -98,7 +98,7 @@ class OutputData:
         return self._items
 
     def set_series(self, row_index: int, field_name: str, value: pd.DataFrame):
-        if not row_index in self._series:
+        if row_index not in self._items:
             self._items[row_index] = dict[str, pd.DataFrame]()
         self._items[row_index][field_name] = value
 

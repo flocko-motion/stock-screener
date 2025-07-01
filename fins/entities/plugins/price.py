@@ -9,11 +9,10 @@ class Price(SeriesPlugin):
         self._register_call_args(alias=alias, ticker=ticker, resolution=resolution, metric=metric)
         self._resolution = resolution
         self._metric = metric
+        self._ticker = ticker
         if alias is None:
             alias = (ticker or "") + self.resolution_name() + self.metric_name()
         super().__init__(alias=alias)
-        self._ticker = ticker
-
 
     def field_value(self, item: BasketItem):
         symbol = item.symbol() if self._ticker is None else Symbol.get(self._ticker)
@@ -32,7 +31,6 @@ class Price(SeriesPlugin):
 
 class WeeklyClose(Price):
     """ Add 'WeeklyClose' series """
-
     def __init__(self, alias: Optional[str] = None, ticker: Optional[str] = None):
         self._register_call_args(alias=alias, ticker=ticker)
         super().__init__(alias=alias, ticker=ticker, resolution="w", metric="close")
