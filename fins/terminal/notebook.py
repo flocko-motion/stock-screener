@@ -249,8 +249,8 @@ def Note(note_id: str) -> Optional[NoteEntity]:
         # Show type-specific info
         if hasattr(note, 'status'):
             print(f"Status: {note.status}")
-        if hasattr(note, 'source'):
-            print(f"Source: {note.source}")
+        if hasattr(note, 'sources') and note.sources:
+            print(f"Sources: {', '.join(note.sources)}")
         if hasattr(note, 'confidence'):
             print(f"Confidence: {note.confidence}")
         if hasattr(note, 'time_horizon'):

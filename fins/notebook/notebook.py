@@ -53,14 +53,14 @@ class Notebook:
                     'metadata': note.metadata,
                     'created_at': note.created_at.isoformat(),
                     'updated_at': note.updated_at.isoformat(),
-                    'baskets': {name: basket.to_dict() for name, basket in note.baskets.items()}
+                    'baskets': {name: basket.to_dict() for name, basket in note.basket().items()}
                 }
                 
                 # Add type-specific fields
                 if isinstance(note, (Trade, Strategy)):
                     data['status'] = note.status
                 if isinstance(note, Fact):
-                    data['source'] = note.source
+                    data['sources'] = note._sources
                     data['confidence'] = note.confidence
                 if isinstance(note, Strategy):
                     data['time_horizon'] = note.time_horizon
@@ -231,13 +231,20 @@ class Notebook:
             'metadata': metadata
         }
         
+        # Handle Fact sources (backward compatibility)
+        fact_source = None
+        if data.get('sources'):
+            fact_source = data['sources'][0] if data['sources'] else None
+        elif data.get('source'):
+            fact_source = data['source']
+        
         # Type-specific kwargs and classes
         type_configs = {
             'principle': (Principle, {}),
             'observation': (Observation, {}),
             'trade': (Trade, {'status': data.get('status', 'executed')}),
             'fact': (Fact, {
-                'source': data.get('source'),
+                'source': fact_source,
                 'confidence': data.get('confidence', 1.0)
             }),
             'strategy': (Strategy, {

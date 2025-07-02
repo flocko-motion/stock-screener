@@ -89,6 +89,11 @@ class Note(Entity):
         self._date = value
         self.update()
     
+    @property
+    def baskets(self) -> Dict[str, Basket]:
+        """Get all baskets (backward compatibility property)."""
+        return self._baskets
+    
     def basket(self, *args) -> Union[Dict[str, Basket], Optional[Basket], 'Note']:
         """
         Get, set, or remove baskets (getter/setter combined).
@@ -498,6 +503,11 @@ class Fact(Note):
         """Set the confidence level of the fact."""
         self._confidence = max(0.0, min(1.0, value))  # Clamp between 0 and 1
         self.update()
+    
+    @property 
+    def sources(self) -> List[str]:
+        """Get all sources (always a list)."""
+        return self._sources
     
     def source(self, source_value: str) -> 'Fact':
         """
