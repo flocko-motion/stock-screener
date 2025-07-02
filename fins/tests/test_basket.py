@@ -240,12 +240,12 @@ class BasketTests(unittest.TestCase):
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['PEG'])
 
-    def test_plugins_price(self):
+    def test_plugins_price_plot(self):
         res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
 
-    def test_plugins_price_yoy(self):
+    def test_plugins_price_yoy_plot(self):
         res = Basket(AAPL)(MonthlyClose() >> MonthlyClose().yoy() >> PlotEach())
         data = res.output_data()
         print(data._series)

@@ -104,6 +104,12 @@ class YoyOperator(SeriesOperator):
 		result_df[value_col] = yoy_values
 		result_df = result_df.drop('year', axis=1)  # Remove helper column
 
+		# Set data type for plotting
+		result_df.attrs['type'] = 'yoy'
+		# Keep original title but indicate it's YoY transformed
+		if 'title' in df.attrs:
+			result_df.attrs['title'] = df.attrs['title'] + ' (YoY)'
+
 		return result_df
 
 	def transform_alias(self, original_alias: str) -> str:
@@ -132,6 +138,12 @@ class LogOperator(SeriesOperator):
 		result_df[value_col] = result_df[value_col].apply(
 			lambda x: math.log10(x) if x is not None and x > 0 else None
 		)
+
+		# Set data type for plotting
+		result_df.attrs['type'] = 'log'
+		# Keep original title but indicate it's Log transformed
+		if 'title' in df.attrs:
+			result_df.attrs['title'] = df.attrs['title'] + ' (Log)'
 
 		return result_df
 
@@ -164,13 +176,9 @@ class SeriesPlugin(Plugin):
 		return self
 
 	def log(self) -> 'SeriesPlugin':
-		"""Transform time series values to log10: series.log()"""
 		log_op = LogOperator()
 		self._operators.append(log_op)
-		
-		# Transform the alias
 		self.alias = log_op.transform_alias(self.alias)
-		
 		return self
 
 	def __str__(self) -> str:

@@ -19,8 +19,10 @@ class PlotEach(OutputPlugin):
         if not data:
             return
             
-        fig, ax1 = plt.subplots(figsize=(6, 4))
-        ax2 = None
+        fig, price_axis = plt.subplots(figsize=(6, 4))
+        indicator_axis = None
+        yoy_axis = None
+        log_axis = None
         
         for alias, df in data.items():
             if df.empty:
@@ -39,36 +41,63 @@ class PlotEach(OutputPlugin):
             for col in data_cols:
                 series_name = df.attrs.get('title', f"{alias}_{col}")
                 
-                if data_type == 'indicator':
+                if data_type == 'index':  # 'index' type - price data
+                    price_axis.plot(df[time_col], df[col], label=series_name, linewidth=2)
+                elif data_type == 'indicator':
                     # Use secondary y-axis for indicators
-                    if ax2 is None:
-                        ax2 = ax1.twinx()
-                        ax2.set_ylim(-1.1, 1.1)
-                        ax2.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
-                        ax2.set_ylabel('Indicators', color='blue')
+                    if indicator_axis is None:
+                        indicator_axis = price_axis.twinx()
+                        indicator_axis.set_ylim(-1.1, 1.1)
+                        indicator_axis.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+                        indicator_axis.set_ylabel('Indicators', color='blue')
                     
-                    ax2.plot(df[time_col], df[col], label=series_name, alpha=0.7, linewidth=1)
+                    indicator_axis.plot(df[time_col], df[col], label=series_name, alpha=0.7, linewidth=1)
                     
-                else:  # 'index' type - price data
-                    ax1.plot(df[time_col], df[col], label=series_name, linewidth=2)
+                elif data_type == 'yoy':
+                    # Use dedicated y-axis for Year-over-Year data
+                    if yoy_axis is None:
+                        yoy_axis = price_axis.twinx()
+                        yoy_axis.set_ylim(-0.5, 0.5)  # -50% to +50%
+                        yoy_axis.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+                        yoy_axis.set_ylabel('Year-over-Year (%)', color='green')
+                        # Format as percentage
+                        yoy_axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x*100:.0f}%'))
+                    
+                    yoy_axis.plot(df[time_col], df[col], label=series_name, alpha=0.8, linewidth=1.5, color='green')
+                    
+                elif data_type == 'log':
+                    # Use dedicated y-axis for Log data
+                    if log_axis is None:
+                        log_axis = price_axis.twinx()
+                        log_axis.set_ylim(-5, 10)
+                        log_axis.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+                        log_axis.set_ylabel('Log Scale', color='orange')
+                    
+                    log_axis.plot(df[time_col], df[col], label=series_name, alpha=0.8, linewidth=1.5, color='orange')
+                else: 
+                    raise ValueError(f"Unknown data type: {data_type}")    
         
         # Configure primary axis (price data) - logarithmic scale with fixed range
-        ax1.set_yscale('log')
-        ax1.set_ylim(10, 1000000)
-        ax1.set_ylabel('Value')
-        ax1.set_xlabel('Date')
-        ax1.grid(True, alpha=0.6, which='major')
-        ax1.grid(True, alpha=0.25, which='minor')
-        ax1.legend(loc='upper left')
+        price_axis.set_yscale('log')
+        price_axis.set_ylim(10, 1000000)
+        price_axis.set_ylabel('Price ($)')
+        price_axis.set_xlabel('Date')
+        price_axis.grid(True, alpha=0.6, which='major')
+        price_axis.grid(True, alpha=0.25, which='minor')
+        price_axis.legend(loc='upper left')
         
-        # Format secondary axis if exists
-        if ax2 is not None:
-            ax2.legend(loc='upper right')
+        # Format additional axes if they exist
+        if indicator_axis is not None:
+            indicator_axis.legend(loc='upper right')
+        if yoy_axis is not None:
+            yoy_axis.legend(loc='center right')
+        if log_axis is not None:
+            log_axis.legend(loc='lower right')
         
         # Format x-axis dates - yearly labels, monthly ticks
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
-        ax1.xaxis.set_major_locator(mdates.YearLocator(base=2))
-        ax1.xaxis.set_minor_locator(mdates.YearLocator())
+        price_axis.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        price_axis.xaxis.set_major_locator(mdates.YearLocator(base=2))
+        price_axis.xaxis.set_minor_locator(mdates.YearLocator())
         plt.xticks(rotation=60, fontsize=8)
         
         plt.title(f"{symbol.ticker} {symbol.name}")
