@@ -1,0 +1,268 @@
+"""
+SQLite-based notebook for storing notes using SQLAlchemy.
+"""
+
+import json
+from datetime import datetime
+from typing import List, Optional, Any, ClassVar
+
+from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy.orm import relationship
+
+from fins.database import Base, session_scope, init_db
+from fins.entities.note import Note, Principle, Observation, Trade, Fact, Strategy
+from fins.entities.basket import Basket
+
+
+class NoteModel(Base):
+    """SQLAlchemy model for note data."""
+    
+    __tablename__ = 'notes'
+    
+    id = Column(String(36), primary_key=True)
+    type = Column(String(20), nullable=False)
+    title = Column(String(500), nullable=False)
+    content = Column(Text, nullable=False)
+    date = Column(DateTime, nullable=False)
+    data = Column(Text, nullable=True)  # JSON blob for all additional fields
+
+
+class Notebook:
+    """SQLite-based notebook for storing notes using the existing SQLAlchemy pattern."""
+    
+    def __init__(self, db_name: str = "notebook"):
+        self.db_name = db_name
+        # Initialize the database
+        init_db(db_name)
+    
+    def save(self, note: Note) -> bool:
+        """
+        Save a note to the database.
+        
+        Args:
+            note: The note to save
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            with session_scope(self.db_name) as session:
+                # Prepare the data blob with all additional fields
+                data = {
+                    'tags': note.tags,
+                    'metadata': note.metadata,
+                    'created_at': note.created_at.isoformat(),
+                    'updated_at': note.updated_at.isoformat(),
+                    'baskets': {name: basket.to_dict() for name, basket in note.baskets.items()}
+                }
+                
+                # Add type-specific fields
+                if isinstance(note, (Trade, Strategy)):
+                    data['status'] = note.status
+                if isinstance(note, Fact):
+                    data['source'] = note.source
+                    data['confidence'] = note.confidence
+                if isinstance(note, Strategy):
+                    data['time_horizon'] = note.time_horizon
+                    data['risk_level'] = note.risk_level
+                
+                # Check if note already exists
+                existing = session.query(NoteModel).filter_by(id=note.id).first()
+                
+                if existing:
+                    # Update existing note
+                    existing.type = note.entity_type
+                    existing.title = note.title
+                    existing.content = note.content
+                    existing.date = note.date
+                    existing.data = json.dumps(data)
+                else:
+                    # Create new note
+                    note_model = NoteModel(
+                        id=note.id,
+                        type=note.entity_type,
+                        title=note.title,
+                        content=note.content,
+                        date=note.date,
+                        data=json.dumps(data)
+                    )
+                    session.add(note_model)
+                
+                return True
+                
+        except Exception as e:
+            print(f"Error saving note: {e}")
+            return False
+    
+    def get(self, note_id: str) -> Optional[Note]:
+        """
+        Get a note by ID.
+        
+        Args:
+            note_id: The note ID
+            
+        Returns:
+            The note if found, None otherwise
+        """
+        try:
+            with session_scope(self.db_name) as session:
+                note_model = session.query(NoteModel).filter_by(id=note_id).first()
+                
+                if note_model:
+                    session.expunge(note_model)  # Detach from session
+                    return self._model_to_note(note_model)
+                return None
+                
+        except Exception as e:
+            print(f"Error getting note: {e}")
+            return None
+    
+    def list_notes(self, note_type: Optional[str] = None, limit: int = 50, offset: int = 0) -> List[Note]:
+        """
+        List notes with optional filtering.
+        
+        Args:
+            note_type: Filter by note type (e.g., "trade", "fact")
+            limit: Maximum number of notes to return
+            offset: Number of notes to skip
+            
+        Returns:
+            List of notes
+        """
+        try:
+            with session_scope(self.db_name) as session:
+                query = session.query(NoteModel)
+                
+                if note_type:
+                    query = query.filter(NoteModel.type == note_type)
+                
+                note_models = query.order_by(NoteModel.date.desc()).limit(limit).offset(offset).all()
+                
+                # Detach from session
+                for model in note_models:
+                    session.expunge(model)
+                
+                return [self._model_to_note(model) for model in note_models]
+                
+        except Exception as e:
+            print(f"Error listing notes: {e}")
+            return []
+    
+    def search(self, query: str, note_type: Optional[str] = None, limit: int = 50) -> List[Note]:
+        """
+        Search notes by title and content.
+        
+        Args:
+            query: Search query
+            note_type: Filter by note type
+            limit: Maximum number of results
+            
+        Returns:
+            List of matching notes
+        """
+        try:
+            with session_scope(self.db_name) as session:
+                db_query = session.query(NoteModel).filter(
+                    (NoteModel.title.like(f"%{query}%")) | 
+                    (NoteModel.content.like(f"%{query}%"))
+                )
+                
+                if note_type:
+                    db_query = db_query.filter(NoteModel.type == note_type)
+                
+                note_models = db_query.order_by(NoteModel.date.desc()).limit(limit).all()
+                
+                # Detach from session
+                for model in note_models:
+                    session.expunge(model)
+                
+                return [self._model_to_note(model) for model in note_models]
+                
+        except Exception as e:
+            print(f"Error searching notes: {e}")
+            return []
+    
+    def delete(self, note_id: str) -> bool:
+        """
+        Delete a note by ID.
+        
+        Args:
+            note_id: The note ID
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            with session_scope(self.db_name) as session:
+                result = session.query(NoteModel).filter_by(id=note_id).delete()
+                return result > 0
+                
+        except Exception as e:
+            print(f"Error deleting note: {e}")
+            return False
+    
+    def _model_to_note(self, model: NoteModel) -> Note:
+        """Convert a NoteModel to a Note object."""
+        # Parse the data JSON blob
+        data = json.loads(model.data) if model.data else {}
+        
+        # Extract common fields
+        tags = data.get('tags', [])
+        metadata = data.get('metadata', {})
+        created_at = datetime.fromisoformat(data.get('created_at', model.date.isoformat()))
+        updated_at = datetime.fromisoformat(data.get('updated_at', model.date.isoformat()))
+        
+        # Reconstruct baskets
+        baskets = {}
+        baskets_data = data.get('baskets', {})
+        for name, basket_data in baskets_data.items():
+            baskets[name] = Basket.from_dict(basket_data)
+        
+        # Common kwargs for all note types
+        common_kwargs = {
+            'title': model.title,
+            'content': model.content,
+            'date': model.date,
+            'baskets': baskets,
+            'id': model.id,
+            'created_at': created_at,
+            'updated_at': updated_at,
+            'tags': tags,
+            'metadata': metadata
+        }
+        
+        # Type-specific kwargs and classes
+        type_configs = {
+            'principle': (Principle, {}),
+            'observation': (Observation, {}),
+            'trade': (Trade, {'status': data.get('status', 'executed')}),
+            'fact': (Fact, {
+                'source': data.get('source'),
+                'confidence': data.get('confidence', 1.0)
+            }),
+            'strategy': (Strategy, {
+                'time_horizon': data.get('time_horizon'),
+                'risk_level': data.get('risk_level'),
+                'status': data.get('status', 'active')
+            })
+        }
+        
+        # Get class and specific kwargs, default to base Note class
+        note_class, specific_kwargs = type_configs.get(model.type, (Note, {}))
+        
+        # Merge common and specific kwargs
+        all_kwargs = {**common_kwargs, **specific_kwargs}
+        
+        return note_class(**all_kwargs)
+
+
+# Global notebook instance
+_notebook = None
+
+
+def get_notebook() -> Notebook:
+    """Get the global notebook instance."""
+    global _notebook
+    if _notebook is None:
+        _notebook = Notebook()
+    return _notebook 

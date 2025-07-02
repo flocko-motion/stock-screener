@@ -6,6 +6,7 @@ from fins.terminal.symbols import __all__ as all_symbols
 from fins.terminal.commands import Screen, Million, Billion, Trillion
 from fins.terminal.persistence import Get, Put, Dir, Delete
 
+
 __all__ = [
     'Basket',
     'Screen',

@@ -59,7 +59,7 @@ class PlotEach(OutputPlugin):
                         yoy_axis = price_axis.twinx()
                         yoy_axis.set_ylim(-0.5, 0.5)  # -50% to +50%
                         yoy_axis.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
-                        yoy_axis.set_ylabel('Year-over-Year (%)', color='green')
+                        yoy_axis.set_ylabel('YoY%', color='green')
                         # Format as percentage
                         yoy_axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x*100:.0f}%'))
                     
@@ -71,7 +71,7 @@ class PlotEach(OutputPlugin):
                         log_axis = price_axis.twinx()
                         log_axis.set_ylim(-5, 10)
                         log_axis.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
-                        log_axis.set_ylabel('Log Scale', color='orange')
+                        log_axis.set_ylabel('Log', color='orange')
                     
                     log_axis.plot(df[time_col], df[col], label=series_name, alpha=0.8, linewidth=1.5, color='orange')
                 else: 
@@ -84,15 +84,28 @@ class PlotEach(OutputPlugin):
         price_axis.set_xlabel('Date')
         price_axis.grid(True, alpha=0.6, which='major')
         price_axis.grid(True, alpha=0.25, which='minor')
-        price_axis.legend(loc='upper left')
         
-        # Format additional axes if they exist
+        # Collect all lines and labels from all axes for unified legend
+        lines, labels = price_axis.get_legend_handles_labels()
+        
         if indicator_axis is not None:
-            indicator_axis.legend(loc='upper right')
+            indicator_lines, indicator_labels = indicator_axis.get_legend_handles_labels()
+            lines.extend(indicator_lines)
+            labels.extend(indicator_labels)
+            
         if yoy_axis is not None:
-            yoy_axis.legend(loc='center right')
+            yoy_lines, yoy_labels = yoy_axis.get_legend_handles_labels()
+            lines.extend(yoy_lines)
+            labels.extend(yoy_labels)
+            
         if log_axis is not None:
-            log_axis.legend(loc='lower right')
+            log_lines, log_labels = log_axis.get_legend_handles_labels()
+            lines.extend(log_lines)
+            labels.extend(log_labels)
+        
+        # Create unified legend at top-left
+        if lines:
+            price_axis.legend(lines, labels, loc='upper left')
         
         # Format x-axis dates - yearly labels, monthly ticks
         price_axis.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
