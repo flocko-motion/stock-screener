@@ -8,11 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: refactored db, implementing notebook, upgraded plotter">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/note.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/note.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
-    </list>
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: refactored db, implementing notebook, upgraded plotter" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -505,15 +501,7 @@
       <workItem from="1750871494713" duration="51984000" />
       <workItem from="1751296912030" duration="9070000" />
       <workItem from="1751352959204" duration="8743000" />
-      <workItem from="1751436711132" duration="2824000" />
-    </task>
-    <task id="LOCAL-00119" summary="feat: complete restart ... now with Python instead of a DSL">
-      <option name="closed" value="true" />
-      <created>1750598756636</created>
-      <option name="number" value="00119" />
-      <option name="presentableId" value="LOCAL-00119" />
-      <option name="project" value="LOCAL" />
-      <updated>1750598756636</updated>
+      <workItem from="1751436711132" duration="3429000" />
     </task>
     <task id="LOCAL-00120" summary="feat: complete restart ... now with Python instead of a DSL">
       <option name="closed" value="true" />
@@ -899,7 +887,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751438490044</updated>
     </task>
-    <option name="localTasksCounter" value="168" />
+    <task id="LOCAL-00168" summary="feat: refactored db, implementing notebook, upgraded plotter">
+      <option name="closed" value="true" />
+      <created>1751441395197</created>
+      <option name="number" value="00168" />
+      <option name="presentableId" value="LOCAL-00168" />
+      <option name="project" value="LOCAL" />
+      <updated>1751441395197</updated>
+    </task>
+    <option name="localTasksCounter" value="169" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
