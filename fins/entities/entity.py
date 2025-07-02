@@ -140,14 +140,20 @@ class Entity(JsonSerializable):
         created_at = datetime.fromisoformat(data.get('created_at')) if data.get('created_at') else None
         updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
         
-        return cls(
-            **data,
-            id=data.get('id', None),
-            created_at=created_at,
-            updated_at=updated_at,
-            tags=data.get('tags', []),
-            metadata=data.get('metadata', {})
-        )
+        # Extract entity-specific fields and pass remaining data as kwargs
+        entity_fields = {
+            'id': data.get('id'),
+            'created_at': created_at,
+            'updated_at': updated_at,
+            'tags': data.get('tags', []),
+            'metadata': data.get('metadata', {})
+        }
+        
+        # Remove entity fields from data to avoid conflicts
+        subclass_data = {k: v for k, v in data.items() 
+                        if k not in ['id', 'created_at', 'updated_at', 'tags', 'metadata', 'type']}
+        
+        return cls(**subclass_data, **entity_fields)
     
     @classmethod
     def from_json(cls, json_str: str) -> 'Entity':

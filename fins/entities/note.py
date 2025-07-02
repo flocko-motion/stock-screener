@@ -51,49 +51,86 @@ class Note(Entity):
             metadata: Additional metadata (empty dict if not provided)
         """
         super().__init__(id, created_at, updated_at, tags, metadata)
-        self.title = title
-        self.content = content
-        self.date = date or datetime.now()
-        self.baskets = baskets or {}
+        self._title = title
+        self._content = content
+        self._date = date or datetime.now()
+        self._baskets = baskets or {}
     
-    def add_basket(self, name: str, basket: Basket) -> None:
-        """
-        Add a basket to the note with the specified name.
-        
-        Args:
-            name: The name to associate with the basket
-            basket: The basket to add
-        """
-        self.baskets[name] = basket
+    @property
+    def title(self) -> str:
+        """Get the title of the note."""
+        return self._title
+    
+    @title.setter
+    def title(self, value: str) -> None:
+        """Set the title of the note."""
+        self._title = value
         self.update()
     
-    def get_basket(self, name: str) -> Optional[Basket]:
-        """
-        Get a basket by name.
-        
-        Args:
-            name: The name of the basket to retrieve
-            
-        Returns:
-            The basket if found, None otherwise
-        """
-        return self.baskets.get(name)
+    @property
+    def content(self) -> str:
+        """Get the content of the note."""
+        return self._content
     
-    def remove_basket(self, name: str) -> bool:
+    @content.setter
+    def content(self, value: str) -> None:
+        """Set the content of the note."""
+        self._content = value
+        self.update()
+    
+    @property
+    def date(self) -> datetime:
+        """Get the date of the note."""
+        return self._date
+    
+    @date.setter
+    def date(self, value: datetime) -> None:
+        """Set the date of the note."""
+        self._date = value
+        self.update()
+    
+    def basket(self, *args) -> Union[Dict[str, Basket], Optional[Basket], 'Note']:
         """
-        Remove a basket by name.
+        Get, set, or remove baskets (getter/setter combined).
         
         Args:
-            name: The name of the basket to remove
+            No args: Return all baskets
+            One arg (name): Return specific basket
+            Two args (name, basket): Set basket (basket can be None to remove)
             
         Returns:
-            True if the basket was removed, False if it wasn't found
+            - No args: Dict of all baskets
+            - One arg: The specific basket or None if not found
+            - Two args: Self for chaining after setting/removing
+            
+        Examples:
+            note.basket()  # Get all baskets
+            note.basket("main")  # Get basket named "main"
+            note.basket("main", my_basket)  # Set basket named "main"
+            note.basket("main", None)  # Remove basket named "main"
         """
-        if name in self.baskets:
-            del self.baskets[name]
-            self.update()
-            return True
-        return False
+        if len(args) == 0:
+            # No args: return all baskets
+            return self._baskets
+        elif len(args) == 1:
+            # One arg: get specific basket
+            name = args[0]
+            return self._baskets.get(name)
+        elif len(args) == 2:
+            # Two args: set or remove basket
+            name, basket = args
+            if basket is None:
+                # Remove basket
+                if name in self._baskets:
+                    del self._baskets[name]
+                    self.update()
+            else:
+                # Set basket
+                self._baskets[name] = basket
+                self.update()
+            return self
+        else:
+            raise ValueError("basket() takes 0, 1, or 2 arguments")
     
     @property
     def related_symbols(self) -> List[str]:
@@ -104,12 +141,44 @@ class Note(Entity):
             List of ticker symbols
         """
         symbols = []
-        for basket in self.baskets.values():
+        for basket in self._baskets.values():
             for item in basket._items:
                 if item.symbol.ticker not in symbols:
                     symbols.append(item.symbol.ticker)
         return symbols
     
+    def tag(self, tag_name: str) -> 'Note':
+        """
+        Add a tag to the note (chainable).
+        
+        Args:
+            tag_name: The tag to add
+            
+        Returns:
+            Self for chaining
+            
+        Example:
+            NoteFact("Elon is a racist").tag("fyi").tag("controversial")
+        """
+        if tag_name not in self.tags:
+            self.tags.append(tag_name)
+            self.save()
+        return self
+    
+
+    
+    def save(self) -> 'Note':
+        """Save the note to the notebook."""
+        from fins.notebook import get_notebook
+        notebook = get_notebook()
+        
+        if notebook.save(self):
+            print(f"✓ Saved {self.entity_type}: {self.title}")
+        else:
+            print(f"✗ Failed to save {self.entity_type}: {self.title}")
+        
+        return self
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert the note to a dictionary.
@@ -119,13 +188,13 @@ class Note(Entity):
         """
         data = super().to_dict()
         baskets_dict = {}
-        for name, basket in self.baskets.items():
+        for name, basket in self._baskets.items():
             baskets_dict[name] = basket.to_dict()
             
         data.update({
-            "title": self.title,
-            "content": self.content,
-            "date": self.date.isoformat(),
+            "title": self._title,
+            "content": self._content,
+            "date": self._date.isoformat(),
             "baskets": baskets_dict
         })
         return data
@@ -141,9 +210,7 @@ class Note(Entity):
         Returns:
             A new Note instance
         """
-        # Parse timestamps
-        created_at = datetime.fromisoformat(data.get('created_at')) if data.get('created_at') else None
-        updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
+        # Parse note-specific timestamps
         date = datetime.fromisoformat(data.get('date')) if data.get('date') else None
         
         # Parse baskets
@@ -156,17 +223,17 @@ class Note(Entity):
                     basket = Basket.from_dict(basket_data)
                     baskets[name] = basket
         
-        return cls(
-            title=data.get('title', ''),
-            content=data.get('content', ''),
-            date=date,
-            baskets=baskets,
-            id=data.get('id'),
-            created_at=created_at,
-            updated_at=updated_at,
-            tags=data.get('tags', []),
-            metadata=data.get('metadata', {})
-        )
+        # Create a copy of data with parsed values for Note-specific fields
+        note_data = data.copy()
+        note_data.update({
+            'title': data.get('title', ''),
+            'content': data.get('content', ''),
+            'date': date,
+            'baskets': baskets
+        })
+        
+        # Let Entity.from_dict handle the common fields
+        return super().from_dict(note_data)
 
 
 class Principle(Note):
@@ -238,7 +305,18 @@ class Trade(Note):
             trade_baskets["sold"] = Basket(name="Sold")
         
         super().__init__(title, content, date, trade_baskets, **kwargs)
-        self.status = status
+        self._status = status
+    
+    @property
+    def status(self) -> str:
+        """Get the status of the trade."""
+        return self._status
+    
+    @status.setter
+    def status(self, value: str) -> None:
+        """Set the status of the trade."""
+        self._status = value
+        self.update()
     
     @property
     def bought_basket(self) -> Basket:
@@ -248,7 +326,7 @@ class Trade(Note):
         Returns:
             The bought basket
         """
-        return self.baskets.get("bought", Basket(name="Bought"))
+        return self._baskets.get("bought", Basket(name="Bought"))
     
     @bought_basket.setter
     def bought_basket(self, basket: Basket) -> None:
@@ -258,7 +336,7 @@ class Trade(Note):
         Args:
             basket: The new bought basket
         """
-        self.baskets["bought"] = basket
+        self._baskets["bought"] = basket
         self.update()
     
     @property
@@ -269,7 +347,7 @@ class Trade(Note):
         Returns:
             The sold basket
         """
-        return self.baskets.get("sold", Basket(name="Sold"))
+        return self._baskets.get("sold", Basket(name="Sold"))
     
     @sold_basket.setter
     def sold_basket(self, basket: Basket) -> None:
@@ -279,7 +357,7 @@ class Trade(Note):
         Args:
             basket: The new sold basket
         """
-        self.baskets["sold"] = basket
+        self._baskets["sold"] = basket
         self.update()
     
     @property
@@ -329,7 +407,7 @@ class Trade(Note):
         """
         data = super().to_dict()
         data.update({
-            "status": self.status
+            "status": self._status
         })
         return data
     
@@ -344,12 +422,7 @@ class Trade(Note):
         Returns:
             A new Trade instance
         """
-        # Parse timestamps
-        created_at = datetime.fromisoformat(data.get('created_at')) if data.get('created_at') else None
-        updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
-        date = datetime.fromisoformat(data.get('date')) if data.get('date') else None
-        
-        # Parse baskets
+        # Handle legacy format with separate bought_basket and sold_basket fields
         from .basket import Basket
         baskets = {}
         
@@ -359,7 +432,6 @@ class Trade(Note):
                     basket = Basket.from_dict(basket_data)
                     baskets[name] = basket
         
-        # Handle legacy format with separate bought_basket and sold_basket fields
         if data.get('bought_basket') and isinstance(data['bought_basket'], dict):
             bought_basket = Basket.from_dict(data['bought_basket'])
             baskets["bought"] = bought_basket
@@ -368,18 +440,15 @@ class Trade(Note):
             sold_basket = Basket.from_dict(data['sold_basket'])
             baskets["sold"] = sold_basket
         
-        return cls(
-            title=data.get('title', ''),
-            content=data.get('content', ''),
-            status=data.get('status', 'executed'),
-            date=date,
-            baskets=baskets,
-            id=data.get('id'),
-            created_at=created_at,
-            updated_at=updated_at,
-            tags=data.get('tags', []),
-            metadata=data.get('metadata', {})
-        )
+        # Create a copy of data with trade-specific fields
+        trade_data = data.copy()
+        trade_data.update({
+            'status': data.get('status', 'executed'),
+            'baskets': baskets
+        })
+        
+        # Let Note.from_dict handle Note and Entity fields
+        return super().from_dict(trade_data)
 
 
 class Fact(Note):
@@ -409,15 +478,44 @@ class Fact(Note):
         Args:
             title: The title of the note
             content: The content of the note
-            source: The source of the fact
+            source: The initial source of the fact (optional)
             confidence: Confidence level in the fact (0.0 to 1.0)
             date: When the fact was recorded
             baskets: Dictionary of named baskets related to this fact
             **kwargs: Additional arguments passed to the parent class
         """
         super().__init__(title, content, date, baskets, **kwargs)
-        self.source = source
-        self.confidence = max(0.0, min(1.0, confidence))  # Clamp between 0 and 1
+        self._sources = [source] if source else []
+        self._confidence = max(0.0, min(1.0, confidence))  # Clamp between 0 and 1
+    
+    @property
+    def confidence(self) -> float:
+        """Get the confidence level of the fact."""
+        return self._confidence
+    
+    @confidence.setter
+    def confidence(self, value: float) -> None:
+        """Set the confidence level of the fact."""
+        self._confidence = max(0.0, min(1.0, value))  # Clamp between 0 and 1
+        self.update()
+    
+    def source(self, source_value: str) -> 'Fact':
+        """
+        Add a source to the fact (chainable).
+        
+        Args:
+            source_value: The source to add
+            
+        Returns:
+            Self for chaining
+            
+        Example:
+            NoteFact("Elon didn't found Tesla").source("Wikipedia").source("TechCrunch")
+        """
+        if source_value not in self._sources:
+            self._sources.append(source_value)
+            self.save()
+        return self
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -428,8 +526,8 @@ class Fact(Note):
         """
         data = super().to_dict()
         data.update({
-            "source": self.source,
-            "confidence": self.confidence
+            "sources": self._sources,
+            "confidence": self._confidence
         })
         return data
     
@@ -444,34 +542,20 @@ class Fact(Note):
         Returns:
             A new Fact instance
         """
-        # Parse timestamps
-        created_at = datetime.fromisoformat(data.get('created_at')) if data.get('created_at') else None
-        updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
-        date = datetime.fromisoformat(data.get('date')) if data.get('date') else None
+        # Handle backwards compatibility - convert old 'source' field to 'sources' list
+        sources = data.get('sources', [])
+        if not sources and data.get('source'):
+            sources = [data.get('source')]
         
-        # Parse baskets
-        from .basket import Basket
-        baskets = {}
+        # Create a copy of data with fact-specific fields
+        fact_data = data.copy()
+        fact_data.update({
+            'source': sources[0] if sources else None,  # Pass first source as 'source' parameter
+            'confidence': data.get('confidence', 1.0)
+        })
         
-        if isinstance(data.get('baskets'), dict):
-            for name, basket_data in data.get('baskets', {}).items():
-                if isinstance(basket_data, dict):
-                    basket = Basket.from_dict(basket_data)
-                    baskets[name] = basket
-        
-        return cls(
-            title=data.get('title', ''),
-            content=data.get('content', ''),
-            source=data.get('source'),
-            confidence=data.get('confidence', 1.0),
-            date=date,
-            baskets=baskets,
-            id=data.get('id'),
-            created_at=created_at,
-            updated_at=updated_at,
-            tags=data.get('tags', []),
-            metadata=data.get('metadata', {})
-        )
+        # Let Note.from_dict handle Note and Entity fields
+        return super().from_dict(fact_data)
 
 
 class Strategy(Note):
@@ -510,9 +594,42 @@ class Strategy(Note):
             **kwargs: Additional arguments passed to the parent class
         """
         super().__init__(title, content, date, baskets, **kwargs)
-        self.time_horizon = time_horizon
-        self.risk_level = risk_level
-        self.status = status
+        self._time_horizon = time_horizon
+        self._risk_level = risk_level
+        self._status = status
+    
+    @property
+    def time_horizon(self) -> Optional[str]:
+        """Get the time horizon of the strategy."""
+        return self._time_horizon
+    
+    @time_horizon.setter
+    def time_horizon(self, value: Optional[str]) -> None:
+        """Set the time horizon of the strategy."""
+        self._time_horizon = value
+        self.update()
+    
+    @property
+    def risk_level(self) -> Optional[str]:
+        """Get the risk level of the strategy."""
+        return self._risk_level
+    
+    @risk_level.setter
+    def risk_level(self, value: Optional[str]) -> None:
+        """Set the risk level of the strategy."""
+        self._risk_level = value
+        self.update()
+    
+    @property
+    def status(self) -> str:
+        """Get the status of the strategy."""
+        return self._status
+    
+    @status.setter
+    def status(self, value: str) -> None:
+        """Set the status of the strategy."""
+        self._status = value
+        self.update()
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -523,9 +640,9 @@ class Strategy(Note):
         """
         data = super().to_dict()
         data.update({
-            "time_horizon": self.time_horizon,
-            "risk_level": self.risk_level,
-            "status": self.status
+            "time_horizon": self._time_horizon,
+            "risk_level": self._risk_level,
+            "status": self._status
         })
         return data
     
@@ -540,32 +657,13 @@ class Strategy(Note):
         Returns:
             A new Strategy instance
         """
-        # Parse timestamps
-        created_at = datetime.fromisoformat(data.get('created_at')) if data.get('created_at') else None
-        updated_at = datetime.fromisoformat(data.get('updated_at')) if data.get('updated_at') else None
-        date = datetime.fromisoformat(data.get('date')) if data.get('date') else None
+        # Create a copy of data with strategy-specific fields
+        strategy_data = data.copy()
+        strategy_data.update({
+            'time_horizon': data.get('time_horizon'),
+            'risk_level': data.get('risk_level'),
+            'status': data.get('status', 'active')
+        })
         
-        # Parse baskets
-        from .basket import Basket
-        baskets = {}
-        
-        if isinstance(data.get('baskets'), dict):
-            for name, basket_data in data.get('baskets', {}).items():
-                if isinstance(basket_data, dict):
-                    basket = Basket.from_dict(basket_data)
-                    baskets[name] = basket
-        
-        return cls(
-            title=data.get('title', ''),
-            content=data.get('content', ''),
-            time_horizon=data.get('time_horizon'),
-            risk_level=data.get('risk_level'),
-            status=data.get('status', 'active'),
-            date=date,
-            baskets=baskets,
-            id=data.get('id'),
-            created_at=created_at,
-            updated_at=updated_at,
-            tags=data.get('tags', []),
-            metadata=data.get('metadata', {})
-        ) 
+        # Let Note.from_dict handle Note and Entity fields
+        return super().from_dict(strategy_data) 
