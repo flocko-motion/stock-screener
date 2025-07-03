@@ -7,7 +7,8 @@ from fins.terminal.commands import Screen, Million, Billion, Trillion
 from fins.terminal.persistence import Get, Put, Dir, Delete
 from fins.terminal.notebook import (
     NotePrinciple, NoteObservation, NoteTrade, NoteFact, NoteStrategy, 
-    Notes, Note
+    Notes, Note, NoteSymbolCmd as NoteSymbol,
+    AiSync, Ai, AiStatus
 )
 
 
@@ -28,6 +29,10 @@ __all__ = [
     'NoteStrategy',
     'Notes',
     'Note',
+    'NoteSymbol',
+    'AiSync',
+    'Ai',
+    'AiStatus',
     *all_plugins,
     *all_symbols,
 ]

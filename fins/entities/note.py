@@ -677,3 +677,76 @@ class Strategy(Note):
         
         # Let Note.from_dict handle Note and Entity fields
         return super().from_dict(strategy_data) 
+
+
+class NoteSymbol(Note):
+    """
+    A note on a specific symbol (ticker).
+    
+    Attributes:
+        _symbol (str): The ticker symbol this note refers to.
+    """
+    entity_type: ClassVar[str] = "symbol_note"
+
+    def __init__(self, symbol, content: str, title: Optional[str] = None, date: Optional[datetime] = None, baskets: Optional[Dict[str, Basket]] = None, **kwargs):
+        """
+        Initialize a symbol note.
+        
+        Args:
+            symbol: The ticker symbol (str), Symbol, or BasketItem
+            content: The note content
+            title: Optional title (auto-generated if not provided)
+            date: When the note was created
+            baskets: Optional baskets
+            **kwargs: Additional args
+        """
+        # Accept str, Symbol, or BasketItem for symbol
+        ticker = None
+        if hasattr(symbol, 'ticker'):
+            ticker = symbol.ticker
+        elif hasattr(symbol, 'symbol'):
+            ticker = symbol.symbol
+        else:
+            ticker = str(symbol)
+        self._symbol = ticker
+        if not title:
+            title = f"Note on {self._symbol}"
+        super().__init__(title, content, date, baskets, **kwargs)
+
+    def symbol(self, value=None):
+        """
+        Get or set the symbol (ticker) for this note.
+        
+        Args:
+            value: If provided, sets the symbol (str, Symbol, or BasketItem)
+        Returns:
+            The current symbol (ticker as str) if no value is given, else self for chaining
+        """
+        if value is None:
+            return self._symbol
+        # Accept str, Symbol, or BasketItem
+        if hasattr(value, 'ticker'):
+            self._symbol = value.ticker
+        elif hasattr(value, 'symbol'):
+            self._symbol = value.symbol
+        else:
+            self._symbol = str(value)
+        self.update()
+        return self
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        data['symbol'] = self._symbol
+        return data
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'NoteSymbol':
+        symbol = data.get('symbol')
+        content = data.get('content', '')
+        title = data.get('title')
+        date = datetime.fromisoformat(data['date']) if data.get('date') else None
+        baskets = None
+        if isinstance(data.get('baskets'), dict):
+            from .basket import Basket
+            baskets = {name: Basket.from_dict(b) for name, b in data['baskets'].items()}
+        return cls(symbol, content, title=title, date=date, baskets=baskets, **data) 

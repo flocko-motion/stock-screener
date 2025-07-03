@@ -5,9 +5,10 @@ Terminal commands for the notebook system.
 from typing import Optional, List
 from datetime import datetime
 
-from fins.entities.note import Note as NoteEntity, Principle, Observation, Trade, Fact, Strategy
+from fins.entities.note import Note as NoteEntity, Principle, Observation, Trade, Fact, Strategy, NoteSymbol
 from fins.entities.basket import Basket
 from fins.notebook import get_notebook
+from fins.notebook.assistant import get_assistant
 
 
 def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[datetime] = None) -> Principle:
@@ -162,6 +163,24 @@ def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Option
     ).save()
 
 
+def NoteSymbolCmd(symbol, content: str, title: Optional[str] = None, date: Optional[datetime] = None):
+    """
+    Create and save a note on a specific symbol.
+    
+    Args:
+        symbol: The ticker symbol (str), Symbol, or BasketItem
+        content: The note content
+        title: Optional title (auto-generated if not provided)
+        date: When the note was created (defaults to now)
+    Returns:
+        The created NoteSymbol note
+    Example:
+        NoteSymbol('AAPL', 'Apple is overbought')
+        NoteSymbol(AAPL, 'Apple is overbought')
+    """
+    return NoteSymbol(symbol, content, title=title, date=date).save()
+
+
 def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> List[NoteEntity]:
     """
     List or search notes.
@@ -261,4 +280,68 @@ def Note(note_id: str) -> Optional[NoteEntity]:
         return note
     else:
         print(f"Note not found: {note_id}")
-        return None 
+        return None
+
+
+def AiSync(force: bool = False):
+    """
+    Sync all notes to the OpenAI assistant.
+    
+    Args:
+        force: If True, re-upload all notes even if already uploaded
+        
+    Example:
+        AiSync()  # Sync new notes only
+        AiSync(force=True)  # Re-upload all notes
+    """
+    try:
+        assistant = get_assistant()
+        assistant.sync_notes(force=force)
+    except Exception as e:
+        print(f"✗ Failed to sync notes: {e}")
+
+
+def Ai(message: str):
+    """
+    Ask a question to the OpenAI assistant.
+    
+    Args:
+        message: The question or message to send
+        
+    Example:
+        Ai("What are my recent observations about tech stocks?")
+        Ai("Show me all trades involving AAPL")
+    """
+    try:
+        assistant = get_assistant()
+        response = assistant.send_message(message)
+        print(f"\nAssistant: {response}")
+    except Exception as e:
+        print(f"✗ Failed to get assistant response: {e}")
+
+
+def AiStatus():
+    """
+    Show the status of the OpenAI assistant.
+    
+    Example:
+        AiStatus()
+    """
+    try:
+        assistant = get_assistant()
+        status = assistant.get_status()
+        
+        if status.get('status') == 'error':
+            print(f"✗ Assistant error: {status.get('error')}")
+            return
+        
+        print("Assistant Status:")
+        print(f"  ID: {status.get('assistant_id', 'N/A')}")
+        print(f"  Name: {status.get('name', 'N/A')}")
+        print(f"  Model: {status.get('model', 'N/A')}")
+        print(f"  Files: {status.get('file_count', 0)}")
+        print(f"  Created: {status.get('created_at', 'N/A')}")
+        print(f"  Updated: {status.get('last_updated', 'N/A')}")
+        
+    except Exception as e:
+        print(f"✗ Failed to get assistant status: {e}") 

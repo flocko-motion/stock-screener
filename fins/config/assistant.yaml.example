@@ -1,0 +1,11 @@
+# OpenAI Assistant Configuration
+# Copy this file to assistant.yaml and add your API key
+
+# Your OpenAI API key (required)
+api_key: "sk-your-openai-api-key-here"
+
+# Assistant ID (auto-generated, don't edit manually)
+assistant_id: null
+
+# Last updated timestamp (auto-generated)
+last_updated: null 
