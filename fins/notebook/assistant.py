@@ -15,7 +15,7 @@ from datetime import datetime
 import openai
 from openai import OpenAI
 
-from fins.config import PATH_ASSISTANT_CONFIG, DIR_PERSISTENCE
+from fins.config import PATH_ASSISTANT_CONFIG, DIR_PERSISTENCE, get_openai_api_key, get_assistant_id, save_assistant_id
 from fins.notebook import get_notebook
 
 
@@ -26,12 +26,13 @@ class NotebookAssistant:
     Manages assistant creation, file uploads, and state persistence.
     """
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, testing_mode: bool = False):
         """
         Initialize the notebook assistant.
         
         Args:
             api_key: OpenAI API key (will be loaded from config if not provided)
+            testing_mode: If True, create new assistant and don't persist ID
         """
         self.api_key = api_key or self._load_api_key()
         if not self.api_key:
@@ -41,45 +42,38 @@ class NotebookAssistant:
         self.assistant_id = None
         self.assistant = None
         self.thread_id = None
+        self.testing_mode = testing_mode
         
         # Load or create assistant
         self._load_or_create_assistant()
     
     def _load_api_key(self) -> Optional[str]:
         """Load API key from assistant config file."""
-        if PATH_ASSISTANT_CONFIG.exists():
-            with open(PATH_ASSISTANT_CONFIG, 'r') as f:
-                config = yaml.safe_load(f) or {}
-                return config.get('api_key')
-        return None
+        return get_openai_api_key()
     
     def _save_config(self):
         """Save assistant configuration to file."""
-        config = {
-            'api_key': self.api_key,
-            'assistant_id': self.assistant_id,
-            'last_updated': datetime.now().isoformat()
-        }
-        
-        with open(PATH_ASSISTANT_CONFIG, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False)
+        if not self.testing_mode:
+            save_assistant_id(self.assistant_id)
     
     def _load_or_create_assistant(self):
         """Load existing assistant or create a new one."""
+        # Skip config loading in testing mode
+        if self.testing_mode:
+            self._create_assistant()
+            return
+        
         # Try to load existing assistant ID
-        if PATH_ASSISTANT_CONFIG.exists():
-            with open(PATH_ASSISTANT_CONFIG, 'r') as f:
-                config = yaml.safe_load(f) or {}
-                assistant_id = config.get('assistant_id')
-                
-                if assistant_id:
-                    try:
-                        self.assistant = self.client.beta.assistants.retrieve(assistant_id)
-                        self.assistant_id = assistant_id
-                        print(f"✓ Loaded existing assistant: {assistant_id}")
-                        return
-                    except Exception as e:
-                        print(f"⚠ Failed to load assistant {assistant_id}: {e}")
+        assistant_id = get_assistant_id()
+        
+        if assistant_id:
+            try:
+                self.assistant = self.client.assistants.retrieve(assistant_id)
+                self.assistant_id = assistant_id
+                print(f"✓ Loaded existing assistant: {assistant_id}")
+                return
+            except Exception as e:
+                print(f"⚠ Failed to load assistant {assistant_id}: {e}")
         
         # Create new assistant
         self._create_assistant()
@@ -104,10 +98,10 @@ When analyzing or responding:
 
 Always cite your sources from the notebook when making claims or providing analysis."""
 
-        self.assistant = self.client.beta.assistants.create(
+        self.assistant = self.client.assistants.create(
             name="FINS Financial Assistant",
             instructions=base_instructions,
-            model="gpt-4-turbo-preview",
+            model="gpt-4o",
             tools=[{"type": "file_search"}]
         )
         
@@ -192,11 +186,11 @@ Always cite your sources from the notebook when making claims or providing analy
     def _update_assistant_files(self):
         """Update assistant with current file list."""
         # Get all file IDs from the assistant
-        assistant = self.client.beta.assistants.retrieve(self.assistant_id)
+        assistant = self.client.assistants.retrieve(self.assistant_id)
         file_ids = assistant.file_ids
         
         # Update assistant with current files
-        self.assistant = self.client.beta.assistants.update(
+        self.assistant = self.client.assistants.update(
             self.assistant_id,
             file_ids=file_ids
         )
@@ -208,7 +202,7 @@ Always cite your sources from the notebook when making claims or providing analy
         Returns:
             Thread ID
         """
-        thread = self.client.beta.threads.create()
+        thread = self.client.threads.create()
         self.thread_id = thread.id
         return self.thread_id
     
@@ -229,28 +223,28 @@ Always cite your sources from the notebook when making claims or providing analy
             self.thread_id = thread_id
         
         # Add message to thread
-        self.client.beta.threads.messages.create(
+        self.client.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=message
         )
         
         # Run assistant
-        run = self.client.beta.threads.runs.create(
+        run = self.client.threads.runs.create(
             thread_id=thread_id,
             assistant_id=self.assistant_id
         )
         
         # Wait for completion
         while run.status in ['queued', 'in_progress']:
-            run = self.client.beta.threads.runs.retrieve(
+            run = self.client.threads.runs.retrieve(
                 thread_id=thread_id,
                 run_id=run.id
             )
         
         if run.status == 'completed':
             # Get response
-            messages = self.client.beta.threads.messages.list(thread_id=thread_id)
+            messages = self.client.threads.messages.list(thread_id=thread_id)
             for msg in messages.data:
                 if msg.role == 'assistant':
                     return msg.content[0].text.value
@@ -268,7 +262,7 @@ Always cite your sources from the notebook when making claims or providing analy
             return {'status': 'not_initialized'}
         
         try:
-            assistant = self.client.beta.assistants.retrieve(self.assistant_id)
+            assistant = self.client.assistants.retrieve(self.assistant_id)
             return {
                 'assistant_id': self.assistant_id,
                 'name': assistant.name,
