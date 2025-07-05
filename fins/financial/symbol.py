@@ -460,8 +460,6 @@ class Symbol(Base):
 			'isin': self.isin,
 			'inception': self.inception,
 			'analytics': self.analytics,
-			'valid_until': self.valid_until,
-			'last_price_update': self.last_price_update,
 			**(self.details or {})  # Include any additional fields
 		}
 

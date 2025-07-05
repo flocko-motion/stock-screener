@@ -4,12 +4,13 @@ Note Entity
 This module defines the Note class and its subclasses for different types of notes
 in the FINS system.
 """
-
+import json
 from typing import Dict, Any, Optional, List, ClassVar, Union
 from datetime import datetime
 
 from .entity import Entity
 from .basket import Basket
+from ..financial import Symbol
 
 
 class Note(Entity):
@@ -35,7 +36,8 @@ class Note(Entity):
                  created_at: Optional[datetime] = None,
                  updated_at: Optional[datetime] = None,
                  tags: Optional[List[str]] = None,
-                 metadata: Optional[Dict[str, Any]] = None):
+                 metadata: Optional[Dict[str, Any]] = None,
+                 vector_store_id: Optional[str] = None):
         """
         Initialize a note.
         
@@ -49,8 +51,10 @@ class Note(Entity):
             updated_at: Update timestamp (same as created_at if not provided)
             tags: List of tags (empty list if not provided)
             metadata: Additional metadata (empty dict if not provided)
+            vector_store_id: Vector store ID for file search (None if not provided)
         """
         super().__init__(id, created_at, updated_at, tags, metadata)
+        self._vector_store_id = vector_store_id
         self._title = title
         self._content = content
         self._date = date or datetime.now()
@@ -174,15 +178,29 @@ class Note(Entity):
     
     def save(self) -> 'Note':
         """Save the note to the notebook."""
-        from fins.notebook import get_notebook
-        notebook = get_notebook()
-        
+        from fins.notebook import notebook
+        notebook = notebook()
+
+        try:
+            from fins.notebook.assistant import assistant
+            assistant().sync_note(self)
+        except Exception as e:
+            print(f"⚠ Failed to notify assistant: {e}")
+
         if notebook.save(self):
             print(f"✓ Saved {self.entity_type}: {self.title}")
         else:
             print(f"✗ Failed to save {self.entity_type}: {self.title}")
         
         return self
+
+    def to_ai_note(self) -> bytes:
+        def json_serializer(obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            raise TypeError(f'Object of type {type(obj).__name__} is not JSON serializable')
+        
+        return json.dumps(self.to_dict(), default=json_serializer).encode('utf-8')
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -239,6 +257,14 @@ class Note(Entity):
         
         # Let Entity.from_dict handle the common fields
         return super().from_dict(note_data)
+
+    @property
+    def vector_store_file_id(self) -> Optional[str]:
+        return getattr(self, '_vector_store_id', None)
+
+    @vector_store_file_id.setter
+    def vector_store_file_id(self, value: str) -> None:
+        self._vector_store_id = value
 
 
 class Principle(Note):
@@ -736,7 +762,8 @@ class NoteSymbol(Note):
 
     def to_dict(self) -> Dict[str, Any]:
         data = super().to_dict()
-        data['symbol'] = self._symbol
+        symbol = Symbol.get(self._symbol)
+        data['symbol'] = symbol.to_dict()
         return data
 
     @classmethod

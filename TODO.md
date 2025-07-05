@@ -11,3 +11,8 @@ Goals:
 - get Industry plugin running, implement basic plugin execution: Basket(..)(PluginA() >> (FilterPluginB() < threshold) >> PlotterPluginC())
 - build a simple plotter
 - build a simple filter
+
+
+Ai improvements:
+- auto enrich ai_notes using a mini GPT, e.g. adding tags or a summary or condensing the symbol description
+- batch upload notes to vector storage

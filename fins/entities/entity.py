@@ -116,14 +116,14 @@ class Entity(JsonSerializable):
             "metadata": self.metadata
         }
     
-    def to_json(self) -> str:
+    def to_json(self) -> bytes:
         """
         Convert the entity to a JSON string.
         
         Returns:
             A JSON string representation of the entity
         """
-        return json.dumps(self.to_dict())
+        return json.dumps(self.to_dict(), indent=2).encode('utf-8')
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Entity':

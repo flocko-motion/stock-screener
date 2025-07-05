@@ -7,8 +7,8 @@ from datetime import datetime
 
 from fins.entities.note import Note as NoteEntity, Principle, Observation, Trade, Fact, Strategy, NoteSymbol
 from fins.entities.basket import Basket
-from fins.notebook import get_notebook
-from fins.notebook.assistant import get_assistant
+from fins.notebook import notebook
+from fins.notebook.assistant import assistant
 
 
 def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[datetime] = None) -> Principle:
@@ -198,7 +198,7 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> 
         Notes("Tesla")  # Search for notes containing "Tesla"
         Notes(note_type="trade", limit=5)  # List recent 5 trades
     """
-    notebook = get_notebook()
+    notebook = notebook()
     
     if query:
         notes = notebook.search(query, note_type=note_type, limit=limit)
@@ -237,7 +237,7 @@ def Note(note_id: str) -> Optional[NoteEntity]:
         Note("a1b2c3d4")  # Full ID
         Note("a1b2")      # Partial ID
     """
-    notebook = get_notebook()
+    notebook = notebook()
     
     # Try exact match first
     note = notebook.get(note_id)
@@ -283,20 +283,19 @@ def Note(note_id: str) -> Optional[NoteEntity]:
         return None
 
 
-def AiSync(force: bool = False):
+def AiSync():
     """
-    Sync all notes to the OpenAI assistant.
+    Sync all notes to the OpenAI assistant using file search.
     
     Args:
         force: If True, re-upload all notes even if already uploaded
         
     Example:
-        AiSync()  # Sync new notes only
-        AiSync(force=True)  # Re-upload all notes
+        AiSync()  # Sync all notes
+        AiSync(force=True)  # Force re-upload
     """
     try:
-        assistant = get_assistant()
-        assistant.sync_notes(force=force)
+        assistant().sync_notes()
     except Exception as e:
         print(f"✗ Failed to sync notes: {e}")
 
@@ -313,7 +312,7 @@ def Ai(message: str):
         Ai("Show me all trades involving AAPL")
     """
     try:
-        assistant = get_assistant()
+        assistant = assistant()
         response = assistant.send_message(message)
         print(f"\nAssistant: {response}")
     except Exception as e:
@@ -328,7 +327,7 @@ def AiStatus():
         AiStatus()
     """
     try:
-        assistant = get_assistant()
+        assistant = assistant()
         status = assistant.get_status()
         
         if status.get('status') == 'error':
@@ -339,9 +338,13 @@ def AiStatus():
         print(f"  ID: {status.get('assistant_id', 'N/A')}")
         print(f"  Name: {status.get('name', 'N/A')}")
         print(f"  Model: {status.get('model', 'N/A')}")
-        print(f"  Files: {status.get('file_count', 0)}")
         print(f"  Created: {status.get('created_at', 'N/A')}")
         print(f"  Updated: {status.get('last_updated', 'N/A')}")
+        print(f"  New notes this session: {status.get('new_notes_count', 0)}")
+        print(f"  Sync threshold: {status.get('sync_threshold', 10)}")
         
     except Exception as e:
-        print(f"✗ Failed to get assistant status: {e}") 
+        print(f"✗ Failed to get assistant status: {e}")
+
+
+ 

@@ -29,12 +29,18 @@ class NoteModel(Base):
 
 class Notebook:
     """SQLite-based notebook for storing notes using the existing SQLAlchemy pattern."""
-    
+
+    test_mode = False
+
     def __init__(self, db_name: str = "notebook"):
         self.db_name = db_name
         # Initialize the database
         init_db(db_name)
-    
+
+    @classmethod
+    def is_test_mode(cls):
+        return cls.test_mode
+
     def save(self, note: Note) -> bool:
         """
         Save a note to the database.
@@ -53,7 +59,8 @@ class Notebook:
                     'metadata': note.metadata,
                     'created_at': note.created_at.isoformat(),
                     'updated_at': note.updated_at.isoformat(),
-                    'baskets': {name: basket.to_dict() for name, basket in note.basket().items()}
+                    'baskets': {name: basket.to_dict() for name, basket in note.basket().items()},
+                    'vector_store_id': note.vector_store_file_id
                 }
                 
                 # Add type-specific fields
@@ -146,7 +153,8 @@ class Notebook:
                 
         except Exception as e:
             print(f"Error listing notes: {e}")
-            return []
+            raise e
+            # return []
     
     def search(self, query: str, note_type: Optional[str] = None, limit: int = 50) -> List[Note]:
         """
@@ -201,6 +209,45 @@ class Notebook:
             print(f"Error deleting note: {e}")
             return False
     
+    def clear_all(self) -> bool:
+        """
+        Delete all notes from the notebook.
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        if self.db_name != "notebook_test":
+            print("⚠ Clearing all notes is not allowed in production database")
+            return False
+        
+        try:
+            with session_scope(self.db_name) as session:
+                # First, let's check how many notes exist
+                count_before = session.query(NoteModel).count()
+                print(f"Found {count_before} notes to delete")
+                
+                if count_before == 0:
+                    print("✓ No notes to delete")
+                    return True
+                
+                # Delete all notes
+                result = session.query(NoteModel).delete()
+                session.flush()  # Ensure the delete is processed
+                
+                # Verify deletion
+                count_after = session.query(NoteModel).count()
+                print(f"✓ Deleted {result} notes from notebook (before: {count_before}, after: {count_after})")
+                
+                if count_after > 0:
+                    print(f"⚠ Warning: {count_after} notes still remain after deletion")
+                    return False
+                
+                return True
+                
+        except Exception as e:
+            print(f"Error clearing all notes: {e}")
+            return False
+    
     def _model_to_note(self, model: NoteModel) -> Note:
         """Convert a NoteModel to a Note object."""
         # Parse the data JSON blob
@@ -211,6 +258,7 @@ class Notebook:
         metadata = data.get('metadata', {})
         created_at = datetime.fromisoformat(data.get('created_at', model.date.isoformat()))
         updated_at = datetime.fromisoformat(data.get('updated_at', model.date.isoformat()))
+        vector_store_id = data.get('vector_store_id')
         
         # Reconstruct baskets
         baskets = {}
@@ -228,7 +276,8 @@ class Notebook:
             'created_at': created_at,
             'updated_at': updated_at,
             'tags': tags,
-            'metadata': metadata
+            'metadata': metadata,
+            'vector_store_id': vector_store_id
         }
         
         # Handle Fact sources (backward compatibility)
@@ -265,11 +314,18 @@ class Notebook:
 
 # Global notebook instance
 _notebook = None
+_notebook_test = None
 
 
-def get_notebook() -> Notebook:
-    """Get the global notebook instance."""
+def notebook() -> Notebook:
+    if Notebook.test_mode:
+        global _notebook_test
+        if _notebook_test is None:
+            _notebook_test = Notebook(db_name="notebook_test")
+        return _notebook_test
+
     global _notebook
     if _notebook is None:
         _notebook = Notebook()
-    return _notebook 
+    return _notebook
+

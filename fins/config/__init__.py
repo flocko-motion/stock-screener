@@ -33,8 +33,7 @@ def get_openai_api_key() -> Optional[str]:
     except Exception:
         return None
 
-
-def get_assistant_id() -> Optional[str]:
+def get_assistant_config(field: str) -> Optional[str]:
     """Get the assistant ID from assistant.yaml"""
     if not PATH_ASSISTANT_CONFIG.exists():
         return None
@@ -42,12 +41,12 @@ def get_assistant_id() -> Optional[str]:
     try:
         with open(PATH_ASSISTANT_CONFIG, 'r') as f:
             config = yaml.safe_load(f) or {}
-            return config.get('assistant_id')
+            return config.get(field)
     except Exception:
         return None
 
 
-def save_assistant_id(assistant_id: str) -> bool:
+def set_assistant_config(field: str, value: str) -> bool:
     """Save the assistant ID to assistant.yaml"""
     try:
         config = {}
@@ -55,7 +54,7 @@ def save_assistant_id(assistant_id: str) -> bool:
             with open(PATH_ASSISTANT_CONFIG, 'r') as f:
                 config = yaml.safe_load(f) or {}
         
-        config['assistant_id'] = assistant_id
+        config[field] = value
         
         with open(PATH_ASSISTANT_CONFIG, 'w') as f:
             yaml.dump(config, f, default_flow_style=False)
