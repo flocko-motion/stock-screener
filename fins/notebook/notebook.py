@@ -219,7 +219,8 @@ class Notebook:
         if self.db_name != "notebook_test":
             print("⚠ Clearing all notes is not allowed in production database")
             return False
-        
+
+        print("Clearing all notes from DB..")
         try:
             with session_scope(self.db_name) as session:
                 # First, let's check how many notes exist

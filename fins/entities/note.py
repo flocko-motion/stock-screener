@@ -59,7 +59,7 @@ class Note(Entity):
         self._content = content
         self._date = date or datetime.now()
         self._baskets = baskets or {}
-    
+
     @property
     def title(self) -> str:
         """Get the title of the note."""
@@ -176,16 +176,13 @@ class Note(Entity):
     
 
     
-    def save(self) -> 'Note':
+    def save(self, ai = None) -> 'Note':
         """Save the note to the notebook."""
         from fins.notebook import notebook
         notebook = notebook()
 
-        try:
-            from fins.notebook.assistant import assistant
-            assistant().sync_note(self)
-        except Exception as e:
-            print(f"⚠ Failed to notify assistant: {e}")
+        if ai is not None:
+            ai.sync_note(self)
 
         if notebook.save(self):
             print(f"✓ Saved {self.entity_type}: {self.title}")
@@ -234,8 +231,16 @@ class Note(Entity):
             A new Note instance
         """
         # Parse note-specific timestamps
-        date = datetime.fromisoformat(data.get('date')) if data.get('date') else None
-        
+        if data.get('date'):
+            data['date'] = datetime.fromisoformat(data['date']),  datetime.fromisoformat(data.get('date'))
+
+        note_type = data.get('type')
+        del data['type']
+        if note_type == "symbol_note":
+            return NoteSymbol.from_dict(data)
+
+
+
         # Parse baskets
         baskets = {}
         from .basket import Basket
@@ -251,7 +256,7 @@ class Note(Entity):
         note_data.update({
             'title': data.get('title', ''),
             'content': data.get('content', ''),
-            'date': date,
+            'date': data.get('date'),
             'baskets': baskets
         })
         
@@ -768,12 +773,5 @@ class NoteSymbol(Note):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'NoteSymbol':
-        symbol = data.get('symbol')
-        content = data.get('content', '')
-        title = data.get('title')
-        date = datetime.fromisoformat(data['date']) if data.get('date') else None
-        baskets = None
-        if isinstance(data.get('baskets'), dict):
-            from .basket import Basket
-            baskets = {name: Basket.from_dict(b) for name, b in data['baskets'].items()}
-        return cls(symbol, content, title=title, date=date, baskets=baskets, **data) 
+        return cls(**data)
+

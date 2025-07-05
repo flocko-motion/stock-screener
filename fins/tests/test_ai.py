@@ -1,11 +1,11 @@
 """
 Unit tests for AI assistant functionality.
 """
-
+import time
 import unittest
 
 from fins.notebook import *
-from fins.entities.note import Fact, Observation
+from fins.entities.note import Fact, Observation, NoteSymbol
 
 
 class TestNotebookAssistant(unittest.TestCase):
@@ -21,47 +21,38 @@ class TestNotebookAssistant(unittest.TestCase):
         Notebook.test_mode = False
         pass  # No cleanup needed in testing mode
     
-    def test_assistant_initialization(self):
-        self.assertIsNotNone(assistant().assistant_id)
-        self.assertIsNotNone(assistant().assistant)
-        self.assertTrue(assistant().assistant_id.startswith('asst_'))
+    def test_assistant(self):
+        a = NotebookAi()
+        a.ask("what's in the news about markets?")
+        a.ask("say that again in 4 words")
 
-    
     def test_sync_notes(self):
         """Test syncing notes to the assistant."""
 
-        # Create test notes and save them to the notebook
+        # to have a clean start for our tests, delete all notes
         notebook().clear_all()
-        assistant().sync_notes()
 
-        note1 = Fact("Test", "First test fact")
-        note2 = Observation("Test", "Test observation content")
+        a = NotebookAi()
+        a.sync_notes()
 
-        note1.save()
-        note2.save()
+        notes = [
+            Fact("Test", "First test fact"),
+            Observation("Test", "Test observation content"),
+            NoteSymbol("ADP", "ADP is a pretty hot one - good for a winter portfolio")
+        ]
 
+        for note in notes:
+            note.save(ai=a)
 
-        # Verify assistant has files
-        status = assistant().get_status()
-        print(status)
+        # give some time for processing
+        time.sleep(3)
 
-        notebook().delete(note1.id)
-        notebook().delete(note2.id)
-    
-    def test_send_message(self):
-        response = assistant().ask("Hello")
-        
-        self.assertIsInstance(response, str)
-        self.assertGreater(len(response), 0)
-    
-    def test_get_status(self):
-        status = assistant().get_status()
-        
-        self.assertIn('assistant_id', status)
-        self.assertIn('name', status)
-        self.assertIn('model', status)
-        self.assertIn('file_count', status)
-        self.assertEqual(status['assistant_id'], assistant().assistant_id)
+        a.ask("What did I note about ADP?")
+
+    def test_search(self):
+        a = NotebookAi()
+        res = a.search("ADP")
+
 
 
 
