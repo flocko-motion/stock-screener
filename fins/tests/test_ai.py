@@ -49,7 +49,7 @@ class TestNotebookAssistant(unittest.TestCase):
         notebook().delete(note2.id)
     
     def test_send_message(self):
-        response = assistant().send_message("Hello")
+        response = assistant().ask("Hello")
         
         self.assertIsInstance(response, str)
         self.assertGreater(len(response), 0)

@@ -11,6 +11,8 @@ from datetime import datetime
 from openai import OpenAI
 from openai.types.beta import FileSearchToolParam
 from openai.types.beta.assistant import ToolResources, ToolResourcesFileSearch
+from typing_extensions import override
+from openai import AssistantEventHandler
 
 from fins.config import get_openai_api_key, get_assistant_config, set_assistant_config
 from fins.entities import Note
@@ -34,6 +36,35 @@ When analyzing or responding:
 5. Help identify patterns or insights across the data
 
 Always cite your sources from the notebook when making claims or providing analysis."""
+
+
+
+# First, we create a EventHandler class to define
+# how we want to handle the events in the response stream.
+
+class EventHandler(AssistantEventHandler):
+    @override
+    def on_text_created(self, text) -> None:
+        print(f"\nassistant > ", end="", flush=True)
+
+    @override
+    def on_text_delta(self, delta, snapshot):
+        print(delta.value, end="", flush=True)
+
+    def on_tool_call_created(self, tool_call):
+        print(f"\nassistant > {tool_call.type}\n", flush=True)
+
+    def on_tool_call_delta(self, delta, snapshot):
+        if delta.type == 'code_interpreter':
+            if delta.code_interpreter.input:
+                print(delta.code_interpreter.input, end="", flush=True)
+            if delta.code_interpreter.outputs:
+                print(f"\n\noutput >", flush=True)
+                for output in delta.code_interpreter.outputs:
+                    if output.type == "logs":
+                        print(f"\n{output.logs}", flush=True)
+
+
 
 class NotebookAssistant:
     """
@@ -171,61 +202,25 @@ class NotebookAssistant:
         note.vector_store_file_id = res.id
         print("✓ Note uploaded to vector store")
 
-    def create_thread(self) -> str:
-        """
-        Create a new conversation thread.
-        
-        Returns:
-            Thread ID
-        """
-        thread = self.client.beta.threads.create()
-        self.thread_id = thread.id
+    def _get_thread_id(self) -> str:
+        if not self.thread_id:
+            thread = self.client.beta.threads.create()
+            self.thread_id = thread.id
         return self.thread_id
     
-    def send_message(self, message: str, thread_id: Optional[str] = None) -> str:
-        """
-        Send a message to the assistant and get response.
-        
-        Args:
-            message: The message to send
-            thread_id: Thread ID (creates new if not provided)
-            
-        Returns:
-            Assistant's response
-        """
-        if not thread_id:
-            thread_id = self.create_thread()
-        else:
-            self.thread_id = thread_id
-        
-        # Add message to thread
+    def ask(self, message: str) -> str:
         self.client.beta.threads.messages.create(
-            thread_id=thread_id,
+            thread_id=self._get_thread_id(),
             role="user",
             content=message
         )
-        
-        # Run assistant
-        run = self.client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=self.assistant_id
-        )
-        
-        # Wait for completion
-        while run.status in ['queued', 'in_progress']:
-            run = self.client.beta.threads.runs.retrieve(
-                thread_id=thread_id,
-                run_id=run.id
-            )
-        
-        if run.status == 'completed':
-            # Get response
-            messages = self.client.beta.threads.messages.list(thread_id=thread_id)
-            for msg in messages.data:
-                if msg.role == 'assistant':
-                    return msg.content[0].text.value
-        else:
-            raise Exception(f"Assistant run failed with status: {run.status}")
+        with self.client.beta.threads.runs.stream(
+            thread_id=self._get_thread_id(),
+            assistant_id=self.assistant_id,
+            instructions="Please address the user as Jane Doe. The user has a premium account.",
+            event_handler=EventHandler(),
+        ) as stream:
+            stream.until_done()
     
     def get_status(self) -> Dict[str, Any]:
         """

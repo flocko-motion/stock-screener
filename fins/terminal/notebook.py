@@ -313,7 +313,7 @@ def Ai(message: str):
     """
     try:
         assistant = assistant()
-        response = assistant.send_message(message)
+        response = assistant.ask(message)
         print(f"\nAssistant: {response}")
     except Exception as e:
         print(f"✗ Failed to get assistant response: {e}")
