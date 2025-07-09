@@ -8,17 +8,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: it starts to be useful - created first list of favourites">
-      <change afterPath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: search notebook by symbol">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/note.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/note.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/database/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/notebook/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/notebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/storage/storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/storage/storage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/commands.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/terminal/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/notebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/persistence.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/persistence.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_note.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_note.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -528,23 +525,7 @@
       <workItem from="1751522749865" duration="3035000" />
       <workItem from="1751535700709" duration="129000" />
       <workItem from="1751655906268" duration="35882000" />
-      <workItem from="1752059874819" duration="4752000" />
-    </task>
-    <task id="LOCAL-00128" summary="feat: first working Plot plugin &quot;PlotEach&quot;">
-      <option name="closed" value="true" />
-      <created>1750919723315</created>
-      <option name="number" value="00128" />
-      <option name="presentableId" value="LOCAL-00128" />
-      <option name="project" value="LOCAL" />
-      <updated>1750919723315</updated>
-    </task>
-    <task id="LOCAL-00129" summary="feat: first working Plot plugin &quot;PlotEach&quot;">
-      <option name="closed" value="true" />
-      <created>1750919894921</created>
-      <option name="number" value="00129" />
-      <option name="presentableId" value="LOCAL-00129" />
-      <option name="project" value="LOCAL" />
-      <updated>1750919894921</updated>
+      <workItem from="1752059874819" duration="7219000" />
     </task>
     <task id="LOCAL-00130" summary="feat: prettified PlotEach">
       <option name="closed" value="true" />
@@ -922,7 +903,23 @@
       <option name="project" value="LOCAL" />
       <updated>1752060145739</updated>
     </task>
-    <option name="localTasksCounter" value="177" />
+    <task id="LOCAL-00177" summary="fix: note_symbol had no symbol">
+      <option name="closed" value="true" />
+      <created>1752064940302</created>
+      <option name="number" value="00177" />
+      <option name="presentableId" value="LOCAL-00177" />
+      <option name="project" value="LOCAL" />
+      <updated>1752064940303</updated>
+    </task>
+    <task id="LOCAL-00178" summary="fix: search notebook by symbol">
+      <option name="closed" value="true" />
+      <created>1752065330581</created>
+      <option name="number" value="00178" />
+      <option name="presentableId" value="LOCAL-00178" />
+      <option name="project" value="LOCAL" />
+      <updated>1752065330581</updated>
+    </task>
+    <option name="localTasksCounter" value="179" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -940,8 +937,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: improved performance for Update()" />
-    <MESSAGE value="feat: basket.description()" />
     <MESSAGE value="feat: Get() Set() Dir() Ls() Top()" />
     <MESSAGE value="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries" />
     <MESSAGE value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
@@ -965,7 +960,9 @@
     <MESSAGE value="feat: asking assistant starts working - got deprecation warnings though" />
     <MESSAGE value="feat: reworked ai to modern openai Responses API with file search. ai.search is still buggy due to bad from_json implementation for Note*" />
     <MESSAGE value="feat: it starts to be useful - created first list of favourites" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: it starts to be useful - created first list of favourites" />
+    <MESSAGE value="fix: note_symbol had no symbol" />
+    <MESSAGE value="fix: search notebook by symbol" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: search notebook by symbol" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1284,21 +1281,6 @@
           <line>217</line>
           <option name="timeStamp" value="379" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/tests/test_note.py</url>
-          <line>42</line>
-          <option name="timeStamp" value="382" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/notebook/notebook.py</url>
-          <line>159</line>
-          <option name="timeStamp" value="383" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/notebook/notebook.py</url>
-          <line>317</line>
-          <option name="timeStamp" value="384" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
           <url>file://$PROJECT_DIR$/fins.ipynb</url>
           <line>9</line>
@@ -1445,7 +1427,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_variable.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable Coverage Results" MODIFIED="1743285444052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_in_test_watchdog_py.coverage" NAME="pytest in test_watchdog.py Coverage Results" MODIFIED="1743024513395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$column.coverage" NAME="column Coverage Results" MODIFIED="1743250672207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/entities" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_note_TestNotebook_test_fix_missing_symbols.coverage" NAME="Unittests for test_note.TestNotebook.test_fix_missing_symbols Coverage Results" MODIFIED="1752064741626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_note_TestNotebook_test_fix_missing_symbols.coverage" NAME="Unittests for test_note.TestNotebook.test_fix_missing_symbols Coverage Results" MODIFIED="1752064838207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_stock.coverage" NAME="pytest for test_financial.SymbolTests.test_get_stock Coverage Results" MODIFIED="1747988519666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1748608912783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_cagr_correctness.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_cagr_correctness Coverage Results" MODIFIED="1751263702456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />

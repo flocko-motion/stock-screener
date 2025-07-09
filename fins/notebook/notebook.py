@@ -35,7 +35,7 @@ class Notebook:
     def __init__(self, db_name: str = "notebook"):
         self.db_name = db_name
         # Initialize the database
-        init_db(db_name)
+        init_db(db_name, make_backup=db_name == "notebook")
 
     @classmethod
     def is_test_mode(cls):

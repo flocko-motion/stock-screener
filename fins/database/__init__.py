@@ -4,6 +4,7 @@ Shared database setup for FINS.
 This module provides the common SQLAlchemy setup used by both financial and notebook modules.
 """
 
+import shutil
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 from sqlalchemy import create_engine, event, Column, String, DateTime, JSON, Text
@@ -21,10 +22,17 @@ _engines = {}
 _sessions = {}
 
 
-def init_db(db_name: str = "symbols"):
+def init_db(db_name: str = "symbols", make_backup: bool = False):
     """Initialize a database connection and ensure schema is up to date."""
     if db_name not in _engines:
         db_path = DIR_DB / f"{db_name}.db"
+        
+        # Create backup if requested and database file exists
+        if make_backup and db_path.exists():
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_path = DIR_DB / f"{db_name}.{timestamp}.db"
+            shutil.copy2(db_path, backup_path)
+            print(f"✓ Created backup: {backup_path}")
         
         _engines[db_name] = create_engine(
             f'sqlite:///{db_path}',

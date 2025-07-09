@@ -238,18 +238,14 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10, sym
                 symbol_info = f"ticker: {note.symbol}"
             elif note.related_symbols:
                 symbols = note.related_symbols[:3]
-                symbol_info = f"tickers: {', '.join(symbols)}{'...' if len(note.related_symbols) > 3 else ''}"
+                symbol_info = f" (tickers: {', '.join(symbols)}{'...' if len(note.related_symbols) > 3 else ''}) "
         
         # Clean up content (remove extra whitespace, newlines)
         content_clean = note.content.strip().replace('\n', ' ').replace('  ', ' ')
         
         # Print in a cleaner format
-        print(f"{date_str} {note.title}")
-        if symbol_info:
-            print(f"  {symbol_info}")
-        print(f"  {content_clean}")
-        print()  # Empty line between notes
-    
+        print(f"[{date_str}] {note.title}:\t {content_clean} {symbol_info}")
+
     return notes if return_results else None
 
 
