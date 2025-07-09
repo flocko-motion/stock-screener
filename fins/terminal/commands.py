@@ -212,3 +212,20 @@ def Unfav(symbol, listname: str) -> None:
     
     # Save the updated basket
     Put(fav_basket, f"/fav/{listname}", overwrite=True)
+
+
+def Favs(listname: str) -> Basket:
+    """
+    Fetch a favorite list basket.
+    
+    Args:
+        listname: Name of the favorite list
+        
+    Returns:
+        Basket from "/fav/<listname>.Basket" or None if not found
+        
+    Examples:
+        Favs("tech_stocks")  # Get tech_stocks basket
+        Favs("watchlist")    # Get watchlist basket
+    """
+    return Get(f"/fav/{listname}.Basket")
