@@ -8,13 +8,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: asking assistant starts working - got deprecation warnings though">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: reworked ai to modern openai Responses API with file search. ai.search is still buggy due to bad from_json implementation for Note*">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/note.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/note.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/notebook/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/notebook/assistant.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/ai.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/notebook/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/notebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/fins.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins.sh" beforeDir="false" afterPath="$PROJECT_DIR$/fins.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/notebook/ai.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/ai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/notebook.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,6 +243,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\florian.metzger-noel\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\linux\\amd64\\shellcheck",
     "ToolWindow.Plots.ShowToolbar": "false",
     "database.data.extractors.current.export.id": "JSON-Groovy.json.groovy",
     "git-widget-placeholder": "feat/pure__python",
@@ -263,6 +265,13 @@
     ]
   }
 }]]></component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings>
+        <option name="useSoftWraps" value="true" />
+      </console-settings>
+    </option>
+  </component>
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
   </component>
@@ -280,7 +289,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for test_ai.TestNotebookAssistant.test_search">
+  <component name="RunManager" selected="Python.terminal">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -442,15 +451,15 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.terminal" />
       <item itemvalue="Python.codegen" />
+      <item itemvalue="Python.terminal" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
-      <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
       <item itemvalue="Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant" />
       <item itemvalue="Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization" />
       <item itemvalue="Python tests.Unittests for test_ai.TestNotebookAssistant.test_search" />
       <item itemvalue="Python tests.Unittests for test_ai.TestNotebookAssistant.test_send_message" />
       <item itemvalue="Python tests.Unittests for test_ai.TestNotebookAssistant.test_sync_notes" />
+      <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
     </list>
     <recent_temporary>
       <list>
@@ -465,8 +474,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-PY-251.26094.141" />
-        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-PY-251.26927.74" />
+        <option value="bundled-python-sdk-657d8234b839-64d779b69b7a-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26927.74" />
       </set>
     </attachedChunks>
   </component>
@@ -516,15 +525,8 @@
       <workItem from="1751436711132" duration="4763000" />
       <workItem from="1751522749865" duration="3035000" />
       <workItem from="1751535700709" duration="129000" />
-      <workItem from="1751655906268" duration="20158000" />
-    </task>
-    <task id="LOCAL-00126" summary="feat: first working Price plugins - skeleton of OutputPlugin">
-      <option name="closed" value="true" />
-      <created>1750877180888</created>
-      <option name="number" value="00126" />
-      <option name="presentableId" value="LOCAL-00126" />
-      <option name="project" value="LOCAL" />
-      <updated>1750877180888</updated>
+      <workItem from="1751655906268" duration="35882000" />
+      <workItem from="1752059874819" duration="201000" />
     </task>
     <task id="LOCAL-00127" summary="feat: first working Plot plugin &quot;PlotlyEach&quot;">
       <option name="closed" value="true" />
@@ -910,7 +912,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751716962923</updated>
     </task>
-    <option name="localTasksCounter" value="175" />
+    <task id="LOCAL-00175" summary="feat: reworked ai to modern openai Responses API with file search. ai.search is still buggy due to bad from_json implementation for Note*">
+      <option name="closed" value="true" />
+      <created>1751746080667</created>
+      <option name="number" value="00175" />
+      <option name="presentableId" value="LOCAL-00175" />
+      <option name="project" value="LOCAL" />
+      <updated>1751746080667</updated>
+    </task>
+    <option name="localTasksCounter" value="176" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -928,7 +938,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: filters for all FieldPlugins" />
     <MESSAGE value="feat: improved multi threading for sqlite and fmp" />
     <MESSAGE value="feat: improved performance for Update()" />
     <MESSAGE value="feat: basket.description()" />
@@ -953,7 +962,8 @@
     <MESSAGE value="feat: added AI assistant" />
     <MESSAGE value="feat: create assistant and sync notes" />
     <MESSAGE value="feat: asking assistant starts working - got deprecation warnings though" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: asking assistant starts working - got deprecation warnings though" />
+    <MESSAGE value="feat: reworked ai to modern openai Responses API with file search. ai.search is still buggy due to bad from_json implementation for Note*" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: reworked ai to modern openai Responses API with file search. ai.search is still buggy due to bad from_json implementation for Note*" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1234,17 +1244,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/notebook/ai.py</url>
-          <line>103</line>
+          <line>144</line>
           <option name="timeStamp" value="367" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/notebook/ai.py</url>
-          <line>102</line>
+          <line>143</line>
           <option name="timeStamp" value="370" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/notebook/ai.py</url>
-          <line>179</line>
+          <line>220</line>
           <option name="timeStamp" value="373" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

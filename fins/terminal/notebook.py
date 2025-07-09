@@ -7,9 +7,9 @@ from datetime import datetime
 
 from fins.entities.note import Note as NoteEntity, Principle, Observation, Trade, Fact, Strategy, NoteSymbol
 from fins.entities.basket import Basket
-from fins.notebook import notebook
-from fins.notebook.assistant import assistant
+from fins.notebook import *
 
+ai = NotebookAi()
 
 def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[datetime] = None) -> Principle:
     """
@@ -30,7 +30,7 @@ def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[date
     if title is None:
         title = f"Principle #{datetime.now().strftime('%m%d-%H%M')}"
     
-    return Principle(title=title, content=content, date=date).save()
+    return Principle(title=title, content=content, date=date).save(ai=ai)
 
 
 def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[Basket] = None, date: Optional[datetime] = None) -> Observation:
@@ -54,7 +54,7 @@ def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[
         title = f"Observation #{datetime.now().strftime('%m%d-%H%M')}"
     
     baskets = {'main': basket} if basket else None
-    return Observation(title=title, content=content, baskets=baskets, date=date).save()
+    return Observation(title=title, content=content, baskets=baskets, date=date).save(ai=ai)
 
 
 def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional[Basket] = None, 
@@ -88,7 +88,7 @@ def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional
         sold_basket=sold_basket,
         status=status,
         date=date
-    ).save()
+    ).save(ai=ai)
 
 
 def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = None, 
@@ -123,7 +123,7 @@ def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = 
         confidence=confidence,
         baskets=baskets,
         date=date
-    ).save()
+    ).save(ai=ai)
 
 
 def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Optional[str] = None,
@@ -160,7 +160,7 @@ def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Option
         status=status,
         baskets=baskets,
         date=date
-    ).save()
+    ).save(ai=ai)
 
 
 def NoteSymbolCmd(symbol, content: str, title: Optional[str] = None, date: Optional[datetime] = None):
@@ -178,7 +178,7 @@ def NoteSymbolCmd(symbol, content: str, title: Optional[str] = None, date: Optio
         NoteSymbol('AAPL', 'Apple is overbought')
         NoteSymbol(AAPL, 'Apple is overbought')
     """
-    return NoteSymbol(symbol, content, title=title, date=date).save()
+    return NoteSymbol(symbol, content, title=title, date=date).save(ai=ai)
 
 
 def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> List[NoteEntity]:
@@ -198,13 +198,13 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> 
         Notes("Tesla")  # Search for notes containing "Tesla"
         Notes(note_type="trade", limit=5)  # List recent 5 trades
     """
-    notebook = notebook()
-    
+
+
     if query:
-        notes = notebook.search(query, note_type=note_type, limit=limit)
+        notes = notebook().search(query, note_type=note_type, limit=limit)
         print(f"Found {len(notes)} notes matching '{query}':")
     else:
-        notes = notebook.list_notes(note_type=note_type, limit=limit, offset=0)
+        notes = notebook().list_notes(note_type=note_type, limit=limit, offset=0)
         type_desc = f" {note_type}" if note_type else ""
         print(f"Recent {len(notes)}{type_desc} notes:")
     
@@ -237,14 +237,13 @@ def Note(note_id: str) -> Optional[NoteEntity]:
         Note("a1b2c3d4")  # Full ID
         Note("a1b2")      # Partial ID
     """
-    notebook = notebook()
-    
+
     # Try exact match first
-    note = notebook.get(note_id)
+    note = notebook().get(note_id)
     
     if note is None and len(note_id) < 36:
         # Try partial ID matching by listing all and finding match
-        all_notes = notebook.list_notes(limit=1000)  # Get many notes for partial matching
+        all_notes = notebook().list_notes(limit=1000)  # Get many notes for partial matching
         matches = [n for n in all_notes if n.id.startswith(note_id)]
         
         if len(matches) == 1:
@@ -295,7 +294,7 @@ def AiSync():
         AiSync(force=True)  # Force re-upload
     """
     try:
-        assistant().sync_notes()
+        ai.sync_notes()
     except Exception as e:
         print(f"✗ Failed to sync notes: {e}")
 
@@ -312,9 +311,7 @@ def Ai(message: str):
         Ai("Show me all trades involving AAPL")
     """
     try:
-        assistant = assistant()
-        response = assistant.ask(message)
-        print(f"\nAssistant: {response}")
+        ai.ask(message)
     except Exception as e:
         print(f"✗ Failed to get assistant response: {e}")
 
@@ -327,22 +324,22 @@ def AiStatus():
         AiStatus()
     """
     try:
-        assistant = assistant()
-        status = assistant.get_status()
-        
-        if status.get('status') == 'error':
-            print(f"✗ Assistant error: {status.get('error')}")
-            return
-        
-        print("Assistant Status:")
-        print(f"  ID: {status.get('assistant_id', 'N/A')}")
-        print(f"  Name: {status.get('name', 'N/A')}")
-        print(f"  Model: {status.get('model', 'N/A')}")
-        print(f"  Created: {status.get('created_at', 'N/A')}")
-        print(f"  Updated: {status.get('last_updated', 'N/A')}")
-        print(f"  New notes this session: {status.get('new_notes_count', 0)}")
-        print(f"  Sync threshold: {status.get('sync_threshold', 10)}")
-        
+        print("not implemented")
+        return
+        #
+        # if status.get('status') == 'error':
+        #     print(f"✗ Assistant error: {status.get('error')}")
+        #     return
+        #
+        # print("Assistant Status:")
+        # print(f"  ID: {status.get('assistant_id', 'N/A')}")
+        # print(f"  Name: {status.get('name', 'N/A')}")
+        # print(f"  Model: {status.get('model', 'N/A')}")
+        # print(f"  Created: {status.get('created_at', 'N/A')}")
+        # print(f"  Updated: {status.get('last_updated', 'N/A')}")
+        # print(f"  New notes this session: {status.get('new_notes_count', 0)}")
+        # print(f"  Sync threshold: {status.get('sync_threshold', 10)}")
+        #
     except Exception as e:
         print(f"✗ Failed to get assistant status: {e}")
 
