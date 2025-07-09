@@ -8,12 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: search notebook by symbol">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Info(&lt;symbol&gt;) terminal command">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/notebook/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/notebook/notebook.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/commands.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/terminal/notebook.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/notebook.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" afterDir="false" />
     </list>
@@ -525,15 +522,7 @@
       <workItem from="1751522749865" duration="3035000" />
       <workItem from="1751535700709" duration="129000" />
       <workItem from="1751655906268" duration="35882000" />
-      <workItem from="1752059874819" duration="7219000" />
-    </task>
-    <task id="LOCAL-00130" summary="feat: prettified PlotEach">
-      <option name="closed" value="true" />
-      <created>1750930934930</created>
-      <option name="number" value="00130" />
-      <option name="presentableId" value="LOCAL-00130" />
-      <option name="project" value="LOCAL" />
-      <updated>1750930934930</updated>
+      <workItem from="1752059874819" duration="10611000" />
     </task>
     <task id="LOCAL-00131" summary="feat: Crop() normalizes and crops time range">
       <option name="closed" value="true" />
@@ -919,7 +908,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752065330581</updated>
     </task>
-    <option name="localTasksCounter" value="179" />
+    <task id="LOCAL-00179" summary="feat: Info(&lt;symbol&gt;) terminal command">
+      <option name="closed" value="true" />
+      <created>1752067337137</created>
+      <option name="number" value="00179" />
+      <option name="presentableId" value="LOCAL-00179" />
+      <option name="project" value="LOCAL" />
+      <updated>1752067337137</updated>
+    </task>
+    <option name="localTasksCounter" value="180" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -937,7 +934,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Get() Set() Dir() Ls() Top()" />
     <MESSAGE value="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries" />
     <MESSAGE value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
     <MESSAGE value="fix: Alive()" />
@@ -962,7 +958,8 @@
     <MESSAGE value="feat: it starts to be useful - created first list of favourites" />
     <MESSAGE value="fix: note_symbol had no symbol" />
     <MESSAGE value="fix: search notebook by symbol" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: search notebook by symbol" />
+    <MESSAGE value="feat: Info(&lt;symbol&gt;) terminal command" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Info(&lt;symbol&gt;) terminal command" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1278,7 +1275,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/terminal/notebook.py</url>
-          <line>217</line>
+          <line>230</line>
           <option name="timeStamp" value="379" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">

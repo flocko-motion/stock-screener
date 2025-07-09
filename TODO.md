@@ -31,3 +31,6 @@ Plugins:
 
 Allow: AAPL(MohtlyClose() >> Plot())
 --> requires a __call__ on BasketItem which creates a basket and hands over to Basket.__call__
+
+
+Inject Info(<symbol>) into BasketItem somehow.. 

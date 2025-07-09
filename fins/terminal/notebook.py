@@ -11,7 +11,7 @@ from fins.notebook import *
 
 ai = NotebookAi()
 
-def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[datetime] = None) -> Principle:
+def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[datetime] = None, symbol: Optional[str] = None) -> Principle:
     """
     Create and save a principle note.
     
@@ -19,6 +19,7 @@ def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[date
         content: The content describing the principle
         title: The title of the principle (auto-generated if not provided)
         date: When the principle was formulated (defaults to now)
+        symbol: Optional symbol this principle relates to
         
     Returns:
         The created Principle note
@@ -26,14 +27,15 @@ def NotePrinciple(content: str, title: Optional[str] = None, date: Optional[date
     Example:
         NotePrinciple("Don't buy stocks in free fall - wait for stabilization")
         NotePrinciple("Don't buy stocks in free fall", "Never catch falling knives")
+        NotePrinciple("AAPL is overvalued", symbol="AAPL")
     """
     if title is None:
         title = f"Principle #{datetime.now().strftime('%m%d-%H%M')}"
     
-    return Principle(title=title, content=content, date=date).save(ai=ai)
+    return Principle(title=title, content=content, date=date, symbol=symbol).save(ai=ai)
 
 
-def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[Basket] = None, date: Optional[datetime] = None) -> Observation:
+def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[Basket] = None, date: Optional[datetime] = None, symbol: Optional[str] = None) -> Observation:
     """
     Create and save an observation note.
     
@@ -42,6 +44,7 @@ def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[
         title: The title of the observation (auto-generated if not provided)
         basket: Optional basket of related symbols
         date: When the observation was made (defaults to now)
+        symbol: Optional symbol this observation relates to
         
     Returns:
         The created Observation note
@@ -49,17 +52,18 @@ def NoteObservation(content: str, title: Optional[str] = None, basket: Optional[
     Example:
         NoteObservation("Major tech stocks down 5%+ on rate fears", basket=Screen(sector="Technology"))
         NoteObservation("Major tech stocks down 5%+ on rate fears", "Tech selloff")
+        NoteObservation("currently dipping at -12%", symbol="AAPL")
     """
     if title is None:
         title = f"Observation #{datetime.now().strftime('%m%d-%H%M')}"
     
     baskets = {'main': basket} if basket else None
-    return Observation(title=title, content=content, baskets=baskets, date=date).save(ai=ai)
+    return Observation(title=title, content=content, baskets=baskets, date=date, symbol=symbol).save(ai=ai)
 
 
 def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional[Basket] = None, 
               sold_basket: Optional[Basket] = None, status: str = "executed", 
-              date: Optional[datetime] = None) -> Trade:
+              date: Optional[datetime] = None, symbol: Optional[str] = None) -> Trade:
     """
     Create and save a trade note.
     
@@ -70,6 +74,7 @@ def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional
         sold_basket: Basket of items sold
         status: Trade status ("executed", "pending", "canceled")
         date: When the trade occurred (defaults to now)
+        symbol: Optional primary symbol this trade relates to
         
     Returns:
         The created Trade note
@@ -77,6 +82,7 @@ def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional
     Example:
         NoteTrade("Bought AAPL on dip", bought_basket=Basket.from_tickers(["AAPL"]))
         NoteTrade("Bought AAPL on dip", "AAPL swing trade")
+        NoteTrade("Bought AAPL on dip", symbol="AAPL")
     """
     if title is None:
         title = f"Trade #{datetime.now().strftime('%m%d-%H%M')}"
@@ -87,13 +93,14 @@ def NoteTrade(content: str, title: Optional[str] = None, bought_basket: Optional
         bought_basket=bought_basket,
         sold_basket=sold_basket,
         status=status,
-        date=date
+        date=date,
+        symbol=symbol
     ).save(ai=ai)
 
 
 def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = None, 
              confidence: float = 1.0, basket: Optional[Basket] = None, 
-             date: Optional[datetime] = None) -> Fact:
+             date: Optional[datetime] = None, symbol: Optional[str] = None) -> Fact:
     """
     Create and save a fact note.
     
@@ -104,6 +111,7 @@ def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = 
         confidence: Confidence level (0.0 to 1.0)
         basket: Optional basket of related symbols
         date: When the fact was recorded (defaults to now)
+        symbol: Optional symbol this fact relates to
         
     Returns:
         The created Fact note
@@ -111,6 +119,7 @@ def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = 
     Example:
         NoteFact("Elon Musk didn't found Tesla", source="Wikipedia", confidence=0.95)
         NoteFact("Elon Musk didn't found Tesla", "Tesla founding")
+        NoteFact("Tesla was founded in 2003", symbol="TSLA")
     """
     if title is None:
         title = f"Fact #{datetime.now().strftime('%m%d-%H%M')}"
@@ -122,13 +131,14 @@ def NoteFact(content: str, title: Optional[str] = None, source: Optional[str] = 
         source=source, 
         confidence=confidence,
         baskets=baskets,
-        date=date
+        date=date,
+        symbol=symbol
     ).save(ai=ai)
 
 
 def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Optional[str] = None,
                  risk_level: Optional[str] = None, status: str = "active",
-                 basket: Optional[Basket] = None, date: Optional[datetime] = None) -> Strategy:
+                 basket: Optional[Basket] = None, date: Optional[datetime] = None, symbol: Optional[str] = None) -> Strategy:
     """
     Create and save a strategy note.
     
@@ -140,6 +150,7 @@ def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Option
         status: Strategy status ("active", "inactive", "completed")
         basket: Optional basket of related symbols
         date: When the strategy was created (defaults to now)
+        symbol: Optional symbol this strategy relates to
         
     Returns:
         The created Strategy note
@@ -147,6 +158,7 @@ def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Option
     Example:
         NoteStrategy("Dollar cost average into QQQ", time_horizon="long-term", risk_level="medium")
         NoteStrategy("Dollar cost average into QQQ", "DCA tech")
+        NoteStrategy("Buy AAPL on dips", symbol="AAPL")
     """
     if title is None:
         title = f"Strategy #{datetime.now().strftime('%m%d-%H%M')}"
@@ -159,7 +171,8 @@ def NoteStrategy(content: str, title: Optional[str] = None, time_horizon: Option
         risk_level=risk_level,
         status=status,
         baskets=baskets,
-        date=date
+        date=date,
+        symbol=symbol
     ).save(ai=ai)
 
 

@@ -1,9 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 from fins.entities.basket import Basket
 from fins.entities.plugins import Inception
 from fins.data_sources import fmp
 from fins.financial import Symbol
 from fins.terminal.notebook import Notes
+from fins.terminal.persistence import Get, Put
+from fins.entities.basket_item import BasketItem
 
 # Market cap convenience constants
 Million = 1_000_000
@@ -63,6 +65,31 @@ def Screen(
     return filtered_basket
 
 
+def _normalize_symbol(symbol, target_type: type = BasketItem):
+
+    if isinstance(symbol, target_type):
+        return symbol
+    
+    if target_type == str:
+        if isinstance(symbol, Symbol):
+            return symbol.symbol
+        elif isinstance(symbol, BasketItem):
+            return symbol.ticker
+        else: 
+            raise ValueError(f"Unsupported symbol type: {type(symbol)}")
+    elif target_type == BasketItem:
+        return BasketItem(symbol, amount=1.0)
+    elif target_type == Symbol:
+        if isinstance(symbol, str):
+            return Symbol.get(symbol)
+        elif isinstance(symbol, BasketItem):
+            return symbol.symbol
+        else:
+            raise ValueError(f"Unsupported symbol type: {type(symbol)}")
+    raise ValueError(f"Unsupported target type: {target_type}")
+    
+
+
 def Info(symbol) -> None:
     """
     Display comprehensive information about a symbol including profile and related notes.
@@ -75,24 +102,16 @@ def Info(symbol) -> None:
         Info(AAPL)    # Get info for Apple Symbol object
         Info(basket_item)  # Get info for BasketItem
     """
-    # Extract ticker from symbol parameter
-    ticker = None
-    if hasattr(symbol, 'ticker'):
-        ticker = symbol.ticker
-    elif hasattr(symbol, 'symbol'):
-        ticker = symbol.symbol
-    else:
-        ticker = str(symbol)
-    
+
     # Get the Symbol object
-    symbol_obj = Symbol.get(ticker)
+    symbol_obj = _normalize_symbol(symbol, Symbol)
     
     if not symbol_obj:
         print(f"✗ Symbol '{ticker}' not found")
         return
     
     # Display symbol profile information
-    print(f"📊 {ticker} - {symbol_obj.name}")
+    print(f"📊 {symbol_obj.symbol} - {symbol_obj.name}")
     print("=" * 50)
     
     # Basic info
@@ -140,3 +159,56 @@ def Info(symbol) -> None:
     print("📝 Related Notes:")
     print("-" * 30)
     Notes(symbol=ticker, return_results=True)
+
+
+def Fav(symbol, listname: str) -> None:
+    """
+    Add a symbol to a favorite list.
+    
+    Args:
+        symbol: The ticker symbol (str), Symbol, or BasketItem
+        listname: Name of the favorite list
+        
+    Examples:
+        Fav("AAPL", "tech_stocks")  # Add Apple to tech_stocks list
+        Fav(AAPL, "watchlist")      # Add Apple Symbol to watchlist
+    """
+    # Load or create the favorite list
+    fav_path = f"/fav/{listname}.Basket"
+    fav_basket = Get(fav_path)
+    
+    if fav_basket is None:
+        fav_basket = Basket(name=listname)
+    
+    # Add the symbol to the basket
+    fav_basket += _normalize_symbol(symbol, BasketItem)
+    
+    # Save the updated basket
+    Put(fav_basket, f"/fav/{listname}", overwrite=True)
+
+
+def Unfav(symbol, listname: str) -> None:
+    """
+    Remove a symbol from a favorite list.
+    
+    Args:
+        symbol: The ticker symbol (str), Symbol, or BasketItem
+        listname: Name of the favorite list
+        
+    Examples:
+        Unfav("AAPL", "tech_stocks")  # Remove Apple from tech_stocks list
+        Unfav(AAPL, "watchlist")      # Remove Apple Symbol from watchlist
+    """
+    # Load the favorite list
+    fav_path = f"/fav/{listname}.Basket"
+    fav_basket = Get(fav_path)
+    
+    if fav_basket is None:
+        print(f"List '{listname}' not found")
+        return
+    
+    # Remove the symbol from the basket
+    fav_basket -= _normalize_symbol(symbol, BasketItem)
+    
+    # Save the updated basket
+    Put(fav_basket, f"/fav/{listname}", overwrite=True)
