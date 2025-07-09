@@ -13,6 +13,7 @@ Path formats:
 import os
 import json
 import tempfile
+import subprocess
 from plistlib import InvalidFileException
 from typing import Dict, Any, Optional, List, Protocol, runtime_checkable
 from pathlib import Path
@@ -361,6 +362,14 @@ class DiskStorage(StorageBackend):
         try:
             with open(file_path, 'w') as f:
                 json.dump(storage_value.to_dict(), f, indent=2)
+            
+            # Commit to git
+            try:
+                subprocess.run(['git', 'add', file_path], cwd=self.base_dir, check=True)
+                subprocess.run(['git', 'commit', '-m', f'Update {path}'], cwd=self.base_dir, check=True)
+            except Exception as e:
+                print(f"Warning: Failed to commit to git: {e}")
+            
             return True
         except Exception as e:
             print(f"Error saving value to {file_path}: {e}")
@@ -385,6 +394,10 @@ class DiskStorage(StorageBackend):
         
         if os.path.exists(file_path):
             try:
+                # Commit deletion to git before removing the file
+                subprocess.run(['git', 'rm', file_path], cwd=self.base_dir, check=True)
+                subprocess.run(['git', 'commit', '-m', f'Remove {path}'], cwd=self.base_dir, check=True)
+                
                 os.remove(file_path)
                 return True
             except Exception as e:
@@ -604,6 +617,8 @@ class Storage:
         """
         storage_value = self.get_storage_value(path)
         return storage_value.is_locked if storage_value else False
+    
+
 
     @classmethod
     def temp(cls):

@@ -10,7 +10,7 @@ from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.orm import relationship
 
 from fins.database import Base, session_scope, init_db
-from fins.entities.note import Note, Principle, Observation, Trade, Fact, Strategy
+from fins.entities.note import Note, Principle, Observation, Trade, Fact, Strategy, NoteSymbol
 from fins.entities.basket import Basket
 
 
@@ -60,7 +60,8 @@ class Notebook:
                     'created_at': note.created_at.isoformat(),
                     'updated_at': note.updated_at.isoformat(),
                     'baskets': {name: basket.to_dict() for name, basket in note.basket().items()},
-                    'vector_store_id': note.vector_store_file_id
+                    'vector_store_id': note.vector_store_file_id,
+                    'symbol': note.symbol
                 }
                 
                 # Add type-specific fields
@@ -124,7 +125,7 @@ class Notebook:
             print(f"Error getting note: {e}")
             return None
     
-    def list_notes(self, note_type: Optional[str] = None, limit: int = 50, offset: int = 0) -> List[Note]:
+    def list_notes(self, note_type: Optional[str] = None, limit: int = 50, offset: int = 0, full_text_search: Optional[str] = None) -> List[Note]:
         """
         List notes with optional filtering.
         
@@ -132,6 +133,7 @@ class Notebook:
             note_type: Filter by note type (e.g., "trade", "fact")
             limit: Maximum number of notes to return
             offset: Number of notes to skip
+            full_text_search: Optional text to search in title and content
             
         Returns:
             List of notes
@@ -142,6 +144,12 @@ class Notebook:
                 
                 if note_type:
                     query = query.filter(NoteModel.type == note_type)
+                
+                if full_text_search:
+                    query = query.filter(
+                        (NoteModel.title.like(f"%{full_text_search}%")) | 
+                        (NoteModel.content.like(f"%{full_text_search}%"))
+                    )
                 
                 note_models = query.order_by(NoteModel.date.desc()).limit(limit).offset(offset).all()
                 
@@ -278,7 +286,8 @@ class Notebook:
             'updated_at': updated_at,
             'tags': tags,
             'metadata': metadata,
-            'vector_store_id': vector_store_id
+            'vector_store_id': vector_store_id,
+            'symbol': data.get('symbol')
         }
         
         # Handle Fact sources (backward compatibility)
@@ -301,7 +310,8 @@ class Notebook:
                 'time_horizon': data.get('time_horizon'),
                 'risk_level': data.get('risk_level'),
                 'status': data.get('status', 'active')
-            })
+            }),
+            'symbol_note': (NoteSymbol, {})
         }
         
         # Get class and specific kwargs, default to base Note class

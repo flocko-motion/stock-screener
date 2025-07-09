@@ -32,6 +32,7 @@ class Note(Entity):
                  content: str,
                  date: Optional[datetime] = None,
                  baskets: Optional[Dict[str, Basket]] = None,
+                 symbol: Optional[str] = None,
                  id: Optional[str] = None,
                  created_at: Optional[datetime] = None,
                  updated_at: Optional[datetime] = None,
@@ -59,6 +60,7 @@ class Note(Entity):
         self._content = content
         self._date = date or datetime.now()
         self._baskets = baskets or {}
+        self._symbol = symbol
 
     @property
     def title(self) -> str:
@@ -97,6 +99,17 @@ class Note(Entity):
     def baskets(self) -> Dict[str, Basket]:
         """Get all baskets (backward compatibility property)."""
         return self._baskets
+    
+    @property
+    def symbol(self) -> Optional[str]:
+        """Get the primary symbol this note refers to."""
+        return self._symbol
+    
+    @symbol.setter
+    def symbol(self, value: Optional[str]) -> None:
+        """Set the primary symbol this note refers to."""
+        self._symbol = value
+        self.update()
     
     def basket(self, *args) -> Union[Dict[str, Basket], Optional[Basket], 'Note']:
         """
@@ -150,6 +163,12 @@ class Note(Entity):
             List of ticker symbols
         """
         symbols = []
+        
+        # Add primary symbol if set
+        if self._symbol:
+            symbols.append(self._symbol)
+        
+        # Add symbols from baskets
         for basket in self._baskets.values():
             for item in basket._items:
                 if item.symbol.ticker not in symbols:
@@ -215,7 +234,8 @@ class Note(Entity):
             "title": self._title,
             "content": self._content,
             "date": self._date.isoformat(),
-            "baskets": baskets_dict
+            "baskets": baskets_dict,
+            "symbol": self._symbol
         })
         return data
     
@@ -257,7 +277,8 @@ class Note(Entity):
             'title': data.get('title', ''),
             'content': data.get('content', ''),
             'date': data.get('date'),
-            'baskets': baskets
+            'baskets': baskets,
+            'symbol': data.get('symbol')
         })
         
         # Let Entity.from_dict handle the common fields
@@ -714,8 +735,8 @@ class NoteSymbol(Note):
     """
     A note on a specific symbol (ticker).
     
-    Attributes:
-        _symbol (str): The ticker symbol this note refers to.
+    This is a semantic wrapper that indicates the note is specifically about a symbol.
+    The symbol is stored in the base Note class.
     """
     entity_type: ClassVar[str] = "symbol_note"
 
@@ -737,39 +758,19 @@ class NoteSymbol(Note):
             ticker = symbol.ticker
         elif hasattr(symbol, 'symbol'):
             ticker = symbol.symbol
+        elif symbol is None:
+            ticker = None
         else:
             ticker = str(symbol)
-        self._symbol = ticker
-        if not title:
-            title = f"Note on {self._symbol}"
-        super().__init__(title, content, date, baskets, **kwargs)
-
-    def symbol(self, value=None):
-        """
-        Get or set the symbol (ticker) for this note.
         
-        Args:
-            value: If provided, sets the symbol (str, Symbol, or BasketItem)
-        Returns:
-            The current symbol (ticker as str) if no value is given, else self for chaining
-        """
-        if value is None:
-            return self._symbol
-        # Accept str, Symbol, or BasketItem
-        if hasattr(value, 'ticker'):
-            self._symbol = value.ticker
-        elif hasattr(value, 'symbol'):
-            self._symbol = value.symbol
-        else:
-            self._symbol = str(value)
-        self.update()
-        return self
+        if not title:
+            title = f"Note on {ticker}"
+        
+        super().__init__(title, content, date, baskets, symbol=ticker, **kwargs)
 
-    def to_dict(self) -> Dict[str, Any]:
-        data = super().to_dict()
-        symbol = Symbol.get(self._symbol)
-        data['symbol'] = symbol.to_dict()
-        return data
+
+
+
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'NoteSymbol':

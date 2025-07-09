@@ -181,7 +181,7 @@ def NoteSymbolCmd(symbol, content: str, title: Optional[str] = None, date: Optio
     return NoteSymbol(symbol, content, title=title, date=date).save(ai=ai)
 
 
-def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> List[NoteEntity]:
+def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10, symbol=None) -> List[NoteEntity]:
     """
     List or search notes.
     
@@ -189,6 +189,7 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> 
         query: Search query for title/content (empty string lists all)
         note_type: Filter by note type ("principle", "observation", "trade", "fact", "strategy")
         limit: Maximum number of results
+        symbol: Symbol to search for (str, Symbol, or BasketItem)
         
     Returns:
         List of matching notes
@@ -197,10 +198,28 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10) -> 
         Notes()  # List recent 10 notes
         Notes("Tesla")  # Search for notes containing "Tesla"
         Notes(note_type="trade", limit=5)  # List recent 5 trades
+        Notes(symbol="AAPL")  # Search for notes related to AAPL
+        Notes(symbol=AAPL)  # Search for notes related to AAPL symbol
     """
 
 
-    if query:
+    # Extract ticker from symbol parameter
+    ticker = None
+    if symbol is not None:
+        if hasattr(symbol, 'ticker'):
+            ticker = symbol.ticker
+        elif hasattr(symbol, 'symbol'):
+            ticker = symbol.symbol
+        else:
+            ticker = str(symbol)
+    
+    if ticker:
+        # Search for notes related to the symbol
+        all_notes = notebook().list_notes(note_type=note_type, limit=10000, full_text_search=ticker)  # Get many notes for symbol filtering
+        notes = [note for note in all_notes if ticker == note.symbol]
+        notes = notes[:limit]  # Apply limit after filtering
+        print(f"Found {len(notes)} notes related to {ticker}:")
+    elif query:
         notes = notebook().search(query, note_type=note_type, limit=limit)
         print(f"Found {len(notes)} notes matching '{query}':")
     else:

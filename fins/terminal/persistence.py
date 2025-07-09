@@ -153,7 +153,7 @@ def Dir(path: str = "/", recursive: bool = False, silent: bool = False) -> Optio
         result = sorted(result)
     else:
         # Extract just the names relative to the requested path (non-recursive)
-        result = []
+        result = set()
         path_len = len(path)
         
         for full_path in all_paths:
@@ -162,10 +162,9 @@ def Dir(path: str = "/", recursive: bool = False, silent: bool = False) -> Optio
                 # Get just the first component (file or directory name)
                 if '/' in relative:
                     dir_name = relative.split('/')[0]
-                    if dir_name not in result:
-                        result.append(dir_name + '/')
+                    result.add(dir_name + '/')
                 else:
-                    result.append(relative)
+                    result.add(relative)
         
         result = sorted(result)
     
