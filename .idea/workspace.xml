@@ -294,7 +294,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for test_note.TestNotebook.test_fix_missing_symbols">
+  <component name="RunManager" selected="Python.terminal">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -323,9 +323,6 @@
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />

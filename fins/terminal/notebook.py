@@ -181,7 +181,7 @@ def NoteSymbolCmd(symbol, content: str, title: Optional[str] = None, date: Optio
     return NoteSymbol(symbol, content, title=title, date=date).save(ai=ai)
 
 
-def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10, symbol=None) -> List[NoteEntity]:
+def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10, symbol=None, return_results: bool = False) -> List[NoteEntity]:
     """
     List or search notes.
     
@@ -228,18 +228,29 @@ def Notes(query: str = "", note_type: Optional[str] = None, limit: int = 10, sym
         print(f"Recent {len(notes)}{type_desc} notes:")
     
     for note in notes:
-        symbols_info = ""
-        if note.related_symbols:
-            symbols_info = f" [{', '.join(note.related_symbols[:3])}{'...' if len(note.related_symbols) > 3 else ''}]"
+        # Format the date
+        date_str = note.date.strftime('%Y-%m-%d')
         
-        # Truncate content preview to 60 characters
-        content_preview = note.content[:60] + "..." if len(note.content) > 60 else note.content
-        content_preview = content_preview.replace('\n', ' ')  # Replace newlines with spaces
+        # Show symbol if available
+        symbol_info = ""
+        if symbol is None:
+            if note.symbol:
+                symbol_info = f"ticker: {note.symbol}"
+            elif note.related_symbols:
+                symbols = note.related_symbols[:3]
+                symbol_info = f"tickers: {', '.join(symbols)}{'...' if len(note.related_symbols) > 3 else ''}"
         
-        print(f"  {note.id[:8]} | {note.date.strftime('%Y-%m-%d')} | {note.entity_type:12} | {note.title}")
-        print(f"    {content_preview}{symbols_info}")
+        # Clean up content (remove extra whitespace, newlines)
+        content_clean = note.content.strip().replace('\n', ' ').replace('  ', ' ')
+        
+        # Print in a cleaner format
+        print(f"{date_str} {note.title}")
+        if symbol_info:
+            print(f"  {symbol_info}")
+        print(f"  {content_clean}")
+        print()  # Empty line between notes
     
-    return notes
+    return notes if return_results else None
 
 
 def Note(note_id: str) -> Optional[NoteEntity]:
