@@ -8,9 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Fav(..) Unfav(..)">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Favs(..)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -253,7 +255,7 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.code.analysis.last.selected.profile": "aDefault",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable",
+    "settings.editor.selected.configurable": "pyconsole",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -264,10 +266,13 @@
 }]]></component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
-      <console-settings>
+      <console-settings module-name="stock-screener" is-module-sdk="true">
         <option name="useSoftWraps" value="true" />
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="stock-screener" />
       </console-settings>
     </option>
+    <option name="myShowVariablesByDefault" value="false" />
   </component>
   <component name="PyDebuggerOptionsProvider">
     <option name="myDropIntoDebuggerOnFailedTests" value="true" />
@@ -520,23 +525,7 @@
       <workItem from="1751522749865" duration="3035000" />
       <workItem from="1751535700709" duration="129000" />
       <workItem from="1751655906268" duration="35882000" />
-      <workItem from="1752059874819" duration="11371000" />
-    </task>
-    <task id="LOCAL-00132" summary="feat: Crop() normalizes and crops time range">
-      <option name="closed" value="true" />
-      <created>1750938913731</created>
-      <option name="number" value="00132" />
-      <option name="presentableId" value="LOCAL-00132" />
-      <option name="project" value="LOCAL" />
-      <updated>1750938913731</updated>
-    </task>
-    <task id="LOCAL-00133" summary="feat: Cagr() plugin">
-      <option name="closed" value="true" />
-      <created>1751009309477</created>
-      <option name="number" value="00133" />
-      <option name="presentableId" value="LOCAL-00133" />
-      <option name="project" value="LOCAL" />
-      <updated>1751009309477</updated>
+      <workItem from="1752059874819" duration="13248000" />
     </task>
     <task id="LOCAL-00134" summary="feat: Mcap plugin">
       <option name="closed" value="true" />
@@ -914,7 +903,23 @@
       <option name="project" value="LOCAL" />
       <updated>1752089682567</updated>
     </task>
-    <option name="localTasksCounter" value="181" />
+    <task id="LOCAL-00181" summary="feat: Fav(..) Unfav(..)">
+      <option name="closed" value="true" />
+      <created>1752089735217</created>
+      <option name="number" value="00181" />
+      <option name="presentableId" value="LOCAL-00181" />
+      <option name="project" value="LOCAL" />
+      <updated>1752089735217</updated>
+    </task>
+    <task id="LOCAL-00182" summary="feat: Favs(..)">
+      <option name="closed" value="true" />
+      <created>1752089989874</created>
+      <option name="number" value="00182" />
+      <option name="presentableId" value="LOCAL-00182" />
+      <option name="project" value="LOCAL" />
+      <updated>1752089989874</updated>
+    </task>
+    <option name="localTasksCounter" value="183" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -932,7 +937,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin" />
     <MESSAGE value="fix: Alive()" />
     <MESSAGE value="fix: persistence overwrite warning" />
     <MESSAGE value="fix: fmt delivered invalid datapoints pre-inception if from=1900-01-01 was given at api request" />
@@ -957,7 +961,8 @@
     <MESSAGE value="fix: search notebook by symbol" />
     <MESSAGE value="feat: Info(&lt;symbol&gt;) terminal command" />
     <MESSAGE value="feat: Fav(..) Unfav(..)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Fav(..) Unfav(..)" />
+    <MESSAGE value="feat: Favs(..)" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Favs(..)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1123,7 +1128,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/basket.py</url>
-          <line>233</line>
+          <line>239</line>
           <option name="timeStamp" value="285" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

@@ -28,16 +28,22 @@ class Basket(Entity):
     def __str__(self) -> str:
         """Return the string representation of the basket."""
         if not self._items:
-            return ""
-            
-        # Simple text representation preserving order
-        return "\n".join(f"{item.amount:g}x {item.ticker}" for item in sorted(self._items, key=lambda x: (-x.amount, x.ticker)))
+            return "Empty Basket"
+        
+        # Sort items by ticker for consistent display
+        sorted_items = sorted(self._items, key=lambda x: x.ticker)
+        
+        # Create table header
+        result = "#    amnt symbol\n"
+        
+        # Add each item as a row
+        for i, item in enumerate(sorted_items):
+            result += f"{i:<4d} {item.amount:>4} {item.ticker:<6} - {item.symbol().name} ({item.symbol().industry})\n"
+        
+        return result
     
     def __repr__(self) -> str:
-        """Return a simple string representation of the basket."""
-        if not self._items:
-            return "Empty Basket"
-        return repr(self.df())
+        return str(self)
     
     def _repr_html_(self) -> str:
         """Return HTML representation for rich Jupyter display."""
