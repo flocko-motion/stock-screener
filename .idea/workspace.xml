@@ -8,12 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: Favs(..)">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/basket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/portfolio-construction.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
-    </list>
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: fins.sh starts jupyter in background thread" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -525,15 +520,7 @@
       <workItem from="1751522749865" duration="3035000" />
       <workItem from="1751535700709" duration="129000" />
       <workItem from="1751655906268" duration="35882000" />
-      <workItem from="1752059874819" duration="13248000" />
-    </task>
-    <task id="LOCAL-00134" summary="feat: Mcap plugin">
-      <option name="closed" value="true" />
-      <created>1751009586210</created>
-      <option name="number" value="00134" />
-      <option name="presentableId" value="LOCAL-00134" />
-      <option name="project" value="LOCAL" />
-      <updated>1751009586210</updated>
+      <workItem from="1752059874819" duration="14060000" />
     </task>
     <task id="LOCAL-00135" summary="feat: plugins DividendYield, Npm, Pe, Peg, Roe, Vol">
       <option name="closed" value="true" />
@@ -919,7 +906,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752089989874</updated>
     </task>
-    <option name="localTasksCounter" value="183" />
+    <task id="LOCAL-00183" summary="feat: fins.sh starts jupyter in background thread">
+      <option name="closed" value="true" />
+      <created>1752131739482</created>
+      <option name="number" value="00183" />
+      <option name="presentableId" value="LOCAL-00183" />
+      <option name="project" value="LOCAL" />
+      <updated>1752131739482</updated>
+    </task>
+    <option name="localTasksCounter" value="184" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -937,7 +932,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: Alive()" />
     <MESSAGE value="fix: persistence overwrite warning" />
     <MESSAGE value="fix: fmt delivered invalid datapoints pre-inception if from=1900-01-01 was given at api request" />
     <MESSAGE value="fix: remove no-inception symbols" />
@@ -962,7 +956,8 @@
     <MESSAGE value="feat: Info(&lt;symbol&gt;) terminal command" />
     <MESSAGE value="feat: Fav(..) Unfav(..)" />
     <MESSAGE value="feat: Favs(..)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: Favs(..)" />
+    <MESSAGE value="feat: fins.sh starts jupyter in background thread" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: fins.sh starts jupyter in background thread" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

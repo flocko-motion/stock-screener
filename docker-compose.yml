@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: fins-postgres
+    env_file:
+      - ~/.fins/config/db.env
+    environment:
+      POSTGRES_DB: fins
+      POSTGRES_USER: fins
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ~/.fins/postgres/data:/var/lib/postgresql/data
+      - ~/.fins/postgres/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fins -d fins"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 

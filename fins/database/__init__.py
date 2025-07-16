@@ -1,16 +1,17 @@
 """
-Shared database setup for FINS.
+PostgreSQL database setup for FINS.
 
-This module provides the common SQLAlchemy setup used by both financial and notebook modules.
+This module provides the PostgreSQL SQLAlchemy setup used by both financial and notebook modules.
 """
 
-import shutil
-from datetime import datetime, timedelta
+import os
+from datetime import datetime
 from contextlib import contextmanager
 from sqlalchemy import create_engine, event, Column, String, DateTime, JSON, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, scoped_session
-from sqlalchemy.pool import StaticPool, QueuePool
+from sqlalchemy.pool import QueuePool
+from pathlib import Path
 
 from fins.config import DIR_DB
 
@@ -21,45 +22,56 @@ Base = declarative_base()
 _engines = {}
 _sessions = {}
 
+# Database configuration
+def load_db_config():
+    """Load database configuration from ~/.fins/config/db.env"""
+    config_path = Path.home() / '.fins' / 'config' / 'db.env'
+    
+    if not config_path.exists():
+        raise FileNotFoundError(f"Database config file not found: {config_path}")
+    
+    password = None
+    with open(config_path, 'r') as f:
+        for line in f:
+            if line.startswith('POSTGRES_PASSWORD='):
+                password = line.split('=', 1)[1].strip()
+                break
+    
+    if not password:
+        raise ValueError(f"No POSTGRES_PASSWORD found in {config_path}")
+    
+    return {
+        'host': 'localhost',
+        'port': 5432,
+        'database': 'fins',
+        'user': 'fins',
+        'password': password
+    }
 
-def init_db(db_name: str = "symbols", make_backup: bool = False):
-    """Initialize a database connection and ensure schema is up to date."""
+def get_connection_string(db_name: str = "symbols") -> str:
+    """Get PostgreSQL connection string."""
+    config = load_db_config()
+    return f"postgresql://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}"
+
+def init_db(db_name: str = "symbols"):
+    """Initialize a PostgreSQL database connection and ensure schema is up to date."""
     if db_name not in _engines:
-        db_path = DIR_DB / f"{db_name}.db"
-        
-        # Create backup if requested and database file exists
-        if make_backup and db_path.exists():
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = DIR_DB / f"{db_name}.{timestamp}.db"
-            shutil.copy2(db_path, backup_path)
-            print(f"✓ Created backup: {backup_path}")
+        connection_string = get_connection_string(db_name)
         
         _engines[db_name] = create_engine(
-            f'sqlite:///{db_path}',
-            connect_args={
-                'check_same_thread': False,
-                'timeout': 30,  # Wait up to 30 seconds for locks
-            },
+            connection_string,
             poolclass=QueuePool,
-            pool_size=10,  # Allow up to 10 concurrent connections
-            max_overflow=20,  # Allow 20 additional connections if needed
-            pool_pre_ping=True  # Verify connections before use
+            pool_size=5,  # Optimized for single user
+            max_overflow=10,  # Reduced for single user
+            pool_pre_ping=True,
+            pool_recycle=3600,
+            echo=False
         )
-        
-        # Configure SQLite for maximum durability
-        @event.listens_for(_engines[db_name], "connect")
-        def set_sqlite_pragma(dbapi_connection, connection_record):
-            cursor = dbapi_connection.cursor()
-            cursor.execute("PRAGMA journal_mode=DELETE")  # Traditional rollback journal
-            cursor.execute("PRAGMA synchronous=FULL")     # Maximum durability
-            cursor.execute("PRAGMA busy_timeout=30000")   # 30 second timeout
-            cursor.close()
         
         _sessions[db_name] = scoped_session(sessionmaker(bind=_engines[db_name]))
         
         # Create all tables for this database
         Base.metadata.create_all(_engines[db_name])
-
 
 @contextmanager
 def session_scope(db_name: str = "symbols"):
@@ -77,5 +89,20 @@ def session_scope(db_name: str = "symbols"):
     finally:
         session.close()
 
+def get_db_info() -> dict:
+    """Get information about the current database configuration."""
+    try:
+        config = load_db_config()
+        return {
+            'backend': 'postgresql',
+            'connection_string': get_connection_string('symbols').replace(config['password'], '***'),
+            'engines_initialized': list(_engines.keys())
+        }
+    except Exception as e:
+        return {
+            'backend': 'postgresql',
+            'error': str(e),
+            'engines_initialized': list(_engines.keys())
+        }
 
-__all__ = ['Base', 'session_scope', 'init_db'] 
+__all__ = ['Base', 'session_scope', 'init_db', 'get_db_info'] 
