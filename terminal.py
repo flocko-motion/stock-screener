@@ -101,6 +101,19 @@ def start_jupyter_server():
 		return None
 
 
+# Import centralized shutdown mechanism
+from fins.shutdown import setup_shutdown_handlers, register_cleanup_handler
+
+# Setup shutdown handlers
+setup_shutdown_handlers()
+
+# Register database cleanup
+try:
+    from fins.database import shutdown_db
+    register_cleanup_handler(shutdown_db)
+except ImportError:
+    pass
+
 # Start Jupyter server in background thread
 jupyter_thread = start_jupyter_server()
 

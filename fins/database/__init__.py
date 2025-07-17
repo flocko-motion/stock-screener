@@ -112,4 +112,16 @@ def get_db_info() -> dict:
             'initialized': _engine is not None
         }
 
-__all__ = ['session_scope', 'Base'] 
+def shutdown_db():
+    """Properly shutdown database connections."""
+    global _engine, _session_factory
+    
+    if _session_factory:
+        _session_factory.remove()
+        _session_factory = None
+    
+    if _engine:
+        _engine.dispose()
+        _engine = None
+
+__all__ = ['session_scope', 'Base', 'shutdown_db'] 

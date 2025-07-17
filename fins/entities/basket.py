@@ -286,10 +286,13 @@ class Basket(Entity):
         """
         from fins.financial import Symbol
         from fins.utils import ProgressTracker
+        from fins.shutdown import is_shutdown_requested
         
         tracker = ProgressTracker(len(self._items), "Fetching symbols")
         
         def fetch_symbol_for_item(item: BasketItem):
+            if is_shutdown_requested():
+                return item
             if item._symbol is None:
                 item._symbol = Symbol.get(item.ticker)
             tracker.next()
@@ -298,6 +301,8 @@ class Basket(Entity):
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(fetch_symbol_for_item, item): item for item in self._items}
             for future in as_completed(futures):
+                if is_shutdown_requested():
+                    break
                 future.result()  # This will raise any exceptions that occurred
         
         tracker.done()

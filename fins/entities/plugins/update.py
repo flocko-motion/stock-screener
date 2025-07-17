@@ -19,6 +19,7 @@ class Update(Plugin):
     def run(self, runtime: 'BasketRuntime'):
         from fins.utils import ProgressTracker
         from concurrent.futures import ThreadPoolExecutor, as_completed
+        from fins.shutdown import is_shutdown_requested
         
         basket_items = runtime.basket_items()
         
@@ -35,6 +36,8 @@ class Update(Plugin):
         tracker = ProgressTracker(actual_update_count, f"Updating symbols (max {self.max_updates})")
         
         def update_symbol_for_item(item: BasketItem):
+            if is_shutdown_requested():
+                return item
             try:
                 symbol = item.symbol()
                 if self._update_required(symbol):
@@ -52,6 +55,8 @@ class Update(Plugin):
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = {executor.submit(update_symbol_for_item, item): item for item in items_to_update}
             for future in as_completed(futures):
+                if is_shutdown_requested():
+                    break
                 future.result()  # This will raise any exceptions that occurred
         
         tracker.done()

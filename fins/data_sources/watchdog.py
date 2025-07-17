@@ -3,6 +3,9 @@ import time
 import traceback
 from functools import wraps
 
+# Import centralized shutdown mechanism
+from fins.shutdown import is_shutdown_requested
+
 
 class WatchdogTimeoutError(Exception):
 	"""Custom exception raised when the function exceeds the allowed timeout."""
@@ -35,8 +38,9 @@ def watchdog(timeout: int, retries: int):
 
 				thread = threading.Thread(target=target)
 				thread.start()
+				
 				thread.join(timeout)
-
+				
 				if thread.is_alive():
 					# If the thread is still running after the timeout, kill it
 					thread.join(0)  # Force thread termination

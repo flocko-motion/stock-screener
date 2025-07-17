@@ -21,6 +21,9 @@ from ..exceptions import NoPriceDataError
 
 DEBUG = False
 
+# Import centralized shutdown mechanism
+from fins.shutdown import set_shutdown_event, is_shutdown_requested
+
 # Read the API key from the file
 key_file_path = os.path.join(os.path.dirname(__file__), '..', '..', 'api-keys', 'financialmodelingprep.key')
 
@@ -83,8 +86,24 @@ class ApiBadRequestException(Exception):
         self.message = message
         super().__init__(message)
 
-RATE_LIMIT_INTERVAL = (60 / 300) * 2  # 600/m should be allowed, we slow down by a factor to be safe
+RATE_LIMIT_INTERVAL = (60 / 300) * 1.02 # 300/m should be allowed, we slow down by a factor to be safe
 log_debug(f"FMP rate limit interval set to {RATE_LIMIT_INTERVAL} seconds", channel=sys.stderr)
+
+RATE_LIMIT_LOG_PATH = os.path.expanduser('~/.fins/rate-limit.log')
+RATE_LIMIT_LOG_LOCK = threading.Lock()
+
+def log_rate_limit_event(endpoint: str, params: dict, result: str):
+    """Log each API request with timestamp, endpoint, and result (ok or rate-limit-blocker)."""
+    timestamp = datetime.now().isoformat()
+    # Remove apikey from params for logging
+    log_params = (params or {}).copy()
+    log_params.pop('apikey', None)
+    param_str = urlencode(log_params)
+    log_line = f"{timestamp}\t{endpoint}?{param_str}\t{result}\n"
+    with RATE_LIMIT_LOG_LOCK:
+        os.makedirs(os.path.dirname(RATE_LIMIT_LOG_PATH), exist_ok=True)
+        with open(RATE_LIMIT_LOG_PATH, 'a') as f:
+            f.write(log_line)
 
 def rate_limit_enforce():
     """Enforce rate limiting between requests."""
@@ -92,12 +111,13 @@ def rate_limit_enforce():
     with rate_limit_lock:
         current_time = time.time()
         elapsed_time = current_time - last_request_time
-        last_request_time = time.time()
 
-    if elapsed_time < RATE_LIMIT_INTERVAL:
-        sleep_interval = RATE_LIMIT_INTERVAL - elapsed_time
-        # debug_print(f"sleep {sleep_interval} seconds")
-        time.sleep(sleep_interval)
+        if elapsed_time < RATE_LIMIT_INTERVAL:
+            sleep_interval = RATE_LIMIT_INTERVAL - elapsed_time
+            if sleep_interval > 0:
+                time.sleep(sleep_interval)
+
+        last_request_time = time.time()
 
 
 def rate_limit_recover():
@@ -105,6 +125,9 @@ def rate_limit_recover():
         seconds = 60
         print("")
         for s in range(seconds):
+            if is_shutdown_requested():
+                print(f"\rFMP API rate limit recovery interrupted by shutdown")
+                return
             print(f"\rFMP API rate limit exceeded - recover {seconds - s} s              ", end='', flush=True)
             time.sleep(1)
             print(f"\rFMP API rate limit recovered for {seconds} s                        ")
@@ -134,11 +157,15 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
 
     def handle_response(response):
         if response.status_code == 200:
+            log_rate_limit_event(endpoint, request_params, "ok")
             return response.json()
         if response.status_code == 400:
+            log_rate_limit_event(endpoint, request_params, "bad-request")
             raise ApiBadRequestException(response.content)
         if response.status_code == 402:
+            log_rate_limit_event(endpoint, request_params, "rate-limit-blocker")
             raise ApiLimitationException(response.content)
+        log_rate_limit_event(endpoint, request_params, f"error-{response.status_code}")
         raise Exception(f"API error: {response.status_code} - {response.content}")
 
     def make_request():
@@ -149,19 +176,25 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
 
     def fetch_data():
         for attempt in range(max_retries):
+            if is_shutdown_requested():
+                log_rate_limit_event(endpoint, request_params, "shutdown-requested")
+                raise Exception("Shutdown requested during API call")
             try:
                 response = make_request()
                 return handle_response(response)
             except ApiLimitationException:
+                log_rate_limit_event(endpoint, request_params, "rate-limit-blocker")
                 rate_limit_recover()
                 continue
             except ApiBadRequestException:
+                log_rate_limit_event(endpoint, request_params, "bad-request")
                 raise
             except (requests.exceptions.ConnectionError, 
                     requests.exceptions.Timeout,
                     requests.exceptions.HTTPError,
                     requests.exceptions.RequestException,
                     OSError) as e:
+                log_rate_limit_event(endpoint, request_params, f"network-error-{type(e).__name__}")
                 if attempt == max_retries - 1:
                     raise Exception(f"Network error after {max_retries} attempts: {e}")
                 delay = base_delay * (2 ** attempt)  # Exponential backoff
@@ -169,9 +202,12 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 time.sleep(delay)
             except Exception as e:
                 if "API error: 429" in str(e):
+                    log_rate_limit_event(endpoint, request_params, "rate-limit-blocker-429")
                     rate_limit_recover()
                     continue
+                log_rate_limit_event(endpoint, request_params, f"exception-{type(e).__name__}")
                 raise Exception(f"Request failed: {type(e)} {e}")
+        log_rate_limit_event(endpoint, request_params, "failed-to-fetch")
         raise Exception("failed to fetch data")
 
     if use_cache:
