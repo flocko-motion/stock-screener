@@ -9,7 +9,7 @@ from typing import List, Optional, Any, ClassVar
 from sqlalchemy import Column, String, DateTime, Text
 from sqlalchemy.orm import relationship
 
-from fins.database import Base, session_scope, init_db
+from fins.database import session_scope, Base
 from fins.entities.note import Note, Principle, Observation, Trade, Fact, Strategy, NoteSymbol
 from fins.entities.basket import Basket
 
@@ -32,10 +32,8 @@ class Notebook:
 
     test_mode = False
 
-    def __init__(self, db_name: str = "notebook"):
-        self.db_name = db_name
-        # Initialize the database
-        init_db(db_name)
+    def __init__(self):
+        pass
 
     @classmethod
     def is_test_mode(cls):
@@ -52,7 +50,7 @@ class Notebook:
             True if successful, False otherwise
         """
         try:
-            with session_scope(self.db_name) as session:
+            with session_scope() as session:
                 # Prepare the data blob with all additional fields
                 data = {
                     'tags': note.tags,
@@ -79,144 +77,152 @@ class Notebook:
                 
                 if existing:
                     # Update existing note
-                    existing.type = note.entity_type
-                    existing.title = note.title
-                    existing.content = note.content
-                    existing.date = note.date
+                    existing.type = note.__class__.__name__
+                    existing.title = note.title()
+                    existing.content = note.content()
+                    existing.date = note.date()
                     existing.data = json.dumps(data)
                 else:
                     # Create new note
-                    note_model = NoteModel(
+                    new_note = NoteModel(
                         id=note.id,
-                        type=note.entity_type,
-                        title=note.title,
-                        content=note.content,
-                        date=note.date,
+                        type=note.__class__.__name__,
+                        title=note.title(),
+                        content=note.content(),
+                        date=note.date(),
                         data=json.dumps(data)
                     )
-                    session.add(note_model)
+                    session.add(new_note)
                 
                 return True
                 
         except Exception as e:
             print(f"Error saving note: {e}")
             return False
-    
-    def get(self, note_id: str) -> Optional[Note]:
+
+    def load(self, note_id: str) -> Optional[Note]:
         """
-        Get a note by ID.
+        Load a note from the database.
         
         Args:
-            note_id: The note ID
+            note_id: The ID of the note to load
             
         Returns:
             The note if found, None otherwise
         """
         try:
-            with session_scope(self.db_name) as session:
+            with session_scope() as session:
                 note_model = session.query(NoteModel).filter_by(id=note_id).first()
                 
-                if note_model:
-                    session.expunge(note_model)  # Detach from session
-                    return self._model_to_note(note_model)
-                return None
+                if not note_model:
+                    return None
+                
+                # Parse the data blob
+                data = json.loads(note_model.data) if note_model.data else {}
+                
+                # Create the appropriate note type
+                note_class = globals().get(note_model.type, Note)
+                
+                # Extract basic fields
+                kwargs = {
+                    'id': note_model.id,
+                    'title': note_model.title,
+                    'content': note_model.content,
+                    'date': note_model.date,
+                    'symbol': data.get('symbol'),
+                    'created_at': datetime.fromisoformat(data.get('created_at', datetime.now().isoformat())),
+                    'updated_at': datetime.fromisoformat(data.get('updated_at', datetime.now().isoformat())),
+                    'tags': data.get('tags', []),
+                    'metadata': data.get('metadata', {}),
+                    'vector_store_id': data.get('vector_store_id')
+                }
+                
+                # Add type-specific fields
+                if note_model.type in ['Trade', 'Strategy']:
+                    kwargs['status'] = data.get('status')
+                if note_model.type == 'Fact':
+                    kwargs['sources'] = data.get('sources', [])
+                    kwargs['confidence'] = data.get('confidence')
+                if note_model.type == 'Strategy':
+                    kwargs['time_horizon'] = data.get('time_horizon')
+                    kwargs['risk_level'] = data.get('risk_level')
+                
+                # Create baskets if present
+                baskets = {}
+                for name, basket_data in data.get('baskets', {}).items():
+                    baskets[name] = Basket.from_dict(basket_data)
+                kwargs['baskets'] = baskets
+                
+                return note_class(**kwargs)
                 
         except Exception as e:
-            print(f"Error getting note: {e}")
+            print(f"Error loading note: {e}")
             return None
-    
-    def list_notes(self, note_type: Optional[str] = None, limit: int = 50, offset: int = 0, full_text_search: Optional[str] = None) -> List[Note]:
+
+    def list_notes(self, limit: Optional[int] = None) -> List[Note]:
         """
-        List notes with optional filtering.
+        List all notes in the database.
         
         Args:
-            note_type: Filter by note type (e.g., "trade", "fact")
             limit: Maximum number of notes to return
-            offset: Number of notes to skip
-            full_text_search: Optional text to search in title and content
             
         Returns:
             List of notes
         """
         try:
-            with session_scope(self.db_name) as session:
-                query = session.query(NoteModel)
+            with session_scope() as session:
+                query = session.query(NoteModel).order_by(NoteModel.date.desc())
                 
-                if note_type:
-                    query = query.filter(NoteModel.type == note_type)
+                if limit:
+                    query = query.limit(limit)
                 
-                if full_text_search:
-                    query = query.filter(
-                        (NoteModel.title.like(f"%{full_text_search}%")) | 
-                        (NoteModel.content.like(f"%{full_text_search}%"))
-                    )
+                note_models = query.all()
+                notes = []
                 
-                note_models = query.order_by(NoteModel.date.desc()).limit(limit).offset(offset).all()
+                for note_model in note_models:
+                    note = self.load(note_model.id)
+                    if note:
+                        notes.append(note)
                 
-                # Detach from session
-                for model in note_models:
-                    session.expunge(model)
-                
-                return [self._model_to_note(model) for model in note_models]
+                return notes
                 
         except Exception as e:
             print(f"Error listing notes: {e}")
-            raise e
-            # return []
-    
-    def search(self, query: str, note_type: Optional[str] = None, limit: int = 50) -> List[Note]:
-        """
-        Search notes by title and content.
-        
-        Args:
-            query: Search query
-            note_type: Filter by note type
-            limit: Maximum number of results
-            
-        Returns:
-            List of matching notes
-        """
-        try:
-            with session_scope(self.db_name) as session:
-                db_query = session.query(NoteModel).filter(
-                    (NoteModel.title.like(f"%{query}%")) | 
-                    (NoteModel.content.like(f"%{query}%"))
-                )
-                
-                if note_type:
-                    db_query = db_query.filter(NoteModel.type == note_type)
-                
-                note_models = db_query.order_by(NoteModel.date.desc()).limit(limit).all()
-                
-                # Detach from session
-                for model in note_models:
-                    session.expunge(model)
-                
-                return [self._model_to_note(model) for model in note_models]
-                
-        except Exception as e:
-            print(f"Error searching notes: {e}")
             return []
-    
+
     def delete(self, note_id: str) -> bool:
         """
-        Delete a note by ID.
+        Delete a note from the database.
         
         Args:
-            note_id: The note ID
+            note_id: The ID of the note to delete
             
         Returns:
             True if successful, False otherwise
         """
         try:
-            with session_scope(self.db_name) as session:
+            with session_scope() as session:
                 result = session.query(NoteModel).filter_by(id=note_id).delete()
                 return result > 0
                 
         except Exception as e:
             print(f"Error deleting note: {e}")
             return False
-    
+
+    def count(self) -> int:
+        """
+        Get the number of notes in the database.
+        
+        Returns:
+            The number of notes
+        """
+        try:
+            with session_scope() as session:
+                return session.query(NoteModel).count()
+        except Exception as e:
+            print(f"Error counting notes: {e}")
+            return 0
+
     def clear_all(self) -> bool:
         """
         Delete all notes from the notebook.
@@ -230,7 +236,7 @@ class Notebook:
 
         print("Clearing all notes from DB..")
         try:
-            with session_scope(self.db_name) as session:
+            with session_scope() as session:
                 # First, let's check how many notes exist
                 count_before = session.query(NoteModel).count()
                 print(f"Found {count_before} notes to delete")
@@ -256,71 +262,6 @@ class Notebook:
         except Exception as e:
             print(f"Error clearing all notes: {e}")
             return False
-    
-    def _model_to_note(self, model: NoteModel) -> Note:
-        """Convert a NoteModel to a Note object."""
-        # Parse the data JSON blob
-        data = json.loads(model.data) if model.data else {}
-        
-        # Extract common fields
-        tags = data.get('tags', [])
-        metadata = data.get('metadata', {})
-        created_at = datetime.fromisoformat(data.get('created_at', model.date.isoformat()))
-        updated_at = datetime.fromisoformat(data.get('updated_at', model.date.isoformat()))
-        vector_store_id = data.get('vector_store_id')
-        
-        # Reconstruct baskets
-        baskets = {}
-        baskets_data = data.get('baskets', {})
-        for name, basket_data in baskets_data.items():
-            baskets[name] = Basket.from_dict(basket_data)
-        
-        # Common kwargs for all note types
-        common_kwargs = {
-            'title': model.title,
-            'content': model.content,
-            'date': model.date,
-            'baskets': baskets,
-            'id': model.id,
-            'created_at': created_at,
-            'updated_at': updated_at,
-            'tags': tags,
-            'metadata': metadata,
-            'vector_store_id': vector_store_id,
-            'symbol': data.get('symbol')
-        }
-        
-        # Handle Fact sources (backward compatibility)
-        fact_source = None
-        if data.get('sources'):
-            fact_source = data['sources'][0] if data['sources'] else None
-        elif data.get('source'):
-            fact_source = data['source']
-        
-        # Type-specific kwargs and classes
-        type_configs = {
-            'principle': (Principle, {}),
-            'observation': (Observation, {}),
-            'trade': (Trade, {'status': data.get('status', 'executed')}),
-            'fact': (Fact, {
-                'source': fact_source,
-                'confidence': data.get('confidence', 1.0)
-            }),
-            'strategy': (Strategy, {
-                'time_horizon': data.get('time_horizon'),
-                'risk_level': data.get('risk_level'),
-                'status': data.get('status', 'active')
-            }),
-            'symbol_note': (NoteSymbol, {})
-        }
-        
-        # Get class and specific kwargs, default to base Note class
-        note_class, specific_kwargs = type_configs.get(model.type, (Note, {}))
-        
-        # Merge common and specific kwargs
-        all_kwargs = {**common_kwargs, **specific_kwargs}
-        
-        return note_class(**all_kwargs)
 
 
 # Global notebook instance

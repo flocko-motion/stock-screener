@@ -62,7 +62,7 @@ class SymbolTests(unittest.TestCase):
         fins.DEBUG = True
         s = Symbol.get("EXEEW")
         s.update()
-        assert s.inception() is not None
+        assert s.inception is not None
 
 
 

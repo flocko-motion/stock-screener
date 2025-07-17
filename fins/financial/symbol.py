@@ -14,15 +14,12 @@ from sqlalchemy.orm import relationship
 
 from fins.data_sources import fmp
 from fins.exceptions import NoPriceDataError
-from fins.database import Base, session_scope, init_db
+from fins.database import session_scope, Base
 
 TYPE_STOCK = "stock"
 TYPE_CRYPTO = "crypto"
 TYPE_ETF = "etf"
 TYPE_INDEX = "index"
-
-# Initialize the symbols database
-init_db("symbols")
 
 
 class PriceData(Base):
@@ -126,8 +123,6 @@ class Symbol(Base):
 		"""Delete a symbol from the cache."""
 		with session_scope() as session:
 			session.query(cls).filter_by(ticker=ticker).delete()
-
-
 
 	@classmethod
 	def _clear_all_cache(cls) -> None:

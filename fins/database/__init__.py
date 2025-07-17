@@ -15,12 +15,12 @@ from pathlib import Path
 
 from fins.config import DIR_DB
 
-# Create declarative base
+# Create shared declarative base for all modules
 Base = declarative_base()
 
-# Database engines and session factories
-_engines = {}
-_sessions = {}
+# Database engine and session factory
+_engine = None
+_session_factory = None
 
 # Database configuration
 def load_db_config():
@@ -48,17 +48,19 @@ def load_db_config():
         'password': password
     }
 
-def get_connection_string(db_name: str = "symbols") -> str:
+def get_connection_string() -> str:
     """Get PostgreSQL connection string."""
     config = load_db_config()
     return f"postgresql://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}"
 
-def init_db(db_name: str = "symbols"):
-    """Initialize a PostgreSQL database connection and ensure schema is up to date."""
-    if db_name not in _engines:
-        connection_string = get_connection_string(db_name)
+def init_db():
+    """Initialize PostgreSQL database connection and ensure schema is up to date."""
+    global _engine, _session_factory
+    
+    if _engine is None:
+        connection_string = get_connection_string()
         
-        _engines[db_name] = create_engine(
+        _engine = create_engine(
             connection_string,
             poolclass=QueuePool,
             pool_size=5,  # Optimized for single user
@@ -68,18 +70,23 @@ def init_db(db_name: str = "symbols"):
             echo=False
         )
         
-        _sessions[db_name] = scoped_session(sessionmaker(bind=_engines[db_name]))
+        _session_factory = scoped_session(sessionmaker(bind=_engine))
+        
+        # Import all models to ensure they are registered with Base.metadata
+        from fins.financial.symbol import Symbol, WeeklyPrice, MonthlyPrice
+        from fins.notebook.notebook import NoteModel
         
         # Create all tables for this database
-        Base.metadata.create_all(_engines[db_name])
+        Base.metadata.create_all(_engine)
 
 @contextmanager
-def session_scope(db_name: str = "symbols"):
+def session_scope():
     """Provide a transactional scope around a series of operations."""
-    if db_name not in _sessions:
-        init_db(db_name)
+    # Ensure database is initialized
+    if _session_factory is None:
+        init_db()
     
-    session = _sessions[db_name]()
+    session = _session_factory()
     try:
         yield session
         session.commit()
@@ -95,14 +102,14 @@ def get_db_info() -> dict:
         config = load_db_config()
         return {
             'backend': 'postgresql',
-            'connection_string': get_connection_string('symbols').replace(config['password'], '***'),
-            'engines_initialized': list(_engines.keys())
+            'connection_string': get_connection_string().replace(config['password'], '***'),
+            'initialized': _engine is not None
         }
     except Exception as e:
         return {
             'backend': 'postgresql',
             'error': str(e),
-            'engines_initialized': list(_engines.keys())
+            'initialized': _engine is not None
         }
 
-__all__ = ['Base', 'session_scope', 'init_db', 'get_db_info'] 
+__all__ = ['session_scope', 'Base'] 

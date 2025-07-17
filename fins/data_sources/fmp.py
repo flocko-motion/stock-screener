@@ -46,6 +46,28 @@ except Exception as e:
     log_debug(f"ERROR loading FMP API key from {key_file_path}: {str(e)}", channel=sys.stderr)
     sys.exit(1)
 
+# Initialize session with connection pooling
+_session = None
+_session_lock = threading.Lock()
+
+def get_session():
+    """Get or create a persistent requests session with connection pooling."""
+    global _session
+    with _session_lock:
+        if _session is None:
+            _session = requests.Session()
+            # Configure connection pooling with built-in retries
+            adapter = requests.adapters.HTTPAdapter(
+                pool_connections=10,  # Number of connection pools to cache
+                pool_maxsize=20,     # Maximum number of connections per pool
+                max_retries=3        # Built-in retries for transient issues
+            )
+            _session.mount('http://', adapter)
+            _session.mount('https://', adapter)
+            # Set reasonable timeouts
+            _session.timeout = (5, 30)  # (connect_timeout, read_timeout)
+        return _session
+
 # Initialize a lock and a variable to store the last request time
 rate_limit_lock = threading.Lock()
 last_request_time = 0
@@ -121,9 +143,9 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
 
     def make_request():
         rate_limit_enforce()
+        session = get_session()
         log_debug(f"Fetching {url}?{urlencode(request_params)}")
-        return requests.get(url, params=request_params)
-
+        return session.get(url, params=request_params)
 
     def fetch_data():
         for attempt in range(max_retries):
@@ -135,11 +157,15 @@ def api_get(endpoint, params=None, max_retries=5, base_delay=3):
                 continue
             except ApiBadRequestException:
                 raise
-            except requests.exceptions.ConnectionError as e:
+            except (requests.exceptions.ConnectionError, 
+                    requests.exceptions.Timeout,
+                    requests.exceptions.HTTPError,
+                    requests.exceptions.RequestException,
+                    OSError) as e:
                 if attempt == max_retries - 1:
-                    raise Exception(f"Connection failed after {max_retries} attempts: {e}")
+                    raise Exception(f"Network error after {max_retries} attempts: {e}")
                 delay = base_delay * (2 ** attempt)  # Exponential backoff
-                log_err(f"Connection error, retrying in {delay}s: {e}")
+                log_err(f"Network error, retrying in {delay}s: {e}")
                 time.sleep(delay)
             except Exception as e:
                 if "API error: 429" in str(e):
