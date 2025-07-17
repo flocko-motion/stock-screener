@@ -8,9 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: migration to postgres">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: shudown handling">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/data_sources/fmp.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/data_sources/fmp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -458,12 +460,12 @@
       <item itemvalue="Python.codegen" />
       <item itemvalue="Python.terminal" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
+      <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_no_inception" />
-      <item itemvalue="Python tests.Unittests for test_financial.SymbolTests" />
       <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_stock" />
+      <item itemvalue="Python tests.Unittests for test_financial.SymbolTests" />
       <item itemvalue="Python tests.Unittests for test_note.TestNotebook.test_fix_missing_symbols" />
-      <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
     </list>
     <recent_temporary>
       <list>
@@ -535,14 +537,7 @@
       <workItem from="1752655811355" duration="28000" />
       <workItem from="1752661465623" duration="374000" />
       <workItem from="1752729330932" duration="3372000" />
-    </task>
-    <task id="LOCAL-00137" summary="feat: filters for all FieldPlugins">
-      <option name="closed" value="true" />
-      <created>1751018285549</created>
-      <option name="number" value="00137" />
-      <option name="presentableId" value="LOCAL-00137" />
-      <option name="project" value="LOCAL" />
-      <updated>1751018285549</updated>
+      <workItem from="1752778396654" duration="1045000" />
     </task>
     <task id="LOCAL-00138" summary="feat: improved multi threading for sqlite and fmp">
       <option name="closed" value="true" />
@@ -928,7 +923,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752729485437</updated>
     </task>
-    <option name="localTasksCounter" value="186" />
+    <task id="LOCAL-00186" summary="feat: shudown handling">
+      <option name="closed" value="true" />
+      <created>1752779550497</created>
+      <option name="number" value="00186" />
+      <option name="presentableId" value="LOCAL-00186" />
+      <option name="project" value="LOCAL" />
+      <updated>1752779550497</updated>
+    </task>
+    <option name="localTasksCounter" value="187" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -946,7 +949,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: fmt delivered invalid datapoints pre-inception if from=1900-01-01 was given at api request" />
     <MESSAGE value="fix: remove no-inception symbols" />
     <MESSAGE value="fix: filters now auto-convert all dates to datetimes to guarantee comparability" />
     <MESSAGE value="fix: candidates now filter properly by inception" />
@@ -971,7 +973,8 @@
     <MESSAGE value="feat: Favs(..)" />
     <MESSAGE value="feat: fins.sh starts jupyter in background thread" />
     <MESSAGE value="feat: migration to postgres" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: migration to postgres" />
+    <MESSAGE value="feat: shudown handling" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: shudown handling" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -998,12 +1001,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/watchdog.py</url>
-          <line>31</line>
+          <line>34</line>
           <option name="timeStamp" value="114" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/watchdog.py</url>
-          <line>33</line>
+          <line>36</line>
           <option name="timeStamp" value="115" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1162,22 +1165,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>226</line>
+          <line>235</line>
           <option name="timeStamp" value="302" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>383</line>
+          <line>392</line>
           <option name="timeStamp" value="303" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>379</line>
+          <line>388</line>
           <option name="timeStamp" value="305" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>377</line>
+          <line>386</line>
           <option name="timeStamp" value="312" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1287,7 +1290,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/data_sources/fmp.py</url>
-          <line>85</line>
+          <line>88</line>
           <option name="timeStamp" value="380" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
@@ -1311,14 +1314,14 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/stock_screener$codegen__1_.coverage" NAME="codegen Coverage Results" MODIFIED="1750587113584" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743536201302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_ai_TestNotebookAssistant.coverage" NAME="Unittests for test_ai.TestNotebookAssistant Coverage Results" MODIFIED="1751525995814" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743536201302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_profile.coverage" NAME="pytest for test_fmp.TestFMP.test_profile Coverage Results" MODIFIED="1747482962987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket Coverage Results" MODIFIED="1743284425871" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$codegen.coverage" NAME="codegen Coverage Results" MODIFIED="1750938836293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_add_item.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_add_item Coverage Results" MODIFIED="1750596984729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_BasketTests_test_basket_item_multiplication.coverage" NAME="pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication Coverage Results" MODIFIED="1750518516466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests Coverage Results" MODIFIED="1743027268739" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_basket_BasketTests_test_basket_item_multiplication.coverage" NAME="pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication Coverage Results" MODIFIED="1750518516466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_multiple_conditions.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_multiple_conditions Coverage Results" MODIFIED="1751018240340" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_roe.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_roe Coverage Results" MODIFIED="1751009802983" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_inception_date.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_inception_date Coverage Results" MODIFIED="1751262090320" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
@@ -1397,7 +1400,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_items_to_basket_bad_syntax.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax Coverage Results" MODIFIED="1749018842713" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_vol.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_vol Coverage Results" MODIFIED="1751009807653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_sub_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_sub_basket Coverage Results" MODIFIED="1750598592784" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_no_inception.coverage" NAME="Unittests for test_basket.BasketTests.test_no_inception Coverage Results" MODIFIED="1752731689066" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_no_inception.coverage" NAME="Unittests for test_basket.BasketTests.test_no_inception Coverage Results" MODIFIED="1752779555113" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_remove_basket.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_remove_basket Coverage Results" MODIFIED="1750598702062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_plugins_ragr_log_subfield.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_plugins_ragr_log_subfield Coverage Results" MODIFIED="1751402456794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
