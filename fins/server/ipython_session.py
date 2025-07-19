@@ -141,6 +141,11 @@ class IPythonSession:
                     if last_result and last_result != 'None' and last_result not in output:
                         output += last_result + '\n'
                 
+                # Debug: Check if any rich elements were captured
+                print(f"[DEBUG] Rich element cache size: {len(self.rich_element_cache)}")
+                if self.rich_element_cache:
+                    print(f"[DEBUG] Rich elements captured: {list(self.rich_element_cache.keys())}")
+                
                 return output, error, success
                 
         except Exception as e:
@@ -161,8 +166,10 @@ class IPythonSession:
         session = self
 
         def custom_publish(data, metadata=None, source=None, **kwargs):
+            print(f"[DEBUG] Display hook called with data type: {type(data)}")
             # Matplotlib Figure
             if isinstance(data, Figure):
+                print(f"[DEBUG] Matplotlib figure detected: {data}")
                 buf = io.BytesIO()
                 data.savefig(buf, format='png')
                 buf.seek(0)
@@ -176,6 +183,7 @@ class IPythonSession:
                 print(f"RICH_ELEMENT:{element_id}:image/png")
                 return
             # Add more types as needed (e.g., DataFrame, HTML, etc.)
+            print(f"[DEBUG] Using default display for: {type(data)}")
             old_publish(data, metadata, source, **kwargs)
         shell.display_pub.publish = custom_publish
 
