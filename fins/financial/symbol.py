@@ -364,7 +364,7 @@ class Symbol(Base):
 				sql = """
 				SELECT date, open, high, low, avg, close 
 				FROM weekly_prices 
-				WHERE symbol_ticker = ? AND date >= ?
+				WHERE symbol_ticker = %s AND date >= %s
 				ORDER BY date
 				"""
 				self._weekly_prices = pd.read_sql_query(
@@ -377,7 +377,7 @@ class Symbol(Base):
 				sql = """
 				SELECT date, open, high, low, avg, close 
 				FROM monthly_prices 
-				WHERE symbol_ticker = ? AND date >= ?
+				WHERE symbol_ticker = %s AND date >= %s
 				ORDER BY date
 				"""
 				self._monthly_prices = pd.read_sql_query(
