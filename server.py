@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from fins.server import start_jupyter_server, start_api_server, start_websocket_server
+
 from fins.shutdown import setup_shutdown_handlers, register_cleanup_handler
 
 
@@ -28,8 +29,10 @@ def main():
 
     print("🚀 Starting FINS servers...")
     
+
+    
     # Start all servers
-    start_jupyter_server()
+    # start_jupyter_server()
     start_api_server()
     start_websocket_server()
 

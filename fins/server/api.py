@@ -12,6 +12,7 @@ from pathlib import Path
 
 # Import centralized shutdown mechanism
 from fins.shutdown import set_shutdown_event, is_shutdown_requested
+from fins.server.ipython_session import get_session
 
 
 def start_api_server():
@@ -31,23 +32,27 @@ def start_api_server():
         static_dir = Path("./fins/server/html")
         static_dir.mkdir(parents=True, exist_ok=True)
         
-        # Mount static files
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-        
         # Basic health check endpoint
-        @app.get("/health")
+        @app.get("/api/health")
         async def health_check():
             return {"status": "healthy", "service": "fins-api"}
         
-        # Serve the client HTML
-        @app.get("/", response_class=HTMLResponse)
-        async def serve_client():
-            html_file = static_dir / "index.html"
-            if html_file.exists():
-                with open(html_file, 'r') as f:
-                    return f.read()
-            else:
-                return HTMLResponse(content="<h1>FINS Console</h1><p>HTML file not found</p>", status_code=404)
+        # Serve rich elements by UUID
+        @app.get("/api/rich/{session_id}/{element_id}")
+        async def get_rich_element(session_id: int, element_id: str):
+            print(f"[DEBUG] API request for rich element: session={session_id}, id={element_id}")
+            session = get_session(session_id)
+            element = session.get_rich_element(element_id)
+            if not element:
+                raise HTTPException(status_code=404, detail="Rich element not found")
+            if element['type'] == 'image/png':
+                from fastapi.responses import Response
+                return Response(content=element['data'], media_type='image/png')
+            # Add more types as needed
+            raise HTTPException(status_code=415, detail="Unsupported rich element type")
+        
+        # Mount static files at root (this will serve index.html at / and style.css at /style.css)
+        app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
         
         # Start server in background thread
         def run_server():

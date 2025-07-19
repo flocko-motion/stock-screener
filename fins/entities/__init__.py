@@ -10,6 +10,16 @@ from .plugin import Plugin, BasketPipeline, BasketRuntime
 from .entity import Entity, JsonSerializable
 from .note import Note, Principle, Observation, Trade, Fact, Strategy
 
+class SymbolAccessor:
+    """Accessor class for convenient symbol access."""
+    
+    def __getattr__(self, name):
+        return BasketItem(name)
+
+
+# Global instance for convenient access
+S = SymbolAccessor()
+
 __all__ = [
     'JsonSerializable',
     'BasketItem',
@@ -24,6 +34,7 @@ __all__ = [
     'Trade',
     'Fact',
     'Strategy',
+    'S',
 ]
 
 def entity_from_dict(data: dict) -> 'Entity':

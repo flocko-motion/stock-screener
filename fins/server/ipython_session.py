@@ -1,38 +1,41 @@
 """
 IPython Session Manager
 
-This module provides an IPython session that runs in the same process
-to maintain in-memory caching and state.
+This module provides multiple IPython sessions managed by session IDs
+to allow multiple users to have isolated sessions.
 """
 
 import sys
 import io
 import traceback
 from contextlib import redirect_stdout, redirect_stderr
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
+import threading
+from fins.shutdown import register_cleanup_handler, is_shutdown_requested
+import uuid
+import base64
+import types
 
+from matplotlib.figure import Figure
 
 class IPythonSession:
     """Manages an IPython session in the same process."""
     
-    def __init__(self):
+    def __init__(self, session_id: int):
         """Initialize the IPython session."""
+        self.session_id = session_id
+        self.rich_element_cache: Dict[str, dict] = {}  # uuid -> {type, data}
         try:
             from IPython import get_ipython
             from IPython.terminal.prompts import Prompts, Token
             
-            # Get or create IPython instance
-            self.ipython = get_ipython()
-            if self.ipython is None:
-                # Create a new IPython instance
-                from IPython import start_ipython
-                # We'll use a different approach - create the namespace directly
-                self.ipython = self._create_ipython()
+            # Create a new IPython instance for this session
+            self.ipython = self._create_ipython()
             
             # Set up FINS prompts
             class FinsPrompts(Prompts):
                 def in_prompt_tokens(self, cli=None):
-                    return [(Token.Prompt, 'FINS> ')]
+                    return [(Token.Prompt, f'FINS[{session_id}]> ')]
                 
                 def continuation_prompt_tokens(self, cli=None, width=None):
                     return [(Token.Prompt, '...   ')]
@@ -45,6 +48,9 @@ class IPythonSession:
             
             # Import FINS modules into the session
             self._setup_fins_environment()
+            
+            # Register display hook for rich elements
+            self._register_display_hook()
             
         except ImportError:
             print("⚠️  IPython not available")
@@ -78,10 +84,10 @@ class IPythonSession:
                     self.ipython.user_ns[name] = getattr(fins.terminal, name)
             
             # Set up the prompt
-            sys.ps1 = "FINS> "
+            sys.ps1 = f"FINS[{self.session_id}]> "
             sys.ps2 = "...   "
             
-            print("FINS environment loaded in IPython session")
+            print(f"FINS environment loaded in IPython session {self.session_id}")
             
         except Exception as e:
             print(f"⚠️  Error setting up FINS environment: {e}")
@@ -143,34 +149,100 @@ class IPythonSession:
     
     def get_completions(self, text: str) -> List[str]:
         """Get completions for the given text."""
-        if not self.ipython:
-            return []
-        
-        try:
-            # Use IPython's completion system
-            completions = self.ipython.complete(text)
-            return list(completions)
-        except Exception as e:
-            print(f"⚠️  Error getting completions: {e}")
-            return []
+        # Auto-completion disabled for now
+        return []
+
+    def _register_display_hook(self):
+        """Register a display hook to capture rich elements like matplotlib figures."""
+        shell = self.ipython
+        if not shell:
+            return
+        old_publish = shell.display_pub.publish
+        session = self
+
+        def custom_publish(data, metadata=None, source=None, **kwargs):
+            # Matplotlib Figure
+            if isinstance(data, Figure):
+                buf = io.BytesIO()
+                data.savefig(buf, format='png')
+                buf.seek(0)
+                img_bytes = buf.read()
+                element_id = str(uuid.uuid4())
+                session.rich_element_cache[element_id] = {
+                    'type': 'image/png',
+                    'data': img_bytes,
+                }
+                print(f"[DEBUG] Captured matplotlib figure as rich element: {element_id}")
+                print(f"RICH_ELEMENT:{element_id}:image/png")
+                return
+            # Add more types as needed (e.g., DataFrame, HTML, etc.)
+            old_publish(data, metadata, source, **kwargs)
+        shell.display_pub.publish = custom_publish
+
+    def get_rich_element(self, element_id: str):
+        return self.rich_element_cache.get(element_id)
 
 
-# Global session instance
-_session = None
+class SessionManager:
+    """Manages multiple IPython sessions by session ID."""
+    
+    def __init__(self):
+        self.sessions: Dict[int, IPythonSession] = {}
+        self.lock = threading.Lock()
+        # Register cleanup handler for graceful shutdown
+        register_cleanup_handler(self.cleanup_all_sessions)
+    
+    def get_session(self, session_id: int) -> IPythonSession:
+        """Get or create a session for the given session ID."""
+        with self.lock:
+            if session_id not in self.sessions:
+                print(f"Creating new IPython session for ID: {session_id}")
+                self.sessions[session_id] = IPythonSession(session_id)
+            return self.sessions[session_id]
+    
+    def remove_session(self, session_id: int):
+        """Remove a session (cleanup)."""
+        with self.lock:
+            if session_id in self.sessions:
+                print(f"Removing IPython session for ID: {session_id}")
+                del self.sessions[session_id]
+    
+    def get_session_count(self) -> int:
+        """Get the number of active sessions."""
+        with self.lock:
+            return len(self.sessions)
+    
+    def cleanup_all_sessions(self):
+        """Clean up all sessions during shutdown."""
+        with self.lock:
+            session_count = len(self.sessions)
+            if session_count > 0:
+                print(f"🧹 Cleaning up {session_count} IPython sessions...")
+                self.sessions.clear()
+                print(f"✅ Cleaned up {session_count} IPython sessions")
 
-def get_session() -> IPythonSession:
-    """Get the global IPython session instance."""
-    global _session
-    if _session is None:
-        _session = IPythonSession()
-    return _session
 
-def execute_code(code: str) -> Tuple[str, str, bool]:
-    """Execute code in the IPython session."""
-    session = get_session()
+# Global session manager
+_session_manager = SessionManager()
+
+def get_session(session_id: int) -> IPythonSession:
+    """Get or create a session for the given session ID."""
+    return _session_manager.get_session(session_id)
+
+def remove_session(session_id: int):
+    """Remove a session."""
+    _session_manager.remove_session(session_id)
+
+def get_session_count() -> int:
+    """Get the number of active sessions."""
+    return _session_manager.get_session_count()
+
+def execute_code(code: str, session_id: int) -> Tuple[str, str, bool]:
+    """Execute code in the specified IPython session."""
+    session = get_session(session_id)
     return session.execute(code)
 
-def get_completions(text: str) -> List[str]:
-    """Get completions for the given text."""
-    session = get_session()
+def get_completions(text: str, session_id: int) -> List[str]:
+    """Get completions for the given text in the specified session."""
+    session = get_session(session_id)
     return session.get_completions(text) 

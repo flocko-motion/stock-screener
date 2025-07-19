@@ -1,3 +1,4 @@
+from fins.entities import S
 from fins.entities.basket import Basket
 from fins.entities.plugins import *
 from fins.entities.plugins import __all__ as all_plugins
@@ -35,6 +36,7 @@ __all__ = [
     'AiSync',
     'Ai',
     'AiStatus',
+    'S',
     *all_plugins,
     *all_symbols,
 ]

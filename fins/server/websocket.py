@@ -11,10 +11,11 @@ import logging
 import json
 import asyncio
 from typing import Dict, Set
+from datetime import datetime, timedelta
 
 # Import centralized shutdown mechanism
 from fins.shutdown import set_shutdown_event, is_shutdown_requested
-from .ipython_session import execute_code
+from .ipython_session import execute_code, get_session_count, remove_session
 
 
 class WebSocketManager:
@@ -22,17 +23,48 @@ class WebSocketManager:
     
     def __init__(self):
         self.connections: Set[object] = set()
+        self.session_map: Dict[object, int] = {}  # Map websocket to session_id
+        self.session_last_seen: Dict[int, datetime] = {}  # Track when sessions were last active
         self.lock = threading.Lock()
+        self.session_timeout = timedelta(minutes=30)  # Sessions expire after 30 minutes of inactivity
     
-    def add_connection(self, websocket):
+    def add_connection(self, websocket, session_id: int = None):
         """Add a new WebSocket connection."""
         with self.lock:
             self.connections.add(websocket)
+            if session_id:
+                self.session_map[websocket] = session_id
+                self.session_last_seen[session_id] = datetime.now()
     
     def remove_connection(self, websocket):
-        """Remove a WebSocket connection."""
+        """Remove a WebSocket connection but keep the session alive."""
         with self.lock:
             self.connections.discard(websocket)
+            if websocket in self.session_map:
+                session_id = self.session_map[websocket]
+                del self.session_map[websocket]
+                # Don't cleanup the session immediately - it might reconnect
+                print(f"Client disconnected, keeping session {session_id} alive for potential reconnection")
+    
+    def update_session_activity(self, session_id: int):
+        """Update the last activity time for a session."""
+        with self.lock:
+            self.session_last_seen[session_id] = datetime.now()
+    
+    def cleanup_expired_sessions(self):
+        """Clean up sessions that have been inactive for too long."""
+        with self.lock:
+            now = datetime.now()
+            expired_sessions = []
+            
+            for session_id, last_seen in self.session_last_seen.items():
+                if now - last_seen > self.session_timeout:
+                    expired_sessions.append(session_id)
+            
+            for session_id in expired_sessions:
+                print(f"Cleaning up expired session {session_id} (inactive for {self.session_timeout})")
+                remove_session(session_id)
+                del self.session_last_seen[session_id]
     
     async def broadcast(self, message: str):
         """Broadcast message to all connected clients."""
@@ -61,6 +93,7 @@ def start_websocket_server():
         
         async def websocket_handler(websocket, path):
             """Handle WebSocket connections."""
+            client_session_id = None
             ws_manager.add_connection(websocket)
             print(f"WebSocket client connected: {websocket.remote_address}")
             
@@ -70,10 +103,20 @@ def start_websocket_server():
                         data = json.loads(message)
                         if data.get('type') == 'command':
                             command = data.get('command', '')
-                            print(f"Received command: {command}")
+                            session_id = data.get('session_id', 1)  # Default to session 1
+                            
+                            # Track session ID for this connection
+                            if client_session_id is None:
+                                client_session_id = session_id
+                                ws_manager.add_connection(websocket, session_id)
+                            
+                            # Update session activity
+                            ws_manager.update_session_activity(session_id)
+                            
+                            print(f"Received command for session {session_id}: {command}")
                             
                             # Execute command in IPython session
-                            output, error, success = execute_code(command)
+                            output, error, success = execute_code(command, session_id)
                             
                             if success:
                                 if output.strip():
@@ -96,18 +139,7 @@ def start_websocket_server():
                                     'content': error.strip() if error.strip() else 'Unknown error'
                                 }
                                 await websocket.send(json.dumps(response))
-                        elif data.get('type') == 'completion':
-                            text = data.get('text', '')
-                            print(f"Received completion request for: {text}")
-                            
-                            # Get completions from IPython session
-                            completions = get_completions(text)
-                            
-                            response = {
-                                'type': 'completion',
-                                'completions': completions
-                            }
-                            await websocket.send(json.dumps(response))
+
                     except json.JSONDecodeError:
                         await websocket.send(json.dumps({
                             'type': 'error',
@@ -125,6 +157,16 @@ def start_websocket_server():
                 ws_manager.remove_connection(websocket)
                 print(f"WebSocket client disconnected: {websocket.remote_address}")
         
+        async def cleanup_task():
+            """Background task to clean up expired sessions."""
+            while not is_shutdown_requested():
+                try:
+                    ws_manager.cleanup_expired_sessions()
+                    await asyncio.sleep(60)  # Check every minute
+                except Exception as e:
+                    logging.error(f"Error in cleanup task: {e}")
+                    await asyncio.sleep(60)
+        
         async def run_server():
             """Run the WebSocket server."""
             server = await websockets.serve(
@@ -135,10 +177,21 @@ def start_websocket_server():
             
             print("🌐 WebSocket server started at ws://localhost:8001")
             print("   (Server running in same process)")
+            print(f"   (Sessions timeout after {ws_manager.session_timeout})")
+            
+            # Start cleanup task
+            cleanup_task_handle = asyncio.create_task(cleanup_task())
             
             # Keep server running until shutdown
             while not is_shutdown_requested():
                 await asyncio.sleep(1)
+            
+            # Cancel cleanup task
+            cleanup_task_handle.cancel()
+            try:
+                await cleanup_task_handle
+            except asyncio.CancelledError:
+                pass
             
             server.close()
             await server.wait_closed()

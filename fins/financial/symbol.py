@@ -490,3 +490,6 @@ def beginning_of_next_month() -> datetime:
 
 	# Add 12 hours to allow for market data to settle
 	return next_month + timedelta(hours=12)
+
+
+

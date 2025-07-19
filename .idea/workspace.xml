@@ -8,11 +8,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: shudown handling">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: web frontend">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/terminal.py" beforeDir="false" afterPath="$PROJECT_DIR$/terminal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/codegen.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/ipython_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/ipython_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/symbols/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -295,7 +300,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for test_basket.BasketTests.test_no_inception">
+  <component name="RunManager" selected="Python.terminal">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -324,9 +329,6 @@
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -537,15 +539,7 @@
       <workItem from="1752655811355" duration="28000" />
       <workItem from="1752661465623" duration="374000" />
       <workItem from="1752729330932" duration="3372000" />
-      <workItem from="1752778396654" duration="1045000" />
-    </task>
-    <task id="LOCAL-00138" summary="feat: improved multi threading for sqlite and fmp">
-      <option name="closed" value="true" />
-      <created>1751020973046</created>
-      <option name="number" value="00138" />
-      <option name="presentableId" value="LOCAL-00138" />
-      <option name="project" value="LOCAL" />
-      <updated>1751020973046</updated>
+      <workItem from="1752778396654" duration="2241000" />
     </task>
     <task id="LOCAL-00139" summary="feat: improved multi threading for sqlite and fmp">
       <option name="closed" value="true" />
@@ -931,7 +925,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752779550497</updated>
     </task>
-    <option name="localTasksCounter" value="187" />
+    <task id="LOCAL-00187" summary="feat: web frontend">
+      <option name="closed" value="true" />
+      <created>1752782337184</created>
+      <option name="number" value="00187" />
+      <option name="presentableId" value="LOCAL-00187" />
+      <option name="project" value="LOCAL" />
+      <updated>1752782337184</updated>
+    </task>
+    <option name="localTasksCounter" value="188" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -949,7 +951,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: remove no-inception symbols" />
     <MESSAGE value="fix: filters now auto-convert all dates to datetimes to guarantee comparability" />
     <MESSAGE value="fix: candidates now filter properly by inception" />
     <MESSAGE value="feat: plugin Description()" />
@@ -974,7 +975,8 @@
     <MESSAGE value="feat: fins.sh starts jupyter in background thread" />
     <MESSAGE value="feat: migration to postgres" />
     <MESSAGE value="feat: shudown handling" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: shudown handling" />
+    <MESSAGE value="feat: web frontend" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: web frontend" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1123,10 +1125,6 @@
           <url>file://$PROJECT_DIR$/fins/tests/tools.py</url>
           <line>16</line>
           <option name="timeStamp" value="259" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/codegen.py</url>
-          <option name="timeStamp" value="279" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_test.py</url>
