@@ -4,7 +4,6 @@ from datetime import datetime, date
 import numpy as np
 
 from fins.terminal import *
-from fins.terminal.symbols import *
 from fins.entities.basket import Basket
 
 
@@ -12,27 +11,27 @@ from fins.entities.basket import Basket
 class BasketTests(unittest.TestCase):
 
     def test_create_basket(self):
-        self.assertBasket(Basket(AAPL * 1.5), {
+        self.assertBasket(Basket(S.AAPL * 1.5), {
             "AAPL": 1.5,
         })
 
     def test_add_item(self):
         self.assertBasket(
-            Basket(AAPL * 2) + (GOOG * 1.7),{
+            Basket(S.AAPL * 2) + (S.GOOG * 1.7),{
             "AAPL": 2,
             "GOOG": 1.7,
         })
 
     def test_add_baskets(self):
         self.assertBasket(
-            Basket(AAPL * 2) + Basket(GOOG * 1.7),{
+            Basket(S.AAPL * 2) + Basket(S.GOOG * 1.7),{
             "AAPL": 2,
             "GOOG": 1.7,
         })
 
     def test_subtract_basket(self):
-        b0 = Basket(AAPL * 2, GOOG * 3)
-        b1 = Basket(GOOG * 2)
+        b0 = Basket(S.AAPL * 2, S.GOOG * 3)
+        b1 = Basket(S.GOOG * 2)
         b2 = b0 - b1
         self.assertBasket(
             b0,{
@@ -53,33 +52,33 @@ class BasketTests(unittest.TestCase):
 
     def test_slash_item(self):
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 3) / GOOG,{
+            Basket(S.AAPL * 2, S.GOOG * 3) / S.GOOG,{
             "AAPL": 2,
         })
 
 
     def test_slash_basket(self):
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 3) / Basket(GOOG * 2),{
+            Basket(S.AAPL * 2, S.GOOG * 3) / Basket(S.GOOG * 2),{
             "AAPL": 2,
         })
 
 
     def test_add_baskets_overlap(self):
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 1) + Basket(GOOG * 1.7),{
+            Basket(S.AAPL * 2, S.GOOG * 1) + Basket(S.GOOG * 1.7),{
             "AAPL": 2,
             "GOOG": 2.7,
         })
 
     def test_multiply_weights(self):
         self.assertBasket(
-            Basket(AAPL * 2, GOOG * 1) * 3, {
+            Basket(S.AAPL * 2, S.GOOG * 1) * 3, {
             "AAPL": 6,
             "GOOG": 3,
         })
         self.assertBasket(
-            1.5 * Basket(AAPL * 2, GOOG * 1), {
+            1.5 * Basket(S.AAPL * 2, S.GOOG * 1), {
             "AAPL": 3,
             "GOOG": 1.5,
         })
