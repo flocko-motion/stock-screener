@@ -8,8 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: web frontend">
-      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket_item.py" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: debugging after massive feature upgrades and refactoring">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/tests/test_basket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/tests/test_basket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,215 +57,217 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Locals&quot;: &quot;true&quot;,
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Python tests in test_dsl.py.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization_with_api_key.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_load_existing_assistant.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_search.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_send_message.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_ai.TestNotebookAssistant.test_sync_notes.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.test_no_inception.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.test_plugins_price_yoy.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.test_plugins_price_yoy_plot.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.test_plugins_vol.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_basket.BasketTests.test_plugins_volume.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_financial.SymbolTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_financial.SymbolTests.test_get_inception.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_financial.SymbolTests.test_get_prices.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_financial.SymbolTests.test_get_stock.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_note.TestNotebook.test_fix_missing_symbols.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for test_note.TestNotebook.test_note_symbol.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_note.TestNotebook.test_notes_search.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_terminal.TerminalPersistenceTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for test_test.TestTests.test_test.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_add_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_alive.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_basket_item_multiplication.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_big_update.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_cagr_correctness.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_age.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_chaining.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_contains_operator.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_mcap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_none_handling.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_string_equality.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_create_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_age.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_any.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_around.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_boolean.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_chaining.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_contains.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_dates.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_exclude_multiple.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_mcap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_multiple_conditions.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_none_handling.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_string_equality.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_filter_within.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_fluent_filter_age.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_minimal_plugin_application.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_multiply_weights.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_no_inception.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_alias_collision.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_industry.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_name_collision.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_top.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_age.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_age_filter.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_alive.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cagr.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_chaining.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_crop.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_description.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_dividend_yield.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_inception.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_log_with_filter.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap_log.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_npm.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_pe.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_peg.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ragr.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ragr_log_subfield.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ratio.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_roe.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_simple_price.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_update.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_yoy_transformation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_remove_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_screen.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_sub_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_sub_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_subtract_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Unittests for tests.test_basket.BasketTests.test_two_plugin_application.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_crypto.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_etf.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_prices.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_financial.SymbolTests.test_get_stock.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_api_get.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_price_history.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_profile.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_quote.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_search_name.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for test_test.TestTests.test_test.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_basket.BasketTests.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_basket.BasketTests.test_basket_item_multiplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_basket.BasketTests.test_multithreaded_basket_creation.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_basket.BasketTests.test_multithreaded_basket_creation_one.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_dsl.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_cache.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_dsl.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_fmp.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in test_watchdog.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in tests.executor&quot;: &quot;Run&quot;,
-    &quot;Python.FINS Terminal.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cli.executor&quot;: &quot;Run&quot;,
-    &quot;Python.codegen (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.codegen.executor&quot;: &quot;Run&quot;,
-    &quot;Python.column.executor&quot;: &quot;Run&quot;,
-    &quot;Python.command.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.jupyter_frontend.executor&quot;: &quot;Run&quot;,
-    &quot;Python.terminal.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\florian.metzger-noel\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\linux\\amd64\\shellcheck&quot;,
-    &quot;ToolWindow.Plots.ShowToolbar&quot;: &quot;false&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;JSON-Groovy.json.groovy&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/postgres-migration&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/plugins&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;pyconsole&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Locals": "true",
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.Python tests in test_dsl.py.executor": "Debug",
+    "Python tests.Unittests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.executor": "Run",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant.executor": "Debug",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization.executor": "Run",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization_with_api_key.executor": "Debug",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_load_existing_assistant.executor": "Run",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_search.executor": "Debug",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_send_message.executor": "Debug",
+    "Python tests.Unittests for test_ai.TestNotebookAssistant.test_sync_notes.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_no_inception.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_plugins_price_yoy.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_plugins_price_yoy_plot.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_plugins_vol.executor": "Run",
+    "Python tests.Unittests for test_basket.BasketTests.test_plugins_volume.executor": "Run",
+    "Python tests.Unittests for test_financial.SymbolTests.executor": "Run",
+    "Python tests.Unittests for test_financial.SymbolTests.test_get_inception.executor": "Debug",
+    "Python tests.Unittests for test_financial.SymbolTests.test_get_prices.executor": "Debug",
+    "Python tests.Unittests for test_financial.SymbolTests.test_get_stock.executor": "Run",
+    "Python tests.Unittests for test_note.TestNotebook.test_fix_missing_symbols.executor": "Debug",
+    "Python tests.Unittests for test_note.TestNotebook.test_note_symbol.executor": "Run",
+    "Python tests.Unittests for test_note.TestNotebook.test_notes_search.executor": "Run",
+    "Python tests.Unittests for test_terminal.TerminalPersistenceTests.executor": "Run",
+    "Python tests.Unittests for test_test.TestTests.test_test.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_add_baskets_overlap.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_add_item.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_alive.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_basket_item_multiplication.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_big_update.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_cagr_correctness.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_age.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_chaining.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_contains_operator.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_mcap.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_none_handling.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_comparison_filter_string_equality.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_create_basket.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_age.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_any.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_around.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_boolean.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_chaining.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_contains.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_dates.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_exclude_multiple.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_mcap.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_multiple_conditions.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_none_handling.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_string_equality.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_filter_within.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_fluent_filter_age.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_inception_date.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_inception_filter.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_minimal_plugin_application.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_multiply_weights.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_no_inception.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_alias_collision.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_industry.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_name_collision.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugin_top.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_age.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_age_filter.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_alive.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cagr.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_chaining.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_crop.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_cropy_time_series.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_description.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_dividend_yield.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_inception.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_log_with_filter.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_mcap_log.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_npm.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_pe.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_peg.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ragr.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ragr_log_subfield.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_ratio.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_roe.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_simple_price.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_update.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_vol.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_plugins_yoy_transformation.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_remove_basket.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_remove_item.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_screen.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_sub_basket.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_sub_item.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_subtract_basket.executor": "Run",
+    "Python tests.Unittests for tests.test_basket.BasketTests.test_two_plugin_application.executor": "Debug",
+    "Python tests.Unittests for tests.test_basket_item.BasketItemTests.executor": "Run",
+    "Python tests.pytest for fins.tests.test_basket.BasketTests.test_basket_item_multiplication.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_add_variable_and_basket_short.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_complex_basket_operation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_create_simple_basket.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_remove_items_from_basket.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.BasicFlowTests.test_simple_weighted_basket_creation.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_args.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_multiple_columns.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for fins.tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for test_basket.BasketTests.test_simple_basket.executor": "Run",
+    "Python tests.pytest for test_basket_item.BasketItemTests.test_create_basket_item.executor": "Debug",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_prices.executor": "Run",
+    "Python tests.pytest for test_financial.SymbolTests.test_get_stock.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_api_get.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_fundamentals.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_load_ticker_history_caching.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_price_history.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_profile.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_quote.executor": "Debug",
+    "Python tests.pytest for test_fmp.TestFMP.test_search.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_search_name.executor": "Run",
+    "Python tests.pytest for test_fmp.TestFMP.test_tradeable_symbols.executor": "Run",
+    "Python tests.pytest for test_index_constituents.IndexConstituentsTests.test_get_constituents.executor": "Debug",
+    "Python tests.pytest for test_symbol.BasketItemTests.test_create_basket_item.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_crypto.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_etf.executor": "Run",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_index.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_get_stock.executor": "Debug",
+    "Python tests.pytest for test_symbol.SymbolTests.test_stock_cagr.executor": "Debug",
+    "Python tests.pytest for test_test.TestTests.test_test.executor": "Debug",
+    "Python tests.pytest for tests.test_basket.BasketTests.executor": "Debug",
+    "Python tests.pytest for tests.test_basket.BasketTests.test_basket_item_multiplication.executor": "Debug",
+    "Python tests.pytest for tests.test_basket.BasketTests.test_multithreaded_basket_creation.executor": "Run",
+    "Python tests.pytest for tests.test_basket.BasketTests.test_multithreaded_basket_creation_one.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_items_to_basket_bad_syntax.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_basket_to_file.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.BasicFlowTests.test_explicit_add_syntax.executor": "Debug",
+    "Python tests.pytest for tests.test_dsl.ColumnCommandTests.test_add_pe_column.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_complex_column_flow.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.ComplexFlowTests.test_multiple_columns.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_asc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.SortCommandTests.test_sort_by_market_cap_desc.executor": "Run",
+    "Python tests.pytest for tests.test_dsl.executor": "Run",
+    "Python tests.pytest for tests.test_fmp.TestFMP.test_etf_holder.executor": "Run",
+    "Python tests.pytest in test_cache.py.executor": "Run",
+    "Python tests.pytest in test_dsl.py.executor": "Run",
+    "Python tests.pytest in test_fmp.py.executor": "Run",
+    "Python tests.pytest in test_watchdog.py.executor": "Run",
+    "Python tests.pytest in tests.executor": "Run",
+    "Python.FINS Terminal.executor": "Debug",
+    "Python.__init__.executor": "Run",
+    "Python.cli.executor": "Run",
+    "Python.codegen (1).executor": "Run",
+    "Python.codegen.executor": "Run",
+    "Python.column.executor": "Run",
+    "Python.command.executor": "Debug",
+    "Python.jupyter_frontend.executor": "Run",
+    "Python.terminal.executor": "Run",
+    "Python.test.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\florian.metzger-noel\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\linux\\amd64\\shellcheck",
+    "ToolWindow.Plots.ShowToolbar": "false",
+    "database.data.extractors.current.export.id": "JSON-Groovy.json.groovy",
+    "git-widget-placeholder": "feat/postgres-migration",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/plugins",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "pyconsole",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;,
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "sqlite"
     ]
   }
-}</component>
+}]]></component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="stock-screener" is-module-sdk="true">
@@ -292,7 +295,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for tests.test_basket_item.BasketItemTests">
+  <component name="RunManager" selected="Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -384,6 +387,22 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Unittests for test_basket.BasketTests.test_plugins_price_plot" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="stock-screener" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_basket.BasketTests.test_plugins_price_plot&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="Unittests for test_financial.SymbolTests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -397,22 +416,6 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_financial.SymbolTests&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for test_financial.SymbolTests.test_get_stock" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="stock-screener" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_financial.SymbolTests.test_get_stock&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -455,19 +458,19 @@
       <item itemvalue="Python.terminal" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
+      <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot" />
       <item itemvalue="Python tests.Unittests for tests.test_basket_item.BasketItemTests" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_no_inception" />
-      <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_stock" />
       <item itemvalue="Python tests.Unittests for test_financial.SymbolTests" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot" />
         <item itemvalue="Python tests.Unittests for tests.test_basket_item.BasketItemTests" />
         <item itemvalue="Python tests.Unittests for test_financial.SymbolTests" />
         <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_no_inception" />
         <item itemvalue="Python tests.Unittests for test_basket.BasketTests" />
-        <item itemvalue="Python tests.Unittests for test_financial.SymbolTests.test_get_stock" />
       </list>
     </recent_temporary>
   </component>
@@ -531,31 +534,7 @@
       <workItem from="1752655811355" duration="28000" />
       <workItem from="1752661465623" duration="374000" />
       <workItem from="1752729330932" duration="3372000" />
-      <workItem from="1752778396654" duration="2951000" />
-    </task>
-    <task id="LOCAL-00140" summary="feat: improved multi threading for sqlite and fmp">
-      <option name="closed" value="true" />
-      <created>1751024990015</created>
-      <option name="number" value="00140" />
-      <option name="presentableId" value="LOCAL-00140" />
-      <option name="project" value="LOCAL" />
-      <updated>1751024990016</updated>
-    </task>
-    <task id="LOCAL-00141" summary="feat: improved performance for Update()">
-      <option name="closed" value="true" />
-      <created>1751143598902</created>
-      <option name="number" value="00141" />
-      <option name="presentableId" value="LOCAL-00141" />
-      <option name="project" value="LOCAL" />
-      <updated>1751143598902</updated>
-    </task>
-    <task id="LOCAL-00142" summary="feat: improved performance for Update()">
-      <option name="closed" value="true" />
-      <created>1751192766369</created>
-      <option name="number" value="00142" />
-      <option name="presentableId" value="LOCAL-00142" />
-      <option name="project" value="LOCAL" />
-      <updated>1751192766369</updated>
+      <workItem from="1752778396654" duration="3555000" />
     </task>
     <task id="LOCAL-00143" summary="feat: basket.description()">
       <option name="closed" value="true" />
@@ -925,7 +904,31 @@
       <option name="project" value="LOCAL" />
       <updated>1752955433222</updated>
     </task>
-    <option name="localTasksCounter" value="189" />
+    <task id="LOCAL-00189" summary="feat: web frontend">
+      <option name="closed" value="true" />
+      <created>1752955748653</created>
+      <option name="number" value="00189" />
+      <option name="presentableId" value="LOCAL-00189" />
+      <option name="project" value="LOCAL" />
+      <updated>1752955748653</updated>
+    </task>
+    <task id="LOCAL-00190" summary="feat: web frontend">
+      <option name="closed" value="true" />
+      <created>1752955754225</created>
+      <option name="number" value="00190" />
+      <option name="presentableId" value="LOCAL-00190" />
+      <option name="project" value="LOCAL" />
+      <updated>1752955754225</updated>
+    </task>
+    <task id="LOCAL-00191" summary="fix: debugging after massive feature upgrades and refactoring">
+      <option name="closed" value="true" />
+      <created>1752955773116</created>
+      <option name="number" value="00191" />
+      <option name="presentableId" value="LOCAL-00191" />
+      <option name="project" value="LOCAL" />
+      <updated>1752955773118</updated>
+    </task>
+    <option name="localTasksCounter" value="192" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -943,7 +946,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: filters now auto-convert all dates to datetimes to guarantee comparability" />
     <MESSAGE value="fix: candidates now filter properly by inception" />
     <MESSAGE value="feat: plugin Description()" />
     <MESSAGE value="docs: working on my baskets" />
@@ -968,7 +970,8 @@
     <MESSAGE value="feat: migration to postgres" />
     <MESSAGE value="feat: shudown handling" />
     <MESSAGE value="feat: web frontend" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: web frontend" />
+    <MESSAGE value="fix: debugging after massive feature upgrades and refactoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: debugging after massive feature upgrades and refactoring" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1130,17 +1133,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>88</line>
+          <line>87</line>
           <option name="timeStamp" value="287" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>97</line>
+          <line>96</line>
           <option name="timeStamp" value="288" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>244</line>
+          <line>243</line>
           <option name="timeStamp" value="297" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1200,12 +1203,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>129</line>
+          <line>128</line>
           <option name="timeStamp" value="330" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>154</line>
+          <line>153</line>
           <option name="timeStamp" value="331" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1220,7 +1223,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/tests/test_basket.py</url>
-          <line>252</line>
+          <line>251</line>
           <option name="timeStamp" value="337" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1339,6 +1342,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_plugins_price_yoy_plot.coverage" NAME="Unittests for test_basket.BasketTests.test_plugins_price_yoy_plot Coverage Results" MODIFIED="1751438235243" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_basket_item_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for test_basket_item.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745344970809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_comparison_filter_contains_operator.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_comparison_filter_contains_operator Coverage Results" MODIFIED="1751013217747" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_item_BasketItemTests.coverage" NAME="Unittests for tests.test_basket_item.BasketItemTests Coverage Results" MODIFIED="1752955477401" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_duplicate_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_duplicate_items_to_basket Coverage Results" MODIFIED="1743284479374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_dates.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_dates Coverage Results" MODIFIED="1751018264212" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_financial_SymbolTests_test_get_inception.coverage" NAME="Unittests for test_financial.SymbolTests.test_get_inception Coverage Results" MODIFIED="1751205429892" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
@@ -1419,6 +1423,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_add_overlapping_items_to_basket.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_add_overlapping_items_to_basket Coverage Results" MODIFIED="1743284485597" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_variable_and_multiply.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_variable_and_multiply Coverage Results" MODIFIED="1743534262138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_within.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_within Coverage Results" MODIFIED="1751018245036" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_plugins_price_plot.coverage" NAME="Unittests for test_basket.BasketTests.test_plugins_price_plot Coverage Results" MODIFIED="1752955982639" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for test_symbol.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745345711615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747483758332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_comparison_filter_none_handling.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_comparison_filter_none_handling Coverage Results" MODIFIED="1751012845630" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />

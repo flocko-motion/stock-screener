@@ -84,14 +84,14 @@ class BasketTests(unittest.TestCase):
         })
 
     def test_plugin_minimal_plugin_application(self):
-        res = Basket(AAPL * 1.5, GOOG * 10)(Industry())
+        res = Basket(S.AAPL * 1.5, S.GOOG * 10)(Industry())
         df = res.df()
         
         self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
         self.assertEqual(df.iloc[1]['Industry'], 'Internet Content & Information')
 
     def test_two_plugin_application(self):
-        res = Basket(AAPL * 1.5, GOOG * 10)(Industry() >> Name() >> Name(alias="foo"))
+        res = Basket(S.AAPL * 1.5, S.GOOG * 10)(Industry() >> Name() >> Name(alias="foo"))
         df = res.df()
 
         self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
@@ -103,19 +103,19 @@ class BasketTests(unittest.TestCase):
 
     def test_plugin_alias_collision(self):
         try:
-            Basket(AAPL * 1.5, GOOG * 10)(Industry() >> Name() >> Name())
+            Basket(S.AAPL * 1.5, S.GOOG * 10)(Industry() >> Name() >> Name())
             assert False
         except RuntimeError as e:
             assert str(e).startswith('Plugin Name already exists')
 
         try:
-            Basket(AAPL * 1.5, GOOG * 10)(Industry(alias="foo") >> Name(alias="foo"))
+            Basket(S.AAPL * 1.5, S.GOOG * 10)(Industry(alias="foo") >> Name(alias="foo"))
             assert False
         except RuntimeError as e:
             assert str(e).startswith('Plugin foo already exists in pipe')
 
     def test_plugins_chaining(self):
-        df = Basket(AAPL, GOOG, META)(Age().min(10) >> Name() >> Mcap()).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Age().min(10) >> Name() >> Mcap()).df()
         self.assertIn('Age', df.columns)
         self.assertIn('Name', df.columns)
         self.assertIn('MCap', df.columns)
@@ -124,7 +124,7 @@ class BasketTests(unittest.TestCase):
 
 
     def test_plugins_alive(self):
-        res = Basket(AAPL, VBLTX, GOOG)(Alive().true())
+        res = Basket(S.AAPL, S.VBLTX, S.GOOG)(Alive().true())
         df = res.df()
         self.assertEqual(len(res), 2)
         alive_value = df.iloc[0]['Alive']
@@ -132,7 +132,7 @@ class BasketTests(unittest.TestCase):
         print(df)
 
     def test_plugins_age(self):
-        res = Basket(AAPL, GOOG, META, CRCL)(Age().min(10))
+        res = Basket(S.AAPL, S.GOOG, S.META, S.CRCL)(Age().min(10))
         df = res.df()
         assert len(df) == 3
         for age in df['Age']:
@@ -140,28 +140,28 @@ class BasketTests(unittest.TestCase):
             self.assertIsInstance(age, (float, int))
 
     def test_plugins_cagr(self):
-        res = Basket(AAPL, GOOG, META)(Cagr())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Cagr())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['CAGR'])
 
     def test_plugins_crop(self):
-        res = Basket(AAPL, GOOG, META)(WeeklyClose() >> Crop() >> PlotEach())
+        res = Basket(S.AAPL, S.GOOG, S.META)(WeeklyClose() >> Crop() >> PlotEach())
         data = res.output_data()
 
     def test_plugins_description(self):
-        res = Basket(AAPL, GOOG, META)(Description().contains("designs"))
+        res = Basket(S.AAPL, S.GOOG, S.META)(Description().contains("designs"))
         df = res.df()
         assert len(df) == 1
         for d in df['Description']:
             self.assertIsInstance(d, str)
 
     def test_plugins_dividend_yield(self):
-        res = Basket(AAPL, GOOG, META)(DivYield())
+        res = Basket(S.AAPL, S.GOOG, S.META)(DivYield())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['DivYield'])
 
     def test_plugins_inception(self):
-        res = Basket(AAPL, GOOG, META)(Inception())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Inception())
         df = res.df()
         # Inception date might be None for some symbols
         inception_date = df.iloc[0]['Inception']
@@ -176,38 +176,38 @@ class BasketTests(unittest.TestCase):
 
     def test_inception_filter(self):
         # CRCL should be filtered out, because it's inception is in 2025
-        res = Basket(GOOG, CRCL, AAPL)(Inception().max("2015-01-01"))
+        res = Basket(S.GOOG, S.CRCL, S.AAPL)(Inception().max("2015-01-01"))
         assert len(res.basket()) == 2
-        assert GOOG in res.basket()
-        assert AAPL in res.basket()
+        assert S.GOOG in res.basket()
+        assert S.AAPL in res.basket()
         print(res.df())
 
     def test_plugin_industry(self):
-        res = Basket(AAPL * 1.5, GOOG * 10)(Industry())
+        res = Basket(S.AAPL * 1.5, S.GOOG * 10)(Industry())
         df = res.df()
 
         self.assertEqual(df.iloc[0]['Industry'], 'Consumer Electronics')
         self.assertEqual(df.iloc[1]['Industry'], 'Internet Content & Information')
 
     def test_plugins_update(self):
-        res = Basket(AAPL * 1.5)(Name() >> LastUpdate())
+        res = Basket(S.AAPL * 1.5)(Name() >> LastUpdate())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['LastUpdate'])
 
-        res2 = Basket(AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdate(combined=False))
+        res2 = Basket(S.AAPL * 1.5)(Update(older_than=datetime.now()) >> LastUpdate(combined=False))
         df2 = res2.df()
         self.assertGreater(df2.iloc[0]['LastUpdate[Price]'], df.iloc[0]['LastUpdate'])
         self.assertGreater(df2.iloc[0]['LastUpdate[Profile]'], df.iloc[0]['LastUpdate'])
 
 
     def test_plugins_mcap(self):
-        res = Basket(AAPL, GOOG, META)(Mcap())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Mcap())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['MCap'])
         self.assertGreater(df.iloc[0]['MCap'], 0)
 
     def test_plugins_mcap_log(self):
-        res = Basket(AAPL)(Mcap().log())
+        res = Basket(S.AAPL)(Mcap().log())
         df = res.df()
         self.assertIn('MCap', df.columns)
         log_mcap = df.iloc[0]['MCap']
@@ -218,41 +218,41 @@ class BasketTests(unittest.TestCase):
 
     def test_plugins_mcap_log_filtered(self):
         # Test log transformation with subsequent filtering
-        res = Basket(AAPL, GOOG)(Mcap().log().min(11))
+        res = Basket(S.AAPL, S.GOOG)(Mcap().log().min(11))
         df = res.df()
         self.assertIn('MCap', df.columns)
         for mcap_log in df['MCap'].dropna():
             self.assertGreaterEqual(mcap_log, 11)
 
     def test_plugins_npm(self):
-        res = Basket(AAPL, GOOG, META)(Npm())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Npm())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['NPM'])
 
     def test_plugins_pe(self):
-        res = Basket(AAPL, GOOG, META)(Pe())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Pe())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['PE'])
 
     def test_plugins_peg(self):
-        res = Basket(AAPL, GOOG, META)(Peg())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Peg())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['PEG'])
 
     def test_plugins_price_plot(self):
-        res = Basket(AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
+        res = Basket(S.AAPL)(WeeklyClose() >> MonthlyClose() >> PlotEach())
         data = res.output_data()
         self.assertTrue(len(data._series) == 2)
 
     def test_plugins_price_yoy_plot(self):
-        res = Basket(AAPL)(MonthlyClose() >> MonthlyClose().yoy() >> PlotEach())
+        res = Basket(S.AAPL)(MonthlyClose() >> MonthlyClose().yoy() >> PlotEach())
         data = res.output_data()
         print(data._series)
         print(data._items)
         self.assertTrue(len(data._series) == 2)
 
     def test_plugins_ragr(self):
-        res = Basket(CVBF)(Ragr())
+        res = Basket(S.CVBF)(Ragr())
         df = res.df()
         self.assertIn('RAGR[Avg]', df.columns)
         self.assertIn('RAGR[Med]', df.columns)
@@ -272,7 +272,7 @@ class BasketTests(unittest.TestCase):
 
     def test_plugins_ragr_log_subfield(self):
         # Test log transformation on multi-field plugin subfield
-        res = Basket(CVBF)(Ragr().log(subfield="Sigma"))
+        res = Basket(S.CVBF)(Ragr().log(subfield="Sigma"))
         df = res.df()
         self.assertIn('RAGR[Sigma]', df.columns)
 
@@ -283,7 +283,7 @@ class BasketTests(unittest.TestCase):
             self.assertLess(log_sigma, 0)
 
     def test_plugins_ratio(self):
-        res = Basket(CVBF)(Ragr() >> Ratio("RAGR[Med]", "RAGR[Sigma]", alias="efficiency"))
+        res = Basket(S.CVBF)(Ragr() >> Ratio("RAGR[Med]", "RAGR[Sigma]", alias="efficiency"))
         df = res.df()
         self.assertIn('efficiency', df.columns)
         
@@ -293,17 +293,17 @@ class BasketTests(unittest.TestCase):
             self.assertGreater(efficiency, 0)  # Should be positive for our test data
 
     def test_plugins_roe(self):
-        res = Basket(AAPL, GOOG, META)(Roe())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Roe())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['ROE'])
 
     def test_plugins_sector_string_equality(self):
-        df = Basket(AAPL, GOOG, META)(Sector().equals("Technology")).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Sector().equals("Technology")).df()
         for sector in df['Sector'].dropna():
             self.assertEqual(sector, "Technology")
 
     def test_plugins_volume(self):
-        res = Basket(AAPL, GOOG, META)(Volume())
+        res = Basket(S.AAPL, S.GOOG, S.META)(Volume())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['Volume'])
         self.assertGreater(df.iloc[0]['Volume'], 0)
@@ -311,26 +311,26 @@ class BasketTests(unittest.TestCase):
 
 
     def test_filter_none_handling(self):
-        df = Basket(AAPL, GOOG, META)(Pe().min(0)).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Pe().min(0)).df()
         if 'PE' in df.columns:
             for pe in df['PE'].dropna():
                 self.assertGreaterEqual(pe, 0)
 
     def test_filter_contains(self):
-        df = Basket(AAPL, GOOG, META)(Name().contains("Inc")).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Name().contains("Inc")).df()
         if 'Name' in df.columns:
             for name in df['Name'].dropna():
                 self.assertIn("Inc", name)
 
     def test_filter_multiple_conditions(self):
-        df = Basket(AAPL, GOOG, META)(Age().min(5).max(50)).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Age().min(5).max(50)).df()
         if 'Age' in df.columns:
             for age in df['Age'].dropna():
                 self.assertGreaterEqual(age, 5)
                 self.assertLessEqual(age, 50)
 
     def test_filter_within(self):
-        df = Basket(AAPL, GOOG, META)(Age().within(10, 40)).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Age().within(10, 40)).df()
         if 'Age' in df.columns:
             for age in df['Age'].dropna():
                 self.assertGreaterEqual(age, 10)
@@ -338,25 +338,25 @@ class BasketTests(unittest.TestCase):
 
     def test_filter_any(self):
         allowed_sectors = ["Technology", "Consumer Cyclical", "Communication Services"]
-        df = Basket(AAPL, GOOG, META)(Sector().any(allowed_sectors)).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Sector().any(allowed_sectors)).df()
         if 'Sector' in df.columns:
             for sector in df['Sector'].dropna():
                 self.assertIn(sector, allowed_sectors)
 
     def test_filter_exclude_multiple(self):
         excluded_sectors = ["Real Estate", "Utilities", "Energy"]
-        df = Basket(AAPL, GOOG, META)(Sector().exclude(excluded_sectors)).df()
+        df = Basket(S.AAPL, S.GOOG, S.META)(Sector().exclude(excluded_sectors)).df()
         if 'Sector' in df.columns:
             for sector in df['Sector'].dropna():
                 self.assertNotIn(sector, excluded_sectors)
 
     def test_filter_around(self):
-        baseline_df = Basket(AAPL, GOOG, META)(Pe()).df()
+        baseline_df = Basket(S.AAPL, S.GOOG, S.META)(Pe()).df()
         if 'PE' in baseline_df.columns and not baseline_df['PE'].isna().all():
             pe_values = baseline_df['PE'].dropna()
             if len(pe_values) > 0:
                 target_pe = pe_values.iloc[0]
-                df = Basket(AAPL, GOOG, META)(Pe().around(target_pe, precision=0.2)).df()
+                df = Basket(S.AAPL, S.GOOG, S.META)(Pe().around(target_pe, precision=0.2)).df()
                 if 'PE' in df.columns:
                     lower_bound, upper_bound = target_pe * 0.8, target_pe * 1.2
                     for pe in df['PE'].dropna():
@@ -365,23 +365,23 @@ class BasketTests(unittest.TestCase):
 
     def test_filter_dates(self):
         from datetime import datetime
-        df_after = Basket(AAPL, GOOG, META)(Inception().min("2000-01-01")).df()
+        df_after = Basket(S.AAPL, S.GOOG, S.META)(Inception().min("2000-01-01")).df()
         if 'Inception' in df_after.columns:
             for date in df_after['Inception'].dropna():
                 self.assertGreater(date, datetime(2000, 1, 1))
         
-        df_before = Basket(AAPL, GOOG, META)(Inception().max(datetime(2020, 1, 1))).df()
+        df_before = Basket(S.AAPL, S.GOOG, S.META)(Inception().max(datetime(2020, 1, 1))).df()
         if 'Inception' in df_before.columns:
             for date in df_before['Inception'].dropna():
                 self.assertLess(date, datetime(2020, 1, 1))
 
     def test_filter_boolean(self):
-        df_alive = Basket(AAPL, GOOG, META)(Alive().true()).df()
+        df_alive = Basket(S.AAPL, S.GOOG, S.META)(Alive().true()).df()
         if 'Alive' in df_alive.columns:
             for value in df_alive['Alive'].dropna():
                 self.assertTrue(value)
         
-        df_not_alive = Basket(AAPL, GOOG, META)(Alive().false()).df()
+        df_not_alive = Basket(S.AAPL, S.GOOG, S.META)(Alive().false()).df()
         if 'Alive' in df_not_alive.columns:
             for value in df_not_alive['Alive'].dropna():
                 self.assertFalse(value)
@@ -390,7 +390,7 @@ class BasketTests(unittest.TestCase):
     def test_plugin_top(self):
         """Test the Top plugin keeps only the first n items"""
         # Create a basket with 5 items
-        original_basket = Basket(AAPL, GOOG, META, MSFT, TSLA)
+        original_basket = Basket(S.AAPL, S.GOOG, S.META, S.MSFT, S.TSLA)
         self.assertEqual(len(original_basket._items), 5)
         
         # Apply Top(3) to keep only first 3 items
@@ -408,7 +408,7 @@ class BasketTests(unittest.TestCase):
 
     def test_top_plugin_larger_than_basket(self):
         """Test Top plugin when n is larger than basket size"""
-        basket = Basket(AAPL, GOOG)
+        basket = Basket(S.AAPL, S.GOOG)
         result = basket(Top(5))
         
         # Should keep all items when n > basket size
@@ -430,7 +430,7 @@ class BasketTests(unittest.TestCase):
     def test_top_plugin_chaining(self):
         """Test Top plugin works in chains"""
         # Create basket and apply Name plugin then Top
-        result = Basket(AAPL, GOOG, META, MSFT)(Name() >> Top(2))
+        result = Basket(S.AAPL, S.GOOG, S.META, S.MSFT)(Name() >> Top(2))
         
         # Should have Name field and only 2 items
         df = result.df()
