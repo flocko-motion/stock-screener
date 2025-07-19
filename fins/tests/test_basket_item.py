@@ -1,6 +1,6 @@
 import unittest
 
-from fins.entities import columns
+# from fins.entities import columns
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
 from .tools import time_it, no_cache, unbuffered_output
