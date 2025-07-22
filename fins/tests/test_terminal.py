@@ -15,12 +15,12 @@ import sys
 # Add the parent directory to the path to allow imports from the fins package
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from fins.terminal import *
 from fins.terminal.persistence import Get, Put, Dir, Delete, _storage
 from fins.entities.basket import Basket
 from fins.entities.basket_item import BasketItem
 from fins.entities.note import Note, Observation, Fact
 from fins.storage import Storage
-from fins.terminal.symbols import AAPL, MSFT, GOOGL, NFLX
 
 
 class TerminalPersistenceTests(unittest.TestCase):
@@ -52,7 +52,7 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_put_and_get_basket(self):
         """Test saving and loading a basket."""
         # Create test basket
-        basket = Basket(AAPL * 1.0, MSFT * 0.5, GOOGL * 2.0, name='test_basket')
+        basket = Basket(S.AAPL * 1.0, S.MSFT * 0.5, S.GOOGL * 2.0, name='test_basket')
         
         # Test Put
         success = Put(basket, 'portfolios/tech_stocks', silent=True)
@@ -137,7 +137,7 @@ class TerminalPersistenceTests(unittest.TestCase):
 
     def test_automatic_extension_addition(self):
         """Test that entity class names are automatically added as extensions."""
-        basket = Basket(AAPL * 1.0, name='test')
+        basket = Basket(S.AAPL * 1.0, name='test')
         
         # Put without extension
         Put(basket, 'test/basket_no_ext', silent=True)
@@ -150,8 +150,8 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_dir_listing(self):
         """Test directory listing functionality."""
         # Create test entities
-        basket1 = Basket(AAPL * 1.0, name='basket1')
-        basket2 = Basket(MSFT * 1.0, name='basket2')
+        basket1 = Basket(S.AAPL * 1.0, name='basket1')
+        basket2 = Basket(S.MSFT * 1.0, name='basket2')
         
         note = Note("Test Note", "Content")
         
@@ -184,8 +184,8 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_dir_recursive_listing(self):
         """Test recursive directory listing functionality."""
         # Create test entities in nested structure
-        basket1 = Basket(AAPL * 1.0, name='growth_basket')
-        basket2 = Basket(MSFT * 1.0, name='value_basket')
+        basket1 = Basket(S.AAPL * 1.0, name='growth_basket')
+        basket2 = Basket(S.MSFT * 1.0, name='value_basket')
         note1 = Note("Tech Analysis", "Content about tech")
         note2 = Note("Market Overview", "General market content")
         fact = Fact("Important Fact", "Some factual content")
@@ -222,7 +222,7 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_delete_single_entity(self):
         """Test deleting a single entity."""
         # Create and save entity
-        basket = Basket(AAPL * 1.0, name='to_delete')
+        basket = Basket(S.AAPL * 1.0, name='to_delete')
         Put(basket, 'temp/delete_me', silent=True)
         
         # Verify it exists
@@ -240,7 +240,7 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_delete_directory_requires_force(self):
         """Test that deleting directories with contents requires force=True."""
         # Create entities in a directory
-        basket = Basket(AAPL * 1.0, name='test')
+        basket = Basket(S.AAPL * 1.0, name='test')
         note = Note("Test", "Content")
         
         Put(basket, 'temp_dir/basket', silent=True)
@@ -277,7 +277,7 @@ class TerminalPersistenceTests(unittest.TestCase):
 
     def test_path_normalization(self):
         """Test that paths are properly normalized."""
-        basket = Basket(AAPL * 1.0, name='test')
+        basket = Basket(S.AAPL * 1.0, name='test')
         
         # Put with various path formats
         Put(basket, 'test_path', silent=True)  # No leading slash
@@ -294,8 +294,8 @@ class TerminalPersistenceTests(unittest.TestCase):
         """Test creating and navigating complex directory structures."""
         # Create entities in nested directories
         entities = [
-            (Basket(NFLX * 1.0, name='growth'), 'strategies/equity/growth/momentum'),
-            (Basket(NFLX * 1.0, name='value'), 'strategies/equity/value/deep_value'),
+            (Basket(S.NFLX * 1.0, name='growth'), 'strategies/equity/growth/momentum'),
+            (Basket(S.NFLX * 1.0, name='value'), 'strategies/equity/value/deep_value'),
             (Note("Bond Analysis", "Content"), 'strategies/fixed_income/analysis'),
             (Fact("Market Fact", "Content"), 'research/facts/market_structure'),
         ]
@@ -323,7 +323,7 @@ class TerminalPersistenceTests(unittest.TestCase):
 
     def test_basket_with_description(self):
         """Test saving and loading baskets with descriptions."""
-        basket = Basket(AAPL * 1.0, name='described_basket')
+        basket = Basket(S.AAPL * 1.0, name='described_basket')
         basket.description('This is a test basket with a description')
         
         Put(basket, 'described/basket', silent=True)
@@ -335,8 +335,8 @@ class TerminalPersistenceTests(unittest.TestCase):
     def test_put_overwrite_behavior(self):
         """Test Put function overwrite behavior."""
         # Create two different baskets
-        basket1 = Basket(AAPL * 1.0, name='original')
-        basket2 = Basket(MSFT * 1.0, name='replacement')
+        basket1 = Basket(S.AAPL * 1.0, name='original')
+        basket2 = Basket(S.MSFT * 1.0, name='replacement')
         
         # Save first basket
         success1 = Put(basket1, 'overwrite_test/basket', silent=True)
@@ -371,8 +371,8 @@ class TerminalPersistenceTests(unittest.TestCase):
         import sys
         
         # Create basket
-        basket1 = Basket(AAPL * 1.0, name='first')
-        basket2 = Basket(MSFT * 1.0, name='second')
+        basket1 = Basket(S.AAPL * 1.0, name='first')
+        basket2 = Basket(S.MSFT * 1.0, name='second')
         
         # Save first basket (silent mode)
         Put(basket1, 'warning_test/basket', silent=True)

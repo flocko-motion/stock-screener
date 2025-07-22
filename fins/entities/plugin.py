@@ -10,6 +10,7 @@ from typing import Optional, List, Union, Any
 import pandas as pd
 
 from fins.entities import BasketItem, Basket
+
 from fins.financial import Symbol
 from fins.utils import format_value
 
@@ -67,41 +68,6 @@ class Plugin(ABC):
         else:
             return NotImplemented
 
-class OutputPlugin(Plugin):
-
-    def __init__(self, alias: Optional[str] = None):
-        super().__init__(alias)
-
-    def output_item(self, symbol: Symbol, data: dict[str, pd.DataFrame]):
-        pass
-
-    def output_all(self, data: 'OutputData'):
-        pass
-
-    def run(self, runtime: 'BasketRuntime'):
-        output_data = runtime.output_data()
-        self.output_all(output_data)
-        items = output_data.items()
-        for idx, basket_item in enumerate(runtime.basket_items()):
-            self.output_item(basket_item.symbol(), items[idx])
-
-class OutputData:
-
-    def __init__(self):
-        self._series = list[str]()
-        self._items = dict[int, dict[str, pd.DataFrame]]()
-
-    def register_series(self, field_name: str):
-        self._series.append(field_name)
-
-    def items(self) -> dict[int, dict[str, pd.DataFrame]]:
-        return self._items
-
-    def set_series(self, row_index: int, field_name: str, value: pd.DataFrame):
-        if row_index not in self._items:
-            self._items[row_index] = dict[str, pd.DataFrame]()
-        self._items[row_index][field_name] = value
-
 
 def _parse_filter_value(value):
     if isinstance(value, str):
@@ -150,6 +116,7 @@ class BasketPipeline:
 class BasketRuntime:
 
     def __init__(self, basket: Basket):
+        from fins.entities.plugin_output import OutputData
         self._basket = basket
         self._df = basket.df().copy()  # Start with basket's DataFrame
         self._fields = dict[str, type]()

@@ -5,6 +5,7 @@ from typing import Union, Any, Optional, List, Tuple
 from fins.entities import BasketItem, Plugin
 from fins.entities.plugin import _parse_filter_value
 from fins.utils import format_value
+from fins.entities.media import Media, media_cache
 
 
 class FilterOut:
@@ -387,7 +388,7 @@ class FieldPlugin(Plugin):
 		self._operators = []  # Ordered list of FieldOperator instances
 
 	@abstractmethod
-	def field_values(self, item: BasketItem) -> List[Any]:
+	def field_values(self, item: BasketItem, output_data) -> List[Any]:
 		pass
 
 	@abstractmethod
@@ -413,7 +414,7 @@ class FieldPlugin(Plugin):
 		tracker = ProgressTracker(len(basket_items), f"Computing {self.alias}")
 		for idx, basket_item in enumerate(basket_items):
 			try:
-				field_values = self.field_values(basket_item)
+				field_values = self.field_values(basket_item, runtime.output_data().item_series(idx))
 				filtered = self._set_field_values(runtime, idx, field_values, field_info)
 				if filtered:
 					items_to_filter.add(idx)
@@ -457,6 +458,10 @@ class FieldPlugin(Plugin):
 				item_should_be_filtered = True
 				break  # If any field filters out, the entire item is filtered
 			else:
+				# If the value is a Media instance, register and store handle
+				if isinstance(processed_value, Media):
+					media_cache.register(processed_value)
+					processed_value = processed_value.handle()
 				runtime.set_field_value(idx, full_field_name, processed_value)
 		
 		return item_should_be_filtered

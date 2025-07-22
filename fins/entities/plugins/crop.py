@@ -2,7 +2,7 @@ from typing import Optional
 import pandas as pd
 
 from .. import BasketItem
-from ..plugin import OutputPlugin, OutputData
+from ..plugin_output import OutputPlugin, OutputData
 from ...financial import Symbol
 
 
