@@ -5,6 +5,7 @@ from typing import Optional
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
+import pandas as pd
 
 
 class Name(FieldPlugin):
@@ -19,7 +20,7 @@ class Name(FieldPlugin):
     def field_types(self):
         return [("", str)]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().name]
 
 

@@ -2,6 +2,8 @@ from abc import abstractmethod, ABC
 from datetime import datetime
 from typing import Union, Any, Optional, List, Tuple
 
+import pandas as pd
+
 from fins.entities import BasketItem, Plugin
 from fins.entities.plugin import _parse_filter_value
 from fins.utils import format_value
@@ -388,7 +390,7 @@ class FieldPlugin(Plugin):
 		self._operators = []  # Ordered list of FieldOperator instances
 
 	@abstractmethod
-	def field_values(self, item: BasketItem, output_data) -> List[Any]:
+	def field_values(self, item: BasketItem, output_data: dict[str, pd.DataFrame]) -> List[Any]:
 		pass
 
 	@abstractmethod

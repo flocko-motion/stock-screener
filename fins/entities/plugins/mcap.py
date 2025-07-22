@@ -4,6 +4,8 @@ Market Cap Column
 
 from typing import Optional
 
+import pandas as pd
+
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
 
@@ -20,5 +22,5 @@ class Mcap(FieldPlugin):
     def field_types(self):
         return [("", float)]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().get_analytics("market_cap")]

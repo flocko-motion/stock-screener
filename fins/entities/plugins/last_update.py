@@ -6,6 +6,7 @@ from typing import Optional
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
+import pandas as pd
 
 
 class LastUpdate(FieldPlugin):
@@ -24,7 +25,7 @@ class LastUpdate(FieldPlugin):
         else:
             return [("Price", Optional[datetime]), ("Profile", Optional[datetime])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         s = item.symbol()
         if self.combined:
             if s.last_price_update is None or s.last_profile_update is None:

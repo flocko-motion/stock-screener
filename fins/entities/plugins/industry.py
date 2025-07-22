@@ -3,6 +3,8 @@ Industry Column
 """
 from typing import Optional
 
+import pandas as pd
+
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
 
@@ -19,7 +21,7 @@ class Industry(FieldPlugin):
     def field_types(self):
         return [("", Optional[str])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().industry]
 
 

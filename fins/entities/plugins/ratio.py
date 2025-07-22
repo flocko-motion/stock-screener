@@ -3,6 +3,8 @@ Ratio Plugin - Calculate ratio between two fields from previous pipeline steps
 """
 from typing import Optional
 
+import pandas as pd
+
 from .. import BasketItem
 from ..plugin_field import FieldPlugin, FILTER_OUT
 
@@ -71,6 +73,6 @@ class Ratio(FieldPlugin):
             if processed_value is not FILTER_OUT:
                 runtime.set_field_value(idx, self.alias, processed_value)
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         """Not used - we override run() method instead"""
         raise NotImplementedError("Ratio plugin uses run() method override") 

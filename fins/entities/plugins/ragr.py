@@ -69,7 +69,7 @@ class Ragr(FieldPlugin):
     def field_types(self):
         return [("Avg", Optional[float]), ("Med", Optional[float]), ("Sigma", Optional[float])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         df = item.symbol().get_monthly()
         
         if df.empty:

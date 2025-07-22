@@ -83,6 +83,7 @@ function App() {
   const hasInitializedRef = useRef(false)
   const resizeRef = useRef(null)
   const isResizingRef = useRef(false)
+  const consoleOutputRef = useRef(null)
   
   // Command history
   const commandHistoryRef = useRef([])
@@ -97,6 +98,13 @@ function App() {
       timestamp: new Date() 
     }])
   }
+  
+  // Auto-scroll console to bottom when new output is added
+  useEffect(() => {
+    if (consoleOutputRef.current) {
+      consoleOutputRef.current.scrollTop = consoleOutputRef.current.scrollHeight
+    }
+  }, [consoleOutput])
   
   const addToHistory = (command) => {
     if (command.trim() && (commandHistoryRef.current.length === 0 || commandHistoryRef.current[commandHistoryRef.current.length - 1] !== command)) {
@@ -156,6 +164,63 @@ function App() {
           addConsoleOutput(data.content)
         } else if (data.type === 'error') {
           addConsoleOutput(data.content, 'error')
+        } else if (data.type === 'media') {
+          // Handle media messages - create tabs for each media handle
+          console.log('Received media handles:', data.handles)
+          data.handles.forEach(handle => {
+            // Parse handle format: [type:uuid]
+            const match = handle.match(/\[(\w+):([a-f0-9-]+)\]/)
+            if (match) {
+              const [, mediaType, uuid] = match
+              const title = `${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} ${uuid.slice(0, 8)}`
+              
+              // Create tab with loading content
+              addTab(title, `Loading ${mediaType}...`)
+              
+              // Fetch the media data
+              fetch(`http://localhost:8000/api/media/${uuid}`)
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`)
+                  }
+                  return response.blob()
+                })
+                .then(blob => {
+                  const url = URL.createObjectURL(blob)
+                  
+                  // Update the tab content with the media
+                  setTabs(prev => prev.map(tab => {
+                    if (tab.title === title) {
+                      if (mediaType === 'chart') {
+                        return {
+                          ...tab,
+                          content: `<img src="${url}" alt="${title}" style="max-width: 100%; height: auto;" />`
+                        }
+                      } else {
+                        return {
+                          ...tab,
+                          content: `<div>Unsupported media type: ${mediaType}</div>`
+                        }
+                      }
+                    }
+                    return tab
+                  }))
+                })
+                .catch(error => {
+                  console.error('Failed to fetch media:', error)
+                  // Update tab with error message
+                  setTabs(prev => prev.map(tab => {
+                    if (tab.title === title) {
+                      return {
+                        ...tab,
+                        content: `<div style="color: red;">Failed to load media: ${error.message}</div>`
+                      }
+                    }
+                    return tab
+                  }))
+                })
+            }
+          })
         }
       } catch (e) {
         addConsoleOutput(event.data)
@@ -423,7 +488,7 @@ function App() {
       
       {/* Console Output Area */}
       <div className="console-area">
-        <div className="console-output">
+        <div className="console-output" ref={consoleOutputRef}>
           {consoleOutput.map(output => (
             <div key={output.id} className={`console-line ${output.type}`}>
               <div dangerouslySetInnerHTML={{ __html: output.message }} />

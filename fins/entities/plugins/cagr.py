@@ -89,7 +89,7 @@ class Cagr(FieldPlugin):
     def field_types(self):
         return [("", Optional[float])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         df = item.symbol().get_weekly() if self._resolution == 'y' else item.symbol().get_monthly()
         
         if df.empty:

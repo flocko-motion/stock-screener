@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
+import pandas as pd
 
 
 class Alive(FieldPlugin):
@@ -26,7 +27,7 @@ class Alive(FieldPlugin):
     def field_types(self):
         return [("", bool)]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         # Check if we have recent price data (within last 30 days)
         weekly_data = item.symbol().get_weekly()
         if weekly_data.empty:

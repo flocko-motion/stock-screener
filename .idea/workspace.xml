@@ -8,12 +8,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: output plugin now based on field plugin... media output stored in media cache, handle in dataframe allows access. This is the basis for making media available in browser UI">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/7e6389ea-134e-4414-bd77-7c47e2b7bb5b/storage_v2/_src_/database/fins.yPUvAA/schema/pg_catalog.0S1ZNQ.zip" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/7e6389ea-134e-4414-bd77-7c47e2b7bb5b/storage_v2/_src_/database/fins.yPUvAA/schema/pg_catalog.0S1ZNQ.zip" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: react web app">
+      <change afterPath="$PROJECT_DIR$/server.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/config/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/config/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/media/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/media/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugin_field.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin_field.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugin_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugin_output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/age.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/age.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/alive.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/alive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/cagr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/description.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/description.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/inception.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/inception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/industry.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/industry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/last_update.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/mcap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/name.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/name.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/npm.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/npm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/pe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/pe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/peg.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/peg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/ragr.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/ragr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/ratio.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/ratio.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/roe.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/roe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/sector.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/sector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/entities/plugins/volume.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/plugins/volume.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -268,7 +288,7 @@
     "git-widget-placeholder": "feat/postgres-migration",
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener/fins/entities/plugins",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/r/priv/stock-screener",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -300,11 +320,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities\plugins" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\tests" />
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl\commands" />
-      <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\entities\columns" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener" />
@@ -312,7 +332,7 @@
       <recent name="\\wsl.localhost\Ubuntu\r\priv\stock-screener\fins\dsl" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.terminal">
+  <component name="RunManager" selected="Python tests.Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application">
     <configuration name="codegen" type="PythonConfigurationType" factoryName="Python">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -388,6 +408,22 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="stock-screener" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_basket.BasketTests.test_plugin_minimal_plugin_application&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="Unittests for test_basket.BasketTests.test_plugins_alive" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="stock-screener" />
       <option name="ENV_FILES" value="" />
@@ -401,22 +437,6 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_basket.BasketTests.test_plugins_alive&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for test_basket.BasketTests.test_plugins_chaining" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="stock-screener" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fins/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_basket.BasketTests.test_plugins_chaining&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -475,19 +495,19 @@
       <item itemvalue="Python.terminal" />
       <item itemvalue="Python tests.Python tests for fins.tests.test_dsl.BasicFlowTests.test_add_symbol_to_basket" />
       <item itemvalue="Python tests.Unittests for test_test.TestTests.test_test" />
+      <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_alive" />
-      <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_chaining" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot" />
       <item itemvalue="Python tests.Unittests in test_basket.py" />
       <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_no_inception" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application" />
         <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_price_plot" />
         <item itemvalue="Python tests.Unittests in test_basket.py" />
         <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_no_inception" />
         <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_alive" />
-        <item itemvalue="Python tests.Unittests for test_basket.BasketTests.test_plugins_chaining" />
       </list>
     </recent_temporary>
   </component>
@@ -553,15 +573,7 @@
       <workItem from="1752729330932" duration="3372000" />
       <workItem from="1752778396654" duration="8964000" />
       <workItem from="1753119266113" duration="2456000" />
-      <workItem from="1753211915025" duration="1347000" />
-    </task>
-    <task id="LOCAL-00147" summary="feat: improved db performance: new indexes, dropped valid_to and legacy caching logic, optimized sql queries">
-      <option name="closed" value="true" />
-      <created>1751199419332</created>
-      <option name="number" value="00147" />
-      <option name="presentableId" value="LOCAL-00147" />
-      <option name="project" value="LOCAL" />
-      <updated>1751199419332</updated>
+      <workItem from="1753211915025" duration="3430000" />
     </task>
     <task id="LOCAL-00148" summary="feat: Plugins have reflective __str__ now, that print the Python code to create an identical Plugin">
       <option name="closed" value="true" />
@@ -947,7 +959,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753167242115</updated>
     </task>
-    <option name="localTasksCounter" value="196" />
+    <task id="LOCAL-00196" summary="feat: react web app">
+      <option name="closed" value="true" />
+      <created>1753215159561</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
+      <option name="project" value="LOCAL" />
+      <updated>1753215159561</updated>
+    </task>
+    <option name="localTasksCounter" value="197" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -965,7 +985,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: plugin Description()" />
     <MESSAGE value="docs: working on my baskets" />
     <MESSAGE value="feat: Ragr() plugin and subfields with filtering" />
     <MESSAGE value="feat: Ratio(a, b) - and use cases" />
@@ -990,7 +1009,8 @@
     <MESSAGE value="feat: web frontend" />
     <MESSAGE value="fix: debugging after massive feature upgrades and refactoring" />
     <MESSAGE value="feat: output plugin now based on field plugin... media output stored in media cache, handle in dataframe allows access. This is the basis for making media available in browser UI" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: output plugin now based on field plugin... media output stored in media cache, handle in dataframe allows access. This is the basis for making media available in browser UI" />
+    <MESSAGE value="feat: react web app" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: react web app" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1212,7 +1232,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugins/alive.py</url>
-          <line>20</line>
+          <line>21</line>
           <option name="timeStamp" value="325" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1227,12 +1247,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugins/dividend_yield.py</url>
-          <line>23</line>
+          <line>24</line>
           <option name="timeStamp" value="333" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugins/volume.py</url>
-          <line>23</line>
+          <line>24</line>
           <option name="timeStamp" value="336" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1307,12 +1327,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugin_field.py</url>
-          <line>414</line>
+          <line>416</line>
           <option name="timeStamp" value="385" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fins/entities/plugin_field.py</url>
-          <line>416</line>
+          <line>418</line>
           <option name="timeStamp" value="386" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1460,7 +1480,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_tests_test_dsl_BasicFlowTests_test_add_variable_and_basket.coverage" NAME="pytest for tests.test_dsl.BasicFlowTests.test_add_variable_and_basket Coverage Results" MODIFIED="1749019438129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_any.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_any Coverage Results" MODIFIED="1751402626675" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_screen.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_screen Coverage Results" MODIFIED="1751141569898" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_plugin_minimal_plugin_application.coverage" NAME="Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application Coverage Results" MODIFIED="1752956234444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
+    <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_plugin_minimal_plugin_application.coverage" NAME="Unittests for test_basket.BasketTests.test_plugin_minimal_plugin_application Coverage Results" MODIFIED="1753216600800" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_ai_TestNotebookAssistant_test_assistant.coverage" NAME="Unittests for test_ai.TestNotebookAssistant.test_assistant Coverage Results" MODIFIED="1751742503462" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_prices.coverage" NAME="pytest for test_financial.SymbolTests.test_get_prices Coverage Results" MODIFIED="1747989485003" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_BasicFlowTests_test_basket_to_file_overwrite.coverage" NAME="pytest for fins.tests.test_dsl.BasicFlowTests.test_basket_to_file_overwrite Coverage Results" MODIFIED="1743285481117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

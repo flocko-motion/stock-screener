@@ -39,6 +39,8 @@ class OutputData:
         return self._items
 
     def item_series(self, row_index: int) -> dict[str, pd.DataFrame]:
+        if row_index >= len(self._series):
+            return {}
         return self._items[row_index]
 
     def set_series(self, row_index: int, field_name: str, value: pd.DataFrame):

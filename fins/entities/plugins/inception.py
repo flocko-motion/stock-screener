@@ -6,6 +6,7 @@ from datetime import datetime
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
+import pandas as pd
 
 
 class Inception(FieldPlugin):
@@ -20,5 +21,5 @@ class Inception(FieldPlugin):
     def field_types(self):
         return [("", Optional[datetime])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().inception] 

@@ -6,6 +6,7 @@ from typing import Optional
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
+import pandas as pd
 
 
 class Volume(FieldPlugin):
@@ -20,5 +21,5 @@ class Volume(FieldPlugin):
     def field_types(self):
         return [("", float)]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().get_analytics("volume")]

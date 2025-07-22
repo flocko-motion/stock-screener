@@ -13,6 +13,7 @@ from pathlib import Path
 # Import centralized shutdown mechanism
 from fins.shutdown import set_shutdown_event, is_shutdown_requested
 from fins.server.ipython_session import get_session
+from fins.entities.media import Chart
 
 
 def start_api_server():
@@ -50,6 +51,48 @@ def start_api_server():
                 return Response(content=element['data'], media_type='image/png')
             # Add more types as needed
             raise HTTPException(status_code=415, detail="Unsupported rich element type")
+        
+        # Serve media from MediaCache
+        @app.get("/api/media/{uuid}")
+        async def get_media(uuid: str):
+            print(f"[DEBUG] API request for media: {uuid}")
+            from fins.entities.media import media_cache
+            
+            try:
+                media = media_cache.get(uuid)
+                if not media:
+                    raise HTTPException(status_code=404, detail="Media not found")
+                
+                if isinstance(media, Chart):
+                    from fastapi.responses import Response
+                    return Response(content=media.image_bytes, media_type='image/png')
+                else:
+                    raise HTTPException(status_code=415, detail="Unsupported media type")
+                    
+            except Exception as e:
+                print(f"[ERROR] Failed to serve media {uuid}: {e}")
+                raise HTTPException(status_code=500, detail="Internal server error")
+        
+        # Get media metadata
+        @app.get("/api/media/{uuid}/metadata")
+        async def get_media_metadata(uuid: str):
+            print(f"[DEBUG] API request for media metadata: {uuid}")
+            from fins.entities.media import media_cache
+            
+            try:
+                media = media_cache.get(uuid)
+                if not media:
+                    raise HTTPException(status_code=404, detail="Media not found")
+                
+                return {
+                    "uuid": uuid,
+                    "type": media.__class__.__name__,
+                    "handle": media.handle()
+                }
+                    
+            except Exception as e:
+                print(f"[ERROR] Failed to get media metadata {uuid}: {e}")
+                raise HTTPException(status_code=500, detail="Internal server error")
         
         # Mount static files at root (this will serve index.html at / and style.css at /style.css)
         app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")

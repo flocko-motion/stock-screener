@@ -4,6 +4,7 @@ Age (Years Since IPO) Column
 
 from typing import Optional
 from datetime import datetime
+import pandas as pd
 
 from .. import BasketItem
 from ..plugin_field import FieldPlugin
@@ -21,7 +22,7 @@ class Age(FieldPlugin):
     def field_types(self):
         return [("", Optional[float])]
 
-    def field_values(self, item: BasketItem):
+    def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         """Return age in years since inception, or None if inception unknown"""
         symbol = item.symbol()
         
