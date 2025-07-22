@@ -1,22 +1,21 @@
 Next steps:
 
-Working on Plugins. Implementing a first prototype Plugin "Industry()".
+- Authentication
+- Notebook Access via API -> ChatGPT frontend
+- Move Postgres to Server
 
-Clarify: how are generated fields stored? Are they part of the basket? Or are they transient pipeline data? Rather the latter... 
 
-Idea: Have some archetypal Plugin superclasses derived from the base class: FilterPlugin, FieldPlugin, IndicatorPlugin, OutputPlugin. This 
-could simplify implementation.
 
-Goals:
-- get Industry plugin running, implement basic plugin execution: Basket(..)(PluginA() >> (FilterPluginB() < threshold) >> PlotterPluginC())
-- build a simple plotter
-- build a simple filter
 
+
+
+
+
+Backlog: 
 
 Ai improvements:
 - auto enrich ai_notes using a mini GPT, e.g. adding tags or a summary or condensing the symbol description
 - batch upload notes to vector storage
-
 
 Usability:
 - add file reference to Basket, so that a quick .save() can be implemented
@@ -32,5 +31,5 @@ Plugins:
 Allow: AAPL(MohtlyClose() >> Plot())
 --> requires a __call__ on BasketItem which creates a basket and hands over to Basket.__call__
 
+Inject Info(<symbol>) into BasketItem somehow..
 
-Inject Info(<symbol>) into BasketItem somehow.. 

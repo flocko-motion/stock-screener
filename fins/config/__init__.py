@@ -11,6 +11,7 @@ DIR_DATA = Path.home() / ".fins"
 DIR_DB = DIR_DATA / "db"
 DIR_CONFIG = DIR_DATA / "config"
 DIR_PERSISTENCE = DIR_DATA / "persistence"
+DIR_MEDIA = DIR_DATA / "media"
 
 # File paths
 PATH_DB = DIR_DB / "symbols.db"
