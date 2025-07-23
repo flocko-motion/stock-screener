@@ -20,6 +20,98 @@ from fins.entities import BasketRuntime
 from fins.entities.media import media_cache
 
 
+async def send_response(websocket, response_type, content):
+    """Send a response to the client."""
+    response = {'type': response_type, 'content': content}
+    await websocket.send(json.dumps(response))
+
+
+async def handle_command_output(websocket, output, session_id, basket_runtime=None):
+    """Handle command output and extract media if BasketRuntime is present."""
+    media_handles = []
+    
+    # Extract media from BasketRuntime if present
+    if basket_runtime:
+        print(f"[DEBUG] BasketRuntime detected in session {session_id}")
+        output_data = basket_runtime.output_data()
+        
+        for series_name, series_data in output_data._items.items():
+            for item_idx, item_data in series_data.items():
+                if hasattr(item_data, 'handle') and callable(item_data.handle):
+                    # This is a Media object
+                    media_cache.register(item_data)
+                    handle = item_data.handle()
+                    media_handles.append(handle)
+                    print(f"[DEBUG] Found media handle: {handle}")
+    
+    # Send the regular output first
+    if output.strip():
+        await send_response(websocket, 'output', output.strip())
+    
+    # Send media handles as a special message
+    if media_handles:
+        media_response = {'type': 'media', 'handles': media_handles}
+        await websocket.send(json.dumps(media_response))
+        print(f"[DEBUG] Sent {len(media_handles)} media handles to client")
+    
+    # If no regular output and no media, send success message
+    if not output.strip() and not media_handles:
+        await send_response(websocket, 'output', 'Command executed successfully')
+
+
+async def process_command(websocket, command, session_id):
+    """Process a single command and send response."""
+    print(f"Received command for session {session_id}: {command}")
+    
+    # Execute command in IPython session
+    output, error, success = execute_code(command, session_id)
+    
+    if success:
+        # Get the last result from the IPython session
+        session = get_session(session_id)
+        if session and hasattr(session.ipython, 'last_result'):
+            last_result = session.ipython.last_result
+            
+            if isinstance(last_result, BasketRuntime):
+                await handle_command_output(websocket, output, session_id, last_result)
+            else:
+                await handle_command_output(websocket, output, session_id)
+        else:
+            await handle_command_output(websocket, output, session_id)
+    else:
+        # Send error
+        await send_response(websocket, 'error', error.strip() if error.strip() else 'Unknown error')
+
+
+async def handle_websocket_messages(websocket, client_session_id):
+    """Handle all WebSocket messages for a connection."""
+    try:
+        async for message in websocket:
+            try:
+                data = json.loads(message)
+                if data.get('type') == 'command':
+                    command = data.get('command', '')
+                    session_id = data.get('session_id', 1)  # Default to session 1
+                    
+                    # Track session ID for this connection
+                    if client_session_id is None:
+                        client_session_id = session_id
+                        ws_manager.add_connection(websocket, session_id)
+                    
+                    # Update session activity
+                    ws_manager.update_session_activity(session_id)
+                    
+                    await process_command(websocket, command, session_id)
+
+            except json.JSONDecodeError:
+                await send_response(websocket, 'error', 'Invalid JSON')
+            except Exception as e:
+                logging.error(f"Error handling message: {e}")
+                await send_response(websocket, 'error', f'Internal server error: {e}')
+    except Exception as e:
+        logging.error(f"WebSocket connection error: {e}")
+
+
 class WebSocketManager:
     """Manages WebSocket connections and message broadcasting."""
     
@@ -100,124 +192,7 @@ def start_websocket_server():
             print(f"WebSocket client connected: {websocket.remote_address}")
             
             try:
-                async for message in websocket:
-                    try:
-                        data = json.loads(message)
-                        if data.get('type') == 'command':
-                            command = data.get('command', '')
-                            session_id = data.get('session_id', 1)  # Default to session 1
-                            
-                            # Track session ID for this connection
-                            if client_session_id is None:
-                                client_session_id = session_id
-                                ws_manager.add_connection(websocket, session_id)
-                            
-                            # Update session activity
-                            ws_manager.update_session_activity(session_id)
-                            
-                            print(f"Received command for session {session_id}: {command}")
-                            
-                            # Execute command in IPython session
-                            output, error, success = execute_code(command, session_id)
-                            
-                            if success:
-                                # Check if the result is a BasketRuntime (which contains media)
-                                
-                                # Get the last result from the IPython session
-                                session = get_session(session_id)
-                                if session and hasattr(session.ipython, 'last_result'):
-                                    last_result = session.ipython.last_result
-                                    
-                                    if isinstance(last_result, BasketRuntime):
-                                        print(f"[DEBUG] BasketRuntime detected in session {session_id}")
-                                        
-                                        # Get the output data from the BasketRuntime
-                                        output_data = last_result.output_data()
-                                        
-                                        # Process any media in the output data
-                                        media_handles = []
-                                        for series_name, series_data in output_data._items.items():
-                                            for item_idx, item_data in series_data.items():
-                                                if hasattr(item_data, 'handle') and callable(item_data.handle):
-                                                    # This is a Media object
-                                                    media_cache.register(item_data)
-                                                    handle = item_data.handle()
-                                                    media_handles.append(handle)
-                                                    print(f"[DEBUG] Found media handle: {handle}")
-                                        
-                                        # Send the regular output first
-                                        if output.strip():
-                                            response = {
-                                                'type': 'output',
-                                                'content': output.strip()
-                                            }
-                                            await websocket.send(json.dumps(response))
-                                        
-                                        # Send media handles as a special message
-                                        if media_handles:
-                                            media_response = {
-                                                'type': 'media',
-                                                'handles': media_handles
-                                            }
-                                            await websocket.send(json.dumps(media_response))
-                                            print(f"[DEBUG] Sent {len(media_handles)} media handles to client")
-                                        
-                                        # If no regular output, send success message
-                                        if not output.strip() and not media_handles:
-                                            response = {
-                                                'type': 'output',
-                                                'content': 'Command executed successfully'
-                                            }
-                                            await websocket.send(json.dumps(response))
-                                    else:
-                                        # Regular output (not BasketRuntime)
-                                        if output.strip():
-                                            response = {
-                                                'type': 'output',
-                                                'content': output.strip()
-                                            }
-                                            await websocket.send(json.dumps(response))
-                                        else:
-                                            # Command executed successfully but no output
-                                            response = {
-                                                'type': 'output',
-                                                'content': 'Command executed successfully'
-                                            }
-                                            await websocket.send(json.dumps(response))
-                                else:
-                                    # Fallback for regular output
-                                    if output.strip():
-                                        response = {
-                                            'type': 'output',
-                                            'content': output.strip()
-                                        }
-                                        await websocket.send(json.dumps(response))
-                                    else:
-                                        # Command executed successfully but no output
-                                        response = {
-                                            'type': 'output',
-                                            'content': 'Command executed successfully'
-                                        }
-                                        await websocket.send(json.dumps(response))
-                            else:
-                                # Send error
-                                response = {
-                                    'type': 'error',
-                                    'content': error.strip() if error.strip() else 'Unknown error'
-                                }
-                                await websocket.send(json.dumps(response))
-
-                    except json.JSONDecodeError:
-                        await websocket.send(json.dumps({
-                            'type': 'error',
-                            'content': 'Invalid JSON'
-                        }))
-                    except Exception as e:
-                        logging.error(f"Error handling message: {e}")
-                        await websocket.send(json.dumps({
-                            'type': 'error',
-                            'content': f'Internal server error: {e}'
-                        }))
+                await handle_websocket_messages(websocket, client_session_id)
             except Exception as e:
                 logging.error(f"WebSocket connection error: {e}")
             finally:

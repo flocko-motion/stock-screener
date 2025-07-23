@@ -29,17 +29,11 @@ def main():
 
     print("🚀 Starting FINS servers...")
     
-
-    
     # Start all servers
     # start_jupyter_server()
     start_api_server()
     start_websocket_server()
 
-    print("\n🌐 Servers running:")
-    print("   Jupyter Lab: http://localhost:8888")
-    print("   API Server:  http://localhost:8000")
-    print("   WebSocket:   ws://localhost:8001")
     print("\nPress Ctrl+C to stop")
 
     # Keep running
