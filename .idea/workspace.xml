@@ -8,12 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="refactor: cleaned up websocket server">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/7e6389ea-134e-4414-bd77-7c47e2b7bb5b/storage_v2/_src_/database/fins.yPUvAA/schema/pg_catalog.0S1ZNQ.zip" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/7e6389ea-134e-4414-bd77-7c47e2b7bb5b/storage_v2/_src_/database/fins.yPUvAA/schema/pg_catalog.0S1ZNQ.zip" afterDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: transport df media to webclient">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/entities/media/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/media/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/server/ipython_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/ipython_session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/server/websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -564,15 +563,7 @@
       <workItem from="1752778396654" duration="8964000" />
       <workItem from="1753119266113" duration="2456000" />
       <workItem from="1753211915025" duration="3682000" />
-      <workItem from="1753252233743" duration="3208000" />
-    </task>
-    <task id="LOCAL-00150" summary="fix: persistence overwrite warning">
-      <option name="closed" value="true" />
-      <created>1751202456035</created>
-      <option name="number" value="00150" />
-      <option name="presentableId" value="LOCAL-00150" />
-      <option name="project" value="LOCAL" />
-      <updated>1751202456035</updated>
+      <workItem from="1753252233743" duration="4372000" />
     </task>
     <task id="LOCAL-00151" summary="fix: fmt delivered invalid datapoints pre-inception if from=1900-01-01 was given at api request">
       <option name="closed" value="true" />
@@ -958,7 +949,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753253113939</updated>
     </task>
-    <option name="localTasksCounter" value="199" />
+    <task id="LOCAL-00199" summary="feat: transport df media to webclient">
+      <option name="closed" value="true" />
+      <created>1753255548619</created>
+      <option name="number" value="00199" />
+      <option name="presentableId" value="LOCAL-00199" />
+      <option name="project" value="LOCAL" />
+      <updated>1753255548619</updated>
+    </task>
+    <option name="localTasksCounter" value="200" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -976,7 +975,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Ragr() plugin and subfields with filtering" />
     <MESSAGE value="feat: Ratio(a, b) - and use cases" />
     <MESSAGE value="refactor: Plugins architector remodelling" />
     <MESSAGE value="feat: MonthlyClose().yoy() is a first series transformer plugin" />
@@ -1001,7 +999,8 @@
     <MESSAGE value="feat: output plugin now based on field plugin... media output stored in media cache, handle in dataframe allows access. This is the basis for making media available in browser UI" />
     <MESSAGE value="feat: react web app" />
     <MESSAGE value="refactor: cleaned up websocket server" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: cleaned up websocket server" />
+    <MESSAGE value="feat: transport df media to webclient" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: transport df media to webclient" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1321,11 +1320,6 @@
           <line>143</line>
           <option name="timeStamp" value="389" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fins/server/websocket.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="391" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
           <url>file://$PROJECT_DIR$/fins.ipynb</url>
           <line>9</line>
@@ -1506,7 +1500,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_BasketItemTests_test_create_basket_item.coverage" NAME="pytest for test_symbol.BasketItemTests.test_create_basket_item Coverage Results" MODIFIED="1745345711615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_basket_BasketTests_test_plugin_alias_collision.coverage" NAME="Unittests for test_basket.BasketTests.test_plugin_alias_collision Coverage Results" MODIFIED="1752956244814" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_none_handling.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_none_handling Coverage Results" MODIFIED="1751018230744" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
-    <SUITE FILE_PATH="coverage/stock_screener$server.coverage" NAME="server Coverage Results" MODIFIED="1753254559923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$server.coverage" NAME="server Coverage Results" MODIFIED="1753255792241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_around.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_around Coverage Results" MODIFIED="1751018259130" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_fins_tests_test_dsl_ColumnCommandTests_test_add_column_with_alias.coverage" NAME="pytest for fins.tests.test_dsl.ColumnCommandTests.test_add_column_with_alias Coverage Results" MODIFIED="1747511967512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_fmp_TestFMP_test_price_history.coverage" NAME="pytest for test_fmp.TestFMP.test_price_history Coverage Results" MODIFIED="1748608912783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />

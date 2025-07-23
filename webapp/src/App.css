@@ -268,3 +268,48 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #777;
 }
+
+.dataframe-table-wrapper {
+  overflow-x: auto;
+  padding: 8px;
+}
+.dataframe-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95em;
+  background: #fff;
+}
+.dataframe-table th, .dataframe-table td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+.dataframe-table th {
+  background: #f5f5f5;
+  cursor: pointer;
+  user-select: none;
+}
+.dataframe-table tr:nth-child(even) {
+  background: #fafbfc;
+}
+.dataframe-table tr:hover {
+  background: #f1f7ff;
+}
+.pagination {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pagination button {
+  padding: 2px 8px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

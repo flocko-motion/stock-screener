@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import ansiToHtml from 'ansi-to-html'
+import { useTable, useSortBy, useFilters, useGlobalFilter, usePagination, useColumnOrder } from '@tanstack/react-table'
 import './App.css'
 
 // ANSI color support
@@ -65,6 +67,69 @@ function ansiToHtml(text) {
   }
   
   return result
+}
+
+// DataFrameTable component for DataFrameMedia
+function DataFrameTable({ schema, data }) {
+  const columns = React.useMemo(
+    () =>
+      schema.fields.map(field => ({
+        accessorKey: field.name,
+        header: field.name,
+      })),
+    [schema]
+  )
+  const table = useTable({
+    data,
+    columns,
+    getCoreRowModel: true,
+    getSortedRowModel: useSortBy,
+    getFilteredRowModel: useFilters,
+    getGlobalFilteredRowModel: useGlobalFilter,
+    getPaginationRowModel: usePagination,
+    getColumnOrder: useColumnOrder,
+  })
+
+  return (
+    <div className="dataframe-table-wrapper">
+      <table className="dataframe-table">
+        <thead>
+          {table.getHeaderGroups().map(headerGroup => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map(header => (
+                <th key={header.id} {...header.column.getToggleSortingProps()}>
+                  {header.isPlaceholder ? null : header.renderHeader()}
+                  {header.column.getIsSorted() ? (header.column.getIsSorted() === 'desc' ? ' 🔽' : ' 🔼') : ''}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map(row => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map(cell => (
+                <td key={cell.id}>{cell.renderCell()}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* Pagination controls */}
+      <div className="pagination">
+        <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>{'<<'}</button>
+        <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>{'<'}</button>
+        <span>
+          Page{' '}
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </strong>
+        </span>
+        <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{'>'}</button>
+        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>{'>>'}</button>
+      </div>
+    </div>
+  )
 }
 
 function App() {
@@ -178,47 +243,81 @@ function App() {
               addTab(title, `Loading ${mediaType}...`)
               
               // Fetch the media data
-              fetch(`http://localhost:8000/api/media/${uuid}`)
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`)
-                  }
-                  return response.blob()
-                })
-                .then(blob => {
-                  const url = URL.createObjectURL(blob)
-                  
-                  // Update the tab content with the media
-                  setTabs(prev => prev.map(tab => {
-                    if (tab.title === title) {
-                      if (mediaType === 'chart') {
+              if (mediaType === 'chart') {
+                fetch(`http://localhost:8000/api/media/${uuid}`)
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error(`HTTP ${response.status}`)
+                    }
+                    return response.blob()
+                  })
+                  .then(blob => {
+                    const url = URL.createObjectURL(blob)
+                    
+                    // Update the tab content with the media
+                    setTabs(prev => prev.map(tab => {
+                      if (tab.title === title) {
                         return {
                           ...tab,
                           content: `<img src="${url}" alt="${title}" style="max-width: 100%; height: auto;" />`
                         }
-                      } else {
+                      }
+                      return tab
+                    }))
+                  })
+                  .catch(error => {
+                    console.error('Failed to fetch media:', error)
+                    // Update tab with error message
+                    setTabs(prev => prev.map(tab => {
+                      if (tab.title === title) {
                         return {
                           ...tab,
-                          content: `<div>Unsupported media type: ${mediaType}</div>`
+                          content: `<div style="color: red;">Failed to load media: ${error.message}</div>`
                         }
                       }
-                    }
-                    return tab
-                  }))
-                })
-                .catch(error => {
-                  console.error('Failed to fetch media:', error)
-                  // Update tab with error message
-                  setTabs(prev => prev.map(tab => {
-                    if (tab.title === title) {
-                      return {
-                        ...tab,
-                        content: `<div style="color: red;">Failed to load media: ${error.message}</div>`
+                      return tab
+                    }))
+                  })
+              } else if (mediaType === 'dataframemedia') {
+                fetch(`http://localhost:8000/api/media/${uuid}`)
+                  .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                    return response.json()
+                  })
+                  .then(json => {
+                    setTabs(prev => prev.map(tab => {
+                      if (tab.title === title) {
+                        return {
+                          ...tab,
+                          content: <DataFrameTable schema={json.schema} data={json.data} />
+                        }
                       }
+                      return tab
+                    }))
+                  })
+                  .catch(error => {
+                    setTabs(prev => prev.map(tab => {
+                      if (tab.title === title) {
+                        return {
+                          ...tab,
+                          content: <div style={{ color: 'red' }}>Failed to load DataFrame: {error.message}</div>
+                        }
+                      }
+                      return tab
+                    }))
+                  })
+              } else {
+                // Fallback for other media types
+                setTabs(prev => prev.map(tab => {
+                  if (tab.title === title) {
+                    return {
+                      ...tab,
+                      content: `<div>Unsupported media type: ${mediaType}</div>`
                     }
-                    return tab
-                  }))
-                })
+                  }
+                  return tab
+                }))
+              }
             }
           })
         }
