@@ -13,7 +13,7 @@ from pathlib import Path
 # Import centralized shutdown mechanism
 from fins.shutdown import set_shutdown_event, is_shutdown_requested
 from fins.server.ipython_session import get_session
-from fins.entities.media import Chart
+from fins.entities.media import Chart, DataFrameMedia
 
 
 def start_api_server():
@@ -25,9 +25,19 @@ def start_api_server():
         from fastapi.staticfiles import StaticFiles
         from fastapi.responses import HTMLResponse
         import uvicorn
+        from fastapi.middleware.cors import CORSMiddleware
         
         # Create FastAPI app
         app = FastAPI(title="FINS API", version="1.0.0")
+        
+        # Enable CORS for all origins (development)
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
         
         # Create static files directory for client
         static_dir = Path("./fins/server/html")
@@ -56,7 +66,7 @@ def start_api_server():
         @app.get("/api/media/{uuid}")
         async def get_media(uuid: str):
             print(f"[DEBUG] API request for media: {uuid}")
-            from fins.entities.media import media_cache
+            from fins.entities.media import media_cache, DataFrameMedia
             
             try:
                 media = media_cache.get(uuid)
@@ -66,6 +76,9 @@ def start_api_server():
                 if isinstance(media, Chart):
                     from fastapi.responses import Response
                     return Response(content=media.image_bytes, media_type='image/png')
+                elif isinstance(media, DataFrameMedia):
+                    from fastapi.responses import Response
+                    return Response(content=media.to_bytes(), media_type='application/json')
                 else:
                     raise HTTPException(status_code=415, detail="Unsupported media type")
                     
