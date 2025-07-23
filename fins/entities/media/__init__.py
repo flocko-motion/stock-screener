@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Optional
+import pandas as pd
 
 from fins.config import DIR_MEDIA
 
@@ -12,6 +13,8 @@ DIR_MEDIA.mkdir(parents=True, exist_ok=True)
 class Media:
     def __init__(self):
         self._uuid = str(uuid.uuid4())
+        # Auto-register on creation
+        media_cache.register(self)
     def uuid(self) -> str:
         return self._uuid
     def handle(self) -> str:
@@ -19,8 +22,20 @@ class Media:
 
 class Chart(Media):
     def __init__(self, image_bytes: bytes):
-        super().__init__()
         self.image_bytes = image_bytes
+        super().__init__()
+
+class DataFrameMedia(Media):
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+        super().__init__()
+    def to_bytes(self) -> bytes:
+        return self.df.to_json(orient='table').encode('utf-8')
+    @staticmethod
+    def from_bytes(data: bytes) -> 'DataFrameMedia':
+        import io
+        df = pd.read_json(io.BytesIO(data), orient='table')
+        return DataFrameMedia(df)
 
 class MediaCache:
     def __init__(self):
@@ -44,6 +59,9 @@ class MediaCache:
         if isinstance(media, Chart):
             with open(media_path, 'wb') as f:
                 f.write(media.image_bytes)
+        elif isinstance(media, DataFrameMedia):
+            with open(media_path, 'wb') as f:
+                f.write(media.to_bytes())
         
         # Store metadata
         metadata_path = self._get_metadata_path(uuid_str)
@@ -74,6 +92,10 @@ class MediaCache:
                 with open(media_path, 'rb') as f:
                     image_bytes = f.read()
                 return Chart(image_bytes)
+            elif media_type == 'DataFrameMedia':
+                with open(media_path, 'rb') as f:
+                    data = f.read()
+                return DataFrameMedia.from_bytes(data)
             else:
                 # Unknown media type
                 return None

@@ -13,11 +13,13 @@ import asyncio
 from typing import Dict, Set
 from datetime import datetime, timedelta
 
+import pandas as pd
+
 # Import centralized shutdown mechanism
 from fins.shutdown import set_shutdown_event, is_shutdown_requested
 from .ipython_session import execute_code, get_session_count, remove_session, get_session
 from fins.entities import BasketRuntime
-from fins.entities.media import media_cache
+from fins.entities.media import media_cache, DataFrameMedia
 
 
 async def send_response(websocket, response_type, content):
@@ -26,23 +28,21 @@ async def send_response(websocket, response_type, content):
     await websocket.send(json.dumps(response))
 
 
-async def handle_command_output(websocket, output, session_id, basket_runtime=None):
+async def handle_command_output(websocket, output, session_id, command_res=None):
     """Handle command output and extract media if BasketRuntime is present."""
     media_handles = []
     
-    # Extract media from BasketRuntime if present
-    if basket_runtime:
+    # If BasketRuntime, register its DataFrame as media
+    if isinstance(command_res, BasketRuntime):
         print(f"[DEBUG] BasketRuntime detected in session {session_id}")
-        output_data = basket_runtime.output_data()
-        
-        for series_name, series_data in output_data._items.items():
-            for item_idx, item_data in series_data.items():
-                if hasattr(item_data, 'handle') and callable(item_data.handle):
-                    # This is a Media object
-                    media_cache.register(item_data)
-                    handle = item_data.handle()
-                    media_handles.append(handle)
-                    print(f"[DEBUG] Found media handle: {handle}")
+        handle = DataFrameMedia(command_res.df()).handle()
+        media_handles.append(handle)
+        print(f"[DEBUG] Registered DataFrameMedia handle: {handle}")
+    elif isinstance(command_res, pd.DataFrame):
+        print(f"[DEBUG] DataFrame detected in session {session_id}")
+        handle = DataFrameMedia(command_res).handle()
+        media_handles.append(handle)
+        print(f"[DEBUG] Registered DataFrameMedia handle: {handle}")
     
     # Send the regular output first
     if output.strip():
@@ -64,20 +64,10 @@ async def process_command(websocket, command, session_id):
     print(f"Received command for session {session_id}: {command}")
     
     # Execute command in IPython session
-    output, error, success = execute_code(command, session_id)
+    output, error, success, result = execute_code(command, session_id)
     
     if success:
-        # Get the last result from the IPython session
-        session = get_session(session_id)
-        if session and hasattr(session.ipython, 'last_result'):
-            last_result = session.ipython.last_result
-            
-            if isinstance(last_result, BasketRuntime):
-                await handle_command_output(websocket, output, session_id, last_result)
-            else:
-                await handle_command_output(websocket, output, session_id)
-        else:
-            await handle_command_output(websocket, output, session_id)
+        await handle_command_output(websocket, output, session_id, result)
     else:
         # Send error
         await send_response(websocket, 'error', error.strip() if error.strip() else 'Unknown error')

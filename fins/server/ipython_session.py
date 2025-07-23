@@ -92,7 +92,7 @@ class IPythonSession:
         except Exception as e:
             print(f"⚠️  Error setting up FINS environment: {e}")
     
-    def execute(self, code: str) -> Tuple[str, str, bool]:
+    def execute(self, code: str) -> Tuple[str, str, bool, object]:
         """
         Execute code in the IPython session.
         
@@ -100,15 +100,15 @@ class IPythonSession:
             code: The code to execute
             
         Returns:
-            Tuple of (output, error, success)
+            Tuple of (output, error, success, result)
         """
         if not self.ipython:
-            return "", "IPython not available", False
+            return "", "IPython not available", False, None
         
         # Capture stdout and stderr
         stdout_capture = io.StringIO()
         stderr_capture = io.StringIO()
-        
+        result_obj = None
         try:
             with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
                 # Execute the code
@@ -130,10 +130,12 @@ class IPythonSession:
                     ))
                 
                 # Get the result value if there is one
-                if hasattr(result, 'result') and result.result is not None:
-                    result_str = str(result.result)
-                    if result_str and result_str != 'None':
-                        output += result_str + '\n'
+                if hasattr(result, 'result'):
+                    result_obj = result.result
+                    if result_obj is not None:
+                        result_str = str(result_obj)
+                        if result_str and result_str != 'None':
+                            output += result_str + '\n'
                 
                 # Also check for the last result in IPython's result history
                 if hasattr(self.ipython, 'last_result') and self.ipython.last_result is not None:
@@ -146,11 +148,11 @@ class IPythonSession:
                 if self.rich_element_cache:
                     print(f"[DEBUG] Rich elements captured: {list(self.rich_element_cache.keys())}")
                 
-                return output, error, success
+                return output, error, success, result_obj
                 
         except Exception as e:
             error = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
-            return "", error, False
+            return "", error, False, None
     
     def get_completions(self, text: str) -> List[str]:
         """Get completions for the given text."""
@@ -245,7 +247,7 @@ def get_session_count() -> int:
     """Get the number of active sessions."""
     return _session_manager.get_session_count()
 
-def execute_code(code: str, session_id: int) -> Tuple[str, str, bool]:
+def execute_code(code: str, session_id: int) -> Tuple[str, str, bool, object]:
     """Execute code in the specified IPython session."""
     session = get_session(session_id)
     return session.execute(code)
