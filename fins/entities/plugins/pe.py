@@ -19,7 +19,7 @@ class Pe(FieldPlugin):
         super().__init__(alias=alias)
 
     def field_types(self):
-        return [("", float)]
+        return [("", Optional[float])]
 
     def field_values(self, item: BasketItem, data: dict[str, pd.DataFrame]):
         return [item.symbol().get_analytics("pe_ratio_ttm")]
