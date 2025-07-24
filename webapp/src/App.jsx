@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
-import ansiToHtml from 'ansi-to-html'
-import { useTable, useSortBy, useFilters, useGlobalFilter, usePagination, useColumnOrder } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getPaginationRowModel, flexRender, createColumnHelper } from '@tanstack/react-table'
 import './App.css'
 
 // ANSI color support
-function ansiToHtml(text) {
+function convertAnsiToHtml(text) {
   const colors = {
     '30': '#000000', // black
     '31': '#ff0000', // red
@@ -71,35 +70,274 @@ function ansiToHtml(text) {
 
 // DataFrameTable component for DataFrameMedia
 function DataFrameTable({ schema, data }) {
+  const columnHelper = createColumnHelper()
+  
+  const [columnOrder, setColumnOrder] = useState([])
+  const [columnVisibility, setColumnVisibility] = useState({})
+  const [columnFilters, setColumnFilters] = useState([])
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+  const [movingColumnId, setMovingColumnId] = useState(null)
+  const [targetColumnId, setTargetColumnId] = useState(null)
+  
+  // Custom column filter function
+  const columnFilterFn = (row, columnId, filterValue) => {
+    if (!filterValue) return true
+    
+    const searchValue = filterValue.toLowerCase()
+    const cellValue = String(row.getValue(columnId)).toLowerCase()
+    
+    // Starts with: ^pattern
+    if (searchValue.startsWith('^')) {
+      const pattern = searchValue.slice(1)
+      return cellValue.startsWith(pattern)
+    }
+    
+    // Ends with: pattern$
+    if (searchValue.endsWith('$')) {
+      const pattern = searchValue.slice(0, -1)
+      return cellValue.endsWith(pattern)
+    }
+    
+    // Greater than or equal: >= number
+    if (searchValue.startsWith('>= ')) {
+      const numValue = parseFloat(searchValue.slice(3))
+      const cellNum = parseFloat(cellValue)
+      return !isNaN(cellNum) && cellNum >= numValue
+    }
+    
+    // Less than or equal: <= number
+    if (searchValue.startsWith('<= ')) {
+      const numValue = parseFloat(searchValue.slice(3))
+      const cellNum = parseFloat(cellValue)
+      return !isNaN(cellNum) && cellNum <= numValue
+    }
+    
+    // Greater than: > number
+    if (searchValue.startsWith('> ')) {
+      const numValue = parseFloat(searchValue.slice(2))
+      const cellNum = parseFloat(cellValue)
+      return !isNaN(cellNum) && cellNum > numValue
+    }
+    
+    // Less than: < number
+    if (searchValue.startsWith('< ')) {
+      const numValue = parseFloat(searchValue.slice(2))
+      const cellNum = parseFloat(cellValue)
+      return !isNaN(cellNum) && cellNum < numValue
+    }
+    
+    // Default: contains
+    return cellValue.includes(searchValue)
+  }
+  
   const columns = React.useMemo(
     () =>
-      schema.fields.map(field => ({
-        accessorKey: field.name,
-        header: field.name,
-      })),
-    [schema]
+      schema.fields
+        .filter(field => field.name !== 'index') // Hide the index column
+        .map(field => 
+          columnHelper.accessor(field.name, {
+            header: field.name,
+            cell: info => info.getValue(),
+            enableSorting: true,
+            enableColumnFilter: true,
+            enableHiding: true,
+            enableResizing: true,
+            size: 150,
+            minSize: 50,
+            maxSize: 500,
+            filterFn: columnFilterFn,
+          })
+        ),
+    [schema, columnHelper, columnFilterFn]
   )
-  const table = useTable({
+
+  const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: true,
-    getSortedRowModel: useSortBy,
-    getFilteredRowModel: useFilters,
-    getGlobalFilteredRowModel: useGlobalFilter,
-    getPaginationRowModel: usePagination,
-    getColumnOrder: useColumnOrder,
+    state: {
+      columnOrder,
+      columnVisibility,
+      columnFilters,
+      pagination,
+    },
+    onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    columnResizeMode: 'onChange',
+    getRowId: (row) => row.id || row.index,
   })
+
+  // Drag and drop handlers for column reordering
+  const handleDragStart = (e, columnId) => {
+    setMovingColumnId(columnId)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e, columnId) => {
+    e.preventDefault()
+    if (movingColumnId && movingColumnId !== columnId) {
+      setTargetColumnId(columnId)
+    }
+  }
+
+  const handleDrop = (e, columnId) => {
+    e.preventDefault()
+    if (movingColumnId && targetColumnId && movingColumnId !== targetColumnId) {
+      const newColumnOrder = [...columnOrder]
+      const movingIndex = newColumnOrder.indexOf(movingColumnId)
+      const targetIndex = newColumnOrder.indexOf(targetColumnId)
+      
+      if (movingIndex !== -1 && targetIndex !== -1) {
+        newColumnOrder.splice(movingIndex, 1)
+        newColumnOrder.splice(targetIndex, 0, movingColumnId)
+        setColumnOrder(newColumnOrder)
+      }
+    }
+    setMovingColumnId(null)
+    setTargetColumnId(null)
+  }
+
+  const handleDragEnd = () => {
+    setMovingColumnId(null)
+    setTargetColumnId(null)
+  }
 
   return (
     <div className="dataframe-table-wrapper">
+      {/* Table Controls Bar */}
+      <div className="table-controls">
+        <div className="controls-left">
+          {/* Pagination controls */}
+          <div className="pagination">
+            <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>{'<<'}</button>
+            <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>{'<'}</button>
+            <span>
+              {table.getState().pagination.pageIndex + 1}/{table.getPageCount()}
+              {' '}({table.getFilteredRowModel().rows.length})
+            </span>
+            <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{'>'}</button>
+            <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>{'>>'}</button>
+            
+            {/* Page Size Selector */}
+            <div className="page-size-selector">
+              <select
+                value=""
+                onChange={e => {
+                  const pageSize = e.target.value === 'ALL' ? (() => {
+                    const totalRows = table.getFilteredRowModel().rows.length
+                    return totalRows
+                  })() : Number(e.target.value)
+                  table.setPageSize(pageSize)
+                  e.target.value = "" // Reset selection
+                }}
+              >
+                <option value="">Show</option>
+                {(() => {
+                  const totalRows = table.getFilteredRowModel().rows.length
+                  const pageSizeOptions = [10, 100, 1000, totalRows]
+                  
+                  return pageSizeOptions.map((pageSize, index) => (
+                    <option key={`page-size-${pageSize}-${index}`} value={pageSize}>
+                      {index === pageSizeOptions.length - 1 ? 'ALL' : pageSize}
+                    </option>
+                  ))
+                })()}
+              </select>
+            </div>
+            
+            {/* Column Visibility Dropdown */}
+            <div className="column-dropdown">
+              <select
+                value=""
+                onChange={e => {
+                  const value = e.target.value
+                  if (value === 'show-all') {
+                    table.toggleAllColumnsVisible()
+                  } else if (value === 'hide-all') {
+                    table.toggleAllColumnsVisible()
+                  } else if (value) {
+                    const column = table.getColumn(value)
+                    if (column) {
+                      column.toggleVisibility()
+                    }
+                  }
+                  e.target.value = "" // Reset selection
+                }}
+              >
+                <option value="">Columns</option>
+                <option value={table.getIsAllColumnsVisible() ? 'hide-all' : 'show-all'}>
+                  {table.getIsAllColumnsVisible() ? 'Hide All' : 'Show All'}
+                </option>
+                <option value="" disabled>──────────</option>
+                {table.getAllLeafColumns()
+                  .filter(column => column.getCanHide())
+                  .map(column => (
+                    <option key={column.id} value={column.id}>
+                      {column.getIsVisible() ? '✓ ' : '✗ '}{column.id}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <table className="dataframe-table">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th key={header.id} {...header.column.getToggleSortingProps()}>
-                  {header.isPlaceholder ? null : header.renderHeader()}
-                  {header.column.getIsSorted() ? (header.column.getIsSorted() === 'desc' ? ' 🔽' : ' 🔼') : ''}
+                <th 
+                  key={header.id} 
+                  colSpan={header.colSpan}
+                  style={{ 
+                    width: header.getSize(),
+                    position: 'relative'
+                  }}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, header.column.id)}
+                  onDragOver={(e) => handleDragOver(e, header.column.id)}
+                  onDrop={(e) => handleDrop(e, header.column.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`${movingColumnId === header.column.id ? 'dragging' : ''} ${targetColumnId === header.column.id ? 'drag-over' : ''}`}
+                >
+                  {header.isPlaceholder ? null : (
+                    <div className="header-content">
+                      <div 
+                        className="header-title"
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getIsSorted() ? (header.column.getIsSorted() === 'desc' ? ' 🔽' : ' 🔼') : ''}
+                      </div>
+                      {header.column.getCanFilter() && (
+                        <input
+                          type="text"
+                          placeholder={`Filter ${header.column.id}...`}
+                          value={header.column.getFilterValue() ?? ''}
+                          onChange={e => header.column.setFilterValue(e.target.value)}
+                          className="column-filter-input"
+                        />
+                      )}
+                    </div>
+                  )}
+                  {/* Column Resize Handle */}
+                  <div
+                    onMouseDown={header.getResizeHandler()}
+                    onTouchStart={header.getResizeHandler()}
+                    className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`}
+                  />
                 </th>
               ))}
             </tr>
@@ -109,25 +347,20 @@ function DataFrameTable({ schema, data }) {
           {table.getRowModel().rows.map(row => (
             <tr key={row.id}>
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id}>{cell.renderCell()}</td>
+                <td 
+                  key={cell.id}
+                  style={{ width: cell.column.getSize() }}
+                >
+                  {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  )}
+                </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-      {/* Pagination controls */}
-      <div className="pagination">
-        <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>{'<<'}</button>
-        <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>{'<'}</button>
-        <span>
-          Page{' '}
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-          </strong>
-        </span>
-        <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>{'>'}</button>
-        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>{'>>'}</button>
-      </div>
     </div>
   )
 }
@@ -140,7 +373,7 @@ function App() {
   const [activeTab, setActiveTab] = useState(null)
   const [maximizedTab, setMaximizedTab] = useState(null)
   const [sessionId] = useState(Math.floor(Math.random() * 1000000))
-  const [mediaHeight, setMediaHeight] = useState(600) // Initial height in pixels - large tab space
+  const [mediaHeight, setMediaHeight] = useState(() => window.innerHeight - 200) // Initial height so console is 100px
   
   const commandInputRef = useRef(null)
   const wsRef = useRef(null)
@@ -158,7 +391,7 @@ function App() {
   const addConsoleOutput = (message, type = 'info') => {
     setConsoleOutput(prev => [...prev, { 
       id: Date.now(), 
-      message: ansiToHtml(message), 
+      message: convertAnsiToHtml(message), 
       type,
       timestamp: new Date() 
     }])
@@ -237,7 +470,7 @@ function App() {
             const match = handle.match(/\[(\w+):([a-f0-9-]+)\]/)
             if (match) {
               const [, mediaType, uuid] = match
-              const title = `${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} ${uuid.slice(0, 8)}`
+              const title = mediaType === 'dataframemedia' ? `DF ${uuid.slice(0, 4)}` : `${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} ${uuid.slice(0, 8)}`
               
               // Create tab with loading content
               addTab(title, `Loading ${mediaType}...`)
@@ -493,10 +726,7 @@ function App() {
       hasInitializedRef.current = true
       connectWebSocket()
       addConsoleOutput(`Session ${sessionId}`)
-      
-      // Add dummy tabs for testing
-      addTab('Stock Prices', 'AAPL: $150.25\nMSFT: $320.10\nGOOGL: $2,850.75')
-      addTab('Portfolio Chart', '📈 Chart showing portfolio performance over time')
+      // Removed dummy tabs
     }
   }, [])
   
@@ -587,11 +817,15 @@ function App() {
       
       {/* Console Output Area */}
       <div className="console-area">
-        <div className="console-output" ref={consoleOutputRef}>
-          {consoleOutput.map(output => (
-            <div key={output.id} className={`console-line ${output.type}`}>
-              <div dangerouslySetInnerHTML={{ __html: output.message }} />
-            </div>
+        <div 
+          className="console-output" 
+          ref={consoleOutputRef}
+          style={{ overflowY: 'auto' }}
+        >
+          {consoleOutput.slice(-5).map(line => (
+            <div key={line.id} className={`console-line ${line.type}`}
+              dangerouslySetInnerHTML={{ __html: line.message }}
+            />
           ))}
         </div>
       </div>
