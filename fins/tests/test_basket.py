@@ -230,7 +230,7 @@ class BasketTests(unittest.TestCase):
         self.assertIsNotNone(df.iloc[0]['NPM'])
 
     def test_plugins_pe(self):
-        res = Basket(S.AAPL, S.GOOG, S.META)(Pe())
+        res = Basket(S.AAPL, S.GOOG, S.VSMPX)(Pe())
         df = res.df()
         self.assertIsNotNone(df.iloc[0]['PE'])
 
