@@ -8,12 +8,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="fix: Pe plugin has Optional[float] return type">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/7e6389ea-134e-4414-bd77-7c47e2b7bb5b/storage_v2/_src_/database/fins.yPUvAA/schema/pg_catalog.0S1ZNQ.zip" beforeDir="false" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: great ui improvements, filterable table, pagination, colums hidable">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.jsx" afterDir="false" />
     </list>
@@ -586,15 +583,7 @@
       <workItem from="1753119266113" duration="2456000" />
       <workItem from="1753211915025" duration="3682000" />
       <workItem from="1753252233743" duration="4403000" />
-      <workItem from="1753335804609" duration="1553000" />
-    </task>
-    <task id="LOCAL-00155" summary="fix: candidates now filter properly by inception">
-      <option name="closed" value="true" />
-      <created>1751261741997</created>
-      <option name="number" value="00155" />
-      <option name="presentableId" value="LOCAL-00155" />
-      <option name="project" value="LOCAL" />
-      <updated>1751261741997</updated>
+      <workItem from="1753335804609" duration="3406000" />
     </task>
     <task id="LOCAL-00156" summary="fix: candidates now filter properly by inception">
       <option name="closed" value="true" />
@@ -980,7 +969,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753337043209</updated>
     </task>
-    <option name="localTasksCounter" value="204" />
+    <task id="LOCAL-00204" summary="feat: great ui improvements, filterable table, pagination, colums hidable">
+      <option name="closed" value="true" />
+      <created>1753340412846</created>
+      <option name="number" value="00204" />
+      <option name="presentableId" value="LOCAL-00204" />
+      <option name="project" value="LOCAL" />
+      <updated>1753340412846</updated>
+    </task>
+    <option name="localTasksCounter" value="205" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -998,7 +995,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactor: Plugins architector remodelling" />
     <MESSAGE value="feat: MonthlyClose().yoy() is a first series transformer plugin" />
     <MESSAGE value="feat: Plot yoy and log data" />
     <MESSAGE value="feat: refactored db, implementing notebook, upgraded plotter" />
@@ -1023,7 +1019,8 @@
     <MESSAGE value="refactor: cleaned up websocket server" />
     <MESSAGE value="feat: transport df media to webclient" />
     <MESSAGE value="fix: Pe plugin has Optional[float] return type" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Pe plugin has Optional[float] return type" />
+    <MESSAGE value="feat: great ui improvements, filterable table, pagination, colums hidable" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: great ui improvements, filterable table, pagination, colums hidable" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

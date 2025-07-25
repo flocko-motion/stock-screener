@@ -278,7 +278,6 @@ body {
 .dataframe-table {
   border-collapse: collapse;
   width: auto;
-  min-width: 100%;
   font-size: 0.95em;
   background: #2d2d2d;
   color: #ffffff;
