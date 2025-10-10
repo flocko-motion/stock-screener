@@ -13,7 +13,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
 from fins.data_sources import fmp
-from fins.exceptions import NoPriceDataError
+from fins.exceptions import NoPriceDataError, SymbolNotFound
 from fins.database import session_scope, Base
 
 TYPE_STOCK = "stock"
@@ -240,7 +240,7 @@ class Symbol(Base):
 		except ValueError:
 			pass
 
-		raise ValueError(f"Symbol not found: {self.ticker}")
+		raise SymbolNotFound(self.ticker)
 
 	def _load_profile(self, profile: Dict[str, Any]):
 		"""Load unified profile data."""
