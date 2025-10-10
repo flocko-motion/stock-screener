@@ -4,10 +4,10 @@ from fins.entities.plugins import *
 from fins.entities.plugins import __all__ as all_plugins
 from fins.terminal.symbols import *
 from fins.terminal.symbols import __all__ as all_symbols
-from fins.terminal.commands import Screen, Million, Billion, Trillion, Info, Fav, Unfav, Favs
+from fins.terminal.commands import Screen, Million, Billion, Trillion, Info, Fav, Unfav, Favs, Help
 from fins.terminal.persistence import Get, Put, Dir, Delete
 from fins.terminal.notebook import (
-    NotePrinciple, NoteObservation, NoteTrade, NoteFact, NoteStrategy, 
+    NotePrinciple, NoteObservation, NoteTrade, NoteFact, NoteStrategy,
     Notes, Note, NoteSymbolCmd as NoteSymbol,
     AiSync, Ai, AiStatus
 )
@@ -18,15 +18,16 @@ __all__ = [
     'Fav', 'Unfav', 'Favs',
     'Screen',
     'Million',
-    'Billion', 
+    'Billion',
     'Trillion',
     'Info',
+    'Help',
     'Get',
     'Put',
-    'Dir', 
+    'Dir',
     'Delete',
     'NotePrinciple',
-    'NoteObservation', 
+    'NoteObservation',
     'NoteTrade',
     'NoteFact',
     'NoteStrategy',

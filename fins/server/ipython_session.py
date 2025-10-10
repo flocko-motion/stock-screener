@@ -60,9 +60,22 @@ class IPythonSession:
         """Create an IPython instance programmatically."""
         try:
             from IPython.core.interactiveshell import InteractiveShell
+            from IPython.core.page import page
             
             # Create a shell instance
             shell = InteractiveShell()
+            
+            # Disable interactive pager to prevent help() and ? from blocking
+            shell.system_raw = lambda cmd: None
+            
+            # Override the pager to just print instead of entering interactive mode
+            def non_interactive_page(text, start=0, screen_lines=0, pager_cmd=None):
+                """Non-interactive pager that just prints the text."""
+                print(text)
+            
+            import IPython.core.page
+            IPython.core.page.page = non_interactive_page
+            
             return shell
             
         except Exception as e:

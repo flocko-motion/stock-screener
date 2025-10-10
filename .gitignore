@@ -4,3 +4,5 @@ backup/
 html/
 api-keys/*.key
 protocol.log
+__pycache__/
+lib/__pycache__
