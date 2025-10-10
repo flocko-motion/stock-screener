@@ -13,7 +13,15 @@ from fins.financial import Symbol
 
 
 class SymbolAccessor:
-    """Get any symbol as a basket item - e.g. S.AAPL returns a basket item for Apple Inc"""
+    """
+    Get any symbol as basket item
+
+    Usage:
+        S.AAPL  - Returns a BasketItem for Apple Inc.
+        S.MSFT  - Returns a BasketItem for Microsoft Corp.
+
+    The ticker symbol is automatically converted to uppercase.
+    """
 
     def __getattr__(self, name: str):
         name = str(name).upper()
