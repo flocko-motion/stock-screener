@@ -8,12 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: implemented help()/Help()/?, overriding ipython built in help with a nice manual&#10;fix: debugged Info() command">
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="feat: S.&lt;name&gt; symbol lookup now has nicer exception if symbol not found, &lt;name&gt; is auto converted to uppercase">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fins/entities/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/entities/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/exceptions/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/exceptions/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/financial/symbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/financial/symbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fins/server/ipython_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/ipython_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/server/websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/server/websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fins/terminal/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/fins/terminal/commands.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -590,15 +589,7 @@
       <workItem from="1753211915025" duration="3682000" />
       <workItem from="1753252233743" duration="4403000" />
       <workItem from="1753335804609" duration="5026000" />
-      <workItem from="1760096189571" duration="2658000" />
-    </task>
-    <task id="LOCAL-00158" summary="docs: working on my baskets">
-      <option name="closed" value="true" />
-      <created>1751267714230</created>
-      <option name="number" value="00158" />
-      <option name="presentableId" value="LOCAL-00158" />
-      <option name="project" value="LOCAL" />
-      <updated>1751267714232</updated>
+      <workItem from="1760096189571" duration="3106000" />
     </task>
     <task id="LOCAL-00159" summary="feat: Ragr() plugin and subfields with filtering">
       <option name="closed" value="true" />
@@ -984,7 +975,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760097021030</updated>
     </task>
-    <option name="localTasksCounter" value="207" />
+    <task id="LOCAL-00207" summary="feat: S.&lt;name&gt; symbol lookup now has nicer exception if symbol not found, &lt;name&gt; is auto converted to uppercase">
+      <option name="closed" value="true" />
+      <created>1760098894464</created>
+      <option name="number" value="00207" />
+      <option name="presentableId" value="LOCAL-00207" />
+      <option name="project" value="LOCAL" />
+      <updated>1760098894464</updated>
+    </task>
+    <option name="localTasksCounter" value="208" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1002,7 +1001,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: refactored db, implementing notebook, upgraded plotter" />
     <MESSAGE value="feat: improved notebook" />
     <MESSAGE value="feat: added AI assistant" />
     <MESSAGE value="feat: create assistant and sync notes" />
@@ -1027,7 +1025,8 @@
     <MESSAGE value="feat: great ui improvements, filterable table, pagination, colums hidable" />
     <MESSAGE value="feat: refactored react app" />
     <MESSAGE value="feat: implemented help()/Help()/?, overriding ipython built in help with a nice manual&#10;fix: debugged Info() command" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: implemented help()/Help()/?, overriding ipython built in help with a nice manual&#10;fix: debugged Info() command" />
+    <MESSAGE value="feat: S.&lt;name&gt; symbol lookup now has nicer exception if symbol not found, &lt;name&gt; is auto converted to uppercase" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: S.&lt;name&gt; symbol lookup now has nicer exception if symbol not found, &lt;name&gt; is auto converted to uppercase" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1487,7 +1486,7 @@
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_stock_cagr.coverage" NAME="pytest for test_symbol.SymbolTests.test_stock_cagr Coverage Results" MODIFIED="1747513712008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_symbol_SymbolTests_test_get_crypto.coverage" NAME="pytest for test_symbol.SymbolTests.test_get_crypto Coverage Results" MODIFIED="1747483758332" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_test_ai_TestNotebookAssistant_test_assistant_initialization_with_api_key.coverage" NAME="Unittests for test_ai.TestNotebookAssistant.test_assistant_initialization_with_api_key Coverage Results" MODIFIED="1751525066677" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
-    <SUITE FILE_PATH="coverage/stock_screener$server.coverage" NAME="server Coverage Results" MODIFIED="1760098814420" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/stock_screener$server.coverage" NAME="server Coverage Results" MODIFIED="1760099186368" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_tests_test_basket_BasketTests_test_filter_string_equality.coverage" NAME="Unittests for tests.test_basket.BasketTests.test_filter_string_equality Coverage Results" MODIFIED="1751018225792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins" />
     <SUITE FILE_PATH="coverage/stock_screener$pytest_for_test_financial_SymbolTests_test_get_etf.coverage" NAME="pytest for test_financial.SymbolTests.test_get_etf Coverage Results" MODIFIED="1747859900851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fins/tests" />
     <SUITE FILE_PATH="coverage/stock_screener$Unittests_for_fins_tests_test_basket_BasketTests_test_add_item.coverage" NAME="Unittests for fins.tests.test_basket.BasketTests.test_add_item Coverage Results" MODIFIED="1760097564515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

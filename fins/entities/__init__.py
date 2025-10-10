@@ -13,7 +13,7 @@ from fins.financial import Symbol
 
 
 class SymbolAccessor:
-    """Accessor class for convenient symbol access."""
+    """Get any symbol as a basket item - e.g. S.AAPL returns a basket item for Apple Inc"""
 
     def __getattr__(self, name: str):
         name = str(name).upper()
