@@ -76,14 +76,17 @@ async def process_command(websocket, command, session_id):
             await send_response(websocket, 'error', error.strip() if error.strip() else 'Unknown error')
         return
 
-    # Block object-specific help (e.g., "object?") with friendly message
+    # Convert object-specific help (e.g., "object?") to print docstring
     if cmd_stripped.endswith('?') and len(cmd_stripped) > 1:
         obj_name = cmd_stripped[:-1].strip()
-        await send_response(websocket, 'output',
-                            f"Interactive help for '{obj_name}' is not supported in the web interface.\n"
-                            f"Use: {obj_name}.__doc__ to see documentation\n"
-                            f"Use: dir({obj_name}) to list available attributes and methods\n"
-                            f"Use: Help() to see all available FINS commands")
+        # Execute print(obj.__doc__) instead of interactive help
+        docstring_cmd = f"print({obj_name}.__doc__ if hasattr({obj_name}, '__doc__') and {obj_name}.__doc__ else 'No documentation available')"
+        output, error, success, result = execute_code(
+            docstring_cmd, session_id)
+        if success:
+            await handle_command_output(websocket, output, session_id, result)
+        else:
+            await send_response(websocket, 'error', error.strip() if error.strip() else 'Unknown error')
         return
 
     # Execute command in IPython session

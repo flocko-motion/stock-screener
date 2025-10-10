@@ -416,8 +416,8 @@ def Help():
     output.append(
         '═══════════════════════════════════════════════════════════════════════════════')
     output.append(
-        'For detailed documentation on any command, use: command_name.__doc__')
-    output.append('Example: Screen.__doc__')
+        'For detailed documentation on any command, use \'?\'')
+    output.append('Example: Screen?')
     output.append(
         '═══════════════════════════════════════════════════════════════════════════════')
 
