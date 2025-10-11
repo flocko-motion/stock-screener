@@ -267,3 +267,15 @@ func (db *DB) GetStaleProfiles(limit int, olderThan time.Time) ([]string, error)
 
 	return tickers, rows.Err()
 }
+
+// CountStaleProfiles returns the count of stale profiles
+func (db *DB) CountStaleProfiles(olderThan time.Time) (int, error) {
+	query := `
+		SELECT COUNT(*) FROM symbols
+		WHERE last_profile_update IS NULL OR last_profile_update < $1
+	`
+
+	var count int
+	err := db.conn.QueryRow(query, olderThan).Scan(&count)
+	return count, err
+}

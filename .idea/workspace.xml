@@ -8,7 +8,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="docs: better docstring for S.&lt;name&gt;" />
+    <list default="true" id="1d29960b-d231-4714-93b1-9e6730eb171d" name="Changes" comment="docs: better docstring for S.&lt;name&gt;">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gofins/pkg/db/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/gofins/pkg/db/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gofins/pkg/updater/profile.go" beforeDir="false" afterPath="$PROJECT_DIR$/gofins/pkg/updater/profile.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -584,7 +588,7 @@
       <workItem from="1753211915025" duration="3682000" />
       <workItem from="1753252233743" duration="4403000" />
       <workItem from="1753335804609" duration="5026000" />
-      <workItem from="1760096189571" duration="3334000" />
+      <workItem from="1760096189571" duration="3934000" />
     </task>
     <task id="LOCAL-00162" summary="refactor: Plugins architector remodelling">
       <option name="closed" value="true" />

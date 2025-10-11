@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/api"
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/updater"
@@ -46,7 +47,13 @@ var serverCmd = &cobra.Command{
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-		fmt.Println("\n=== Starting Profile Updater ===")
+		fmt.Println("\n=== Starting Services ===")
+
+		// Start REST API server
+		apiServer := api.NewServer(database, 8080)
+		go apiServer.Start(ctx)
+
+		// Start profile updater
 		go updater.UpdateProfiles(ctx, database, fmpClient)
 
 		fmt.Println("✓ Server running (Ctrl+C to stop)")

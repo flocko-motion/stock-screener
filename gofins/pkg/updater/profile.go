@@ -11,13 +11,22 @@ import (
 )
 
 const (
-	ProfileBatchSize      = 100
 	ProfileUpdateInterval = 30 * 24 * time.Hour
-	ProfileWorkers        = 10
+	ProfileWorkers        = 3
+	ProfileBatchSize      = ProfileWorkers * 3
 )
 
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 	threshold := time.Now().Add(-ProfileUpdateInterval)
+
+	// Get initial count
+	totalStale, err := database.CountStaleProfiles(threshold)
+	if err != nil {
+		fmt.Printf("✗ Failed to count stale profiles: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Profile updater started: %d stale profiles, %d workers\n", totalStale, ProfileWorkers)
 
 	for {
 		select {
@@ -39,9 +48,8 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 			continue
 		}
 
-		fmt.Printf("Updating %d profiles with %d workers...\n", len(tickers), ProfileWorkers)
-
 		// Stats tracking
+		startTime := time.Now()
 		var statsMu sync.Mutex
 		stats := &UpdateStats{
 			Updated:  make([]string, 0),
@@ -84,7 +92,9 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 		wg.Wait()
 
 		// Print stats
-		printStats(stats)
+		elapsed := time.Since(startTime)
+		currentStale, _ := database.CountStaleProfiles(threshold)
+		printStats(stats, elapsed, currentStale)
 	}
 }
 
@@ -137,11 +147,17 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 	return "updated"
 }
 
-func printStats(stats *UpdateStats) {
-	fmt.Println("\n=== Batch Complete ===")
-	fmt.Printf("✓ Updated:   %d\n", len(stats.Updated))
-	fmt.Printf("✗ Not found: %d\n", len(stats.NotFound))
-	fmt.Printf("✗ Failed:    %d\n", len(stats.Failed))
+func printStats(stats *UpdateStats, elapsed time.Duration, currentStale int) {
+	total := len(stats.Updated) + len(stats.NotFound) + len(stats.Failed)
+	rate := float64(total) / elapsed.Seconds()
+
+	fmt.Printf("Fetched %d profiles | ✓ %d good\t✗ %d not-found\t✗ %d failed | %.1fs (%.1f/s) | %d remaining\n",
+		total,
+		len(stats.Updated),
+		len(stats.NotFound),
+		len(stats.Failed),
+		elapsed.Seconds(),
+		rate, currentStale)
 
 	if len(stats.NotFound) > 0 && len(stats.NotFound) <= 10 {
 		fmt.Printf("  Not found: %v\n", stats.NotFound)
@@ -149,5 +165,4 @@ func printStats(stats *UpdateStats) {
 	if len(stats.Failed) > 0 && len(stats.Failed) <= 10 {
 		fmt.Printf("  Failed: %v\n", stats.Failed)
 	}
-	fmt.Println()
 }
