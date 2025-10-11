@@ -13,7 +13,7 @@ import (
 const (
 	ProfileUpdateInterval = 30 * 24 * time.Hour
 	ProfileWorkers        = 3
-	ProfileBatchSize      = ProfileWorkers * 3
+	ProfileBatchSize      = 50
 )
 
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
@@ -151,13 +151,24 @@ func printStats(stats *UpdateStats, elapsed time.Duration, currentStale int) {
 	total := len(stats.Updated) + len(stats.NotFound) + len(stats.Failed)
 	rate := float64(total) / elapsed.Seconds()
 
-	fmt.Printf("Fetched %d profiles | ✓ %d good\t✗ %d not-found\t✗ %d failed | %.1fs (%.1f/s) | %d remaining\n",
+	// Calculate ETA
+	var eta string
+	if rate > 0 {
+		etaSeconds := float64(currentStale) / rate
+		eta = formatDuration(time.Duration(etaSeconds * float64(time.Second)))
+	} else {
+		eta = "unknown"
+	}
+
+	fmt.Printf("Fetched %d profiles | ✓ %d\t❌ %d\t⚠️  %d | %d left\t| %.1f/s\t| ETA %s\n",
 		total,
 		len(stats.Updated),
 		len(stats.NotFound),
 		len(stats.Failed),
 		elapsed.Seconds(),
-		rate, currentStale)
+		rate,
+		currentStale,
+		eta)
 
 	if len(stats.NotFound) > 0 && len(stats.NotFound) <= 10 {
 		fmt.Printf("  Not found: %v\n", stats.NotFound)
@@ -165,4 +176,22 @@ func printStats(stats *UpdateStats, elapsed time.Duration, currentStale int) {
 	if len(stats.Failed) > 0 && len(stats.Failed) <= 10 {
 		fmt.Printf("  Failed: %v\n", stats.Failed)
 	}
+}
+
+func formatDuration(d time.Duration) string {
+	days := int(d.Hours() / 24)
+	hours := int(d.Hours()) % 24
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+
+	if days > 0 {
+		return fmt.Sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)
+	}
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm %ds", hours, minutes, seconds)
+	}
+	if minutes > 0 {
+		return fmt.Sprintf("%dm %ds", minutes, seconds)
+	}
+	return fmt.Sprintf("%ds", seconds)
 }
