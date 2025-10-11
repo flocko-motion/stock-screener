@@ -20,3 +20,6 @@ Before executing anything, make sure to be in the project root /r/priv/stock-scr
 Tests are in fins.tests and can be executed with: 
 /home/flo/.cache/pypoetry/virtualenvs/fins-YwmRDpgI-py3.10/bin/python /home/flo/.pycharm_helpers/pycharm/_jb_unittest_runner.py --target fins.tests.<test-module>.<test-class>.<test-name> 
 Example: /home/flo/.cache/pypoetry/virtualenvs/fins-YwmRDpgI-py3.10/bin/python /home/flo/.pycharm_helpers/pycharm/_jb_unittest_runner.py --target fins.tests.test_basket.BasketTests.test_plugins_ragr 
+
+
+ Project Rules: avoid overengineering. This is not a commercial product, it's a private project. It should be slim, efficient, easy, minimalistic. 
