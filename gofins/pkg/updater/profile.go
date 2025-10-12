@@ -12,7 +12,7 @@ import (
 const (
 	ProfileUpdateInterval = 30 * 24 * time.Hour
 	ProfileWorkers        = 3
-	ProfileBatchSize      = 20
+	ProfileBatchSize      = 50
 )
 
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {

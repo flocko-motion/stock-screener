@@ -14,7 +14,7 @@ import (
 const (
 	PriceUpdateInterval = 7 * 24 * time.Hour // Update weekly
 	PriceWorkers        = 3
-	PriceBatchSize      = 20
+	PriceBatchSize      = 50
 )
 
 type PriceStats struct {
