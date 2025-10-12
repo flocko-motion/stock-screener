@@ -24,6 +24,7 @@ func NewServer(database *db.DB, port int) *Server {
 	mux.HandleFunc("/api/symbols", s.handleListSymbols)
 	mux.HandleFunc("/api/prices/monthly/", s.handleGetMonthlyPrices)
 	mux.HandleFunc("/api/health", s.handleHealth)
+	mux.HandleFunc("/api/analysis/create", s.handleCreateAnalysis)
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

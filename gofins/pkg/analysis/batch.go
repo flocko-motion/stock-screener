@@ -1,6 +1,7 @@
 package analysis
 
 import (
+	"sync"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
@@ -21,24 +22,37 @@ func AnalyzeBatch(database *db.DB, tickers []string, from, to time.Time, interva
 		return nil, err
 	}
 
-	// Analyze each symbol
+	// Analyze each symbol in parallel
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 	results := make([]SymbolStats, 0, len(tickers))
+
 	for _, ticker := range tickers {
+		ticker := ticker // Capture for goroutine
 		prices, ok := pricesMap[ticker]
 		if !ok || len(prices) == 0 {
 			continue
 		}
 
-		stats := AnalyzeYoY(prices, histConfig)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
-		// Only include symbols with YoY data
-		if stats.Count > 0 {
-			results = append(results, SymbolStats{
-				Ticker: ticker,
-				Stats:  stats,
-			})
-		}
+			stats := AnalyzeYoY(prices, histConfig)
+
+			// Only include symbols with YoY data
+			if stats.Count > 0 {
+				mu.Lock()
+				results = append(results, SymbolStats{
+					Ticker: ticker,
+					Stats:  stats,
+				})
+				mu.Unlock()
+			}
+		}()
 	}
+
+	wg.Wait()
 
 	return results, nil
 }

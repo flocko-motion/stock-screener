@@ -48,6 +48,11 @@ func (db *DB) Close() error {
 	return db.conn.Close()
 }
 
+// Exec executes a query without returning rows
+func (db *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return db.conn.Exec(query, args...)
+}
+
 // Symbol represents a stock symbol in the database
 type Symbol struct {
 	Ticker            string
@@ -67,6 +72,7 @@ type Symbol struct {
 	ISIN              *string
 	Inception         *time.Time
 	IsActivelyTrading *bool
+	MarketCap         *int64
 }
 
 // PriceData represents price data (daily, weekly, or monthly)
@@ -89,8 +95,8 @@ func (db *DB) PutSymbol(s *Symbol) error {
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
 			name, type, currency, sector, industry, country, description, website, isin, inception,
-			is_actively_trading
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+			is_actively_trading, market_cap
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 		ON CONFLICT (ticker) DO UPDATE SET
 			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
 			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
@@ -107,7 +113,8 @@ func (db *DB) PutSymbol(s *Symbol) error {
 			website = COALESCE(EXCLUDED.website, symbols.website),
 			isin = COALESCE(EXCLUDED.isin, symbols.isin),
 			inception = COALESCE(EXCLUDED.inception, symbols.inception),
-			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading)
+			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading),
+			market_cap = COALESCE(EXCLUDED.market_cap, symbols.market_cap)
 	`
 
 	_, err := db.conn.Exec(
@@ -115,7 +122,7 @@ func (db *DB) PutSymbol(s *Symbol) error {
 		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
 		s.LastPriceStatus, s.LastProfileStatus,
 		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception,
-		s.IsActivelyTrading,
+		s.IsActivelyTrading, s.MarketCap,
 	)
 
 	return err
@@ -127,7 +134,7 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 		SELECT ticker, exchange, last_price_update, last_profile_update,
 			   last_price_status, last_profile_status,
 			   name, type, currency, sector, industry, country,
-			   description, website, isin, inception, is_actively_trading
+			   description, website, isin, inception, is_actively_trading, market_cap
 		FROM symbols
 		WHERE ticker = $1
 	`
@@ -137,7 +144,7 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 		&s.Ticker, &s.Exchange, &s.LastPriceUpdate, &s.LastProfileUpdate,
 		&s.LastPriceStatus, &s.LastProfileStatus,
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
-		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.IsActivelyTrading,
+		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.IsActivelyTrading, &s.MarketCap,
 	)
 
 	if err == sql.ErrNoRows {
@@ -307,6 +314,36 @@ func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval Pric
 }
 
 // GetAllTickers returns all ticker symbols in the database
+// GetFilteredTickers returns tickers matching filters (for analysis packages)
+func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]string, error) {
+	query := `
+		SELECT DISTINCT s.ticker FROM symbols s
+		WHERE s.is_actively_trading = true
+		  AND s.type = ANY($1)
+		  AND ($2::BIGINT IS NULL OR s.market_cap >= $2)
+		  AND ($3::TIMESTAMP IS NULL OR s.inception <= $3)
+		  AND EXISTS (SELECT 1 FROM monthly_prices WHERE symbol_ticker = s.ticker)
+		ORDER BY s.ticker
+	`
+
+	rows, err := db.conn.Query(query, pq.Array(PriceUpdateTypes), mcapMin, inceptionMax)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tickers []string
+	for rows.Next() {
+		var ticker string
+		if err := rows.Scan(&ticker); err != nil {
+			return nil, err
+		}
+		tickers = append(tickers, ticker)
+	}
+
+	return tickers, rows.Err()
+}
+
 // GetTickersWithPrices returns tickers that have price data (limited to specified count)
 func (db *DB) GetTickersWithPrices(limit int) ([]string, error) {
 	query := `

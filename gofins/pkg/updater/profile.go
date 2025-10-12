@@ -140,6 +140,11 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		}
 	}
 
+	var marketCap *int64
+	if profile.MarketCap > 0 {
+		marketCap = f.Ptr(int64(profile.MarketCap))
+	}
+
 	symbol := &db.Symbol{
 		Ticker:            ticker,
 		Name:              f.Ptr(profile.CompanyName),
@@ -154,6 +159,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		LastProfileUpdate: f.Ptr(now),
 		LastProfileStatus: f.Ptr(StatusOK),
 		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
+		MarketCap:         marketCap,
 	}
 
 	if err := database.PutSymbol(symbol); err != nil {

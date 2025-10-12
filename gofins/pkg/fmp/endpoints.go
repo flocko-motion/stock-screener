@@ -2,7 +2,6 @@ package fmp
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 )
 
@@ -147,75 +146,6 @@ func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*Histor
 	}
 
 	return &response, nil
-}
-
-// ScreenParams contains parameters for the stock screener
-type ScreenParams struct {
-	MarketCapMin *int64
-	MarketCapMax *int64
-	Type         string // "all", "stock", "etf", "fund"
-	Sector       string
-	Industry     string
-	Country      string
-	Exchange     string
-	Limit        int
-}
-
-// Screen performs a stock screen with the given parameters
-func (c *Client) Screen(params ScreenParams) ([]string, error) {
-	apiParams := make(map[string]string)
-
-	if params.Limit > 0 {
-		apiParams["limit"] = strconv.Itoa(params.Limit)
-	} else {
-		apiParams["limit"] = "1000"
-	}
-
-	if params.MarketCapMin != nil {
-		apiParams["marketCapMoreThan"] = strconv.FormatInt(*params.MarketCapMin, 10)
-	}
-
-	if params.MarketCapMax != nil {
-		apiParams["marketCapLowerThan"] = strconv.FormatInt(*params.MarketCapMax, 10)
-	}
-
-	switch params.Type {
-	case "etf":
-		apiParams["isEtf"] = "true"
-	case "fund":
-		apiParams["isFund"] = "true"
-	case "stock":
-		apiParams["isStock"] = "true"
-	}
-
-	if params.Sector != "" {
-		apiParams["sector"] = params.Sector
-	}
-
-	if params.Industry != "" {
-		apiParams["industry"] = params.Industry
-	}
-
-	if params.Country != "" {
-		apiParams["country"] = params.Country
-	}
-
-	if params.Exchange != "" {
-		apiParams["exchange"] = params.Exchange
-	}
-
-	var results []ScreenResult
-	if err := c.apiGet("stable/company-screener", apiParams, &results); err != nil {
-		return nil, err
-	}
-
-	// Extract symbols
-	symbols := make([]string, len(results))
-	for i, result := range results {
-		symbols[i] = result.Symbol
-	}
-
-	return symbols, nil
 }
 
 // Search searches for companies by query string
