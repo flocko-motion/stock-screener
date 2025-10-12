@@ -342,7 +342,7 @@ func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
-		  AND (is_actively_trading IS NULL OR is_actively_trading = true)
+		  AND is_actively_trading = true
 		ORDER BY last_price_update ASC NULLS FIRST
 		LIMIT $2
 	`
@@ -370,7 +370,7 @@ func (db *DB) CountStalePrices(olderThan time.Time) (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
-		  AND (is_actively_trading IS NULL OR is_actively_trading = true)
+		  AND is_actively_trading = true
 	`
 
 	var count int
