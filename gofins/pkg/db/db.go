@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/files"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -299,7 +300,7 @@ func (db *DB) DeleteSymbols(keepTickers []string) error {
 }
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)
-func (db *DB) GetStaleProfiles(limit int, olderThan time.Time) ([]string, error) {
+func (db *DB) GetStaleProfiles(limit int) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
 		WHERE last_profile_update IS NULL OR last_profile_update < $1
@@ -307,7 +308,7 @@ func (db *DB) GetStaleProfiles(limit int, olderThan time.Time) ([]string, error)
 		LIMIT $2
 	`
 
-	rows, err := db.conn.Query(query, olderThan, limit)
+	rows, err := db.conn.Query(query, GetProfileThreshold(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -325,29 +326,85 @@ func (db *DB) GetStaleProfiles(limit int, olderThan time.Time) ([]string, error)
 	return tickers, rows.Err()
 }
 
+// Symbol types
+const (
+	TypeStock = "stock"
+	TypeETF   = "etf"
+	TypeFund  = "fund"
+	TypeADR   = "adr"
+)
+
+// PriceUpdateTypes defines which symbol types should receive price updates
+var PriceUpdateTypes = []string{TypeStock, TypeADR}
+
+// GetProfileThreshold returns the threshold for stale profiles (30 days ago)
+func GetProfileThreshold() time.Time {
+	return time.Now().UTC().AddDate(0, 0, -30)
+}
+
+// GetPriceThreshold returns the threshold for stale prices (1st of current month at noon UTC)
+func GetPriceThreshold() time.Time {
+	now := time.Now().UTC()
+	return time.Date(now.Year(), now.Month(), 1, 12, 0, 0, 0, time.UTC)
+}
+
+// CountSymbols returns the total number of symbols
+func (db *DB) CountSymbols() (int, error) {
+	query := `SELECT COUNT(*) FROM symbols`
+
+	var count int
+	err := db.conn.QueryRow(query).Scan(&count)
+	return count, err
+}
+
+// CountActivelyTrading returns the count of actively trading symbols
+func (db *DB) CountActivelyTrading() (int, error) {
+	query := `SELECT COUNT(*) FROM symbols WHERE is_actively_trading = true`
+
+	var count int
+	err := db.conn.QueryRow(query).Scan(&count)
+	return count, err
+}
+
 // CountStaleProfiles returns the count of stale profiles
-func (db *DB) CountStaleProfiles(olderThan time.Time) (int, error) {
+func (db *DB) CountStaleProfiles() (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE last_profile_update IS NULL OR last_profile_update < $1
 	`
 
 	var count int
-	err := db.conn.QueryRow(query, olderThan).Scan(&count)
+	err := db.conn.QueryRow(query, GetProfileThreshold()).Scan(&count)
 	return count, err
 }
 
+// GetOldestProfileUpdate returns the oldest profile update timestamp
+func (db *DB) GetOldestProfileUpdate() (*time.Time, error) {
+	query := `
+		SELECT MIN(last_profile_update) FROM symbols
+		WHERE last_profile_update IS NOT NULL
+	`
+
+	var oldest *time.Time
+	err := db.conn.QueryRow(query).Scan(&oldest)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return oldest, err
+}
+
 // GetStalePrices returns symbols with outdated price data
-func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
+func (db *DB) GetStalePrices(limit int) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
 		  AND is_actively_trading = true
+		  AND type = ANY($2)
 		ORDER BY last_price_update ASC NULLS FIRST
-		LIMIT $2
+		LIMIT $3
 	`
 
-	rows, err := db.conn.Query(query, olderThan, limit)
+	rows, err := db.conn.Query(query, GetPriceThreshold(), pq.Array(PriceUpdateTypes), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -366,14 +423,31 @@ func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
 }
 
 // CountStalePrices returns the count of stale prices
-func (db *DB) CountStalePrices(olderThan time.Time) (int, error) {
+func (db *DB) CountStalePrices() (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
 		  AND is_actively_trading = true
+		  AND type = ANY($2)
 	`
 
 	var count int
-	err := db.conn.QueryRow(query, olderThan).Scan(&count)
+	err := db.conn.QueryRow(query, GetPriceThreshold(), pq.Array(PriceUpdateTypes)).Scan(&count)
 	return count, err
+}
+
+// GetOldestPriceUpdate returns the oldest price update timestamp (only for actively trading symbols)
+func (db *DB) GetOldestPriceUpdate() (*time.Time, error) {
+	query := `
+		SELECT MIN(last_price_update) FROM symbols
+		WHERE last_price_update IS NOT NULL
+		  AND is_actively_trading = true
+	`
+
+	var oldest *time.Time
+	err := db.conn.QueryRow(query).Scan(&oldest)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return oldest, err
 }

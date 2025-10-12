@@ -11,18 +11,6 @@ const (
 	StatusFailed   = "failed"
 )
 
-func threshold() time.Time {
-	now := time.Now().UTC()
-	threshold := time.Date(now.Year(), now.Month(), 1, 12, 0, 0, 0, time.UTC)
-	return threshold
-}
-
-func thresholdProfile() time.Time {
-	now := time.Now().UTC()
-	threshold := time.Date(now.Year(), now.Month(), 1, 20, 0, 0, 0, time.UTC)
-	return threshold
-}
-
 type Logger struct {
 	prefix string
 }

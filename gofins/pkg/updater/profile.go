@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 )
 
@@ -18,7 +19,7 @@ const (
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 	log := NewLogger("Profile")
 
-	totalStale, err := database.CountStaleProfiles(thresholdProfile())
+	totalStale, err := database.CountStaleProfiles()
 	if err != nil {
 		log.Error("Failed to count stale profiles: %v\n", err)
 		return
@@ -34,7 +35,7 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 		default:
 		}
 
-		tickers, err := database.GetStaleProfiles(ProfileBatchSize, thresholdProfile())
+		tickers, err := database.GetStaleProfiles(ProfileBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale profiles: %v\n", err)
 			return
@@ -47,7 +48,7 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 			continue
 		}
 
-		currentStale, _ := database.CountStaleProfiles(thresholdProfile())
+		currentStale, _ := database.CountStaleProfiles()
 		log.Batch(currentStale, len(tickers))
 
 		// Stats tracking
@@ -95,7 +96,7 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 
 		// Print stats
 		elapsed := time.Since(startTime)
-		currentStale, _ = database.CountStaleProfiles(thresholdProfile())
+		currentStale, _ = database.CountStaleProfiles()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
@@ -139,20 +140,20 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		}
 	}
 
-	status := StatusOK
 	symbol := &db.Symbol{
 		Ticker:            ticker,
-		Name:              &profile.CompanyName,
-		Exchange:          &profile.Exchange,
-		Sector:            &profile.Sector,
-		Industry:          &profile.Industry,
-		Country:           &profile.Country,
-		Description:       &profile.Description,
-		Website:           &profile.Website,
+		Name:              f.Ptr(profile.CompanyName),
+		Exchange:          f.Ptr(profile.Exchange),
+		Type:              f.Ptr(deriveType(profile)),
+		Sector:            f.Ptr(profile.Sector),
+		Industry:          f.Ptr(profile.Industry),
+		Country:           f.Ptr(profile.Country),
+		Description:       f.Ptr(profile.Description),
+		Website:           f.Ptr(profile.Website),
 		Inception:         inception,
-		LastProfileUpdate: &now,
-		LastProfileStatus: &status,
-		IsActivelyTrading: &profile.IsActivelyTrading,
+		LastProfileUpdate: f.Ptr(now),
+		LastProfileStatus: f.Ptr(StatusOK),
+		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
 	}
 
 	if err := database.PutSymbol(symbol); err != nil {
@@ -166,4 +167,17 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 	}
 
 	return StatusOK
+}
+
+func deriveType(profile *fmp.Profile) string {
+	if profile.IsEtf {
+		return db.TypeETF
+	}
+	if profile.IsFund {
+		return db.TypeFund
+	}
+	if profile.IsAdr {
+		return db.TypeADR
+	}
+	return db.TypeStock
 }

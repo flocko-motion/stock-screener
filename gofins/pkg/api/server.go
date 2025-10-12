@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -47,70 +46,4 @@ func (s *Server) Start(ctx context.Context) error {
 		return err
 	}
 	return nil
-}
-
-func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-}
-
-func (s *Server) handleGetSymbol(w http.ResponseWriter, r *http.Request) {
-	ticker := r.URL.Path[len("/api/symbol/"):]
-	if ticker == "" {
-		http.Error(w, "ticker required", http.StatusBadRequest)
-		return
-	}
-
-	symbol, err := s.db.GetSymbol(ticker)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if symbol == nil {
-		http.Error(w, "symbol not found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(symbol)
-}
-
-func (s *Server) handleListSymbols(w http.ResponseWriter, r *http.Request) {
-	tickers, err := s.db.GetAllTickers()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"count":   len(tickers),
-		"tickers": tickers,
-	})
-}
-
-func (s *Server) handleGetMonthlyPrices(w http.ResponseWriter, r *http.Request) {
-	ticker := r.URL.Path[len("/api/prices/monthly/"):]
-	if ticker == "" {
-		http.Error(w, "ticker required", http.StatusBadRequest)
-		return
-	}
-
-	// Default to last 5 years
-	to := time.Now()
-	from := to.AddDate(-5, 0, 0)
-
-	prices, err := s.db.GetMonthlyPrices(ticker, from, to)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"ticker": ticker,
-		"from":   from,
-		"to":     to,
-		"count":  len(prices),
-		"prices": prices,
-	})
 }

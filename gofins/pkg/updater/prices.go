@@ -26,7 +26,7 @@ type PriceStats struct {
 func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 	log := NewLogger("Prices")
 
-	totalStale, err := database.CountStalePrices(threshold())
+	totalStale, err := database.CountStalePrices()
 	if err != nil {
 		log.Error("Failed to count stale prices: %v\n", err)
 		return
@@ -42,7 +42,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		default:
 		}
 
-		tickers, err := database.GetStalePrices(PriceBatchSize, threshold())
+		tickers, err := database.GetStalePrices(PriceBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale prices: %v\n", err)
 			return
@@ -55,7 +55,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 			continue
 		}
 
-		currentStale, _ := database.CountStalePrices(threshold())
+		currentStale, _ := database.CountStalePrices()
 		log.Batch(currentStale, len(tickers))
 
 		startTime := time.Now()
@@ -98,7 +98,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		wg.Wait()
 
 		elapsed := time.Since(startTime)
-		currentStale, _ = database.CountStalePrices(threshold())
+		currentStale, _ = database.CountStalePrices()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)

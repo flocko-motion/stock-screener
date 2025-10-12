@@ -44,6 +44,9 @@ type Profile struct {
 	IPODate           string  `json:"ipoDate"`
 	FullTimeEmployees string  `json:"fullTimeEmployees"`
 	IsActivelyTrading bool    `json:"isActivelyTrading"`
+	IsEtf             bool    `json:"isEtf"`
+	IsFund            bool    `json:"isFund"`
+	IsAdr             bool    `json:"isAdr"`
 }
 
 // Quote represents a stock quote
