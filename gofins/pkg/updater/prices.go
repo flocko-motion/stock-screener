@@ -138,21 +138,21 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 
 	// Save to database
 	if err := database.PutMonthlyPrices(monthly); err != nil {
-		return "failed"
+		return StatusFailed
 	}
 	if err := database.PutWeeklyPrices(weekly); err != nil {
-		return "failed"
+		return StatusFailed
 	}
 
 	// Update last_price_update timestamp
-	status := "ok"
+	status := StatusOK
 	database.PutSymbol(&db.Symbol{
 		Ticker:          ticker,
 		LastPriceUpdate: &now,
 		LastPriceStatus: &status,
 	})
 
-	return "updated"
+	return StatusOK
 }
 
 func convertPrices(dailyPrices []fmp.DailyPrice, ticker string) ([]db.PriceData, []db.PriceData) {
