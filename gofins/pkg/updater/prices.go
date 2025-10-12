@@ -163,6 +163,7 @@ func convertPrices(dailyPrices []fmp.DailyPrice, ticker string) ([]db.PriceData,
 	var monthly []db.PriceData
 	var weekly []db.PriceData
 	monthlyYoY := make(map[string]float64) // Store monthly closes for YoY calculation
+	weeklyYoY := make(map[string]float64)  // Store weekly closes for YoY calculation
 
 	var currentMonth, currentWeek time.Time
 	var monthData, weekData aggregator
@@ -188,7 +189,7 @@ func convertPrices(dailyPrices []fmp.DailyPrice, ticker string) ([]db.PriceData,
 		weekStart := startOfWeek(date)
 		if currentWeek.IsZero() || !weekStart.Equal(currentWeek) {
 			if !currentWeek.IsZero() {
-				weekly = append(weekly, weekData.toWeekly(currentWeek, ticker))
+				weekly = append(weekly, weekData.toWeekly(currentWeek, ticker, weeklyYoY))
 			}
 			currentWeek = weekStart
 			weekData = aggregator{}
@@ -201,7 +202,7 @@ func convertPrices(dailyPrices []fmp.DailyPrice, ticker string) ([]db.PriceData,
 		monthly = append(monthly, monthData.toMonthly(currentMonth, ticker, monthlyYoY))
 	}
 	if !currentWeek.IsZero() {
-		weekly = append(weekly, weekData.toWeekly(currentWeek, ticker))
+		weekly = append(weekly, weekData.toWeekly(currentWeek, ticker, weeklyYoY))
 	}
 
 	return monthly, weekly
@@ -260,8 +261,22 @@ func (a *aggregator) toMonthly(date time.Time, ticker string, yoyMap map[string]
 	}
 }
 
-func (a *aggregator) toWeekly(date time.Time, ticker string) db.PriceData {
+func (a *aggregator) toWeekly(date time.Time, ticker string, yoyMap map[string]float64) db.PriceData {
 	avg := a.closeSum / float64(a.count)
+
+	// Calculate YoY (52 weeks ago)
+	var yoy *float64
+	key := fmt.Sprintf("%s-%d-%02d-%02d", ticker, date.Year(), date.Month(), date.Day())
+
+	// Find the date 52 weeks ago
+	yearAgo := date.AddDate(0, 0, -364) // 52 weeks = 364 days
+	lastYearKey := fmt.Sprintf("%s-%d-%02d-%02d", ticker, yearAgo.Year(), yearAgo.Month(), yearAgo.Day())
+
+	if lastYearClose, exists := yoyMap[lastYearKey]; exists && lastYearClose > 0 {
+		yoyValue := ((a.close - lastYearClose) / lastYearClose) * 100
+		yoy = &yoyValue
+	}
+	yoyMap[key] = a.close
 
 	return db.PriceData{
 		Date:         date,
@@ -270,6 +285,7 @@ func (a *aggregator) toWeekly(date time.Time, ticker string) db.PriceData {
 		Low:          a.low,
 		Avg:          avg,
 		Close:        a.close,
+		YoY:          yoy,
 		SymbolTicker: ticker,
 	}
 }

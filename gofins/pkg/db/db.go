@@ -8,7 +8,6 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/files"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 )
 
 type DB struct {
@@ -212,14 +211,15 @@ func (db *DB) PutWeeklyPrices(prices []PriceData) error {
 	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`
-		INSERT INTO weekly_prices (date, open, high, low, avg, close, symbol_ticker)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO weekly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		ON CONFLICT (date, symbol_ticker) DO UPDATE SET
 			open = EXCLUDED.open,
 			high = EXCLUDED.high,
 			low = EXCLUDED.low,
 			avg = EXCLUDED.avg,
-			close = EXCLUDED.close
+			close = EXCLUDED.close,
+			yoy = EXCLUDED.yoy
 	`)
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %w", err)
@@ -227,7 +227,7 @@ func (db *DB) PutWeeklyPrices(prices []PriceData) error {
 	defer stmt.Close()
 
 	for _, p := range prices {
-		_, err := stmt.Exec(p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.SymbolTicker)
+		_, err := stmt.Exec(p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
 		if err != nil {
 			return fmt.Errorf("failed to insert price for %s: %w", p.SymbolTicker, err)
 		}
