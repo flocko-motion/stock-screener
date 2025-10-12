@@ -152,6 +152,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		Inception:         inception,
 		LastProfileUpdate: &now,
 		LastProfileStatus: &status,
+		IsActivelyTrading: &profile.IsActivelyTrading,
 	}
 
 	if err := database.PutSymbol(symbol); err != nil {

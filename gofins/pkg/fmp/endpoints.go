@@ -43,6 +43,7 @@ type Profile struct {
 	Website           string  `json:"website"`
 	IPODate           string  `json:"ipoDate"`
 	FullTimeEmployees string  `json:"fullTimeEmployees"`
+	IsActivelyTrading bool    `json:"isActivelyTrading"`
 }
 
 // Quote represents a stock quote

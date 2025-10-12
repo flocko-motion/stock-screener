@@ -65,6 +65,7 @@ type Symbol struct {
 	Website           *string
 	ISIN              *string
 	Inception         *time.Time
+	IsActivelyTrading *bool
 }
 
 // PriceData represents price data (daily, weekly, or monthly)
@@ -86,8 +87,9 @@ func (db *DB) PutSymbol(s *Symbol) error {
 		INSERT INTO symbols (
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
-			name, type, currency, sector, industry, country, description, website, isin, inception
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+			name, type, currency, sector, industry, country, description, website, isin, inception,
+			is_actively_trading
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 		ON CONFLICT (ticker) DO UPDATE SET
 			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
 			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
@@ -103,7 +105,8 @@ func (db *DB) PutSymbol(s *Symbol) error {
 			description = COALESCE(EXCLUDED.description, symbols.description),
 			website = COALESCE(EXCLUDED.website, symbols.website),
 			isin = COALESCE(EXCLUDED.isin, symbols.isin),
-			inception = COALESCE(EXCLUDED.inception, symbols.inception)
+			inception = COALESCE(EXCLUDED.inception, symbols.inception),
+			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading)
 	`
 
 	_, err := db.conn.Exec(
@@ -111,6 +114,7 @@ func (db *DB) PutSymbol(s *Symbol) error {
 		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
 		s.LastPriceStatus, s.LastProfileStatus,
 		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception,
+		s.IsActivelyTrading,
 	)
 
 	return err
@@ -120,8 +124,9 @@ func (db *DB) PutSymbol(s *Symbol) error {
 func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 	query := `
 		SELECT ticker, exchange, last_price_update, last_profile_update,
+			   last_price_status, last_profile_status,
 			   name, type, currency, sector, industry, country,
-			   description, website, isin, inception
+			   description, website, isin, inception, is_actively_trading
 		FROM symbols
 		WHERE ticker = $1
 	`
@@ -129,8 +134,9 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 	s := &Symbol{}
 	err := db.conn.QueryRow(query, ticker).Scan(
 		&s.Ticker, &s.Exchange, &s.LastPriceUpdate, &s.LastProfileUpdate,
+		&s.LastPriceStatus, &s.LastProfileStatus,
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
-		&s.Description, &s.Website, &s.ISIN, &s.Inception,
+		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.IsActivelyTrading,
 	)
 
 	if err == sql.ErrNoRows {
@@ -335,7 +341,8 @@ func (db *DB) CountStaleProfiles(olderThan time.Time) (int, error) {
 func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
-		WHERE last_price_update IS NULL OR last_price_update < $1
+		WHERE (last_price_update IS NULL OR last_price_update < $1)
+		  AND (is_actively_trading IS NULL OR is_actively_trading = true)
 		ORDER BY last_price_update ASC NULLS FIRST
 		LIMIT $2
 	`
@@ -362,7 +369,8 @@ func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
 func (db *DB) CountStalePrices(olderThan time.Time) (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
-		WHERE last_price_update IS NULL OR last_price_update < $1
+		WHERE (last_price_update IS NULL OR last_price_update < $1)
+		  AND (is_actively_trading IS NULL OR is_actively_trading = true)
 	`
 
 	var count int
