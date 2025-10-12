@@ -233,14 +233,16 @@ func (db *DB) PutWeeklyPrices(prices []PriceData) error {
 	return nil
 }
 
-// GetMonthlyPrices retrieves monthly prices for a symbol
-func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
-	query := `
-		SELECT date, open, high, low, avg, close, symbol_ticker
-		FROM monthly_prices
+// GetPrices retrieves price data for a symbol at the specified interval
+func (db *DB) GetPrices(ticker string, from, to time.Time, interval PriceInterval) ([]PriceData, error) {
+	tableName := string(interval) + "_prices"
+
+	query := fmt.Sprintf(`
+		SELECT date, open, high, low, avg, close, yoy, symbol_ticker
+		FROM %s
 		WHERE symbol_ticker = $1 AND date >= $2 AND date <= $3
 		ORDER BY date ASC
-	`
+	`, tableName)
 
 	rows, err := db.conn.Query(query, ticker, from, to)
 	if err != nil {
@@ -251,7 +253,7 @@ func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, 
 	var prices []PriceData
 	for rows.Next() {
 		var p PriceData
-		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.SymbolTicker); err != nil {
+		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.YoY, &p.SymbolTicker); err != nil {
 			return nil, err
 		}
 		prices = append(prices, p)
@@ -260,7 +262,77 @@ func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, 
 	return prices, rows.Err()
 }
 
+// GetMonthlyPrices retrieves monthly prices for a symbol
+func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
+	return db.GetPrices(ticker, from, to, IntervalMonthly)
+}
+
+// GetWeeklyPrices retrieves weekly prices for a symbol
+func (db *DB) GetWeeklyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
+	return db.GetPrices(ticker, from, to, IntervalWeekly)
+}
+
+// GetPricesBatch retrieves price data for multiple symbols in a single query
+// Returns a map of ticker -> []PriceData
+func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval PriceInterval) (map[string][]PriceData, error) {
+	if len(tickers) == 0 {
+		return make(map[string][]PriceData), nil
+	}
+
+	tableName := string(interval) + "_prices"
+
+	query := fmt.Sprintf(`
+		SELECT date, open, high, low, avg, close, yoy, symbol_ticker
+		FROM %s
+		WHERE symbol_ticker = ANY($1) AND date >= $2 AND date <= $3
+		ORDER BY symbol_ticker, date ASC
+	`, tableName)
+
+	rows, err := db.conn.Query(query, pq.Array(tickers), from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[string][]PriceData)
+	for rows.Next() {
+		var p PriceData
+		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.YoY, &p.SymbolTicker); err != nil {
+			return nil, err
+		}
+		result[p.SymbolTicker] = append(result[p.SymbolTicker], p)
+	}
+
+	return result, rows.Err()
+}
+
 // GetAllTickers returns all ticker symbols in the database
+// GetTickersWithPrices returns tickers that have price data (limited to specified count)
+func (db *DB) GetTickersWithPrices(limit int) ([]string, error) {
+	query := `
+		SELECT DISTINCT symbol_ticker FROM monthly_prices 
+		ORDER BY symbol_ticker 
+		LIMIT $1
+	`
+
+	rows, err := db.conn.Query(query, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tickers []string
+	for rows.Next() {
+		var ticker string
+		if err := rows.Scan(&ticker); err != nil {
+			return nil, err
+		}
+		tickers = append(tickers, ticker)
+	}
+
+	return tickers, rows.Err()
+}
+
 func (db *DB) GetAllTickers() ([]string, error) {
 	rows, err := db.conn.Query("SELECT ticker FROM symbols")
 	if err != nil {
@@ -336,6 +408,14 @@ const (
 
 // PriceUpdateTypes defines which symbol types should receive price updates
 var PriceUpdateTypes = []string{TypeStock, TypeADR}
+
+// PriceInterval represents the time interval for price data
+type PriceInterval string
+
+const (
+	IntervalMonthly PriceInterval = "monthly"
+	IntervalWeekly  PriceInterval = "weekly"
+)
 
 // GetProfileThreshold returns the threshold for stale profiles (30 days ago)
 func GetProfileThreshold() time.Time {

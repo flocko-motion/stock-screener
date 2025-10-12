@@ -26,7 +26,7 @@ type RequestLog struct {
 // NewLimiter creates a new rate limiter with specified requests per minute
 func NewLimiter(requestsPerMinute int) *Limiter {
 	// Add 2% buffer for safety
-	interval := time.Duration(float64(time.Minute) / float64(requestsPerMinute) * 1.02)
+	interval := time.Duration(float64(time.Minute) / float64(requestsPerMinute) * 1.05)
 
 	return &Limiter{
 		interval:     interval,
