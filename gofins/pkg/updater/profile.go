@@ -72,11 +72,11 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 					result := updateProfile(ticker, database, fmpClient)
 					statsMu.Lock()
 					switch result {
-					case "updated":
+					case StatusOK:
 						stats.Updated = append(stats.Updated, ticker)
-					case "not_found":
+					case StatusNotFound:
 						stats.NotFound = append(stats.NotFound, ticker)
-					case "failed":
+					case StatusFailed:
 						stats.Failed = append(stats.Failed, ticker)
 					}
 					statsMu.Unlock()
