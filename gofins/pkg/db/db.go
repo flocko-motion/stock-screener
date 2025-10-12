@@ -53,6 +53,8 @@ type Symbol struct {
 	Exchange          *string
 	LastPriceUpdate   *time.Time
 	LastProfileUpdate *time.Time
+	LastPriceStatus   *string
+	LastProfileStatus *string
 	Name              *string
 	Type              *string
 	Currency          *string
@@ -65,43 +67,50 @@ type Symbol struct {
 	Inception         *time.Time
 }
 
-// MonthlyPrice represents monthly price data
-type MonthlyPrice struct {
+// PriceData represents price data (daily, weekly, or monthly)
+type PriceData struct {
 	Date         time.Time
 	Open         float64
 	High         float64
 	Low          float64
 	Avg          float64
 	Close        float64
+	YoY          *float64
 	SymbolTicker string
 }
 
 // SaveSymbol inserts or updates a symbol profile
+// Only updates non-nil fields to avoid overwriting data from other updaters
 func (db *DB) PutSymbol(s *Symbol) error {
 	query := `
 		INSERT INTO symbols (
-			ticker, exchange, last_profile_update, name, type, currency,
-			sector, industry, country, description, website, isin, inception
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+			ticker, exchange, last_price_update, last_profile_update, 
+			last_price_status, last_profile_status,
+			name, type, currency, sector, industry, country, description, website, isin, inception
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 		ON CONFLICT (ticker) DO UPDATE SET
-			exchange = EXCLUDED.exchange,
-			last_profile_update = EXCLUDED.last_profile_update,
-			name = EXCLUDED.name,
-			type = EXCLUDED.type,
-			currency = EXCLUDED.currency,
-			sector = EXCLUDED.sector,
-			industry = EXCLUDED.industry,
-			country = EXCLUDED.country,
-			description = EXCLUDED.description,
-			website = EXCLUDED.website,
-			isin = EXCLUDED.isin,
-			inception = EXCLUDED.inception
+			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
+			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
+			last_profile_update = COALESCE(EXCLUDED.last_profile_update, symbols.last_profile_update),
+			last_price_status = COALESCE(EXCLUDED.last_price_status, symbols.last_price_status),
+			last_profile_status = COALESCE(EXCLUDED.last_profile_status, symbols.last_profile_status),
+			name = COALESCE(EXCLUDED.name, symbols.name),
+			type = COALESCE(EXCLUDED.type, symbols.type),
+			currency = COALESCE(EXCLUDED.currency, symbols.currency),
+			sector = COALESCE(EXCLUDED.sector, symbols.sector),
+			industry = COALESCE(EXCLUDED.industry, symbols.industry),
+			country = COALESCE(EXCLUDED.country, symbols.country),
+			description = COALESCE(EXCLUDED.description, symbols.description),
+			website = COALESCE(EXCLUDED.website, symbols.website),
+			isin = COALESCE(EXCLUDED.isin, symbols.isin),
+			inception = COALESCE(EXCLUDED.inception, symbols.inception)
 	`
 
 	_, err := db.conn.Exec(
 		query,
-		s.Ticker, s.Exchange, s.LastProfileUpdate, s.Name, s.Type, s.Currency,
-		s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception,
+		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
+		s.LastPriceStatus, s.LastProfileStatus,
+		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception,
 	)
 
 	return err
@@ -134,8 +143,8 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 	return s, nil
 }
 
-// SaveMonthlyPrices batch inserts monthly price data
-func (db *DB) PutMonthlyPrices(prices []MonthlyPrice) error {
+// PutMonthlyPrices batch inserts monthly price data
+func (db *DB) PutMonthlyPrices(prices []PriceData) error {
 	if len(prices) == 0 {
 		return nil
 	}
@@ -147,7 +156,49 @@ func (db *DB) PutMonthlyPrices(prices []MonthlyPrice) error {
 	defer tx.Rollback()
 
 	stmt, err := tx.Prepare(`
-		INSERT INTO monthly_prices (date, open, high, low, avg, close, symbol_ticker)
+		INSERT INTO monthly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (date, symbol_ticker) DO UPDATE SET
+			open = EXCLUDED.open,
+			high = EXCLUDED.high,
+			low = EXCLUDED.low,
+			avg = EXCLUDED.avg,
+			close = EXCLUDED.close,
+			yoy = EXCLUDED.yoy
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, p := range prices {
+		_, err := stmt.Exec(p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
+		if err != nil {
+			return fmt.Errorf("failed to insert price for %s: %w", p.SymbolTicker, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// PutWeeklyPrices batch inserts weekly price data
+func (db *DB) PutWeeklyPrices(prices []PriceData) error {
+	if len(prices) == 0 {
+		return nil
+	}
+
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
+		INSERT INTO weekly_prices (date, open, high, low, avg, close, symbol_ticker)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (date, symbol_ticker) DO UPDATE SET
 			open = EXCLUDED.open,
@@ -176,7 +227,7 @@ func (db *DB) PutMonthlyPrices(prices []MonthlyPrice) error {
 }
 
 // GetMonthlyPrices retrieves monthly prices for a symbol
-func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]MonthlyPrice, error) {
+func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
 	query := `
 		SELECT date, open, high, low, avg, close, symbol_ticker
 		FROM monthly_prices
@@ -190,9 +241,9 @@ func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]MonthlyPric
 	}
 	defer rows.Close()
 
-	var prices []MonthlyPrice
+	var prices []PriceData
 	for rows.Next() {
-		var p MonthlyPrice
+		var p PriceData
 		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.SymbolTicker); err != nil {
 			return nil, err
 		}
@@ -273,6 +324,45 @@ func (db *DB) CountStaleProfiles(olderThan time.Time) (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE last_profile_update IS NULL OR last_profile_update < $1
+	`
+
+	var count int
+	err := db.conn.QueryRow(query, olderThan).Scan(&count)
+	return count, err
+}
+
+// GetStalePrices returns symbols with outdated price data
+func (db *DB) GetStalePrices(limit int, olderThan time.Time) ([]string, error) {
+	query := `
+		SELECT ticker FROM symbols
+		WHERE last_price_update IS NULL OR last_price_update < $1
+		ORDER BY last_price_update ASC NULLS FIRST
+		LIMIT $2
+	`
+
+	rows, err := db.conn.Query(query, olderThan, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tickers []string
+	for rows.Next() {
+		var ticker string
+		if err := rows.Scan(&ticker); err != nil {
+			return nil, err
+		}
+		tickers = append(tickers, ticker)
+	}
+
+	return tickers, rows.Err()
+}
+
+// CountStalePrices returns the count of stale prices
+func (db *DB) CountStalePrices(olderThan time.Time) (int, error) {
+	query := `
+		SELECT COUNT(*) FROM symbols
+		WHERE last_price_update IS NULL OR last_price_update < $1
 	`
 
 	var count int

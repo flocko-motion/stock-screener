@@ -21,6 +21,14 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Run FINS in server mode",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Setup context for graceful shutdown
+		ctx, cancel := context.WithCancel(cmd.Context())
+		defer cancel()
+
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+		// init DB
 		fmt.Println("=== Initializing ===")
 		database, err := db.NewDB()
 		if err != nil {
@@ -29,32 +37,25 @@ var serverCmd = &cobra.Command{
 		defer database.Close()
 		fmt.Println("✓ Database connected")
 
+		// init FMP
 		fmpClient, err := fmp.NewClient(apiKeyPath)
 		if err != nil {
 			return fmt.Errorf("failed to create FMP client: %w", err)
 		}
 		fmt.Println("✓ FMP client ready")
 
-		fmt.Println("\n=== Syncing Symbol List ===")
-		if err := updater.SyncSymbols(database, fmpClient); err != nil {
+		// sync symbols once before starting updaters
+		fmt.Println("\n=== Starting Services ===")
+		if err := updater.SyncSymbolsOnce(database, fmpClient); err != nil {
 			return fmt.Errorf("symbol sync failed: %w", err)
 		}
-
-		// Setup context for graceful shutdown
-		ctx, cancel := context.WithCancel(cmd.Context())
-		defer cancel()
-
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-		fmt.Println("\n=== Starting Services ===")
+		go updater.UpdateProfiles(ctx, database, fmpClient)
+		go updater.UpdatePrices(ctx, database, fmpClient)
+		go updater.SyncSymbols(database, fmpClient)
 
 		// Start REST API server
 		apiServer := api.NewServer(database, 8080)
 		go apiServer.Start(ctx)
-
-		// Start profile updater
-		go updater.UpdateProfiles(ctx, database, fmpClient)
 
 		fmt.Println("✓ Server running (Ctrl+C to stop)")
 		<-sigChan

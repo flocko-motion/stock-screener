@@ -2,7 +2,6 @@ package updater
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -13,40 +12,43 @@ import (
 const (
 	ProfileUpdateInterval = 30 * 24 * time.Hour
 	ProfileWorkers        = 3
-	ProfileBatchSize      = 50
+	ProfileBatchSize      = 20
 )
 
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
-	threshold := time.Now().Add(-ProfileUpdateInterval)
+	log := NewLogger("Profile")
 
-	// Get initial count
-	totalStale, err := database.CountStaleProfiles(threshold)
+	totalStale, err := database.CountStaleProfiles(thresholdProfile())
 	if err != nil {
-		fmt.Printf("✗ Failed to count stale profiles: %v\n", err)
+		log.Error("Failed to count stale profiles: %v\n", err)
 		return
 	}
 
-	fmt.Printf("Profile updater started: %d stale profiles, %d workers\n", totalStale, ProfileWorkers)
+	log.Started(totalStale, ProfileWorkers)
 
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Profile updater stopped")
+			log.Stopped()
 			return
 		default:
 		}
 
-		tickers, err := database.GetStaleProfiles(ProfileBatchSize, threshold)
+		tickers, err := database.GetStaleProfiles(ProfileBatchSize, thresholdProfile())
 		if err != nil {
-			fmt.Printf("✗ Failed to get stale profiles: %v\n", err)
+			log.Error("Failed to get stale profiles: %v\n", err)
 			return
 		}
 
 		if len(tickers) == 0 {
-			fmt.Println("✓ All profiles up to date!")
-			time.Sleep(time.Minute)
+			const sleepTimeHours = 8
+			log.AllDone(sleepTimeHours)
+			time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
 			continue
 		}
+
+		currentStale, _ := database.CountStaleProfiles(thresholdProfile())
+		log.Batch(currentStale, len(tickers))
 
 		// Stats tracking
 		startTime := time.Now()
@@ -93,8 +95,11 @@ func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client)
 
 		// Print stats
 		elapsed := time.Since(startTime)
-		currentStale, _ := database.CountStaleProfiles(threshold)
-		printStats(stats, elapsed, currentStale)
+		currentStale, _ = database.CountStaleProfiles(thresholdProfile())
+		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
+		log.NotFoundList(stats.NotFound)
+		log.FailedList(stats.Failed)
+
 	}
 }
 
@@ -110,14 +115,21 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
-			// Mark as attempted so we don't retry constantly
+			status := StatusNotFound
 			database.PutSymbol(&db.Symbol{
 				Ticker:            ticker,
 				LastProfileUpdate: &now,
+				LastProfileStatus: &status,
 			})
-			return "not_found"
+			return StatusNotFound
 		}
-		return "failed"
+		status := StatusFailed
+		database.PutSymbol(&db.Symbol{
+			Ticker:            ticker,
+			LastProfileUpdate: &now,
+			LastProfileStatus: &status,
+		})
+		return StatusFailed
 	}
 
 	var inception *time.Time
@@ -127,6 +139,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		}
 	}
 
+	status := StatusOK
 	symbol := &db.Symbol{
 		Ticker:            ticker,
 		Name:              &profile.CompanyName,
@@ -138,60 +151,18 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		Website:           &profile.Website,
 		Inception:         inception,
 		LastProfileUpdate: &now,
+		LastProfileStatus: &status,
 	}
 
 	if err := database.PutSymbol(symbol); err != nil {
-		return "failed"
+		failStatus := StatusFailed
+		database.PutSymbol(&db.Symbol{
+			Ticker:            ticker,
+			LastProfileUpdate: &now,
+			LastProfileStatus: &failStatus,
+		})
+		return StatusFailed
 	}
 
-	return "updated"
-}
-
-func printStats(stats *UpdateStats, elapsed time.Duration, currentStale int) {
-	total := len(stats.Updated) + len(stats.NotFound) + len(stats.Failed)
-	rate := float64(total) / elapsed.Seconds()
-
-	// Calculate ETA
-	var eta string
-	if rate > 0 {
-		etaSeconds := float64(currentStale) / rate
-		eta = formatDuration(time.Duration(etaSeconds * float64(time.Second)))
-	} else {
-		eta = "unknown"
-	}
-
-	fmt.Printf("Fetched %d profiles | ✓ %d\t❌ %d\t⚠️  %d | %d left\t| %.1f/s\t| ETA %s\n",
-		total,
-		len(stats.Updated),
-		len(stats.NotFound),
-		len(stats.Failed),
-		elapsed.Seconds(),
-		rate,
-		currentStale,
-		eta)
-
-	if len(stats.NotFound) > 0 && len(stats.NotFound) <= 10 {
-		fmt.Printf("  Not found: %v\n", stats.NotFound)
-	}
-	if len(stats.Failed) > 0 && len(stats.Failed) <= 10 {
-		fmt.Printf("  Failed: %v\n", stats.Failed)
-	}
-}
-
-func formatDuration(d time.Duration) string {
-	days := int(d.Hours() / 24)
-	hours := int(d.Hours()) % 24
-	minutes := int(d.Minutes()) % 60
-	seconds := int(d.Seconds()) % 60
-
-	if days > 0 {
-		return fmt.Sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)
-	}
-	if hours > 0 {
-		return fmt.Sprintf("%dh %dm %ds", hours, minutes, seconds)
-	}
-	if minutes > 0 {
-		return fmt.Sprintf("%dm %ds", minutes, seconds)
-	}
-	return fmt.Sprintf("%ds", seconds)
+	return StatusOK
 }
