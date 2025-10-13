@@ -39,32 +39,48 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse time_from
-	timeFrom, err := f.ParseDate(req.TimeFrom)
+	// Parse time_from with default
+	timeFromStr := req.TimeFrom
+	if timeFromStr == "" {
+		timeFromStr = "2009" // Default to 2009
+	}
+
+	timeFrom, err := f.ParseDate(timeFromStr)
 	if err != nil {
 		http.Error(w, "Invalid time_from: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Parse time_to
-	timeTo, err := f.ParseDate(req.TimeTo)
+	// Parse time_to with default (first of current month)
+	timeToStr := req.TimeTo
+	if timeToStr == "" {
+		now := time.Now()
+		timeToStr = now.Format("2006-01") + "-01" // First of current month
+	}
+
+	timeTo, err := f.ParseDate(timeToStr)
 	if err != nil {
 		http.Error(w, "Invalid time_to: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Parse interval
+	// Parse interval with default
+	intervalStr := req.Interval
+	if intervalStr == "" {
+		intervalStr = "weekly" // Default to weekly
+	}
+
 	var interval db.PriceInterval
-	if req.Interval == "weekly" {
+	if intervalStr == "weekly" {
 		interval = db.IntervalWeekly
-	} else if req.Interval == "monthly" {
+	} else if intervalStr == "monthly" {
 		interval = db.IntervalMonthly
 	} else {
 		http.Error(w, "Invalid interval (must be 'weekly' or 'monthly')", http.StatusBadRequest)
 		return
 	}
 
-	// Parse optional mcap_min
+	// Parse mcap_min with default
 	var mcapMin *int64
 	if req.McapMin != nil && *req.McapMin != "" {
 		parsed, err := f.ParseMarketCap(*req.McapMin)
@@ -73,6 +89,9 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		mcapMin = &parsed
+	} else {
+		defaultMcap := int64(100_000_000)
+		mcapMin = &defaultMcap
 	}
 
 	// Parse optional inception_max
@@ -86,13 +105,26 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 		inceptionMax = &parsed
 	}
 
+	// Use defaults for histogram config if not provided
+	histBins := req.HistBins
+	if histBins == 0 {
+		histBins = 100 // Default from test
+	}
+
+	histMin := req.HistMin
+	histMax := req.HistMax
+	if histMin == 0 && histMax == 0 {
+		histMin = -80.0 // Default from test
+		histMax = 80.0  // Default from test
+	}
+
 	// Create analysis package
 	config := analysis.AnalysisPackageConfig{
 		Name:         req.Name,
 		Interval:     interval,
 		TimeFrom:     timeFrom,
 		TimeTo:       timeTo,
-		HistConfig:   analysis.HistogramConfig{NumBins: req.HistBins, Min: req.HistMin, Max: req.HistMax},
+		HistConfig:   analysis.HistogramConfig{NumBins: histBins, Min: histMin, Max: histMax},
 		McapMin:      mcapMin,
 		InceptionMax: inceptionMax,
 	}
