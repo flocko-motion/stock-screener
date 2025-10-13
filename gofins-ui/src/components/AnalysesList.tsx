@@ -52,21 +52,20 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
     }
 
     return (
-        <div className="max-w-7xl mx-auto mt-4">
-            <div className="mb-8">
-                <p className="text-gray-600 font-medium">Browse and manage your stock screening analyses</p>
+        <div className="max-w-7xl mx-auto">
+            <div className="mb-6 flex items-center justify-between">
+                <p className="text-gray-600 text-sm">Browse and manage your stock screening analyses</p>
                 <button
                     onClick={onOpenCreate}
-                    className="form-button-primary flex items-center space-x-3"
+                    className="form-button-primary flex items-center gap-2"
                 >
-                    <PlusIcon className="w-4 h-4" />
-                    <span>Create Analysis</span>
+                    <PlusIcon className="icon-fixed" style={{ width: '16px', height: '16px' }} />
+                    <span>New Analysis</span>
                 </button>
             </div>
 
             {analyses.length === 0 ? (
                 <div className="form-card p-12 text-center">
-                    <BeakerIcon className="icon-fixed text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No analyses yet</h3>
                     <p className="text-gray-500 mb-4">Create your first analysis to get started</p>
                 </div>
@@ -98,7 +97,6 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
                                     <tr key={analysis.ID} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <BeakerIcon className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                                                 <span className="text-sm font-medium text-gray-900">{analysis.Name}</span>
                                             </div>
                                         </td>

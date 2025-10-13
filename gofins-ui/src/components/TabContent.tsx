@@ -10,16 +10,17 @@ interface TabContentProps {
     onOpenAnalysis?: (id: string, name: string) => void;
     onOpenSymbol?: (symbol: string) => void;
     onOpenCreate?: () => void;
+    onCloseTab?: () => void;
 }
 
-export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol, onOpenCreate }: TabContentProps) {
+export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol, onOpenCreate, onCloseTab }: TabContentProps) {
     switch (tabType) {
         case 'analyses':
             return <AnalysesList onOpenAnalysis={onOpenAnalysis} onOpenCreate={onOpenCreate} />;
         case 'favorites':
             return <FavoritesList onOpenSymbol={onOpenSymbol} />;
         case 'create':
-            return <CreateAnalysis />;
+            return <CreateAnalysis onAnalysisCreated={onOpenAnalysis} onCancel={onCloseTab} />;
         case 'analysis':
             return <AnalysisView data={data} />;
         case 'symbol':

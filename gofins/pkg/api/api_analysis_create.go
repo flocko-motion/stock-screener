@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -30,16 +31,23 @@ type CreateAnalysisResponse struct {
 // handleCreateAnalysis creates a new analysis package
 // POST /api/analyses
 func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("[API] handleCreateAnalysis called")
+
 	if r.Method != http.MethodPost {
+		fmt.Println("[API] Method not POST:", r.Method)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req CreateAnalysisRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Println("[API] Failed to decode request body:", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
+	fmt.Printf("[API] Received request: Name=%s, Interval=%s, TimeFrom=%s, TimeTo=%s\n",
+		req.Name, req.Interval, req.TimeFrom, req.TimeTo)
 
 	// Parse time_from with default
 	timeFromStr := req.TimeFrom
@@ -131,15 +139,26 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 		InceptionMax: inceptionMax,
 	}
 
+	fmt.Printf("[API] Creating analysis package with config: %+v\n", config)
+	
 	packageID, err := analysis.CreatePackage(s.db, config)
 	if err != nil {
+		fmt.Println("[API] Failed to create package:", err)
 		http.Error(w, "Failed to create package: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CreateAnalysisResponse{
+	fmt.Println("[API] Successfully created package with ID:", packageID)
+
+	response := CreateAnalysisResponse{
 		PackageID: packageID,
 		Status:    "processing",
-	})
+	}
+	
+	fmt.Printf("[API] Sending response: %+v\n", response)
+	
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		fmt.Println("[API] Failed to encode response:", err)
+	}
 }

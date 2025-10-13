@@ -1,4 +1,4 @@
-import { HeartIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface FavoritesListProps {
     onOpenSymbol?: (symbol: string) => void;
@@ -12,10 +12,22 @@ export default function FavoritesList({ onOpenSymbol }: FavoritesListProps) {
         { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology', cagr: 19.8, beta: 1.1, sigma: 20.1 },
     ];
 
+    const handleNewList = () => {
+        // TODO: Implement create new favorites list
+        console.log('Create new favorites list');
+    };
+
     return (
-        <div className="max-w-7xl mx-auto mt-4">
-            <div className="mb-8">
-                <p className="text-gray-600 font-medium">Your saved stock picks and watchlist</p>
+        <div className="max-w-7xl mx-auto">
+            <div className="mb-6 flex items-center justify-between">
+                <p className="text-gray-600 text-sm">Your saved stock picks and watchlist</p>
+                <button
+                    onClick={handleNewList}
+                    className="form-button-primary flex items-center gap-2"
+                >
+                    <PlusIcon className="icon-fixed" style={{ width: '16px', height: '16px' }} />
+                    <span>New List</span>
+                </button>
             </div>
 
             <div className="form-card">
@@ -51,7 +63,6 @@ export default function FavoritesList({ onOpenSymbol }: FavoritesListProps) {
                                 <tr key={stock.symbol} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <HeartIcon className="w-4 h-4 text-red-400 mr-3 flex-shrink-0" />
                                             <span className="text-sm font-bold text-gray-900">{stock.symbol}</span>
                                         </div>
                                     </td>

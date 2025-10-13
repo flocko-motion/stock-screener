@@ -95,7 +95,7 @@ export default function Layout() {
         <div className="flex flex-col h-screen bg-gray-50 p-4">
             {/* Header */}
             <div className="bg-white border-b border-gray-300 shadow-md rounded-t-lg">
-                <div className="flex items-center px-8 py-6">
+                <div className="flex items-center">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
                             <span className="text-blue-600">F</span>INS
@@ -106,7 +106,7 @@ export default function Layout() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="bg-white border-b border-gray-200 px-6 pt-3">
+            <div className="bg-white border-b border-gray-200 px-6">
                 <nav className="flex gap-2">
                     {tabs.map((tab) => {
                         const Icon = getTabIcon(tab.type);
@@ -136,7 +136,7 @@ export default function Layout() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-6 overflow-auto bg-gray-50 rounded-b-lg">
+            <div className="flex-1 overflow-auto bg-gray-50">
                 {activeTab && (
                     <TabContent
                         tabType={activeTab.type}
@@ -144,6 +144,7 @@ export default function Layout() {
                         onOpenAnalysis={openAnalysis}
                         onOpenSymbol={openSymbol}
                         onOpenCreate={openCreateTab}
+                        onCloseTab={() => closeTab(activeTab.id)}
                     />
                 )}
             </div>
