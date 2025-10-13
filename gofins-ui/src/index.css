@@ -241,6 +241,11 @@ table thead th {
   padding: 12px 16px;
 }
 
+table thead th.lowercase {
+  text-transform: lowercase;
+}
+
+
 table tbody td {
   padding: 14px 16px;
   color: #374151;

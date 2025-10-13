@@ -16,6 +16,15 @@ export interface AnalysisPackage {
     Status: string;
 }
 
+export interface AnalysisResult {
+    symbol: string;
+    mean: number;
+    stddev: number;
+    min: number;
+    max: number;
+    inception?: string;
+}
+
 export interface CreateAnalysisRequest {
     name: string;
     interval?: string;
@@ -85,6 +94,15 @@ export const analysisApi = {
         if (!response.ok) {
             throw new Error('Failed to delete analysis');
         }
+    },
+
+    // Get analysis results
+    getResults: async (id: string): Promise<AnalysisResult[]> => {
+        const response = await fetch(`${API_BASE_URL}/analysis/${id}/results`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch analysis results');
+        }
+        return response.json();
     },
 };
 

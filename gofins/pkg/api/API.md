@@ -50,6 +50,24 @@ DELETE /api/analysis/{id}
 ```
 Returns: 204 No Content
 
+### Get analysis results
+```
+GET /api/analysis/{id}/results
+```
+Returns: Array of analysis results for the package
+
+### Get analysis chart
+```
+GET /api/analysis/{id}/chart/{ticker}
+```
+Returns: PNG image of the chart for the specified ticker
+
+### Get analysis histogram
+```
+GET /api/analysis/{id}/histogram/{ticker}
+```
+Returns: PNG image of the histogram for the specified ticker
+
 ## Response Format
 
 Analysis response is `db.AnalysisPackage`:
@@ -69,5 +87,17 @@ Analysis response is `db.AnalysisPackage`:
   "SymbolCount": 156,
   "Status": "ready" | "processing" | "failed"
 }
+```
+
+Analysis result response is an array of `db.AnalysisResult`:
+```json
+[{
+  "inception": "2010-06-29T00:00:00Z",
+  "symbol": "AAPL",
+  "mean": 12.5,
+  "stddev": 8.3,
+  "min": -15.2,
+  "max": 35.8
+}]
 ```
 

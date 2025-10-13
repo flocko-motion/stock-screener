@@ -50,14 +50,15 @@ func (db *DB) UpdateAnalysisPackageStatus(packageID string, status string, symbo
 
 // AnalysisResult represents a stored analysis result
 type AnalysisResult struct {
-	PackageID string
-	Ticker    string `json:"symbol"`
-	Count     int
-	Mean      float64 `json:"mean"`
-	StdDev    float64 `json:"stddev"`
-	Variance  float64
-	Min       float64
-	Max       float64
+	PackageID     string     `json:"-"`
+	Ticker        string     `json:"symbol"`
+	Count         int        `json:"-"`
+	Mean          float64    `json:"mean"`
+	StdDev        float64    `json:"stddev"`
+	Variance      float64    `json:"-"`
+	Min           float64    `json:"min"`
+	Max           float64    `json:"max"`
+	InceptionDate *time.Time `json:"inception"`
 }
 
 // SaveAnalysisResult saves a single analysis result
@@ -78,10 +79,11 @@ func (db *DB) SaveAnalysisResult(packageID, ticker string, count int, mean, stdd
 // GetAnalysisResults retrieves all results for a package
 func (db *DB) GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
 	query := `
-		SELECT package_id, ticker, count, mean, stddev, variance, min, max
-		FROM analysis_results
-		WHERE package_id = $1
-		ORDER BY mean DESC
+		SELECT ar.package_id, ar.ticker, ar.count, ar.mean, ar.stddev, ar.variance, ar.min, ar.max, s.inception
+		FROM analysis_results ar
+		JOIN symbols s ON ar.ticker = s.ticker
+		WHERE ar.package_id = $1
+		ORDER BY ar.mean DESC
 	`
 
 	rows, err := db.conn.Query(query, packageID)
@@ -93,7 +95,7 @@ func (db *DB) GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
 	var results []AnalysisResult
 	for rows.Next() {
 		var r AnalysisResult
-		if err := rows.Scan(&r.PackageID, &r.Ticker, &r.Count, &r.Mean, &r.StdDev, &r.Variance, &r.Min, &r.Max); err != nil {
+		if err := rows.Scan(&r.PackageID, &r.Ticker, &r.Count, &r.Mean, &r.StdDev, &r.Variance, &r.Min, &r.Max, &r.InceptionDate); err != nil {
 			return nil, err
 		}
 		results = append(results, r)
