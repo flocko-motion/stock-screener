@@ -10,6 +10,10 @@ import (
 	"github.com/lib/pq"
 )
 
+func logf(format string, args ...interface{}) {
+	fmt.Printf("[DB] "+format+"\n", args...)
+}
+
 type DB struct {
 	conn *sql.DB
 }
@@ -315,33 +319,48 @@ func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval Pric
 
 // GetAllTickers returns all ticker symbols in the database
 // GetFilteredTickers returns tickers matching filters (for analysis packages)
-func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]string, error) {
+func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time, interval PriceInterval) ([]string, error) {
+	// Be lenient on price table presence: allow any interval that has data.
+	// Still prioritize/reflect requested interval in logs.
 	query := `
-		SELECT DISTINCT s.ticker FROM symbols s
-		WHERE s.is_actively_trading = true
-		  AND s.type = ANY($1)
-		  AND ($2::BIGINT IS NULL OR s.market_cap >= $2)
-		  AND ($3::TIMESTAMP IS NULL OR s.inception <= $3)
-		  AND EXISTS (SELECT 1 FROM monthly_prices WHERE symbol_ticker = s.ticker)
-		ORDER BY s.ticker
-	`
+        SELECT DISTINCT s.ticker FROM symbols s
+        WHERE s.is_actively_trading = true
+          AND s.type = ANY($1)
+          AND ($2::BIGINT IS NULL OR s.market_cap >= $2)
+          AND ($3::TIMESTAMP IS NULL OR s.inception <= $3)
+          AND s.last_price_status = $4
+          AND s.last_price_update IS NOT NULL
+        ORDER BY s.ticker
+    `
 
-	rows, err := db.conn.Query(query, pq.Array(PriceUpdateTypes), mcapMin, inceptionMax)
+	// logf("[DB] GetFilteredTickers query (interval=%s): %s\n", string(interval), query)
+	// logf("[DB] Parameters: PriceUpdateTypes=%v, mcapMin=%v, inceptionMax=%v, status=%s\n", PriceUpdateTypes, mcapMin, inceptionMax, StatusOK)
+
+	rows, err := db.conn.Query(query, pq.Array(PriceUpdateTypes), mcapMin, inceptionMax, StatusOK)
 	if err != nil {
+		logf("[DB] Query error: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
+	logf("[DB] Query executed successfully, reading results...\n")
 
 	var tickers []string
 	for rows.Next() {
 		var ticker string
 		if err := rows.Scan(&ticker); err != nil {
+			logf("[DB] Error scanning ticker: %v\n", err)
 			return nil, err
 		}
 		tickers = append(tickers, ticker)
 	}
 
-	return tickers, rows.Err()
+	if err := rows.Err(); err != nil {
+		logf("[DB] Error iterating rows: %v\n", err)
+		return nil, err
+	}
+
+	logf("[DB] GetFilteredTickers returned %d tickers\n", len(tickers))
+	return tickers, nil
 }
 
 // GetTickersWithPrices returns tickers that have price data (limited to specified count)
@@ -452,6 +471,13 @@ type PriceInterval string
 const (
 	IntervalMonthly PriceInterval = "monthly"
 	IntervalWeekly  PriceInterval = "weekly"
+)
+
+// Price status constants (mirror updater statuses)
+const (
+	StatusOK       = "ok"
+	StatusNotFound = "not_found"
+	StatusFailed   = "failed"
 )
 
 // GetProfileThreshold returns the threshold for stale profiles (30 days ago)

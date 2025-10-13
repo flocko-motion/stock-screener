@@ -99,7 +99,13 @@ var benchAnalysisCmd = &cobra.Command{
 		fmt.Println("=== Method 2: Batch Analysis ===")
 		startBatch := time.Now()
 
-		results, err := analysis.AnalyzeBatch(database, tickers, from, to, db.IntervalMonthly, histConfig)
+		results, err := analysis.AnalyzeBatch(database, analysis.AnalysisPackageConfig{
+			Tickers:    tickers,
+			TimeFrom:   from,
+			TimeTo:     to,
+			Interval:   db.IntervalMonthly,
+			HistConfig: histConfig,
+		})
 		if err != nil {
 			return fmt.Errorf("failed to batch analyze: %w", err)
 		}

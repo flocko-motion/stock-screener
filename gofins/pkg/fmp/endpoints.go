@@ -35,7 +35,7 @@ type Profile struct {
 	Industry          string  `json:"industry"`
 	Sector            string  `json:"sector"`
 	Country           string  `json:"country"`
-	MarketCap         float64 `json:"mktCap"`
+	MarketCap         int64   `json:"marketCap"`
 	Price             float64 `json:"price"`
 	CEO               string  `json:"ceo"`
 	Description       string  `json:"description"`
@@ -46,25 +46,6 @@ type Profile struct {
 	IsEtf             bool    `json:"isEtf"`
 	IsFund            bool    `json:"isFund"`
 	IsAdr             bool    `json:"isAdr"`
-}
-
-// Quote represents a stock quote
-type Quote struct {
-	Symbol        string  `json:"symbol"`
-	Name          string  `json:"name"`
-	Price         float64 `json:"price"`
-	Change        float64 `json:"change"`
-	PercentChange float64 `json:"changesPercentage"`
-	DayLow        float64 `json:"dayLow"`
-	DayHigh       float64 `json:"dayHigh"`
-	YearLow       float64 `json:"yearLow"`
-	YearHigh      float64 `json:"yearHigh"`
-	MarketCap     float64 `json:"marketCap"`
-	Volume        int64   `json:"volume"`
-	AvgVolume     int64   `json:"avgVolume"`
-	Open          float64 `json:"open"`
-	PreviousClose float64 `json:"previousClose"`
-	Timestamp     int64   `json:"timestamp"`
 }
 
 // HistoricalPrice represents a historical price data point
@@ -82,17 +63,6 @@ type HistoricalPrice struct {
 type HistoricalPriceResponse struct {
 	Symbol     string            `json:"symbol"`
 	Historical []HistoricalPrice `json:"historical"`
-}
-
-// ScreenResult represents a single result from the stock screener
-type ScreenResult struct {
-	Symbol    string  `json:"symbol"`
-	Name      string  `json:"companyName"`
-	MarketCap float64 `json:"marketCap"`
-	Sector    string  `json:"sector"`
-	Industry  string  `json:"industry"`
-	Country   string  `json:"country"`
-	Exchange  string  `json:"exchangeShortName"`
 }
 
 // GetProfile fetches the company profile for a ticker
@@ -113,24 +83,6 @@ func (c *Client) GetProfile(ticker string) (*Profile, error) {
 	return &profiles[0], nil
 }
 
-// GetQuote fetches the real-time quote for a ticker
-func (c *Client) GetQuote(ticker string) (*Quote, error) {
-	var quotes []Quote
-	params := map[string]string{
-		"symbol": ticker,
-	}
-
-	if err := c.apiGet("api/v3/quote/"+ticker, params, &quotes); err != nil {
-		return nil, err
-	}
-
-	if len(quotes) == 0 {
-		return nil, fmt.Errorf("no quote found for ticker: %s", ticker)
-	}
-
-	return &quotes[0], nil
-}
-
 // GetHistoricalPrices fetches historical price data for a ticker
 func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*HistoricalPriceResponse, error) {
 	params := map[string]string{
@@ -146,20 +98,6 @@ func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*Histor
 	}
 
 	return &response, nil
-}
-
-// Search searches for companies by query string
-func (c *Client) Search(query string) ([]ScreenResult, error) {
-	params := map[string]string{
-		"query": query,
-	}
-
-	var results []ScreenResult
-	if err := c.apiGet("api/v3/search", params, &results); err != nil {
-		return nil, err
-	}
-
-	return results, nil
 }
 
 // FetchStockList fetches the complete list of stocks from FMP

@@ -12,7 +12,6 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	rootCmd.AddCommand(resetPricesCmd)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

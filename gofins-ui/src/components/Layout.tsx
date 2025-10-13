@@ -35,17 +35,21 @@ export default function Layout() {
     };
 
     const openAnalysis = (analysisId: string, analysisName: string) => {
+        console.log('openAnalysis called:', analysisId, analysisName);
         const existingTab = tabs.find(tab => tab.id === analysisId);
         if (existingTab) {
+            console.log('Existing tab found, switching to it');
             setActiveTabId(analysisId);
         } else {
+            console.log('Creating new analysis tab');
             const newTab: Tab = {
                 id: analysisId,
                 type: 'analysis',
                 title: analysisName,
                 data: { id: analysisId }
             };
-            setTabs([...tabs, newTab]);
+            setTabs(prev => [...prev, newTab]);
+            // Set active tab after adding to array
             setActiveTabId(analysisId);
         }
     };
@@ -79,14 +83,29 @@ export default function Layout() {
     };
 
     const closeTab = (tabId: string) => {
-        const tabToClose = tabs.find(tab => tab.id === tabId);
-        if (tabToClose?.isPermanent) return; // Don't close permanent tabs
+        console.log('closeTab called:', tabId, 'currentActive:', activeTabId);
 
-        const newTabs = tabs.filter(tab => tab.id !== tabId);
-        setTabs(newTabs);
-        if (activeTabId === tabId && newTabs.length > 0) {
-            setActiveTabId(newTabs[newTabs.length - 1].id);
-        }
+        setTabs(currentTabs => {
+            const tabToClose = currentTabs.find(tab => tab.id === tabId);
+            if (tabToClose?.isPermanent) {
+                console.log('Cannot close permanent tab');
+                return currentTabs;
+            }
+
+            const newTabs = currentTabs.filter(tab => tab.id !== tabId);
+            console.log('Tabs after close:', newTabs.map(t => t.id));
+
+            // Only change active tab if we're closing the currently active tab
+            if (activeTabId === tabId && newTabs.length > 0) {
+                const newActiveTab = newTabs[newTabs.length - 1].id;
+                console.log('Closing active tab, switching to:', newActiveTab);
+                setActiveTabId(newActiveTab);
+            } else {
+                console.log('Not closing active tab, keeping current active tab:', activeTabId);
+            }
+
+            return newTabs;
+        });
     };
 
     const activeTab = tabs.find(tab => tab.id === activeTabId);
@@ -119,7 +138,7 @@ export default function Layout() {
                                 <Icon className="w-4 h-4 flex-shrink-0" />
                                 <span>{tab.title}</span>
                                 {!tab.isPermanent && (
-                                    <button
+                                    <span
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             closeTab(tab.id);
@@ -127,7 +146,7 @@ export default function Layout() {
                                         className="tab-close-button"
                                     >
                                         <XMarkIcon className="w-3 h-3" />
-                                    </button>
+                                    </span>
                                 )}
                             </button>
                         );

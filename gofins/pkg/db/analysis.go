@@ -48,6 +48,18 @@ func (db *DB) UpdateAnalysisPackageStatus(packageID string, status string, symbo
 	return err
 }
 
+// AnalysisResult represents a stored analysis result
+type AnalysisResult struct {
+	PackageID string
+	Ticker    string `json:"symbol"`
+	Count     int
+	Mean      float64 `json:"mean"`
+	StdDev    float64 `json:"stddev"`
+	Variance  float64
+	Min       float64
+	Max       float64
+}
+
 // SaveAnalysisResult saves a single analysis result
 func (db *DB) SaveAnalysisResult(packageID, ticker string, count int, mean, stddev, variance, min, max float64, histogramJSON []byte) error {
 	query := `
@@ -63,6 +75,33 @@ func (db *DB) SaveAnalysisResult(packageID, ticker string, count int, mean, stdd
 	return err
 }
 
+// GetAnalysisResults retrieves all results for a package
+func (db *DB) GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
+	query := `
+		SELECT package_id, ticker, count, mean, stddev, variance, min, max
+		FROM analysis_results
+		WHERE package_id = $1
+		ORDER BY mean DESC
+	`
+
+	rows, err := db.conn.Query(query, packageID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []AnalysisResult
+	for rows.Next() {
+		var r AnalysisResult
+		if err := rows.Scan(&r.PackageID, &r.Ticker, &r.Count, &r.Mean, &r.StdDev, &r.Variance, &r.Min, &r.Max); err != nil {
+			return nil, err
+		}
+		results = append(results, r)
+	}
+
+	return results, rows.Err()
+}
+
 // GetAnalysisPackage retrieves a package by ID
 func (db *DB) GetAnalysisPackage(packageID string) (*AnalysisPackage, error) {
 	query := `
@@ -73,14 +112,21 @@ func (db *DB) GetAnalysisPackage(packageID string) (*AnalysisPackage, error) {
 	`
 
 	pkg := &AnalysisPackage{}
+	var symbolCount sql.NullInt64
 	err := db.conn.QueryRow(query, packageID).Scan(
 		&pkg.ID, &pkg.Name, &pkg.CreatedAt, &pkg.Interval, &pkg.TimeFrom, &pkg.TimeTo,
 		&pkg.HistBins, &pkg.HistMin, &pkg.HistMax, &pkg.McapMin, &pkg.InceptionMax,
-		&pkg.SymbolCount, &pkg.Status,
+		&symbolCount, &pkg.Status,
 	)
 
 	if err == sql.ErrNoRows {
 		return nil, nil
+	}
+
+	if symbolCount.Valid {
+		pkg.SymbolCount = int(symbolCount.Int64)
+	} else {
+		pkg.SymbolCount = 0
 	}
 
 	return pkg, err
@@ -104,12 +150,18 @@ func (db *DB) ListAnalysisPackages() ([]AnalysisPackage, error) {
 	var packages []AnalysisPackage
 	for rows.Next() {
 		var pkg AnalysisPackage
+		var symbolCount sql.NullInt64
 		if err := rows.Scan(
 			&pkg.ID, &pkg.Name, &pkg.CreatedAt, &pkg.Interval, &pkg.TimeFrom, &pkg.TimeTo,
 			&pkg.HistBins, &pkg.HistMin, &pkg.HistMax, &pkg.McapMin, &pkg.InceptionMax,
-			&pkg.SymbolCount, &pkg.Status,
+			&symbolCount, &pkg.Status,
 		); err != nil {
 			return nil, err
+		}
+		if symbolCount.Valid {
+			pkg.SymbolCount = int(symbolCount.Int64)
+		} else {
+			pkg.SymbolCount = 0
 		}
 		packages = append(packages, pkg)
 	}

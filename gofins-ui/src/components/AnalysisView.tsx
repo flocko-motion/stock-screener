@@ -102,12 +102,16 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
                 <div className="mb-8">
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">{analysis.Name}</h2>
                     <div className="flex gap-4 text-sm text-gray-600">
-                        <span>Status: <span className={`font-semibold ${analysis.Status === 'ready' ? 'text-green-600' :
+                        <span>Status:<br /><span className={`font-semibold ${analysis.Status === 'ready' ? 'text-green-600' :
                             analysis.Status === 'processing' ? 'text-blue-600' :
                                 'text-red-600'
                             }`}>{analysis.Status}</span></span>
-                        <span>Symbols: {analysis.SymbolCount}</span>
-                        <span>Interval: {analysis.Interval}</span>
+                        <span>Symbols:<br />{analysis.SymbolCount}</span>
+                        <span>Market Cap Min:<br />{analysis.McapMin}</span>
+                        <span>Inception Max:<br />{analysis.InceptionMax?.substring(0, 10)}</span>
+                        <span>Time From/To:<br />{analysis.TimeFrom.substring(0, 10)} to {analysis.TimeTo.substring(0, 10)}</span>
+                        <span>Interval:<br />{analysis.Interval}</span>
+                        <span>Hist Min/Max/Bins:<br />{analysis.HistMin}/{analysis.HistMax}/{analysis.HistBins}</span>
                     </div>
                 </div>
 

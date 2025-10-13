@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
@@ -16,6 +18,10 @@ import (
 
 // PlotYoYAnalysis creates a price chart with proper axis formatting
 func PlotYoYAnalysis(ticker string, prices []db.PriceData, stats Stats, outputPath string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		return err
+	}
+
 	priceChart, err := createPriceChart(ticker, prices)
 	if err != nil {
 		return err
@@ -30,6 +36,10 @@ func PlotYoYAnalysis(ticker string, prices []db.PriceData, stats Stats, outputPa
 
 // PlotHistogram creates a separate histogram chart
 func PlotHistogram(ticker string, stats Stats, outputPath string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		return err
+	}
+
 	histChart, err := createHistogramChart(ticker, stats)
 	if err != nil {
 		return err
@@ -55,7 +65,7 @@ func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) 
 	// Set up log scale with fixed range
 	p.Y.Scale = plot.LogScale{}
 	p.Y.Min = 1
-	p.Y.Max = math.Pow(1.2, 15)
+	p.Y.Max = math.Pow(1.3, 15)
 
 	// Custom tick formatter for Y-axis (log scale)
 	p.Y.Tick.Marker = &logTickFormatter{}
@@ -79,8 +89,6 @@ func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) 
 		// Clip values to our Y-axis range
 		if normalizedPrice < p.Y.Min {
 			pts[i].Y = p.Y.Min
-		} else if normalizedPrice > math.Pow(1.2, 15) {
-			pts[i].Y = math.Pow(1.2, 15)
 		} else {
 			pts[i].Y = normalizedPrice
 		}
@@ -332,7 +340,7 @@ func createHistogramChart(ticker string, stats Stats) (*plot.Plot, error) {
 		Sigma: stats.StdDev,
 	}
 	normalFunc := plotter.NewFunction(normalDist.Prob)
-	normalFunc.Color = percentageToColor(stats.Mean, 0.4)
+	normalFunc.Color = percentageToColor(stats.Mean, 0.1)
 	normalFunc.Width = vg.Points(2)
 	p.Add(normalFunc)
 

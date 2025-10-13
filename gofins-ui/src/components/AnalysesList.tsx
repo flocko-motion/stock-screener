@@ -35,7 +35,7 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
         }
 
         try {
-            await analysisApi.remove(id);
+            await analysisApi.delete(id);
             // Refresh the list after deletion
             await fetchAnalyses();
         } catch (err) {

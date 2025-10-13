@@ -26,8 +26,8 @@ func NewServer(database *db.DB, port int) *Server {
 	mux.HandleFunc("/api/health", s.handleHealth)
 
 	// RESTful analysis endpoints
-	mux.HandleFunc("/api/analyses", s.handleAnalyses)  // GET (list) / POST (create)
-	mux.HandleFunc("/api/analysis/", s.handleAnalysis) // GET / PUT / DELETE on /api/analysis/{id}
+	mux.HandleFunc("/api/analyses", s.handleAnalyses)         // GET (list) / POST (create)
+	mux.HandleFunc("/api/analysis/", s.handleAnalysisRouting) // Route to specific handlers
 
 	// Wrap with CORS middleware
 	handler := corsMiddleware(mux)

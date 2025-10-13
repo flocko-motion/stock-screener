@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
@@ -43,6 +45,27 @@ func (s *Server) handleListAnalyses(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(packages)
+}
+
+// handleAnalysisRouting routes requests to appropriate handlers
+func (s *Server) handleAnalysisRouting(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
+
+	// Route to /results endpoint
+	if strings.Contains(path, "/results") {
+		s.handleAnalysisResults(w, r)
+		return
+	}
+
+	if strings.Contains(path, fmt.Sprintf("/%s/", analysis.PlotTypeHistogram)) {
+		s.handleAnalysisChart(w, r, analysis.PlotTypeHistogram)
+		return
+	} else if strings.Contains(path, fmt.Sprintf("/%s/", analysis.PlotTypeChart)) {
+		s.handleAnalysisChart(w, r, analysis.PlotTypeChart)
+		return
+	}
+	// Default: handle package operations (GET/PUT/DELETE)
+	s.handleAnalysis(w, r)
 }
 
 // handleAnalysis handles REST operations on /api/analysis/{id}
@@ -125,4 +148,63 @@ func (s *Server) handleDeleteAnalysis(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleAnalysisResults retrieves all results for an analysis package
+// GET /api/analysis/{id}/results
+func (s *Server) handleAnalysisResults(w http.ResponseWriter, r *http.Request) {
+	// Extract packageID from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
+	path = strings.TrimSuffix(path, "/results")
+	packageID := strings.TrimSuffix(path, "/")
+
+	if packageID == "" {
+		http.Error(w, "Package ID required", http.StatusBadRequest)
+		return
+	}
+
+	results, err := s.db.GetAnalysisResults(packageID)
+	if err != nil {
+		http.Error(w, "Failed to get results: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return empty array instead of null
+	if results == nil {
+		results = []db.AnalysisResult{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
+}
+
+// handleAnalysisChart serves PNG chart images
+// GET /api/analysis/{id}/chart/{ticker}
+func (s *Server) handleAnalysisChart(w http.ResponseWriter, r *http.Request, plotType analysis.PlotType) {
+	// Extract packageID and ticker from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
+	parts := strings.Split(path, fmt.Sprintf("/%s/", plotType))
+
+	if len(parts) != 2 {
+		http.Error(w, "Invalid path format", http.StatusBadRequest)
+		return
+	}
+
+	packageID := parts[0]
+	ticker := strings.TrimSuffix(parts[1], "/")
+	packageID = strings.ReplaceAll(packageID, "..", "")
+	ticker = strings.ReplaceAll(ticker, "..", "")
+
+	// Construct chart path
+	chartPath := analysis.PathPlot(packageID, plotType, ticker)
+
+	// Check if file exists
+	if _, err := os.Stat(chartPath); os.IsNotExist(err) {
+		http.Error(w, "Chart not found", http.StatusNotFound)
+		return
+	}
+
+	// Serve the PNG file
+	w.Header().Set("Content-Type", "image/png")
+	http.ServeFile(w, r, chartPath)
 }

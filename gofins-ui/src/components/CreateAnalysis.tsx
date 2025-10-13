@@ -13,6 +13,7 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
     const [timeFrom, setTimeFrom] = useState('2009');
     const [timeTo, setTimeTo] = useState('');
     const [mcapMin, setMcapMin] = useState('100000000');
+    const [inceptionMax, setInceptionMax] = useState('');
     const [histMin, setHistMin] = useState('-80');
     const [histMax, setHistMax] = useState('80');
     const [histBins, setHistBins] = useState('100');
@@ -40,17 +41,25 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
                 hist_min: histMin ? parseFloat(histMin) : undefined,
                 hist_max: histMax ? parseFloat(histMax) : undefined,
                 mcap_min: mcapMin || undefined,
+                inception_max: inceptionMax || undefined,
             };
 
             const result = await analysisApi.create(request);
             console.log('Analysis created:', result);
 
-            // Open the new analysis tab and close the create tab
+            // Open the new analysis tab first
             if (onAnalysisCreated) {
+                console.log('Opening analysis tab:', result.package_id, name.trim());
                 onAnalysisCreated(result.package_id, name.trim());
-            }
-            if (onCancel) {
-                onCancel();
+
+                // Close the create tab after React has processed the state updates
+                if (onCancel) {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            onCancel();
+                        });
+                    });
+                }
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create analysis');
@@ -67,7 +76,7 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
 
                 <form className="space-y-8" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
+                        <div className="md:col-span-2">
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Analysis Name <span className="text-red-500">*</span>
                             </label>
@@ -84,21 +93,6 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
                             {error && (
                                 <p className="mt-2 text-sm text-red-600">{error}</p>
                             )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                Time Period
-                            </label>
-                            <select
-                                className="form-input w-full"
-                                value={interval}
-                                onChange={(e) => setInterval(e.target.value)}
-                            >
-                                <option value="weekly">Weekly</option>
-                                <option value="daily">Daily</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
                         </div>
 
                         <div>
@@ -149,26 +143,55 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
 
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                Max Inception Date (YYYY/YYYY-MM/YYYY-MM-DD)
+                            </label>
+                            <input
+                                type="text"
+                                className="form-input w-full"
+                                placeholder="Leave empty for no filter"
+                                value={inceptionMax}
+                                onChange={(e) => setInceptionMax(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                Time Period
+                            </label>
+                            <select
+                                className="form-input w-full"
+                                value={interval}
+                                onChange={(e) => setInterval(e.target.value)}
+                            >
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Histogram Min, Max, Bins
                             </label>
                             <div className="flex space-x-3">
                                 <input
                                     type="number"
-                                    className="form-input flex-1"
+                                    className="form-input flex-1 min-w-0"
                                     placeholder="Min %"
                                     value={histMin}
                                     onChange={(e) => setHistMin(e.target.value)}
                                 />
                                 <input
                                     type="number"
-                                    className="form-input flex-1"
+                                    className="form-input flex-1 min-w-0"
                                     placeholder="Max %"
                                     value={histMax}
                                     onChange={(e) => setHistMax(e.target.value)}
                                 />
                                 <input
                                     type="number"
-                                    className="form-input flex-1"
+                                    className="form-input flex-1 min-w-0"
                                     placeholder="Bins"
                                     value={histBins}
                                     onChange={(e) => setHistBins(e.target.value)}
