@@ -25,7 +25,6 @@ export default function FavoritesList({ onOpenSymbol }: FavoritesListProps) {
                     onClick={handleNewList}
                     className="form-button-primary flex items-center gap-2"
                 >
-                    <PlusIcon className="icon-fixed" style={{ width: '16px', height: '16px' }} />
                     <span>New List</span>
                 </button>
             </div>
@@ -84,9 +83,15 @@ export default function FavoritesList({ onOpenSymbol }: FavoritesListProps) {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button
                                             onClick={() => onOpenSymbol?.(stock.symbol)}
-                                            className="text-blue-600 hover:text-blue-900"
+                                            className="form-button-primary"
                                         >
                                             View
+                                        </button>
+                                        <button
+                                            onClick={() => onOpenSymbol?.(stock.symbol)}
+                                            className="form-button-danger"
+                                        >
+                                            Delete
                                         </button>
                                     </td>
                                 </tr>

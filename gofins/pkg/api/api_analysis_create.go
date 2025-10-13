@@ -140,7 +140,7 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("[API] Creating analysis package with config: %+v\n", config)
-	
+
 	packageID, err := analysis.CreatePackage(s.db, config)
 	if err != nil {
 		fmt.Println("[API] Failed to create package:", err)
@@ -154,9 +154,9 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 		PackageID: packageID,
 		Status:    "processing",
 	}
-	
+
 	fmt.Printf("[API] Sending response: %+v\n", response)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		fmt.Println("[API] Failed to encode response:", err)

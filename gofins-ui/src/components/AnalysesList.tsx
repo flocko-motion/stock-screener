@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { BeakerIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { analysisApi } from '../services/api';
 import type { AnalysisPackage } from '../services/api';
 
@@ -13,22 +12,36 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchAnalyses = async () => {
-            try {
-                setLoading(true);
-                const data = await analysisApi.list();
-                setAnalyses(data || []); // Handle null response
-                setError(null);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load analyses');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchAnalyses = async () => {
+        try {
+            setLoading(true);
+            const data = await analysisApi.list();
+            setAnalyses(data || []); // Handle null response
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load analyses');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchAnalyses();
     }, []);
+
+    const handleDelete = async (id: string, name: string) => {
+        if (!window.confirm(`Are you sure you want to delete the analysis "${name}"?`)) {
+            return;
+        }
+
+        try {
+            await analysisApi.remove(id);
+            // Refresh the list after deletion
+            await fetchAnalyses();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Failed to delete analysis');
+        }
+    };
 
     if (loading) {
         return (
@@ -59,7 +72,6 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
                     onClick={onOpenCreate}
                     className="form-button-primary flex items-center gap-2"
                 >
-                    <PlusIcon className="icon-fixed" style={{ width: '16px', height: '16px' }} />
                     <span>New Analysis</span>
                 </button>
             </div>
@@ -119,9 +131,15 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button
                                                 onClick={() => onOpenAnalysis?.(analysis.ID, analysis.Name)}
-                                                className="text-blue-600 hover:text-blue-900"
+                                                className="form-button-primary"
                                             >
                                                 View
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(analysis.ID, analysis.Name)}
+                                                className="form-button-danger"
+                                            >
+                                                Delete
                                             </button>
                                         </td>
                                     </tr>

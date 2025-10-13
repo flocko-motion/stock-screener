@@ -43,7 +43,7 @@ export default function Layout() {
                 id: analysisId,
                 type: 'analysis',
                 title: analysisName,
-                data: { analysisId }
+                data: { id: analysisId }
             };
             setTabs([...tabs, newTab]);
             setActiveTabId(analysisId);

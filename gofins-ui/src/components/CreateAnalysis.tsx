@@ -45,9 +45,12 @@ export default function CreateAnalysis({ onAnalysisCreated, onCancel }: CreateAn
             const result = await analysisApi.create(request);
             console.log('Analysis created:', result);
 
-            // Open the new analysis tab
+            // Open the new analysis tab and close the create tab
             if (onAnalysisCreated) {
                 onAnalysisCreated(result.package_id, name.trim());
+            }
+            if (onCancel) {
+                onCancel();
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create analysis');

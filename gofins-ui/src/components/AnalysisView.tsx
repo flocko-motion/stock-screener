@@ -13,31 +13,51 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!data?.id) return;
+        if (!data?.id) {
+            setLoading(false);
+            return;
+        }
+
+        let interval: number | null = null;
 
         const fetchAnalysis = async () => {
             try {
+                console.log('[AnalysisView] Fetching analysis:', data.id);
                 const result = await analysisApi.get(data.id);
+                console.log('[AnalysisView] Received analysis:', result);
                 setAnalysis(result);
                 setError('');
+
+                // Stop polling if status is no longer "processing"
+                if (result.Status !== 'processing' && interval) {
+                    console.log('[AnalysisView] Status is', result.Status, '- stopping poll');
+                    clearInterval(interval);
+                    interval = null;
+                }
             } catch (err) {
+                console.error('[AnalysisView] Error fetching analysis:', err);
                 setError(err instanceof Error ? err.message : 'Failed to load analysis');
             } finally {
                 setLoading(false);
             }
         };
 
+        // Initial fetch
         fetchAnalysis();
 
-        // Auto-refresh every 2 seconds if status is "processing"
-        const interval = setInterval(() => {
-            if (analysis?.Status === 'processing') {
-                fetchAnalysis();
-            }
+        // Set up polling interval (poll every 2 seconds)
+        interval = setInterval(() => {
+            console.log('[AnalysisView] Polling...');
+            fetchAnalysis();
         }, 2000);
 
-        return () => clearInterval(interval);
-    }, [data?.id, analysis?.Status]);
+        return () => {
+            console.log('[AnalysisView] Cleaning up interval');
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
+    }, [data?.id]);
 
     if (loading) {
         return (
