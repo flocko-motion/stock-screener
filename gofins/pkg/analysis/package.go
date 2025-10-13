@@ -19,23 +19,6 @@ type AnalysisPackageConfig struct {
 	InceptionMax *time.Time
 }
 
-// AnalysisPackage represents stored analysis metadata
-type AnalysisPackage struct {
-	ID           string
-	Name         string
-	CreatedAt    time.Time
-	Interval     string
-	TimeFrom     time.Time
-	TimeTo       time.Time
-	HistBins     int
-	HistMin      float64
-	HistMax      float64
-	McapMin      *int64
-	InceptionMax *time.Time
-	SymbolCount  int
-	Status       string
-}
-
 // AnalysisResult represents a single symbol's analysis result
 type AnalysisResult struct {
 	PackageID string

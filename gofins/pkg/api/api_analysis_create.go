@@ -27,6 +27,8 @@ type CreateAnalysisResponse struct {
 	Status    string `json:"status"`
 }
 
+// handleCreateAnalysis creates a new analysis package
+// POST /api/analyses
 func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

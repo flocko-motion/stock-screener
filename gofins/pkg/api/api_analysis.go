@@ -1,0 +1,128 @@
+package api
+
+import (
+	"encoding/json"
+	"net/http"
+	"strings"
+
+	"github.com/flocko-motion/gofins/pkg/analysis"
+	"github.com/flocko-motion/gofins/pkg/db"
+)
+
+// UpdateAnalysisRequest represents the request body for updating an analysis
+type UpdateAnalysisRequest struct {
+	Name string `json:"name"`
+}
+
+// handleAnalyses handles REST operations on /api/analyses
+// GET  /api/analyses - List all analyses
+// POST /api/analyses - Create new analysis
+func (s *Server) handleAnalyses(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.handleListAnalyses(w, r)
+	case http.MethodPost:
+		s.handleCreateAnalysis(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleListAnalyses lists all analysis packages
+func (s *Server) handleListAnalyses(w http.ResponseWriter, r *http.Request) {
+	packages, err := analysis.ListPackages(s.db)
+	if err != nil {
+		http.Error(w, "Failed to list analyses: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Ensure we return an empty array instead of null
+	if packages == nil {
+		packages = []db.AnalysisPackage{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(packages)
+}
+
+// handleAnalysis handles REST operations on /api/analysis/{id}
+// GET    /api/analysis/{id} - Get single analysis
+// PUT    /api/analysis/{id} - Update analysis (rename)
+// DELETE /api/analysis/{id} - Delete analysis
+func (s *Server) handleAnalysis(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
+	packageID := strings.TrimSuffix(path, "/")
+
+	if packageID == "" {
+		http.Error(w, "Package ID required", http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		s.handleGetAnalysis(w, r, packageID)
+	case http.MethodPut:
+		s.handleUpdateAnalysis(w, r, packageID)
+	case http.MethodDelete:
+		s.handleDeleteAnalysis(w, r, packageID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleGetAnalysis retrieves a single analysis package
+func (s *Server) handleGetAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
+	pkg, err := analysis.GetPackage(s.db, packageID)
+	if err != nil {
+		http.Error(w, "Failed to get analysis: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if pkg == nil {
+		http.Error(w, "Analysis not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(pkg)
+}
+
+// handleUpdateAnalysis updates an analysis package (currently just name)
+func (s *Server) handleUpdateAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
+	var req UpdateAnalysisRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" {
+		http.Error(w, "Name is required", http.StatusBadRequest)
+		return
+	}
+
+	pkg, err := analysis.UpdatePackageName(s.db, packageID, req.Name)
+	if err != nil {
+		http.Error(w, "Failed to update analysis: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if pkg == nil {
+		http.Error(w, "Analysis not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(pkg)
+}
+
+// handleDeleteAnalysis deletes an analysis package
+func (s *Server) handleDeleteAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
+	err := analysis.DeletePackage(s.db, packageID)
+	if err != nil {
+		http.Error(w, "Failed to delete analysis: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

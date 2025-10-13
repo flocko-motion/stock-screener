@@ -117,6 +117,13 @@ func (db *DB) ListAnalysisPackages() ([]AnalysisPackage, error) {
 	return packages, rows.Err()
 }
 
+// UpdateAnalysisPackageName updates the name of a package
+func (db *DB) UpdateAnalysisPackageName(packageID string, name string) error {
+	query := `UPDATE analysis_packages SET name = $1 WHERE id = $2`
+	_, err := db.conn.Exec(query, name, packageID)
+	return err
+}
+
 // DeleteAnalysisPackage deletes a package (CASCADE will delete results)
 func (db *DB) DeleteAnalysisPackage(packageID string) error {
 	query := `DELETE FROM analysis_packages WHERE id = $1`

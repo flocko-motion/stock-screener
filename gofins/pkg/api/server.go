@@ -24,14 +24,37 @@ func NewServer(database *db.DB, port int) *Server {
 	mux.HandleFunc("/api/symbols", s.handleListSymbols)
 	mux.HandleFunc("/api/prices/monthly/", s.handleGetMonthlyPrices)
 	mux.HandleFunc("/api/health", s.handleHealth)
-	mux.HandleFunc("/api/analysis/create", s.handleCreateAnalysis)
+
+	// RESTful analysis endpoints
+	mux.HandleFunc("/api/analyses", s.handleAnalyses)  // GET (list) / POST (create)
+	mux.HandleFunc("/api/analysis/", s.handleAnalysis) // GET / PUT / DELETE on /api/analysis/{id}
+
+	// Wrap with CORS middleware
+	handler := corsMiddleware(mux)
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: mux,
+		Handler: handler,
 	}
 
 	return s
+}
+
+// corsMiddleware adds CORS headers to allow frontend access
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) Start(ctx context.Context) error {
