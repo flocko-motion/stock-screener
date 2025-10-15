@@ -117,7 +117,7 @@ export default function Layout() {
                 <div className="flex items-center">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                            <span className="text-blue-600">F</span>INS
+                            FINS
                         </h1>
                         <p className="text-sm text-gray-600 font-medium">Financial Information & Notes System</p>
                     </div>

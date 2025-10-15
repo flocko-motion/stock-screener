@@ -1,12 +1,22 @@
 package analysis
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
 
+func TestRemoveOutliers(t *testing.T) {
+	values := []float64{-171099218523, 2, 4, 6, 8, 10, 21323772474823882383232}
+	values = RemoveOutliers(values, 90)
+	fmt.Println(values)
+	if len(values) != 5 {
+		t.Errorf("Expected 5 values, got %d", len(values))
+	}
+}
+
 func TestCalculate(t *testing.T) {
-	values := []float64{2, 4, 6, 8, 10}
+	values := []float64{2, 4, 6, 8, 10, 23882382382823832}
 	config := HistogramConfig{
 		NumBins: 5,
 		Min:     0,

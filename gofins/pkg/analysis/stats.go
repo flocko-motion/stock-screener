@@ -68,9 +68,10 @@ func Calculate(values []float64, histConfig HistogramConfig) Stats {
 
 // HistogramConfig defines the configuration for histogram generation
 type HistogramConfig struct {
-	NumBins int     // Number of bins
-	Min     float64 // Minimum value (values below go to first bin)
-	Max     float64 // Maximum value (values above go to last bin)
+	NumBins    int     // Number of bins
+	Min        float64 // Minimum value (values below go to first bin)
+	Max        float64 // Maximum value (values above go to last bin)
+	Percentile int     // which percentile to use for outlier removal
 }
 
 // HistogramBin represents a single bin in a histogram
@@ -104,6 +105,12 @@ func addToHistogram(bins []HistogramBin, value float64, config HistogramConfig) 
 		return
 	}
 
+	// Check for invalid values (NaN, Inf)
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		// Skip invalid values
+		return
+	}
+
 	binWidth := (config.Max - config.Min) / float64(config.NumBins)
 	var binIndex int
 
@@ -116,7 +123,10 @@ func addToHistogram(bins []HistogramBin, value float64, config HistogramConfig) 
 	} else {
 		// Normal case: calculate bin index
 		binIndex = int((value - config.Min) / binWidth)
-		// Clamp to valid range (handles floating point edge cases)
+		// Clamp to valid range (handles floating point edge cases and outliers)
+		if binIndex < 0 {
+			binIndex = 0
+		}
 		if binIndex >= config.NumBins {
 			binIndex = config.NumBins - 1
 		}

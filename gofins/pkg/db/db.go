@@ -317,9 +317,8 @@ func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval Pric
 	return result, rows.Err()
 }
 
-// GetAllTickers returns all ticker symbols in the database
 // GetFilteredTickers returns tickers matching filters (for analysis packages)
-func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time, interval PriceInterval) ([]string, error) {
+func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]string, error) {
 	// Be lenient on price table presence: allow any interval that has data.
 	// Still prioritize/reflect requested interval in logs.
 	query := `
@@ -330,6 +329,7 @@ func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time, interv
           AND ($3::TIMESTAMP IS NULL OR s.inception <= $3)
           AND s.last_price_status = $4
           AND s.last_price_update IS NOT NULL
+  		  AND s.exchange NOT IN ('OTC','PINK', 'GREY', 'OTCQB', 'OTCQX')
         ORDER BY s.ticker
     `
 

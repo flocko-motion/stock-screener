@@ -184,3 +184,60 @@ func (db *DB) DeleteAnalysisPackage(packageID string) error {
 	_, err := db.conn.Exec(query, packageID)
 	return err
 }
+
+// SymbolProfile represents profile information for a symbol
+type SymbolProfile struct {
+	Ticker            string     `json:"ticker"`
+	Exchange          *string    `json:"exchange"`
+	Name              *string    `json:"name"`
+	Type              *string    `json:"type"`
+	Currency          *string    `json:"currency"`
+	Sector            *string    `json:"sector"`
+	Industry          *string    `json:"industry"`
+	Country           *string    `json:"country"`
+	Description       *string    `json:"description"`
+	Website           *string    `json:"website"`
+	ISIN              *string    `json:"isin"`
+	Inception         *time.Time `json:"inception"`
+	IsActivelyTrading *bool      `json:"is_actively_trading"`
+	MarketCap         *int64     `json:"market_cap"`
+}
+
+// GetSymbolProfile retrieves profile information for a symbol
+func (db *DB) GetSymbolProfile(ticker string) (*SymbolProfile, error) {
+	query := `
+		SELECT 
+			ticker, exchange, name, type, currency, sector, industry, 
+			country, description, website, isin, inception, 
+			is_actively_trading, market_cap
+		FROM symbols 
+		WHERE ticker = $1
+	`
+
+	var profile SymbolProfile
+	err := db.conn.QueryRow(query, ticker).Scan(
+		&profile.Ticker,
+		&profile.Exchange,
+		&profile.Name,
+		&profile.Type,
+		&profile.Currency,
+		&profile.Sector,
+		&profile.Industry,
+		&profile.Country,
+		&profile.Description,
+		&profile.Website,
+		&profile.ISIN,
+		&profile.Inception,
+		&profile.IsActivelyTrading,
+		&profile.MarketCap,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // Symbol not found
+		}
+		return nil, err
+	}
+
+	return &profile, nil
+}

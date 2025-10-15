@@ -1,7 +1,6 @@
 package analysis
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,6 +27,7 @@ type AnalysisPackageConfig struct {
 	InceptionMax *time.Time
 	Tickers      []string
 	PathPlots    string
+	SaveToDB     bool // If true, save results to database during batch analysis
 }
 
 // AnalysisResult represents a single symbol's analysis result
@@ -110,7 +110,7 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 	}
 
 	logf("%s Fetching filtered tickers...\n", config.PackageID)
-	config.Tickers, err = database.GetFilteredTickers(config.McapMin, config.InceptionMax, config.Interval)
+	config.Tickers, err = database.GetFilteredTickers(config.McapMin, config.InceptionMax)
 	if err != nil {
 		logf("ERROR: Failed to get filtered tickers: %v\n", err)
 		database.UpdateAnalysisPackageStatus(config.PackageID, "failed", 0)
@@ -128,6 +128,7 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 	}
 
 	logf("%s Starting batch analysis of %d symbols...\n", config.PackageID, len(config.Tickers))
+	config.SaveToDB = true // Enable database saving
 	startTime := time.Now()
 	results, err := AnalyzeBatch(database, config)
 	if err != nil {
@@ -142,26 +143,7 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 		logf("%s Throughput: %.1f symbols/sec\n", config.PackageID, float64(len(results))/elapsed.Seconds())
 	}
 
-	logf("%s Saving %d results to database...\n", config.PackageID, len(results))
-	savedCount := 0
-	for i, result := range results {
-		histogramJSON, _ := json.Marshal(result.Stats.Histogram)
-
-		database.SaveAnalysisResult(
-			config.PackageID, result.Ticker,
-			result.Stats.Count, result.Stats.Mean, result.Stats.StdDev, result.Stats.Variance,
-			result.Stats.Min, result.Stats.Max, histogramJSON,
-		)
-
-		savedCount++
-		if (i+1)%100 == 0 {
-			logf("%s Progress: %d/%d results saved (%.1f%%)\n",
-				config.PackageID,
-				savedCount, len(results), float64(savedCount)/float64(len(results))*100)
-		}
-	}
-
-	logf("%s Package processing complete: %d results saved\n", config.PackageID, len(results))
+	logf("%s Package processing complete: %d results\n", config.PackageID, len(results))
 	database.UpdateAnalysisPackageStatus(config.PackageID, "ready", len(results))
 	logf("%s Package %s is now ready\n", config.PackageID, config.PackageID)
 }

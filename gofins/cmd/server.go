@@ -38,7 +38,7 @@ var serverCmd = &cobra.Command{
 		fmt.Println("✓ Database connected")
 
 		// init FMP
-		fmpClient, err := fmp.NewClient(apiKeyPath)
+		fmpClient, err := fmp.NewClient(&apiKeyPath)
 		if err != nil {
 			return fmt.Errorf("failed to create FMP client: %w", err)
 		}
@@ -70,6 +70,6 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	serverCmd.Flags().StringVar(&apiKeyPath, "api-key", "~/.fins/config/financialmodelingprep.key",
+	serverCmd.Flags().StringVar(&apiKeyPath, "api-key", fmp.ApiKeyPathDefault,
 		"Path to FMP API key file")
 }

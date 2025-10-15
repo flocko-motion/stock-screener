@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/files"
 	"github.com/flocko-motion/gofins/pkg/ratelimit"
 )
@@ -23,6 +24,7 @@ const (
 	RequestsPerMinute = 300
 	MaxRetries        = 5
 	BaseRetryDelay    = 3 * time.Second
+	ApiKeyPathDefault = "~/.fins/config/financialmodelingprep.key"
 )
 
 // Client handles all FMP API interactions
@@ -33,10 +35,12 @@ type Client struct {
 }
 
 // NewClient creates a new FMP API client
-func NewClient(apiKeyPath string) (*Client, error) {
-
+func NewClient(apiKeyPath *string) (*Client, error) {
+	if apiKeyPath == nil {
+		apiKeyPath = f.Ptr(ApiKeyPathDefault)
+	}
 	// Read API key from file
-	apiKey, err := readAPIKey(apiKeyPath)
+	apiKey, err := readAPIKey(*apiKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read API key: %w", err)
 	}

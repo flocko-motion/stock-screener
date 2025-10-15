@@ -25,6 +25,23 @@ export interface AnalysisResult {
     inception?: string;
 }
 
+export interface SymbolProfile {
+    ticker: string;
+    exchange?: string;
+    name?: string;
+    type?: string;
+    currency?: string;
+    sector?: string;
+    industry?: string;
+    country?: string;
+    description?: string;
+    website?: string;
+    isin?: string;
+    inception?: string;
+    is_actively_trading?: boolean;
+    market_cap?: number;
+}
+
 export interface CreateAnalysisRequest {
     name: string;
     interval?: string;
@@ -101,6 +118,15 @@ export const analysisApi = {
         const response = await fetch(`${API_BASE_URL}/analysis/${id}/results`);
         if (!response.ok) {
             throw new Error('Failed to fetch analysis results');
+        }
+        return response.json();
+    },
+
+    // Get symbol profile
+    getProfile: async (id: string, ticker: string): Promise<SymbolProfile> => {
+        const response = await fetch(`${API_BASE_URL}/analysis/${id}/profile/${ticker}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch symbol profile');
         }
         return response.json();
     },

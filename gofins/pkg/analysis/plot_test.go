@@ -18,11 +18,14 @@ func TestPlot(t *testing.T) {
 	to := time.Now()
 	from := time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	const symbol = "AIG"
+	const symbol = "NVA"
 
 	prices, err := database.GetWeeklyPrices(symbol, from, to)
 	if err != nil {
 		t.Fatalf("Failed to fetch prices: %v", err)
+	}
+	for i, price := range prices {
+		t.Logf("%d: %f", i, *price.YoY)
 	}
 
 	if len(prices) == 0 {
@@ -44,10 +47,10 @@ func TestPlot(t *testing.T) {
 		stats.Count, stats.Mean, stats.StdDev, stats.Min, stats.Max)
 
 	// Generate plots
-	pricePath := "/tmp/aapl_price_chart.png"
-	histPath := "/tmp/aapl_histogram.png"
+	pricePath := "/tmp/test_chart.png"
+	histPath := "/tmp/test_hist.png"
 
-	if err := PlotYoYAnalysis(symbol, prices, stats, pricePath); err != nil {
+	if err := PlotYoYAnalysis(from, to, symbol, prices, stats, pricePath); err != nil {
 		t.Fatalf("Failed to generate price plot: %v", err)
 	}
 

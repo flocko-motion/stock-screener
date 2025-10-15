@@ -1,9 +1,11 @@
 package analysis
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
 )
@@ -28,10 +30,39 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 	var wg sync.WaitGroup
 	results := make([]SymbolStats, 0, len(config.Tickers))
 	processed := 0
+	totalTickers := len(config.Tickers)
+
+	// Start a progress reporter goroutine
+	progressTicker := time.NewTicker(2 * time.Second)
+	defer progressTicker.Stop()
+
+	go func() {
+		for range progressTicker.C {
+			mu.Lock()
+			currentProcessed := processed
+			currentResults := len(results)
+			mu.Unlock()
+
+			if currentProcessed > 0 {
+				logf("%s Progress: %d/%d processed, %d results (%.1f%%)\n",
+					config.PackageID,
+					currentProcessed, totalTickers, currentResults, float64(currentProcessed)/float64(totalTickers)*100)
+				
+				// Update package status in database with current progress
+				database.UpdateAnalysisPackageStatus(config.PackageID, "processing", currentResults)
+			}
+		}
+	}()
+
 	for _, ticker := range config.Tickers {
 		ticker := ticker // Capture for goroutine
 		prices, ok := pricesMap[ticker]
-		if !ok || len(prices) == 0 {
+		// if there's no price data in the whole first year of our scope, then we ignore the symbol
+		// background: sometimes price data starts much later than IPO mentioned in profile
+		if !ok || len(prices) == 0 || prices[0].Date.After(config.TimeFrom.AddDate(1, 0, 0)) {
+			mu.Lock()
+			processed++
+			mu.Unlock()
 			continue
 		}
 
@@ -41,20 +72,28 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 
 			stats := AnalyzeYoY(prices, config.HistConfig)
 
-			mu.Lock()
-			processed++
-			currentProcessed := processed
-			mu.Unlock()
-
 			// Only include symbols with YoY data
 			if stats.Count > 0 {
 				if config.PathPlots != "" {
-					if err = PlotYoYAnalysis(ticker, prices, stats, filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeChart))); err != nil {
+					if err = PlotYoYAnalysis(config.TimeFrom, config.TimeTo,
+						ticker, prices, stats,
+						filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeChart)),
+					); err != nil {
 						logf("%s ERROR: Failed to generate plot: %v\n", config.PackageID, err)
 					}
 					if err = PlotHistogram(ticker, stats, filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeHistogram))); err != nil {
 						logf("%s ERROR: Failed to generate histogram: %v\n", config.PackageID, err)
 					}
+				}
+
+				// Save to database immediately if requested
+				if config.SaveToDB {
+					histogramJSON, _ := json.Marshal(stats.Histogram)
+					database.SaveAnalysisResult(
+						config.PackageID, ticker,
+						stats.Count, stats.Mean, stats.StdDev, stats.Variance,
+						stats.Min, stats.Max, histogramJSON,
+					)
 				}
 
 				mu.Lock()
@@ -65,20 +104,18 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 				mu.Unlock()
 			}
 
-			// Progress reporting every 100 symbols
-			if currentProcessed%100 == 0 {
-				mu.Lock()
-				logf("%s Progress: %d/%d processed, %d with YoY data (%.1f%%)\n",
-					config.PackageID,
-					currentProcessed, len(config.Tickers), len(results), float64(currentProcessed)/float64(len(config.Tickers))*100)
-				mu.Unlock()
-			}
+			mu.Lock()
+			processed++
+			mu.Unlock()
 		}()
 	}
 
 	wg.Wait()
 
 	logf("%s Batch analysis complete: %d/%d symbols with YoY data\n", config.PackageID, len(results), len(config.Tickers))
+	if config.SaveToDB {
+		logf("%s All results saved to database\n", config.PackageID)
+	}
 
 	return results, nil
 }

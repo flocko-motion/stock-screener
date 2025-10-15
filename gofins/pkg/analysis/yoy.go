@@ -15,6 +15,5 @@ func AnalyzeYoY(prices []db.PriceData, histConfig HistogramConfig) Stats {
 		}
 	}
 
-	// Calculate all statistics in a single pass
-	return Calculate(yoyValues, histConfig)
+	return Calculate(BalancedYoYOutlierRemoval(yoyValues), histConfig)
 }

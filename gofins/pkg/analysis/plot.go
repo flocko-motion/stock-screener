@@ -16,13 +16,15 @@ import (
 	"gonum.org/v1/plot/vg/draw"
 )
 
+const growthLineMax = 0.5
+
 // PlotYoYAnalysis creates a price chart with proper axis formatting
-func PlotYoYAnalysis(ticker string, prices []db.PriceData, stats Stats, outputPath string) error {
+func PlotYoYAnalysis(timeFrom, timeTo time.Time, ticker string, prices []db.PriceData, stats Stats, outputPath string) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
 		return err
 	}
 
-	priceChart, err := createPriceChart(ticker, prices)
+	priceChart, err := createPriceChart(timeFrom, timeTo, ticker, prices)
 	if err != nil {
 		return err
 	}
@@ -52,7 +54,7 @@ func PlotHistogram(ticker string, stats Stats, outputPath string) error {
 	return histChart.Save(width, height, outputPath)
 }
 
-func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) {
+func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []db.PriceData) (*plot.Plot, error) {
 	p := plot.New()
 	p.Title.Text = fmt.Sprintf("%s - Normalized Price (Log Scale)", ticker)
 	p.X.Label.Text = "Date"
@@ -65,7 +67,9 @@ func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) 
 	// Set up log scale with fixed range
 	p.Y.Scale = plot.LogScale{}
 	p.Y.Min = 1
-	p.Y.Max = math.Pow(1.3, 15)
+
+	yearsElapsed := float64(timeTo.Unix()-timeFrom.Unix()) / (365.25 * 24 * 3600)
+	p.Y.Max = math.Pow(1.0+growthLineMax, yearsElapsed)
 
 	// Custom tick formatter for Y-axis (log scale)
 	p.Y.Tick.Marker = &logTickFormatter{}
@@ -83,16 +87,23 @@ func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) 
 	firstPrice := prices[0].Close
 	pts := make(plotter.XYs, len(prices))
 
-	for i, price := range prices {
-		pts[i].X = float64(price.Date.Unix())
+	iWrite := 0
+	for _, price := range prices {
 		normalizedPrice := price.Close / firstPrice
 		// Clip values to our Y-axis range
 		if normalizedPrice < p.Y.Min {
-			pts[i].Y = p.Y.Min
+			pts[iWrite].Y = p.Y.Min
+			// continue
+		} else if normalizedPrice > p.Y.Max {
+			pts[iWrite].Y = p.Y.Max
+			// continue
 		} else {
-			pts[i].Y = normalizedPrice
+			pts[iWrite].Y = normalizedPrice
 		}
+		pts[iWrite].X = float64(price.Date.Unix())
+		iWrite++
 	}
+	pts = pts[0:iWrite]
 
 	line, err := plotter.NewLine(pts)
 	if err != nil {
@@ -105,7 +116,7 @@ func createPriceChart(ticker string, prices []db.PriceData) (*plot.Plot, error) 
 	p.Add(line)
 
 	// Add constant growth lines
-	addGrowthLines(p, prices)
+	addGrowthLines(timeFrom, timeTo, p, prices)
 
 	return p, nil
 }
@@ -234,12 +245,16 @@ func (s ShadedRegion) Plot(c draw.Canvas, plt *plot.Plot) {
 func percentageToColor(percentage float64, lightness float64) color.RGBA {
 	var hue float64
 
+	const (
+		lowerBound float64 = 0
+		upperBound float64 = 50
+	)
 	switch {
-	case percentage <= 0:
+	case percentage <= lowerBound:
 		hue = 0 // Red
-	case percentage <= 30:
+	case percentage <= upperBound:
 		// Linear interpolation from red (0) to cyan (180)
-		hue = (percentage / 30) * 180
+		hue = (percentage / upperBound) * 180
 	default:
 		hue = 180 // Cyan (same as 30%)
 	}
@@ -357,10 +372,17 @@ func createHistogramChart(ticker string, stats Stats) (*plot.Plot, error) {
 	p.Add(plotter.NewGrid())
 
 	// Add vertical lines for mean and stddev
-	addVerticalLineWithLabel(p, stats.Mean, percentageToColor(stats.Mean, 0.2), fmt.Sprintf("%.1f%%", stats.Mean), vg.Points(5))                                // Thicker mean line with value
-	addVerticalLineWithLabel(p, stats.Mean+stats.StdDev, color.RGBA{R: 80, G: 80, B: 80, A: 255}, fmt.Sprintf("%.1f%%", stats.Mean+stats.StdDev), vg.Points(3)) // +σ with value
-	addVerticalLineWithLabel(p, stats.Mean-stats.StdDev, color.RGBA{R: 80, G: 80, B: 80, A: 255}, fmt.Sprintf("%.1f%%", stats.Mean-stats.StdDev), vg.Points(3)) // -σ with value
-	addVerticalLineWithDashes(p, 0, color.RGBA{R: 0, G: 0, B: 0, A: 255}, "Zero", vg.Points(2), nil)                                                            // Black solid line at x=0
+	if stats.Mean >= p.X.Min && stats.Mean <= p.X.Max {
+		addVerticalLineWithLabel(p, stats.Mean, percentageToColor(stats.Mean, 0.2), fmt.Sprintf("%.1f%%", stats.Mean), vg.Points(5)) // Thicker mean line with value
+	}
+	for _, i := range []float64{-1, +1} {
+		x := stats.Mean + (stats.StdDev * i)
+		if x < p.X.Min || x > p.X.Max {
+			continue
+		}
+		addVerticalLineWithLabel(p, x, color.RGBA{R: 80, G: 80, B: 80, A: 255}, fmt.Sprintf("%.1f%%", x), vg.Points(3))
+	}
+	addVerticalLineWithDashes(p, 0, color.RGBA{R: 0, G: 0, B: 0, A: 255}, "Zero", vg.Points(2), nil) // Black solid line at x=0
 
 	return p, nil
 }
@@ -411,21 +433,18 @@ func addVerticalLineWithDashes(p *plot.Plot, x float64, col color.Color, label s
 	p.Add(line)
 }
 
-func addGrowthLines(p *plot.Plot, prices []db.PriceData) {
+func addGrowthLines(timeFrom, timeTo time.Time, p *plot.Plot, prices []db.PriceData) {
 	if len(prices) == 0 {
 		return
 	}
 
-	startTime := float64(prices[0].Date.Unix())
+	startTime := float64(timeFrom.Unix())
 
 	// Growth rates with their colors using the HSL color function
 	lightness := 0.4
-	growthConfig := map[float64]color.Color{
-		0.05: percentageToColor(5.0, lightness),  // 5% - orange
-		0.10: percentageToColor(10.0, lightness), // 10% - yellow
-		0.15: percentageToColor(15.0, lightness), // 15% - lime
-		0.20: percentageToColor(20.0, lightness), // 20% - green
-		0.25: percentageToColor(25.0, lightness), // 25% - cyan
+	growthConfig := map[float64]color.Color{}
+	for i := float64(0.05); i <= growthLineMax; i += 0.05 {
+		growthConfig[i] = percentageToColor(i*100, lightness)
 	}
 
 	for rate, col := range growthConfig {

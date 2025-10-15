@@ -57,6 +57,12 @@ func (s *Server) handleAnalysisRouting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Route to /profile endpoint
+	if strings.Contains(path, "/profile/") {
+		s.handleSymbolProfile(w, r)
+		return
+	}
+
 	if strings.Contains(path, fmt.Sprintf("/%s/", analysis.PlotTypeHistogram)) {
 		s.handleAnalysisChart(w, r, analysis.PlotTypeHistogram)
 		return
@@ -207,4 +213,37 @@ func (s *Server) handleAnalysisChart(w http.ResponseWriter, r *http.Request, plo
 	// Serve the PNG file
 	w.Header().Set("Content-Type", "image/png")
 	http.ServeFile(w, r, chartPath)
+}
+
+// handleSymbolProfile retrieves profile information for a symbol
+// GET /api/analysis/{id}/profile/{ticker}
+func (s *Server) handleSymbolProfile(w http.ResponseWriter, r *http.Request) {
+	// Extract packageID and ticker from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
+	parts := strings.Split(path, "/profile/")
+
+	if len(parts) != 2 {
+		http.Error(w, "Invalid path format", http.StatusBadRequest)
+		return
+	}
+
+	packageID := parts[0]
+	ticker := strings.TrimSuffix(parts[1], "/")
+	packageID = strings.ReplaceAll(packageID, "..", "")
+	ticker = strings.ReplaceAll(ticker, "..", "")
+
+	// Get symbol profile from database
+	profile, err := s.db.GetSymbolProfile(ticker)
+	if err != nil {
+		http.Error(w, "Failed to get symbol profile: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if profile == nil {
+		http.Error(w, "Symbol not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(profile)
 }
