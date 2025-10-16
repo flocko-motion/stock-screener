@@ -337,7 +337,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                     <table className="min-w-full divide-y divide-gray-200 text-xs">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th onClick={() => handleSort('isFavorite')} className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase w-8 cursor-pointer hover:bg-gray-100">⭐ {sortColumn === 'isFavorite' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('isFavorite')} className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase w-8 cursor-pointer hover:bg-gray-100">☆ {sortColumn === 'isFavorite' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('userRating')} className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase w-12 cursor-pointer hover:bg-gray-100">Rating {sortColumn === 'userRating' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('ticker')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-24 cursor-pointer hover:bg-gray-100">Symbol {sortColumn === 'ticker' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('exchange')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Exch {sortColumn === 'exchange' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
@@ -357,7 +357,9 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                                     onClick={() => onOpenSymbol?.(symbol.ticker)}
                                 >
                                     <td className="px-2 py-1 text-center" onClick={(e) => toggleFavorite(symbol.ticker, e)}>
-                                        <span className={`cursor-pointer text-lg hover:scale-125 inline-block transition-transform ${symbol.isFavorite ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-300'}`}>⭐</span>
+                                        <span className={`cursor-pointer text-xl hover:scale-125 inline-block transition-transform ${symbol.isFavorite === true ? 'text-yellow-500' : 'text-gray-300'}`}>
+                                            {symbol.isFavorite === true ? '★' : '☆'}
+                                        </span>
                                     </td>
                                     <td className="px-2 py-1 text-center">
                                         {symbol.userRating != null ? (
