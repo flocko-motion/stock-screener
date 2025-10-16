@@ -436,8 +436,8 @@ func (db *DB) GetAllTickers() ([]string, error) {
 	return tickers, rows.Err()
 }
 
-// DeleteSymbolsNotInList removes symbols not in the provided list
-func (db *DB) DeleteSymbolsNotInList(keepTickers []string) error {
+// DeactivateSymbolsNotInList marks symbols not in the provided list as inactive
+func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
 	if len(keepTickers) == 0 {
 		return nil
 	}
@@ -454,26 +454,26 @@ func (db *DB) DeleteSymbolsNotInList(keepTickers []string) error {
 		keepSet[ticker] = true
 	}
 
-	// Find tickers to delete (in DB but not in keep list)
-	var toDelete []string
+	// Find tickers to deactivate (in DB but not in keep list)
+	var toDeactivate []string
 	for _, ticker := range allTickers {
 		if !keepSet[ticker] {
-			toDelete = append(toDelete, ticker)
+			toDeactivate = append(toDeactivate, ticker)
 		}
 	}
 
-	if len(toDelete) == 0 {
-		return nil // Nothing to delete
+	if len(toDeactivate) == 0 {
+		return nil // Nothing to deactivate
 	}
 
-	// Delete in batches to avoid parameter limit
+	// Deactivate in batches to avoid parameter limit
 	batchSize := 10000
-	for i := 0; i < len(toDelete); i += batchSize {
+	for i := 0; i < len(toDeactivate); i += batchSize {
 		end := i + batchSize
-		if end > len(toDelete) {
-			end = len(toDelete)
+		if end > len(toDeactivate) {
+			end = len(toDeactivate)
 		}
-		batch := toDelete[i:end]
+		batch := toDeactivate[i:end]
 
 		// Build placeholders for this batch
 		placeholders := make([]string, len(batch))
@@ -483,13 +483,13 @@ func (db *DB) DeleteSymbolsNotInList(keepTickers []string) error {
 			args[j] = ticker
 		}
 
-		query := fmt.Sprintf("DELETE FROM symbols WHERE ticker IN (%s)", strings.Join(placeholders, ","))
+		query := fmt.Sprintf("UPDATE symbols SET is_actively_trading = false WHERE ticker IN (%s)", strings.Join(placeholders, ","))
 		if _, err := db.conn.Exec(query, args...); err != nil {
-			return fmt.Errorf("failed to delete batch: %w", err)
+			return fmt.Errorf("failed to deactivate batch: %w", err)
 		}
 	}
 
-	logf("Deleted %d obsolete symbols\n", len(toDelete))
+	logf("Deactivated %d obsolete symbols\n", len(toDeactivate))
 	return nil
 }
 

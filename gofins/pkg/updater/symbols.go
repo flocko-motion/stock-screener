@@ -83,8 +83,8 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 	for _, symbol := range allSymbols {
 		keepList = append(keepList, symbol.Symbol)
 	}
-	if err := database.DeleteSymbolsNotInList(keepList); err != nil {
-		return fmt.Errorf("failed to delete old symbols: %w", err)
+	if err := database.DeactivateSymbolsNotInList(keepList); err != nil {
+		return fmt.Errorf("failed to deactivate old symbols: %w", err)
 	}
 
 	// Build DB ticker map
