@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -51,6 +52,7 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 // GET /api/ratings/{ticker} - Get latest rating
 // GET /api/ratings/{ticker}/history - Get rating history
 // GET /api/ratings - Get all latest ratings
+// DELETE /api/ratings/{id} - Delete rating by ID
 func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/ratings")
 
@@ -124,6 +126,23 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(rating)
+		return
+	}
+
+	if r.Method == "DELETE" {
+		// Delete rating by ID
+		ratingID, err := strconv.Atoi(ticker)
+		if err != nil {
+			http.Error(w, "Invalid rating ID", http.StatusBadRequest)
+			return
+		}
+
+		if err := s.db.DeleteRating(ratingID); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 

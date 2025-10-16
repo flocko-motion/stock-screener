@@ -78,17 +78,6 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
         }
     };
 
-    useEffect(() => {
-        // Check cache first
-        if (symbolCache[endpoint]) {
-            setSymbols(symbolCache[endpoint]);
-            setLoading(false);
-        } else if (!fetchingCache[endpoint]) {
-            fetchSymbols();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [endpoint]);
-
     const fetchSymbols = async () => {
         // Mark as fetching
         fetchingCache[endpoint] = true;
@@ -106,7 +95,8 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
 
             // Cache the results
             symbolCache[endpoint] = fetchedSymbols;
-            setSymbols(fetchedSymbols);
+            // Create new array reference to force re-render
+            setSymbols([...fetchedSymbols]);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Unknown error');
         } finally {
@@ -115,6 +105,30 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
             delete fetchingCache[endpoint];
         }
     };
+
+    useEffect(() => {
+        // Check cache first
+        if (symbolCache[endpoint]) {
+            setSymbols(symbolCache[endpoint]);
+            setLoading(false);
+        } else if (!fetchingCache[endpoint]) {
+            fetchSymbols();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [endpoint]);
+
+    useEffect(() => {
+        // Listen for rating changes and refresh data
+        const handleRatingsChanged = async () => {
+            delete symbolCache[endpoint];
+            delete fetchingCache[endpoint];
+            await fetchSymbols();
+        };
+        
+        window.addEventListener('ratingsChanged', handleRatingsChanged);
+        return () => window.removeEventListener('ratingsChanged', handleRatingsChanged);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [endpoint]);
 
     const formatYear = (dateStr: string | undefined) => {
         if (!dateStr) return 'N/A';

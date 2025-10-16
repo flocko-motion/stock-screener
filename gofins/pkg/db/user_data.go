@@ -139,3 +139,9 @@ func (db *DB) GetAllLatestRatings() (map[string]*UserRating, error) {
 	}
 	return ratings, rows.Err()
 }
+
+// DeleteRating deletes a rating by ID
+func (db *DB) DeleteRating(id int) error {
+	_, err := db.conn.Exec("DELETE FROM user_ratings WHERE id = $1", id)
+	return err
+}
