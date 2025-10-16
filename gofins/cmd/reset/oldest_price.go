@@ -30,6 +30,7 @@ var oldestPriceCmd = &cobra.Command{
 		updated := 0
 		noData := 0
 		failed := 0
+		noDataSymbols := []string{}
 
 		for i, ticker := range tickers {
 			if i%100 == 0 && i > 0 {
@@ -47,6 +48,7 @@ var oldestPriceCmd = &cobra.Command{
 
 			if oldestDate == nil {
 				noData++
+				noDataSymbols = append(noDataSymbols, ticker)
 				continue
 			}
 
@@ -64,6 +66,26 @@ var oldestPriceCmd = &cobra.Command{
 		}
 
 		fmt.Printf("\n✓ Complete: %d updated, %d with no data, %d failed\n", updated, noData, failed)
+		
+		// Print symbols with no data
+		if len(noDataSymbols) > 0 {
+			fmt.Printf("\nSymbols with no price data (%d total):\n", len(noDataSymbols))
+			
+			// Print first 100
+			limit := 100
+			if len(noDataSymbols) < limit {
+				limit = len(noDataSymbols)
+			}
+			
+			for i := 0; i < limit; i++ {
+				fmt.Printf("  %s\n", noDataSymbols[i])
+			}
+			
+			if len(noDataSymbols) > 100 {
+				fmt.Printf("  ... and %d more\n", len(noDataSymbols)-100)
+			}
+		}
+		
 		return nil
 	},
 }

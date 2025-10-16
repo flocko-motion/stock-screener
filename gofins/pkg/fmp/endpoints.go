@@ -127,3 +127,38 @@ func (c *Client) FetchIndexList() ([]Symbol, error) {
 
 	return symbols, nil
 }
+
+// FetchDelistedCompanies fetches all delisted companies from FMP with pagination
+func (c *Client) FetchDelistedCompanies() ([]Symbol, error) {
+	allDelisted := []Symbol{}
+	page := 0
+	limit := 100
+
+	for {
+		var pageResults []Symbol
+		params := map[string]string{
+			"page":  fmt.Sprintf("%d", page),
+			"limit": fmt.Sprintf("%d", limit),
+		}
+
+		if err := c.apiGet("stable/delisted-companies", params, &pageResults); err != nil {
+			return nil, fmt.Errorf("failed to fetch page %d: %w", page, err)
+		}
+
+		// If we got no results, we've reached the end
+		if len(pageResults) == 0 {
+			break
+		}
+
+		allDelisted = append(allDelisted, pageResults...)
+
+		// If we got fewer results than the limit, we've reached the end
+		if len(pageResults) < limit {
+			break
+		}
+
+		page++
+	}
+
+	return allDelisted, nil
+}
