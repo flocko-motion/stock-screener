@@ -139,6 +139,20 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         }
     };
 
+    const formatMarketCap = (marketCap: number): string => {
+        const absValue = Math.abs(marketCap);
+        if (absValue >= 1e12) {
+            return `$${(marketCap / 1e12).toFixed(1)}T`;
+        } else if (absValue >= 1e9) {
+            return `$${(marketCap / 1e9).toFixed(1)}B`;
+        } else if (absValue >= 1e6) {
+            return `$${(marketCap / 1e6).toFixed(1)}M`;
+        } else if (absValue >= 1e3) {
+            return `$${(marketCap / 1e3).toFixed(1)}K`;
+        }
+        return `$${marketCap}`;
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             const target = event.target as HTMLElement;
@@ -278,7 +292,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         </div>
                         <div>
                             <span className="font-medium text-gray-600">Market Cap:</span>
-                            <span className="ml-2">{profile.marketCap ? `$${(profile.marketCap / 1000000000).toFixed(1)}B` : 'N/A'}</span>
+                            <span className="ml-2">{profile.marketCap ? formatMarketCap(profile.marketCap) : 'N/A'}</span>
                         </div>
                         <div>
                             <span className="font-medium text-gray-600">Founded:</span>

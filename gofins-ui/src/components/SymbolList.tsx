@@ -169,15 +169,15 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
         
         const absValue = Math.abs(marketCap);
         if (absValue >= 1e12) {
-            return `${Math.round(marketCap / 1e12)}T`;
+            return `$${(marketCap / 1e12).toFixed(1)}T`;
         } else if (absValue >= 1e9) {
-            return `${Math.round(marketCap / 1e9)}B`;
+            return `$${(marketCap / 1e9).toFixed(1)}B`;
         } else if (absValue >= 1e6) {
-            return `${Math.round(marketCap / 1e6)}M`;
+            return `$${(marketCap / 1e6).toFixed(1)}M`;
         } else if (absValue >= 1e3) {
-            return `${Math.round(marketCap / 1e3)}K`;
+            return `$${(marketCap / 1e3).toFixed(1)}K`;
         }
-        return marketCap.toString();
+        return `$${marketCap}`;
     };
 
     // Filter symbols based on all criteria
@@ -342,16 +342,45 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                 </div>
 
                 <div className="grid grid-cols-6 gap-2">
-                    <input type="number" placeholder="MCap Min (B)" value={mcapMin} onChange={(e) => setMcapMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="MCap Max (B)" value={mcapMax} onChange={(e) => setMcapMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <select value={mcapMin} onChange={(e) => setMcapMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">MCap Min</option>
+                        <option value="0">$0</option>
+                        <option value="0.001">$1M</option>
+                        <option value="0.01">$10M</option>
+                        <option value="0.1">$100M</option>
+                        <option value="1">$1B</option>
+                        <option value="10">$10B</option>
+                        <option value="100">$100B</option>
+                        <option value="1000">$1T</option>
+                    </select>
+                    <select value={mcapMax} onChange={(e) => setMcapMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">MCap Max</option>
+                        <option value="0.001">$1M</option>
+                        <option value="0.01">$10M</option>
+                        <option value="0.1">$100M</option>
+                        <option value="1">$1B</option>
+                        <option value="10">$10B</option>
+                        <option value="100">$100B</option>
+                        <option value="1000">$1T</option>
+                    </select>
                     <input type="number" placeholder="Inception Min" value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Inception Max" value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                 </div>
                 <div className="grid grid-cols-4 gap-2 mt-2">
-                    <input type="number" placeholder="Rating Min" value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Rating Max" value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <select value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Rating Min</option>
+                        {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
+                            <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
+                        ))}
+                    </select>
+                    <select value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Rating Max</option>
+                        {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
+                            <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
+                        ))}
+                    </select>
                     <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
                         <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
                         <span>⭐ Favorites only</span>
