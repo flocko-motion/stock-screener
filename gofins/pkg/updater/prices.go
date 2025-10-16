@@ -13,8 +13,8 @@ import (
 
 const (
 	PriceUpdateInterval = 7 * 24 * time.Hour // Update weekly
-	PriceWorkers        = 3
-	PriceBatchSize      = 50
+	PriceWorkers        = 8
+	PriceBatchSize      = 200
 )
 
 type PriceStats struct {
@@ -144,12 +144,21 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 		return StatusFailed
 	}
 
-	// Update last_price_update timestamp
+	// Parse oldest price date
+	var oldestPrice *time.Time
+	if len(dailyPrices) > 0 {
+		if parsed, err := time.Parse("2006-01-02", dailyPrices[0].Date); err == nil {
+			oldestPrice = &parsed
+		}
+	}
+
+	// Update last_price_update timestamp and oldest_price
 	status := StatusOK
 	database.PutSymbol(&db.Symbol{
 		Ticker:          ticker,
 		LastPriceUpdate: &now,
 		LastPriceStatus: &status,
+		OldestPrice:     oldestPrice,
 	})
 
 	return StatusOK

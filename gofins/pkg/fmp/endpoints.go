@@ -39,7 +39,7 @@ type Profile struct {
 	Industry          string  `json:"industry"`
 	Sector            string  `json:"sector"`
 	Country           string  `json:"country"`
-	MarketCap         int64   `json:"marketCap"`
+	MarketCap         float64 `json:"marketCap"` // Changed to float64 as FMP returns decimals
 	Price             float64 `json:"price"`
 	CEO               string  `json:"ceo"`
 	Description       string  `json:"description"`

@@ -54,12 +54,34 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 		}
 	}()
 
+	// Track rejection reasons
+	rejectionReasons := make(map[string]int)
+	var rejectionMu sync.Mutex
+
 	for _, ticker := range config.Tickers {
 		ticker := ticker // Capture for goroutine
 		prices, ok := pricesMap[ticker]
-		// if there's no price data in the whole first year of our scope, then we ignore the symbol
-		// background: sometimes price data starts much later than IPO mentioned in profile
-		if !ok || len(prices) == 0 || prices[0].Date.After(config.TimeFrom.AddDate(1, 0, 0)) {
+		
+		// Check rejection reasons
+		var rejected bool
+		var reason string
+		
+		if !ok {
+			rejected = true
+			reason = "no_price_data"
+		} else if len(prices) == 0 {
+			rejected = true
+			reason = "empty_price_data"
+		} else if prices[0].Date.After(config.TimeFrom.AddDate(1, 0, 0)) {
+			rejected = true
+			reason = "insufficient_history"
+		}
+		
+		if rejected {
+			rejectionMu.Lock()
+			rejectionReasons[reason]++
+			rejectionMu.Unlock()
+			
 			mu.Lock()
 			processed++
 			mu.Unlock()
@@ -113,6 +135,20 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 	wg.Wait()
 
 	logf("%s Batch analysis complete: %d/%d symbols with YoY data\n", config.PackageID, len(results), len(config.Tickers))
+	
+	// Log rejection statistics
+	totalRejected := 0
+	for _, count := range rejectionReasons {
+		totalRejected += count
+	}
+	if totalRejected > 0 {
+		logf("%s Rejection summary: %d symbols rejected\n", config.PackageID, totalRejected)
+		for reason, count := range rejectionReasons {
+			percentage := float64(count) / float64(len(config.Tickers)) * 100
+			logf("%s   - %s: %d (%.1f%%)\n", config.PackageID, reason, count, percentage)
+		}
+	}
+	
 	if config.SaveToDB {
 		logf("%s All results saved to database\n", config.PackageID)
 	}

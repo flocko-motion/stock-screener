@@ -56,6 +56,7 @@ func NewClient(apiKeyPath *string) (*Client, error) {
 		Transport: &http.Transport{
 			MaxIdleConns:        10,
 			MaxIdleConnsPerHost: 10,
+			MaxConnsPerHost:     10,
 			IdleConnTimeout:     90 * time.Second,
 		},
 	}
@@ -182,7 +183,7 @@ func (c *Client) handleResponse(resp *http.Response, endpoint string, result int
 	case http.StatusOK:
 		// Parse JSON response
 		if err := json.Unmarshal(body, result); err != nil {
-			return fmt.Errorf("failed to parse JSON response: %w", err)
+			return fmt.Errorf("failed to parse JSON response: %w\nRaw response: %s", err, string(body))
 		}
 		return nil
 

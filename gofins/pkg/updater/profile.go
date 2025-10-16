@@ -12,8 +12,8 @@ import (
 
 const (
 	ProfileUpdateInterval = 30 * 24 * time.Hour
-	ProfileWorkers        = 3
-	ProfileBatchSize      = 50
+	ProfileWorkers        = 8
+	ProfileBatchSize      = 200
 )
 
 func UpdateProfiles(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
@@ -154,7 +154,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		LastProfileUpdate: f.Ptr(now),
 		LastProfileStatus: f.Ptr(StatusOK),
 		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
-		MarketCap:         f.Ptr(profile.MarketCap),
+		MarketCap:         f.Ptr(int64(profile.MarketCap)), // Convert float64 to int64
 	}
 
 	if err := database.PutSymbol(symbol); err != nil {

@@ -79,6 +79,7 @@ type Symbol struct {
 	Website           *string
 	ISIN              *string
 	Inception         *time.Time
+	OldestPrice       *time.Time // Date of the oldest price in history
 	IsActivelyTrading *bool
 	MarketCap         *int64
 }
@@ -102,9 +103,9 @@ func (db *DB) PutSymbol(s *Symbol) error {
 		INSERT INTO symbols (
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
-			name, type, currency, sector, industry, country, description, website, isin, inception,
+			name, type, currency, sector, industry, country, description, website, isin, inception, oldest_price,
 			is_actively_trading, market_cap
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 		ON CONFLICT (ticker) DO UPDATE SET
 			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
 			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
@@ -121,6 +122,7 @@ func (db *DB) PutSymbol(s *Symbol) error {
 			website = COALESCE(EXCLUDED.website, symbols.website),
 			isin = COALESCE(EXCLUDED.isin, symbols.isin),
 			inception = COALESCE(EXCLUDED.inception, symbols.inception),
+			oldest_price = COALESCE(EXCLUDED.oldest_price, symbols.oldest_price),
 			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading),
 			market_cap = COALESCE(EXCLUDED.market_cap, symbols.market_cap)
 	`
@@ -129,7 +131,7 @@ func (db *DB) PutSymbol(s *Symbol) error {
 		query,
 		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
 		s.LastPriceStatus, s.LastProfileStatus,
-		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception,
+		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception, s.OldestPrice,
 		s.IsActivelyTrading, s.MarketCap,
 	)
 
@@ -142,7 +144,7 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 		SELECT ticker, exchange, last_price_update, last_profile_update,
 			   last_price_status, last_profile_status,
 			   name, type, currency, sector, industry, country,
-			   description, website, isin, inception, is_actively_trading, market_cap
+			   description, website, isin, inception, oldest_price, is_actively_trading, market_cap
 		FROM symbols
 		WHERE ticker = $1
 	`
@@ -152,7 +154,7 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 		&s.Ticker, &s.Exchange, &s.LastPriceUpdate, &s.LastProfileUpdate,
 		&s.LastPriceStatus, &s.LastProfileStatus,
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
-		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.IsActivelyTrading, &s.MarketCap,
+		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.OldestPrice, &s.IsActivelyTrading, &s.MarketCap,
 	)
 
 	if err == sql.ErrNoRows {
@@ -163,6 +165,27 @@ func (db *DB) GetSymbol(ticker string) (*Symbol, error) {
 	}
 
 	return s, nil
+}
+
+// GetOldestPriceDate returns the oldest price date for a ticker from monthly_prices
+func (db *DB) GetOldestPriceDate(ticker string) (*time.Time, error) {
+	query := `
+		SELECT MIN(date) 
+		FROM monthly_prices 
+		WHERE symbol_ticker = $1
+	`
+
+	var oldestDate *time.Time
+	err := db.conn.QueryRow(query, ticker).Scan(&oldestDate)
+	
+	if err == sql.ErrNoRows || oldestDate == nil {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return oldestDate, nil
 }
 
 // PutMonthlyPrices batch inserts monthly price data

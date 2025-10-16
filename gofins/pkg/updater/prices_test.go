@@ -11,7 +11,7 @@ import (
 )
 
 func TestFetchPrices(t *testing.T) {
-	ticker := "NVA"
+	ticker := "GLL.CN"
 	fmpClient, err := fmp.NewClient(nil)
 	assert.NoError(t, err)
 
