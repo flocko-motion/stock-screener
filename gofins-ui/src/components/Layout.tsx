@@ -155,7 +155,7 @@ export default function Layout() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-auto bg-gray-50">
+            <div className="flex-1 mt-4 overflow-auto bg-gray-50">
                 {activeTab && (
                     <TabContent
                         tabType={activeTab.type}

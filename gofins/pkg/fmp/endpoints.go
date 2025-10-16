@@ -19,12 +19,16 @@ func IsNotFoundError(err error) bool {
 	return ok
 }
 
-// Stock represents a stock from the stock list
-type Stock struct {
+// Symbol represents a symbol (stock or index) from FMP
+type Symbol struct {
 	Symbol   string `json:"symbol"`
 	Name     string `json:"name"`
 	Exchange string `json:"exchange"`
-	Type     string `json:"exchangeShortName"`
+}
+
+// IsIndex returns true if the symbol is an index (ticker starts with ^)
+func (s *Symbol) IsIndex() bool {
+	return len(s.Symbol) > 0 && s.Symbol[0] == '^'
 }
 
 // Profile represents a company profile from FMP
@@ -101,13 +105,25 @@ func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*Histor
 }
 
 // FetchStockList fetches the complete list of stocks from FMP
-func (c *Client) FetchStockList() ([]Stock, error) {
-	var stocks []Stock
+func (c *Client) FetchStockList() ([]Symbol, error) {
+	var symbols []Symbol
 	params := map[string]string{}
 
-	if err := c.apiGet("stable/stock-list", params, &stocks); err != nil {
+	if err := c.apiGet("stable/stock-list", params, &symbols); err != nil {
 		return nil, err
 	}
 
-	return stocks, nil
+	return symbols, nil
+}
+
+// FetchIndexList fetches the complete list of indices from FMP
+func (c *Client) FetchIndexList() ([]Symbol, error) {
+	var symbols []Symbol
+	params := map[string]string{}
+
+	if err := c.apiGet("stable/index-list", params, &symbols); err != nil {
+		return nil, err
+	}
+
+	return symbols, nil
 }

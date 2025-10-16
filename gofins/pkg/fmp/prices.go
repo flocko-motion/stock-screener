@@ -1,5 +1,7 @@
 package fmp
 
+import "strings"
+
 type DailyPrice struct {
 	Date  string  `json:"date"`
 	Open  float64 `json:"adjOpen"`
@@ -8,13 +10,23 @@ type DailyPrice struct {
 	Close float64 `json:"adjClose"`
 }
 
+// FetchPriceHistory fetches historical price data for a ticker.
+// Automatically detects index symbols (starting with ^) and routes to the correct endpoint.
 func (c *Client) FetchPriceHistory(ticker string) ([]DailyPrice, error) {
 	var prices []DailyPrice
+	var endpoint string
 	params := map[string]string{
 		"symbol": ticker,
 	}
 
-	if err := c.apiGet("stable/historical-price-eod/dividend-adjusted", params, &prices); err != nil {
+	// Index symbols (starting with ^) use a different endpoint
+	if strings.HasPrefix(ticker, "^") {
+		endpoint = "stable/historical-price-eod/full"
+	} else {
+		endpoint = "stable/historical-price-eod/dividend-adjusted"
+	}
+
+	if err := c.apiGet(endpoint, params, &prices); err != nil {
 		return nil, err
 	}
 

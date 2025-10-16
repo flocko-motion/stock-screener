@@ -11,6 +11,8 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
     const [analyses, setAnalyses] = useState<AnalysisPackage[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [newName, setNewName] = useState('');
 
     const fetchAnalyses = async () => {
         try {
@@ -41,6 +43,32 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to delete analysis');
         }
+    };
+
+    const handleRenameClick = (id: string, currentName: string) => {
+        setRenamingId(id);
+        setNewName(currentName);
+    };
+
+    const handleRenameSubmit = async () => {
+        if (!renamingId || !newName.trim()) {
+            return;
+        }
+
+        try {
+            await analysisApi.update(renamingId, newName.trim());
+            setRenamingId(null);
+            setNewName('');
+            // Refresh the list after rename
+            await fetchAnalyses();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Failed to rename analysis');
+        }
+    };
+
+    const handleRenameCancel = () => {
+        setRenamingId(null);
+        setNewName('');
     };
 
     if (loading) {
@@ -136,6 +164,12 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
                                                 View
                                             </button>
                                             <button
+                                                onClick={() => handleRenameClick(analysis.ID, analysis.Name)}
+                                                className="form-button-secondary"
+                                            >
+                                                Rename
+                                            </button>
+                                            <button
                                                 onClick={() => handleDelete(analysis.ID, analysis.Name)}
                                                 className="form-button-danger"
                                             >
@@ -146,6 +180,45 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Rename Dialog */}
+            {renamingId && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">Rename Analysis</h3>
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleRenameSubmit();
+                                } else if (e.key === 'Escape') {
+                                    handleRenameCancel();
+                                }
+                            }}
+                            className="form-input w-full mb-4"
+                            placeholder="Enter new name"
+                            autoFocus
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={handleRenameCancel}
+                                className="form-button-secondary"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleRenameSubmit}
+                                className="form-button-primary"
+                                disabled={!newName.trim()}
+                            >
+                                Rename
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

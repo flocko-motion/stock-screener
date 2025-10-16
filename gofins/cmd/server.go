@@ -16,6 +16,7 @@ import (
 )
 
 var apiKeyPath string
+var noUpdates bool
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -37,21 +38,29 @@ var serverCmd = &cobra.Command{
 		defer database.Close()
 		fmt.Println("✓ Database connected")
 
-		// init FMP
-		fmpClient, err := fmp.NewClient(&apiKeyPath)
-		if err != nil {
-			return fmt.Errorf("failed to create FMP client: %w", err)
+		// init FMP (only if updates are enabled)
+		var fmpClient *fmp.Client
+		if !noUpdates {
+			fmpClient, err = fmp.NewClient(&apiKeyPath)
+			if err != nil {
+				return fmt.Errorf("failed to create FMP client: %w", err)
+			}
+			fmt.Println("✓ FMP client ready")
 		}
-		fmt.Println("✓ FMP client ready")
 
-		// sync symbols once before starting updaters
+		// Start updaters only if --no-updates is not set
 		fmt.Println("\n=== Starting Services ===")
-		if err := updater.SyncSymbolsOnce(database, fmpClient); err != nil {
-			return fmt.Errorf("symbol sync failed: %w", err)
+		if !noUpdates {
+			// sync symbols once before starting updaters
+			if err := updater.SyncSymbolsOnce(database, fmpClient); err != nil {
+				return fmt.Errorf("symbol sync failed: %w", err)
+			}
+			go updater.UpdateProfiles(ctx, database, fmpClient)
+			go updater.UpdatePrices(ctx, database, fmpClient)
+			go updater.SyncSymbols(database, fmpClient)
+		} else {
+			fmt.Println("⚠️  Updates disabled - working with existing data only")
 		}
-		go updater.UpdateProfiles(ctx, database, fmpClient)
-		go updater.UpdatePrices(ctx, database, fmpClient)
-		go updater.SyncSymbols(database, fmpClient)
 
 		// Start REST API server
 		apiServer := api.NewServer(database, 8080)
@@ -72,4 +81,6 @@ func init() {
 
 	serverCmd.Flags().StringVar(&apiKeyPath, "api-key", fmp.ApiKeyPathDefault,
 		"Path to FMP API key file")
+	serverCmd.Flags().BoolVar(&noUpdates, "no-updates", false,
+		"Disable all data updates and work with existing data only")
 }

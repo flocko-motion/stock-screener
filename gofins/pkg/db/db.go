@@ -56,6 +56,11 @@ func (db *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
 	return db.conn.Exec(query, args...)
 }
 
+// Query executes a query that returns rows
+func (db *DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return db.conn.Query(query, args...)
+}
+
 // Symbol represents a stock symbol in the database
 type Symbol struct {
 	Ticker            string
@@ -408,35 +413,75 @@ func (db *DB) GetAllTickers() ([]string, error) {
 	return tickers, rows.Err()
 }
 
-// DeleteSymbols removes symbols not in the provided list
-func (db *DB) DeleteSymbols(keepTickers []string) error {
+// DeleteSymbolsNotInList removes symbols not in the provided list
+func (db *DB) DeleteSymbolsNotInList(keepTickers []string) error {
 	if len(keepTickers) == 0 {
 		return nil
 	}
 
-	// Build placeholders for SQL IN clause
-	placeholders := make([]string, len(keepTickers))
-	args := make([]interface{}, len(keepTickers))
-	for i, ticker := range keepTickers {
-		placeholders[i] = fmt.Sprintf("$%d", i+1)
-		args[i] = ticker
+	// Get all current tickers from database
+	allTickers, err := db.GetAllTickers()
+	if err != nil {
+		return fmt.Errorf("failed to get all tickers: %w", err)
 	}
 
-	query := fmt.Sprintf("DELETE FROM symbols WHERE ticker NOT IN (%s)", strings.Join(placeholders, ","))
-	_, err := db.conn.Exec(query, args...)
-	return err
+	// Build a set of tickers to keep
+	keepSet := make(map[string]bool, len(keepTickers))
+	for _, ticker := range keepTickers {
+		keepSet[ticker] = true
+	}
+
+	// Find tickers to delete (in DB but not in keep list)
+	var toDelete []string
+	for _, ticker := range allTickers {
+		if !keepSet[ticker] {
+			toDelete = append(toDelete, ticker)
+		}
+	}
+
+	if len(toDelete) == 0 {
+		return nil // Nothing to delete
+	}
+
+	// Delete in batches to avoid parameter limit
+	batchSize := 10000
+	for i := 0; i < len(toDelete); i += batchSize {
+		end := i + batchSize
+		if end > len(toDelete) {
+			end = len(toDelete)
+		}
+		batch := toDelete[i:end]
+
+		// Build placeholders for this batch
+		placeholders := make([]string, len(batch))
+		args := make([]interface{}, len(batch))
+		for j, ticker := range batch {
+			placeholders[j] = fmt.Sprintf("$%d", j+1)
+			args[j] = ticker
+		}
+
+		query := fmt.Sprintf("DELETE FROM symbols WHERE ticker IN (%s)", strings.Join(placeholders, ","))
+		if _, err := db.conn.Exec(query, args...); err != nil {
+			return fmt.Errorf("failed to delete batch: %w", err)
+		}
+	}
+
+	logf("Deleted %d obsolete symbols\n", len(toDelete))
+	return nil
 }
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)
+// Excludes indices as they don't have profile endpoints
 func (db *DB) GetStaleProfiles(limit int) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
-		WHERE last_profile_update IS NULL OR last_profile_update < $1
+		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
+		  AND (type IS NULL OR type != $2)
 		ORDER BY last_profile_update ASC NULLS FIRST
-		LIMIT $2
+		LIMIT $3
 	`
 
-	rows, err := db.conn.Query(query, GetProfileThreshold(), limit)
+	rows, err := db.conn.Query(query, GetProfileThreshold(), TypeIndex, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -460,10 +505,11 @@ const (
 	TypeETF   = "etf"
 	TypeFund  = "fund"
 	TypeADR   = "adr"
+	TypeIndex = "index"
 )
 
 // PriceUpdateTypes defines which symbol types should receive price updates
-var PriceUpdateTypes = []string{TypeStock, TypeADR}
+var PriceUpdateTypes = []string{TypeStock, TypeADR, TypeIndex}
 
 // PriceInterval represents the time interval for price data
 type PriceInterval string
@@ -510,14 +556,16 @@ func (db *DB) CountActivelyTrading() (int, error) {
 }
 
 // CountStaleProfiles returns the count of stale profiles
+// Excludes indices as they don't have profile endpoints
 func (db *DB) CountStaleProfiles() (int, error) {
 	query := `
 		SELECT COUNT(*) FROM symbols
-		WHERE last_profile_update IS NULL OR last_profile_update < $1
+		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
+		  AND (type IS NULL OR type != $2)
 	`
 
 	var count int
-	err := db.conn.QueryRow(query, GetProfileThreshold()).Scan(&count)
+	err := db.conn.QueryRow(query, GetProfileThreshold(), TypeIndex).Scan(&count)
 	return count, err
 }
 

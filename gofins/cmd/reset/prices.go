@@ -1,4 +1,4 @@
-package cmd
+package reset
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var resetPricesCmd = &cobra.Command{
+var pricesCmd = &cobra.Command{
 	Use:   "prices",
 	Short: "Reset price update timestamps to force fresh reload from FMP",
 	RunE: func(cmd *cobra.Command, args []string) error {

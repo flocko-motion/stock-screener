@@ -11,8 +11,19 @@ const MaybeNumberToFixed = (value: number | null | undefined, decimals: number =
     return value.toFixed(decimals);
 };
 
+// Calculate composite score: higher mean is better, lower stddev is better
+// scoreWeight: 0 = only stddev matters, 1 = only mean matters, 0.5 = equal weight
+const calculateScore = (mean: number, stddev: number, scoreWeight: number): number => {
+    // Normalize: higher score is better
+    // Mean component: higher is better (use as-is)
+    // StdDev component: lower is better (invert by using negative)
+    const meanComponent = mean * scoreWeight;
+    const stddevComponent = -stddev * (1 - scoreWeight);
+    return meanComponent + stddevComponent;
+};
+
 // Sorting function
-const sortResults = (results: AnalysisResult[], field: SortField, direction: SortDirection): AnalysisResult[] => {
+const sortResults = (results: AnalysisResult[], field: SortField, direction: SortDirection, scoreWeight: number): AnalysisResult[] => {
     return [...results].sort((a, b) => {
         let aVal: any, bVal: any;
 
@@ -32,6 +43,10 @@ const sortResults = (results: AnalysisResult[], field: SortField, direction: Sor
             case 'stddev':
                 aVal = a.stddev;
                 bVal = b.stddev;
+                break;
+            case 'score':
+                aVal = calculateScore(a.mean, a.stddev, scoreWeight);
+                bVal = calculateScore(b.mean, b.stddev, scoreWeight);
                 break;
             default:
                 return 0;
@@ -74,7 +89,7 @@ interface AnalysisViewProps {
     data?: { id: string };
 }
 
-type SortField = 'symbol' | 'inception' | 'mean' | 'stddev';
+type SortField = 'symbol' | 'inception' | 'mean' | 'stddev' | 'score';
 type SortDirection = 'asc' | 'desc';
 
 export default function AnalysisView({ data }: AnalysisViewProps) {
@@ -83,8 +98,9 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
     const [filteredResults, setFilteredResults] = useState<AnalysisResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [sortField, setSortField] = useState<SortField>('mean');
+    const [sortField, setSortField] = useState<SortField>('score');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [scoreWeight, setScoreWeight] = useState<number>(0.5); // 0 = only σ, 1 = only μ
     const [filters, setFilters] = useState({
         inceptionFrom: '',
         inceptionTo: '',
@@ -169,9 +185,9 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
     // Handle sorting and filtering
     useEffect(() => {
         const filtered = filterResults(results, filters);
-        const sorted = sortResults(filtered, sortField, sortDirection);
+        const sorted = sortResults(filtered, sortField, sortDirection, scoreWeight);
         setFilteredResults(sorted);
-    }, [results, filters, sortField, sortDirection]);
+    }, [results, filters, sortField, sortDirection, scoreWeight]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -363,6 +379,22 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
                                             />
                                         </div>
 
+                                        <div className="flex items-center gap-3 px-3 py-1 bg-white rounded border border-gray-300">
+                                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Score:</label>
+                                            <span className="text-xs text-gray-500">μ</span>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="1"
+                                                step="0.01"
+                                                value={scoreWeight}
+                                                onChange={(e) => setScoreWeight(parseFloat(e.target.value))}
+                                                className="w-32 h-1"
+                                            />
+                                            <span className="text-xs text-gray-500">σ</span>
+                                            <span className="text-xs font-mono text-gray-700 w-8 text-center">{(scoreWeight * 100).toFixed(0)}%</span>
+                                        </div>
+
                                         <div className="text-xs text-gray-600 ml-auto">
                                             {filteredResults.length} of {results.length} symbols
                                         </div>
@@ -397,6 +429,12 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
                                                 >
                                                     σ {sortField === 'stddev' && (sortDirection === 'asc' ? '↑' : '↓')}
                                                 </th>
+                                                <th
+                                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                                    onClick={() => handleSort('score')}
+                                                >
+                                                    Score {sortField === 'score' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                                </th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 lowercase tracking-wider">min(μ)</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 lowercase tracking-wider">max(μ)</th>
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chart</th>
@@ -421,6 +459,9 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {MaybeNumberToFixed(result.stddev)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                                                        {MaybeNumberToFixed(calculateScore(result.mean, result.stddev, scoreWeight), 2)}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {MaybeNumberToFixed(result.min)}%

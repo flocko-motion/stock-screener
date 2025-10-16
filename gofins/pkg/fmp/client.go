@@ -21,7 +21,7 @@ func logf(format string, args ...interface{}) {
 
 const (
 	BaseURL           = "https://financialmodelingprep.com"
-	RequestsPerMinute = 300
+	RequestsPerMinute = 3000 // ultimate: 3000 starter: 300
 	MaxRetries        = 5
 	BaseRetryDelay    = 3 * time.Second
 	ApiKeyPathDefault = "~/.fins/config/financialmodelingprep.key"

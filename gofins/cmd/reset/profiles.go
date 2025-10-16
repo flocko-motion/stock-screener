@@ -1,4 +1,4 @@
-package cmd
+package reset
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var resetProfileCmd = &cobra.Command{
+var profilesCmd = &cobra.Command{
 	Use:   "profiles",
 	Short: "Reset profile update timestamps to force fresh reload from FMP",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -20,7 +20,7 @@ var resetProfileCmd = &cobra.Command{
 		defer database.Close()
 		fmt.Println("✓ Database connected")
 
-		// Reset all last_price_update timestamps to NULL
+		// Reset all last_profile_update timestamps to NULL
 		result, err := database.Exec(`
 			UPDATE symbols 
 			SET last_profile_update = NULL, last_profile_status = NULL

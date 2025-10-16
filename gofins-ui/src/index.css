@@ -106,16 +106,16 @@
 }
 
 .form-button-secondary {
-  background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
   cursor: pointer;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .form-button-secondary:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: #dbeafe;
+  border-color: #93c5fd;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 )
 
@@ -25,11 +26,22 @@ func SyncSymbolsOnce(database *db.DB, fmpClient *fmp.Client) error {
 }
 
 func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error {
+	// Fetch stocks
 	stocks, err := fmpClient.FetchStockList()
 	if err != nil {
 		return fmt.Errorf("failed to fetch stock list: %w", err)
 	}
 	log.Printf("✓ Fetched %d stocks from FMP\n", len(stocks))
+
+	// Fetch indices
+	indices, err := fmpClient.FetchIndexList()
+	if err != nil {
+		return fmt.Errorf("failed to fetch index list: %w", err)
+	}
+	log.Printf("✓ Fetched %d indices from FMP\n", len(indices))
+
+	// Combine all symbols
+	allSymbols := append(stocks, indices...)
 
 	dbTickers, err := database.GetAllTickers()
 	if err != nil {
@@ -37,30 +49,45 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 	}
 	log.Printf("  Found %d symbols in database\n", len(dbTickers))
 
-	// Delete removed symbols
-	keepList := make([]string, 0, len(stocks))
-	for _, stock := range stocks {
-		keepList = append(keepList, stock.Symbol)
+	// Build keep list from all symbols
+	keepList := make([]string, 0, len(allSymbols))
+	for _, symbol := range allSymbols {
+		keepList = append(keepList, symbol.Symbol)
 	}
-	if err := database.DeleteSymbols(keepList); err != nil {
+	if err := database.DeleteSymbolsNotInList(keepList); err != nil {
 		return fmt.Errorf("failed to delete old symbols: %w", err)
 	}
 
-	// Add new symbols (stubs only)
+	// Build DB ticker map
 	dbTickerMap := make(map[string]bool)
 	for _, ticker := range dbTickers {
 		dbTickerMap[ticker] = true
 	}
 
+	// Add new symbols (stubs only)
 	newCount := 0
-	for _, stock := range stocks {
-		if !dbTickerMap[stock.Symbol] {
-			if err := database.PutSymbol(&db.Symbol{Ticker: stock.Symbol}); err != nil {
-				return fmt.Errorf("failed to insert %s: %w", stock.Symbol, err)
+	for _, symbol := range allSymbols {
+		if !dbTickerMap[symbol.Symbol] {
+
+			dbSymbol := &db.Symbol{
+				Ticker: symbol.Symbol,
+			}
+
+			// Set type for indices
+			if symbol.IsIndex() {
+				dbSymbol.Type = f.Ptr(string(db.TypeIndex))
+				dbSymbol.IsActivelyTrading = f.Ptr(true)
+			} else {
+				dbSymbol.Type = f.Ptr(string(db.TypeStock))
+			}
+
+			if err := database.PutSymbol(dbSymbol); err != nil {
+				return fmt.Errorf("failed to insert %s: %w", symbol.Symbol, err)
 			}
 			newCount++
 		}
 	}
+
 	log.Printf("✓ Added %d new symbols\n", newCount)
 	return nil
 }
