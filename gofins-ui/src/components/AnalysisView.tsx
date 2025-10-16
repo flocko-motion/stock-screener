@@ -1,7 +1,8 @@
 import { ChartBarIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import { analysisApi } from '../services/api';
-import type { AnalysisPackage, AnalysisResult, SymbolProfile } from '../services/api';
+import type { AnalysisPackage, AnalysisResult } from '../services/api';
+import SymbolDetail from './SymbolDetail';
 
 // Utility function to safely format numbers with fallback
 const MaybeNumberToFixed = (value: number | null | undefined, decimals: number = 2, fallback: string = 'N/A'): string => {
@@ -111,8 +112,6 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
     });
     const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
-    const [profile, setProfile] = useState<SymbolProfile | null>(null);
-    const [profileLoading, setProfileLoading] = useState(false);
 
     useEffect(() => {
         if (!data?.id) {
@@ -202,26 +201,14 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
         setFilters(prev => ({ ...prev, [key]: value }));
     };
 
-    const handleRowClick = async (symbol: string) => {
+    const handleRowClick = (symbol: string) => {
         setSelectedSymbol(symbol);
         setShowModal(true);
-        setProfileLoading(true);
-        setProfile(null);
-
-        try {
-            const profileData = await analysisApi.getProfile(data?.id || '', symbol);
-            setProfile(profileData);
-        } catch (err) {
-            console.error('Failed to fetch profile:', err);
-        } finally {
-            setProfileLoading(false);
-        }
     };
 
     const closeModal = () => {
         setShowModal(false);
         setSelectedSymbol(null);
-        setProfile(null);
     };
 
     // Handle keyboard shortcuts
@@ -520,115 +507,11 @@ export default function AnalysisView({ data }: AnalysisViewProps) {
                         className="bg-white rounded-lg p-6 w-full max-w-[95vw] h-[95vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex justify-between items-center mb-6">
-                            <div>
-                                <h2 className="text-2xl font-semibold">{selectedSymbol}</h2>
-                                {profile?.name && (
-                                    <p className="text-lg text-gray-600 mt-1">{profile.name}</p>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <a
-                                    href={`https://www.tradingview.com/chart/?symbol=${selectedSymbol}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-4 py-2 text-gray-500 hover:text-gray-700"
-                                >
-                                    [T]radingView
-                                </a>
-                                <button
-                                    onClick={closeModal}
-                                    className="button-secondary text-gray-500 hover:text-gray-700"
-                                >
-                                    [ESC] to close
-                                </button>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div>
-                                <img
-                                    src={`http://localhost:8080/api/analysis/${data?.id}/chart/${selectedSymbol}`}
-                                    alt={`Chart for ${selectedSymbol}`}
-                                    className="w-full h-[50vh] object-contain border border-gray-200 rounded"
-                                />
-                            </div>
-                            <div>
-                                <img
-                                    src={`http://localhost:8080/api/analysis/${data?.id}/histogram/${selectedSymbol}`}
-                                    alt={`Histogram for ${selectedSymbol}`}
-                                    className="w-full h-[50vh] object-contain border border-gray-200 rounded"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Profile Information */}
-                        {profileLoading ? (
-                            <div className="text-center py-8">
-                                <p className="text-gray-500">Loading profile...</p>
-                            </div>
-                        ) : profile ? (
-                            <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                                    {profile.sector && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Sector:</span>
-                                            <span className="ml-2">{profile.sector}</span>
-                                        </div>
-                                    )}
-                                    {profile.industry && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Industry:</span>
-                                            <span className="ml-2">{profile.industry}</span>
-                                        </div>
-                                    )}
-                                    {profile.country && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Country:</span>
-                                            <span className="ml-2">{profile.country}</span>
-                                        </div>
-                                    )}
-                                    {profile.exchange && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Exchange:</span>
-                                            <span className="ml-2">{profile.exchange}</span>
-                                        </div>
-                                    )}
-                                    {profile.currency && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Currency:</span>
-                                            <span className="ml-2">{profile.currency}</span>
-                                        </div>
-                                    )}
-                                    {profile.market_cap && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Market Cap:</span>
-                                            <span className="ml-2">${(profile.market_cap / 1000000000).toFixed(1)}B</span>
-                                        </div>
-                                    )}
-                                    {profile.inception && (
-                                        <div>
-                                            <span className="font-medium text-gray-600">Founded:</span>
-                                            <span className="ml-2">{new Date(profile.inception).getFullYear()}</span>
-                                        </div>
-                                    )}
-                                    {profile.website && (
-                                        <div className="md:col-span-2 lg:col-span-3">
-                                            <a href={profile.website} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline">
-                                                {String(profile.website).replace('https://', '').replace('http://', '').replace('www.', '')}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                                {profile.description && (
-                                    <div className="mt-4">
-                                        <span className="font-medium text-gray-600">Description:</span>
-                                        <p className="mt-2 text-gray-700">{profile.description}</p>
-                                    </div>
-                                )}
-                            </div>
-                        ) : null}
-
-
+                        <SymbolDetail 
+                            symbol={selectedSymbol} 
+                            analysisId={data?.id}
+                            onClose={closeModal}
+                        />
                     </div>
                 </div>
             )}

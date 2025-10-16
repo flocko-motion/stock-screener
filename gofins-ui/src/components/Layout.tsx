@@ -5,7 +5,9 @@ import {
     HeartIcon,
     BeakerIcon,
     XMarkIcon,
-    BuildingLibraryIcon
+    BuildingLibraryIcon,
+    FunnelIcon,
+    DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
 import TabContent from './TabContent';
 
@@ -27,11 +29,11 @@ export default function Layout() {
 
     const getTabIcon = (type: Tab['type']) => {
         switch (type) {
-            case 'analyses': return ChartBarIcon;
+            case 'analyses': return FunnelIcon;
             case 'stocks': return BuildingLibraryIcon;
             case 'favorites': return HeartIcon;
             case 'analysis': return BeakerIcon;
-            case 'symbol': return ChartBarIcon;
+            case 'symbol': return DocumentChartBarIcon;
             case 'create': return PlusIcon;
             default: return ChartBarIcon;
         }

@@ -493,17 +493,18 @@ func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
 	return nil
 }
 
-// GetActiveSymbols returns all actively trading stocks (excludes indices)
+// GetActiveSymbols returns all actively trading stocks (excludes indices and secondary listings)
 func (db *DB) GetActiveSymbols() ([]Symbol, error) {
 	query := `
 		SELECT ticker, exchange, name, type, currency, sector, industry, country, inception, oldest_price, market_cap
 		FROM symbols
 		WHERE is_actively_trading = true
 		  AND (type = $1 OR type IS NULL)
+		  AND type != $2
 		ORDER BY ticker
 	`
 
-	rows, err := db.conn.Query(query, TypeStock)
+	rows, err := db.conn.Query(query, TypeStock, TypeSecondary)
 	if err != nil {
 		return nil, err
 	}
@@ -524,17 +525,17 @@ func (db *DB) GetActiveSymbols() ([]Symbol, error) {
 }
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)
-// Excludes indices as they don't have profile endpoints
+// Excludes indices and secondary listings (they don't need profile updates)
 func (db *DB) GetStaleProfiles(limit int) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
 		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
-		  AND (type IS NULL OR type != $2)
+		  AND (type IS NULL OR (type != $2 AND type != $3))
 		ORDER BY last_profile_update ASC NULLS FIRST
-		LIMIT $3
+		LIMIT $4
 	`
 
-	rows, err := db.conn.Query(query, GetProfileThreshold(), TypeIndex, limit)
+	rows, err := db.conn.Query(query, GetProfileThreshold(), TypeIndex, TypeSecondary, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -554,11 +555,12 @@ func (db *DB) GetStaleProfiles(limit int) ([]string, error) {
 
 // Symbol types
 const (
-	TypeStock = "stock"
-	TypeETF   = "etf"
-	TypeFund  = "fund"
-	TypeADR   = "adr"
-	TypeIndex = "index"
+	TypeStock     = "stock"
+	TypeETF       = "etf"
+	TypeFund      = "fund"
+	TypeADR       = "adr"
+	TypeIndex     = "index"
+	TypeSecondary = "secondary" // Secondary exchange listing (duplicate of primary)
 )
 
 // PriceUpdateTypes defines which symbol types should receive price updates

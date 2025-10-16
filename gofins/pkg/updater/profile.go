@@ -140,11 +140,14 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 		}
 	}
 
+	// Detect secondary listings by comparing exchange with primary listing
+	symbolType := deriveType(profile, fmpClient)
+
 	symbol := &db.Symbol{
 		Ticker:            ticker,
 		Name:              f.Ptr(profile.CompanyName),
 		Exchange:          f.Ptr(profile.Exchange),
-		Type:              f.Ptr(deriveType(profile)),
+		Type:              f.Ptr(symbolType),
 		Sector:            f.Ptr(profile.Sector),
 		Industry:          f.Ptr(profile.Industry),
 		Country:           f.Ptr(profile.Country),
@@ -170,7 +173,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 	return StatusOK
 }
 
-func deriveType(profile *fmp.Profile) string {
+func deriveType(profile *fmp.Profile, fmpClient *fmp.Client) string {
 	if profile.IsEtf {
 		return db.TypeETF
 	}
@@ -180,5 +183,15 @@ func deriveType(profile *fmp.Profile) string {
 	if profile.IsAdr {
 		return db.TypeADR
 	}
+
+	// Check if this is a secondary listing by comparing with primary exchange
+	if profile.CIK != "" {
+		primaryProfile, err := fmpClient.GetProfileByCIK(profile.CIK)
+		if err == nil && primaryProfile.Exchange != profile.Exchange {
+			// Different exchange than primary = secondary listing
+			return db.TypeSecondary
+		}
+	}
+
 	return db.TypeStock
 }

@@ -39,6 +39,7 @@ type Profile struct {
 	Industry          string  `json:"industry"`
 	Sector            string  `json:"sector"`
 	Country           string  `json:"country"`
+	CIK               string  `json:"cik"`
 	MarketCap         float64 `json:"marketCap"` // Changed to float64 as FMP returns decimals
 	Price             float64 `json:"price"`
 	CEO               string  `json:"ceo"`
@@ -82,6 +83,24 @@ func (c *Client) GetProfile(ticker string) (*Profile, error) {
 
 	if len(profiles) == 0 {
 		return nil, &NotFoundError{Ticker: ticker}
+	}
+
+	return &profiles[0], nil
+}
+
+// GetProfileByCIK fetches the primary listing profile for a company by CIK
+func (c *Client) GetProfileByCIK(cik string) (*Profile, error) {
+	var profiles []Profile
+	params := map[string]string{
+		"cik": cik,
+	}
+
+	if err := c.apiGet("stable/profile-cik", params, &profiles); err != nil {
+		return nil, err
+	}
+
+	if len(profiles) == 0 {
+		return nil, &NotFoundError{Ticker: cik}
 	}
 
 	return &profiles[0], nil

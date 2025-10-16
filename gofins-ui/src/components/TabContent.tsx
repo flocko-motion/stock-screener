@@ -33,7 +33,7 @@ export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol
         case 'analysis':
             return <AnalysisView data={data} />;
         case 'symbol':
-            return <SymbolView data={data} />;
+            return <SymbolView data={data} onCloseTab={onCloseTab} />;
         default:
             return <div>Unknown tab type</div>;
     }

@@ -199,8 +199,9 @@ type SymbolProfile struct {
 	Website           *string    `json:"website"`
 	ISIN              *string    `json:"isin"`
 	Inception         *time.Time `json:"inception"`
-	IsActivelyTrading *bool      `json:"is_actively_trading"`
-	MarketCap         *int64     `json:"market_cap"`
+	OldestPrice       *time.Time `json:"oldestPrice"`
+	IsActivelyTrading *bool      `json:"isActivelyTrading"`
+	MarketCap         *int64     `json:"marketCap"`
 }
 
 // GetSymbolProfile retrieves profile information for a symbol
@@ -208,7 +209,7 @@ func (db *DB) GetSymbolProfile(ticker string) (*SymbolProfile, error) {
 	query := `
 		SELECT 
 			ticker, exchange, name, type, currency, sector, industry, 
-			country, description, website, isin, inception, 
+			country, description, website, isin, inception, oldest_price,
 			is_actively_trading, market_cap
 		FROM symbols 
 		WHERE ticker = $1
@@ -228,6 +229,7 @@ func (db *DB) GetSymbolProfile(ticker string) (*SymbolProfile, error) {
 		&profile.Website,
 		&profile.ISIN,
 		&profile.Inception,
+		&profile.OldestPrice,
 		&profile.IsActivelyTrading,
 		&profile.MarketCap,
 	)

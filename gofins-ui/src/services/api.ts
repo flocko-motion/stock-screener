@@ -38,8 +38,9 @@ export interface SymbolProfile {
     website?: string;
     isin?: string;
     inception?: string;
-    is_actively_trading?: boolean;
-    market_cap?: number;
+    oldestPrice?: string;
+    isActivelyTrading?: boolean;
+    marketCap?: number;
 }
 
 export interface CreateAnalysisRequest {
