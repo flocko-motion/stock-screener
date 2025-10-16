@@ -7,6 +7,9 @@ interface AnalysesListProps {
     onOpenCreate?: () => void;
 }
 
+// Track if we're currently fetching to prevent duplicates
+let isFetching = false;
+
 export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesListProps) {
     const [analyses, setAnalyses] = useState<AnalysisPackage[]>([]);
     const [loading, setLoading] = useState(true);
@@ -15,7 +18,10 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
     const [newName, setNewName] = useState('');
 
     const fetchAnalyses = async () => {
+        if (isFetching) return;
+        
         try {
+            isFetching = true;
             setLoading(true);
             const data = await analysisApi.list();
             setAnalyses(data || []); // Handle null response
@@ -24,6 +30,7 @@ export default function AnalysesList({ onOpenAnalysis, onOpenCreate }: AnalysesL
             setError(err instanceof Error ? err.message : 'Failed to load analyses');
         } finally {
             setLoading(false);
+            isFetching = false;
         }
     };
 

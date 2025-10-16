@@ -3,9 +3,10 @@ import FavoritesList from './FavoritesList';
 import CreateAnalysis from './CreateAnalysis';
 import AnalysisView from './AnalysisView';
 import SymbolView from './SymbolView';
+import SymbolList from './SymbolList';
 
 interface TabContentProps {
-    tabType: 'analyses' | 'favorites' | 'analysis' | 'symbol' | 'create';
+    tabType: 'analyses' | 'favorites' | 'stocks' | 'analysis' | 'symbol' | 'create';
     data?: any;
     onOpenAnalysis?: (id: string, name: string) => void;
     onOpenSymbol?: (symbol: string) => void;
@@ -17,6 +18,14 @@ export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol
     switch (tabType) {
         case 'analyses':
             return <AnalysesList onOpenAnalysis={onOpenAnalysis} onOpenCreate={onOpenCreate} />;
+        case 'stocks':
+            return (
+                <SymbolList 
+                    endpoint="/api/symbols/active"
+                    description="All actively trading stocks in the database"
+                    onOpenSymbol={onOpenSymbol}
+                />
+            );
         case 'favorites':
             return <FavoritesList onOpenSymbol={onOpenSymbol} />;
         case 'create':

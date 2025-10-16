@@ -1,0 +1,340 @@
+import { useEffect, useState } from 'react';
+
+interface Symbol {
+    ticker: string;
+    exchange?: string;
+    name?: string;
+    type?: string;
+    sector?: string;
+    industry?: string;
+    country?: string;
+    inception?: string;
+    oldestPrice?: string;
+    isActivelyTrading?: boolean;
+    marketCap?: number;
+}
+
+interface SymbolListProps {
+    endpoint: string;
+    description: string;
+    onOpenSymbol?: (symbol: string) => void;
+}
+
+// Cache for symbol lists by endpoint
+const symbolCache: Record<string, Symbol[]> = {};
+// Track ongoing fetches to prevent duplicates
+const fetchingCache: Record<string, boolean> = {};
+
+export default function SymbolList({ endpoint, description, onOpenSymbol }: SymbolListProps) {
+    const [symbols, setSymbols] = useState<Symbol[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [exchangeFilter, setExchangeFilter] = useState('');
+    const [countryFilter, setCountryFilter] = useState('');
+    const [sectorFilter, setSectorFilter] = useState('');
+    const [mcapMin, setMcapMin] = useState('');
+    const [mcapMax, setMcapMax] = useState('');
+    const [inceptionMin, setInceptionMin] = useState('');
+    const [inceptionMax, setInceptionMax] = useState('');
+    const [oldestPriceMin, setOldestPriceMin] = useState('');
+    const [oldestPriceMax, setOldestPriceMax] = useState('');
+    const [sortColumn, setSortColumn] = useState<keyof Symbol>('ticker');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const itemsPerPage = 100;
+
+    useEffect(() => {
+        // Check cache first
+        if (symbolCache[endpoint]) {
+            setSymbols(symbolCache[endpoint]);
+            setLoading(false);
+        } else if (!fetchingCache[endpoint]) {
+            fetchSymbols();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [endpoint]);
+
+    const fetchSymbols = async () => {
+        // Mark as fetching
+        fetchingCache[endpoint] = true;
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await fetch(`http://localhost:8080${endpoint}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch symbols');
+            }
+
+            const data = await response.json();
+            const fetchedSymbols = data.symbols || [];
+
+            // Cache the results
+            symbolCache[endpoint] = fetchedSymbols;
+            setSymbols(fetchedSymbols);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Unknown error');
+        } finally {
+            setLoading(false);
+            // Clear fetching flag
+            delete fetchingCache[endpoint];
+        }
+    };
+
+    const formatYear = (dateStr: string | undefined) => {
+        if (!dateStr) return 'N/A';
+        return new Date(dateStr).getFullYear().toString();
+    };
+
+    const formatMarketCap = (marketCap: number | undefined) => {
+        if (!marketCap) return 'N/A';
+        
+        const absValue = Math.abs(marketCap);
+        if (absValue >= 1e12) {
+            return `${Math.round(marketCap / 1e12)}T`;
+        } else if (absValue >= 1e9) {
+            return `${Math.round(marketCap / 1e9)}B`;
+        } else if (absValue >= 1e6) {
+            return `${Math.round(marketCap / 1e6)}M`;
+        } else if (absValue >= 1e3) {
+            return `${Math.round(marketCap / 1e3)}K`;
+        }
+        return marketCap.toString();
+    };
+
+    // Filter symbols based on all criteria
+    const matchedSymbols = symbols.filter(symbol => {
+        // Text search
+        if (searchTerm) {
+            const search = searchTerm.toLowerCase();
+            const matches = symbol.ticker.toLowerCase().includes(search) ||
+                symbol.name?.toLowerCase().includes(search) ||
+                symbol.sector?.toLowerCase().includes(search) ||
+                symbol.country?.toLowerCase().includes(search);
+            if (!matches) return false;
+        }
+
+        // Exchange filter
+        if (exchangeFilter && symbol.exchange !== exchangeFilter) return false;
+
+        // Country filter
+        if (countryFilter && symbol.country !== countryFilter) return false;
+
+        // Sector filter
+        if (sectorFilter && symbol.sector !== sectorFilter) return false;
+
+        // Market cap filters
+        if (mcapMin && (!symbol.marketCap || symbol.marketCap < parseFloat(mcapMin) * 1e9)) return false;
+        if (mcapMax && (!symbol.marketCap || symbol.marketCap > parseFloat(mcapMax) * 1e9)) return false;
+
+        // Inception year filters
+        if (inceptionMin && symbol.inception) {
+            const year = new Date(symbol.inception).getFullYear();
+            if (year < parseInt(inceptionMin)) return false;
+        }
+        if (inceptionMax && symbol.inception) {
+            const year = new Date(symbol.inception).getFullYear();
+            if (year > parseInt(inceptionMax)) return false;
+        }
+
+        // Oldest price year filters
+        if (oldestPriceMin && symbol.oldestPrice) {
+            const year = new Date(symbol.oldestPrice).getFullYear();
+            if (year < parseInt(oldestPriceMin)) return false;
+        }
+        if (oldestPriceMax && symbol.oldestPrice) {
+            const year = new Date(symbol.oldestPrice).getFullYear();
+            if (year > parseInt(oldestPriceMax)) return false;
+        }
+
+        return true;
+    });
+
+    // Sort the filtered results
+    const sortedSymbols = [...matchedSymbols].sort((a, b) => {
+        const aVal = a[sortColumn];
+        const bVal = b[sortColumn];
+        
+        // Handle null/undefined
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return 1;
+        if (bVal == null) return -1;
+        
+        // Compare values
+        let comparison = 0;
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+            comparison = aVal.localeCompare(bVal);
+        } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+            comparison = aVal - bVal;
+        } else {
+            comparison = String(aVal).localeCompare(String(bVal));
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    // Paginate the sorted results
+    const totalPages = Math.ceil(sortedSymbols.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedSymbols = sortedSymbols.slice(startIndex, endIndex);
+
+    // Handle column header click for sorting
+    const handleSort = (column: keyof Symbol) => {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortDirection('asc');
+        }
+    };
+
+    // Reset to page 1 when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    if (loading) {
+        return (
+            <div className="max-w-7xl mx-auto">
+                <div className="form-card">
+                    <p className="text-gray-600 text-center py-8">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-7xl mx-auto">
+                <div className="form-card">
+                    <p className="text-red-600 text-center py-8">Error: {error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Get unique exchanges, countries and sectors for dropdowns
+    const exchanges = Array.from(new Set(symbols.map(s => s.exchange).filter(Boolean))).sort();
+    const countries = Array.from(new Set(symbols.map(s => s.country).filter(Boolean))).sort();
+    const sectors = Array.from(new Set(symbols.map(s => s.sector).filter(Boolean))).sort();
+
+    return (
+        <div className="max-w-7xl mx-auto">
+            <div className="mb-4">
+                <p className="text-gray-600 text-sm mb-3">{description}</p>
+                
+                {/* Filters */}
+                <div className="grid grid-cols-5 gap-2 mb-2">
+                    <input
+                        type="text"
+                        placeholder="Ticker or company name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    />
+                    <select
+                        value={exchangeFilter}
+                        onChange={(e) => setExchangeFilter(e.target.value)}
+                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    >
+                        <option value="">All Exchanges</option>
+                        {exchanges.map(e => <option key={e} value={e}>{e}</option>)}
+                    </select>
+                    <select
+                        value={countryFilter}
+                        onChange={(e) => setCountryFilter(e.target.value)}
+                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    >
+                        <option value="">All Countries</option>
+                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select
+                        value={sectorFilter}
+                        onChange={(e) => setSectorFilter(e.target.value)}
+                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    >
+                        <option value="">All Sectors</option>
+                        {sectors.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <p className="text-gray-500 text-xs flex items-center">
+                        {matchedSymbols.length.toLocaleString()} results
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-6 gap-2">
+                    <input type="number" placeholder="MCap Min (B)" value={mcapMin} onChange={(e) => setMcapMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="MCap Max (B)" value={mcapMax} onChange={(e) => setMcapMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="Inception Min" value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="Inception Max" value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                </div>
+            </div>
+
+            <div className="form-card">
+                {/* Pagination - Top */}
+                <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200 bg-gray-50">
+                    <div className="text-xs text-gray-700">
+                        Page {currentPage} of {totalPages} ({startIndex + 1}-{Math.min(endIndex, sortedSymbols.length)} of {sortedSymbols.length.toLocaleString()})
+                    </div>
+                    <div className="flex gap-1">
+                        <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-2 py-1 text-xs border rounded disabled:opacity-50">First</button>
+                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Prev</button>
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Next</button>
+                        <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Last</button>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 text-xs">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th onClick={() => handleSort('ticker')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-24 cursor-pointer hover:bg-gray-100">Symbol {sortColumn === 'ticker' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('exchange')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Exch {sortColumn === 'exchange' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('name')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase max-w-xs cursor-pointer hover:bg-gray-100">Company {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('country')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-12 cursor-pointer hover:bg-gray-100">Ctry {sortColumn === 'country' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('sector')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-32 cursor-pointer hover:bg-gray-100">Sector {sortColumn === 'sector' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('inception')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Incept {sortColumn === 'inception' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('oldestPrice')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Price {sortColumn === 'oldestPrice' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('marketCap')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">MCap {sortColumn === 'marketCap' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {paginatedSymbols.map((symbol) => (
+                                <tr
+                                    key={symbol.ticker}
+                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                    onClick={() => onOpenSymbol?.(symbol.ticker)}
+                                >
+                                    <td className="px-2 py-1 whitespace-nowrap font-bold text-gray-900">{symbol.ticker}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-gray-500">{symbol.exchange || '-'}</td>
+                                    <td className="px-2 py-1 text-gray-900 truncate max-w-xs" title={symbol.name || ''}>{symbol.name || '-'}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-gray-500">{symbol.country || '-'}</td>
+                                    <td className="px-2 py-1 text-gray-500 truncate max-w-[8rem]" title={symbol.sector || ''}>{symbol.sector || '-'}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-gray-500">{formatYear(symbol.inception)}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-gray-500">{formatYear(symbol.oldestPrice)}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-gray-500 font-mono">{formatMarketCap(symbol.marketCap)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination - Bottom */}
+                <div className="px-4 py-2 flex items-center justify-between border-t border-gray-200 bg-gray-50">
+                    <div className="text-xs text-gray-700">
+                        Page {currentPage} of {totalPages} ({startIndex + 1}-{Math.min(endIndex, sortedSymbols.length)} of {sortedSymbols.length.toLocaleString()})
+                    </div>
+                    <div className="flex gap-1">
+                        <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-2 py-1 text-xs border rounded disabled:opacity-50">First</button>
+                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Prev</button>
+                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Next</button>
+                        <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} className="px-2 py-1 text-xs border rounded disabled:opacity-50">Last</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

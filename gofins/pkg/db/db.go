@@ -63,25 +63,25 @@ func (db *DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
 
 // Symbol represents a stock symbol in the database
 type Symbol struct {
-	Ticker            string
-	Exchange          *string
-	LastPriceUpdate   *time.Time
-	LastProfileUpdate *time.Time
-	LastPriceStatus   *string
-	LastProfileStatus *string
-	Name              *string
-	Type              *string
-	Currency          *string
-	Sector            *string
-	Industry          *string
-	Country           *string
-	Description       *string
-	Website           *string
-	ISIN              *string
-	Inception         *time.Time
-	OldestPrice       *time.Time // Date of the oldest price in history
-	IsActivelyTrading *bool
-	MarketCap         *int64
+	Ticker            string     `json:"ticker"`
+	Exchange          *string    `json:"exchange,omitempty"`
+	LastPriceUpdate   *time.Time `json:"lastPriceUpdate,omitempty"`
+	LastProfileUpdate *time.Time `json:"lastProfileUpdate,omitempty"`
+	LastPriceStatus   *string    `json:"lastPriceStatus,omitempty"`
+	LastProfileStatus *string    `json:"lastProfileStatus,omitempty"`
+	Name              *string    `json:"name,omitempty"`
+	Type              *string    `json:"type,omitempty"`
+	Currency          *string    `json:"currency,omitempty"`
+	Sector            *string    `json:"sector,omitempty"`
+	Industry          *string    `json:"industry,omitempty"`
+	Country           *string    `json:"country,omitempty"`
+	Description       *string    `json:"description,omitempty"`
+	Website           *string    `json:"website,omitempty"`
+	ISIN              *string    `json:"isin,omitempty"`
+	Inception         *time.Time `json:"inception,omitempty"`
+	OldestPrice       *time.Time `json:"oldestPrice,omitempty"`
+	IsActivelyTrading *bool      `json:"isActivelyTrading,omitempty"`
+	MarketCap         *int64     `json:"marketCap,omitempty"`
 }
 
 // PriceData represents price data (daily, weekly, or monthly)
@@ -491,6 +491,36 @@ func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
 
 	logf("Deactivated %d obsolete symbols\n", len(toDeactivate))
 	return nil
+}
+
+// GetActiveSymbols returns all actively trading stocks (excludes indices)
+func (db *DB) GetActiveSymbols() ([]Symbol, error) {
+	query := `
+		SELECT ticker, exchange, name, type, currency, sector, industry, country, inception, oldest_price, market_cap
+		FROM symbols
+		WHERE is_actively_trading = true
+		  AND (type = $1 OR type IS NULL)
+		ORDER BY ticker
+	`
+
+	rows, err := db.conn.Query(query, TypeStock)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var symbols []Symbol
+	for rows.Next() {
+		var s Symbol
+		if err := rows.Scan(
+			&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country, &s.Inception, &s.OldestPrice, &s.MarketCap,
+		); err != nil {
+			return nil, err
+		}
+		symbols = append(symbols, s)
+	}
+
+	return symbols, rows.Err()
 }
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)

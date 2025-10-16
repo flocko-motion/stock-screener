@@ -22,6 +22,7 @@ func NewServer(database *db.DB, port int) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/symbol/", s.handleGetSymbol)
 	mux.HandleFunc("/api/symbols", s.handleListSymbols)
+	mux.HandleFunc("/api/symbols/active", s.handleListActiveSymbols)
 	mux.HandleFunc("/api/prices/monthly/", s.handleGetMonthlyPrices)
 	mux.HandleFunc("/api/health", s.handleHealth)
 

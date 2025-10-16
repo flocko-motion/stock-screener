@@ -4,13 +4,14 @@ import {
     PlusIcon,
     HeartIcon,
     BeakerIcon,
-    XMarkIcon
+    XMarkIcon,
+    BuildingLibraryIcon
 } from '@heroicons/react/24/outline';
 import TabContent from './TabContent';
 
 interface Tab {
     id: string;
-    type: 'analyses' | 'favorites' | 'analysis' | 'symbol' | 'create';
+    type: 'analyses' | 'favorites' | 'stocks' | 'analysis' | 'symbol' | 'create';
     title: string;
     data?: any;
     isPermanent?: boolean;
@@ -19,6 +20,7 @@ interface Tab {
 export default function Layout() {
     const [tabs, setTabs] = useState<Tab[]>([
         { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true },
+        { id: 'stocks', type: 'stocks', title: 'Stocks', isPermanent: true },
         { id: 'favorites', type: 'favorites', title: 'Favorites', isPermanent: true }
     ]);
     const [activeTabId, setActiveTabId] = useState<string>('analyses');
@@ -26,6 +28,7 @@ export default function Layout() {
     const getTabIcon = (type: Tab['type']) => {
         switch (type) {
             case 'analyses': return ChartBarIcon;
+            case 'stocks': return BuildingLibraryIcon;
             case 'favorites': return HeartIcon;
             case 'analysis': return BeakerIcon;
             case 'symbol': return ChartBarIcon;
