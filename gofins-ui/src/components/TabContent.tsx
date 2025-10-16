@@ -1,12 +1,11 @@
 import AnalysesList from './AnalysesList';
-import FavoritesList from './FavoritesList';
 import CreateAnalysis from './CreateAnalysis';
 import AnalysisView from './AnalysisView';
 import SymbolView from './SymbolView';
 import SymbolList from './SymbolList';
 
 interface TabContentProps {
-    tabType: 'analyses' | 'favorites' | 'stocks' | 'analysis' | 'symbol' | 'create';
+    tabType: 'analyses' | 'stocks' | 'analysis' | 'symbol' | 'create';
     data?: any;
     onOpenAnalysis?: (id: string, name: string) => void;
     onOpenSymbol?: (symbol: string) => void;
@@ -26,8 +25,6 @@ export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol
                     onOpenSymbol={onOpenSymbol}
                 />
             );
-        case 'favorites':
-            return <FavoritesList onOpenSymbol={onOpenSymbol} />;
         case 'create':
             return <CreateAnalysis onAnalysisCreated={onOpenAnalysis} onCancel={onCloseTab} />;
         case 'analysis':

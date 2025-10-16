@@ -82,6 +82,8 @@ type Symbol struct {
 	OldestPrice       *time.Time `json:"oldestPrice,omitempty"`
 	IsActivelyTrading *bool      `json:"isActivelyTrading,omitempty"`
 	MarketCap         *int64     `json:"marketCap,omitempty"`
+	IsFavorite        bool       `json:"isFavorite"`
+	UserRating        *int       `json:"userRating,omitempty"`
 }
 
 // PriceData represents price data (daily, weekly, or monthly)
@@ -496,12 +498,24 @@ func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
 // GetActiveSymbols returns all actively trading stocks (excludes indices and secondary listings)
 func (db *DB) GetActiveSymbols() ([]Symbol, error) {
 	query := `
-		SELECT ticker, exchange, name, type, currency, sector, industry, country, inception, oldest_price, market_cap
-		FROM symbols
-		WHERE is_actively_trading = true
-		  AND (type = $1 OR type IS NULL)
-		  AND type != $2
-		ORDER BY ticker
+		SELECT 
+			s.ticker, s.exchange, s.name, s.type, s.currency, s.sector, s.industry, s.country, 
+			s.inception, s.oldest_price, s.market_cap,
+			COALESCE(f.ticker IS NOT NULL, false) as is_favorite,
+			r.rating
+		FROM symbols s
+		LEFT JOIN user_favorites f ON s.ticker = f.ticker
+		LEFT JOIN LATERAL (
+			SELECT rating 
+			FROM user_ratings 
+			WHERE ticker = s.ticker 
+			ORDER BY created_at DESC 
+			LIMIT 1
+		) r ON true
+		WHERE s.is_actively_trading = true
+		  AND (s.type = $1 OR s.type IS NULL)
+		  AND s.type != $2
+		ORDER BY s.ticker
 	`
 
 	rows, err := db.conn.Query(query, TypeStock, TypeSecondary)
@@ -515,6 +529,7 @@ func (db *DB) GetActiveSymbols() ([]Symbol, error) {
 		var s Symbol
 		if err := rows.Scan(
 			&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country, &s.Inception, &s.OldestPrice, &s.MarketCap,
+			&s.IsFavorite, &s.UserRating,
 		); err != nil {
 			return nil, err
 		}

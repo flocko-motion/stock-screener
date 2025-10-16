@@ -30,6 +30,12 @@ func NewServer(database *db.DB, port int) *Server {
 	mux.HandleFunc("/api/analyses", s.handleAnalyses)         // GET (list) / POST (create)
 	mux.HandleFunc("/api/analysis/", s.handleAnalysisRouting) // Route to specific handlers
 
+	// User data endpoints
+	mux.HandleFunc("/api/favorites", s.handleFavorites)   // GET (list) / POST /{ticker} (toggle)
+	mux.HandleFunc("/api/favorites/", s.handleFavorites)  // POST /{ticker} (toggle)
+	mux.HandleFunc("/api/ratings", s.handleRatings)       // GET (all latest)
+	mux.HandleFunc("/api/ratings/", s.handleRatings)      // GET/POST /{ticker}
+
 	// Wrap with CORS middleware
 	handler := corsMiddleware(mux)
 

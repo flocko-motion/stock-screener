@@ -12,6 +12,8 @@ interface Symbol {
     oldestPrice?: string;
     isActivelyTrading?: boolean;
     marketCap?: number;
+    isFavorite: boolean;
+    userRating?: number;
 }
 
 interface SymbolListProps {
@@ -40,9 +42,41 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const [inceptionMax, setInceptionMax] = useState('');
     const [oldestPriceMin, setOldestPriceMin] = useState('');
     const [oldestPriceMax, setOldestPriceMax] = useState('');
+    const [favoritesOnly, setFavoritesOnly] = useState(false);
+    const [ratingMin, setRatingMin] = useState('');
+    const [ratingMax, setRatingMax] = useState('');
     const [sortColumn, setSortColumn] = useState<keyof Symbol>('ticker');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const itemsPerPage = 100;
+
+    const toggleFavorite = async (ticker: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            const response = await fetch(`http://localhost:8080/api/favorites/${ticker}`, { method: 'POST' });
+            const data = await response.json();
+            setSymbols(prev => prev.map(s => s.ticker === ticker ? { ...s, isFavorite: data.isFavorite } : s));
+            if (symbolCache[endpoint]) {
+                symbolCache[endpoint] = symbolCache[endpoint].map(s => s.ticker === ticker ? { ...s, isFavorite: data.isFavorite } : s);
+            }
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+        }
+    };
+
+    const getRatingColor = (rating: number): string => {
+        if (rating === 0) return 'text-gray-500';
+        if (rating > 0) {
+            const intensity = Math.min(rating / 5, 1);
+            if (intensity > 0.6) return 'text-green-700 font-bold';
+            if (intensity > 0.3) return 'text-green-600';
+            return 'text-green-500';
+        } else {
+            const intensity = Math.min(Math.abs(rating) / 5, 1);
+            if (intensity > 0.6) return 'text-red-700 font-bold';
+            if (intensity > 0.3) return 'text-red-600';
+            return 'text-red-500';
+        }
+    };
 
     useEffect(() => {
         // Check cache first
@@ -147,6 +181,10 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
             const year = new Date(symbol.oldestPrice).getFullYear();
             if (year > parseInt(oldestPriceMax)) return false;
         }
+
+        if (favoritesOnly && !symbol.isFavorite) return false;
+        if (ratingMin && (!symbol.userRating || symbol.userRating < parseInt(ratingMin))) return false;
+        if (ratingMax && (!symbol.userRating || symbol.userRating > parseInt(ratingMax))) return false;
 
         return true;
     });
@@ -271,6 +309,14 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                     <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                 </div>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                    <input type="number" placeholder="Rating Min" value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <input type="number" placeholder="Rating Max" value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
+                        <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
+                        <span>⭐ Favorites only</span>
+                    </label>
+                </div>
             </div>
 
             <div className="form-card">
@@ -291,6 +337,8 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                     <table className="min-w-full divide-y divide-gray-200 text-xs">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th onClick={() => handleSort('isFavorite')} className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase w-8 cursor-pointer hover:bg-gray-100">⭐ {sortColumn === 'isFavorite' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('userRating')} className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase w-12 cursor-pointer hover:bg-gray-100">Rating {sortColumn === 'userRating' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('ticker')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-24 cursor-pointer hover:bg-gray-100">Symbol {sortColumn === 'ticker' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('exchange')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Exch {sortColumn === 'exchange' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('name')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase max-w-xs cursor-pointer hover:bg-gray-100">Company {sortColumn === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
@@ -308,6 +356,16 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                                     onClick={() => onOpenSymbol?.(symbol.ticker)}
                                 >
+                                    <td className="px-2 py-1 text-center" onClick={(e) => toggleFavorite(symbol.ticker, e)}>
+                                        <span className={`cursor-pointer text-lg hover:scale-125 inline-block transition-transform ${symbol.isFavorite ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-300'}`}>⭐</span>
+                                    </td>
+                                    <td className="px-2 py-1 text-center">
+                                        {symbol.userRating != null ? (
+                                            <span className={`font-mono ${getRatingColor(symbol.userRating)}`}>{symbol.userRating > 0 ? '+' : ''}{symbol.userRating}</span>
+                                        ) : (
+                                            <span className="text-gray-300">-</span>
+                                        )}
+                                    </td>
                                     <td className="px-2 py-1 whitespace-nowrap font-bold text-gray-900">{symbol.ticker}</td>
                                     <td className="px-2 py-1 whitespace-nowrap text-gray-500">{symbol.exchange || '-'}</td>
                                     <td className="px-2 py-1 text-gray-900 truncate max-w-xs" title={symbol.name || ''}>{symbol.name || '-'}</td>
