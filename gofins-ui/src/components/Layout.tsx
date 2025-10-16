@@ -20,10 +20,11 @@ interface Tab {
 
 export default function Layout() {
     const [tabs, setTabs] = useState<Tab[]>([
-        { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true },
-        { id: 'stocks', type: 'stocks', title: 'Stocks', isPermanent: true }
+        { id: 'stocks', type: 'stocks', title: 'Stocks', isPermanent: true },
+        { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true }
     ]);
-    const [activeTabId, setActiveTabId] = useState<string>('analyses');
+    const [activeTabId, setActiveTabId] = useState<string>('stocks');
+    const [previousTabId, setPreviousTabId] = useState<string>('stocks');
 
     const getTabIcon = (type: Tab['type']) => {
         switch (type) {
@@ -69,6 +70,7 @@ export default function Layout() {
                 data: { symbol }
             };
             setTabs([...tabs, newTab]);
+            setPreviousTabId(activeTabId);
             setActiveTabId(symbolTabId);
         }
     };
@@ -81,11 +83,12 @@ export default function Layout() {
             title: 'Create Analysis'
         };
         setTabs([...tabs, newTab]);
+        setPreviousTabId(activeTabId);
         setActiveTabId(createTabId);
     };
 
     const closeTab = (tabId: string) => {
-        console.log('closeTab called:', tabId, 'currentActive:', activeTabId);
+        console.log('closeTab called:', tabId, 'currentActive:', activeTabId, 'previous:', previousTabId);
 
         setTabs(currentTabs => {
             const tabToClose = currentTabs.find(tab => tab.id === tabId);
@@ -99,9 +102,10 @@ export default function Layout() {
 
             // Only change active tab if we're closing the currently active tab
             if (activeTabId === tabId && newTabs.length > 0) {
-                const newActiveTab = newTabs[newTabs.length - 1].id;
-                console.log('Closing active tab, switching to:', newActiveTab);
-                setActiveTabId(newActiveTab);
+                // Try to go back to previous tab if it still exists
+                const targetTab = newTabs.find(t => t.id === previousTabId) ? previousTabId : newTabs[newTabs.length - 1].id;
+                console.log('Closing active tab, switching to:', targetTab);
+                setActiveTabId(targetTab);
             } else {
                 console.log('Not closing active tab, keeping current active tab:', activeTabId);
             }
@@ -134,7 +138,10 @@ export default function Layout() {
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTabId(tab.id)}
+                                onClick={() => {
+                                    setPreviousTabId(activeTabId);
+                                    setActiveTabId(tab.id);
+                                }}
                                 className={`tab-button ${activeTabId === tab.id ? 'active' : ''}`}
                             >
                                 <Icon className="w-4 h-4 flex-shrink-0" />

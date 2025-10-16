@@ -31,23 +31,42 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const [symbols, setSymbols] = useState<Symbol[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    // Load filters from sessionStorage or use defaults
+    const getStoredFilters = () => {
+        const stored = sessionStorage.getItem('symbolListFilters');
+        return stored ? JSON.parse(stored) : {};
+    };
+    
+    const filters = getStoredFilters();
+    const [searchTerm, setSearchTerm] = useState(filters.searchTerm || '');
     const [currentPage, setCurrentPage] = useState(1);
-    const [exchangeFilter, setExchangeFilter] = useState('');
-    const [countryFilter, setCountryFilter] = useState('');
-    const [sectorFilter, setSectorFilter] = useState('');
-    const [mcapMin, setMcapMin] = useState('');
-    const [mcapMax, setMcapMax] = useState('');
-    const [inceptionMin, setInceptionMin] = useState('');
-    const [inceptionMax, setInceptionMax] = useState('');
-    const [oldestPriceMin, setOldestPriceMin] = useState('');
-    const [oldestPriceMax, setOldestPriceMax] = useState('');
-    const [favoritesOnly, setFavoritesOnly] = useState(false);
-    const [ratingMin, setRatingMin] = useState('');
-    const [ratingMax, setRatingMax] = useState('');
-    const [sortColumn, setSortColumn] = useState<keyof Symbol>('ticker');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [exchangeFilter, setExchangeFilter] = useState(filters.exchangeFilter || '');
+    const [countryFilter, setCountryFilter] = useState(filters.countryFilter || '');
+    const [sectorFilter, setSectorFilter] = useState(filters.sectorFilter || '');
+    const [mcapMin, setMcapMin] = useState(filters.mcapMin || '');
+    const [mcapMax, setMcapMax] = useState(filters.mcapMax || '');
+    const [inceptionMin, setInceptionMin] = useState(filters.inceptionMin || '');
+    const [inceptionMax, setInceptionMax] = useState(filters.inceptionMax || '');
+    const [oldestPriceMin, setOldestPriceMin] = useState(filters.oldestPriceMin || '');
+    const [oldestPriceMax, setOldestPriceMax] = useState(filters.oldestPriceMax || '');
+    const [favoritesOnly, setFavoritesOnly] = useState(filters.favoritesOnly || false);
+    const [ratingMin, setRatingMin] = useState(filters.ratingMin || '');
+    const [ratingMax, setRatingMax] = useState(filters.ratingMax || '');
+    const [sortColumn, setSortColumn] = useState<keyof Symbol>(filters.sortColumn || 'ticker');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(filters.sortDirection || 'asc');
     const itemsPerPage = 100;
+    
+    // Save filters to sessionStorage whenever they change
+    useEffect(() => {
+        sessionStorage.setItem('symbolListFilters', JSON.stringify({
+            searchTerm, exchangeFilter, countryFilter, sectorFilter,
+            mcapMin, mcapMax, inceptionMin, inceptionMax,
+            oldestPriceMin, oldestPriceMax, favoritesOnly,
+            ratingMin, ratingMax, sortColumn, sortDirection
+        }));
+    }, [searchTerm, exchangeFilter, countryFilter, sectorFilter, mcapMin, mcapMax, 
+        inceptionMin, inceptionMax, oldestPriceMin, oldestPriceMax, favoritesOnly,
+        ratingMin, ratingMax, sortColumn, sortDirection]);
 
     const toggleFavorite = async (ticker: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -107,6 +126,14 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     };
 
     useEffect(() => {
+        // Check if cache was invalidated (e.g., rating was added/deleted)
+        const invalidated = sessionStorage.getItem('symbolCacheInvalidated');
+        if (invalidated) {
+            console.log('Cache invalidated, clearing...');
+            delete symbolCache[endpoint];
+            sessionStorage.removeItem('symbolCacheInvalidated');
+        }
+        
         // Check cache first
         if (symbolCache[endpoint]) {
             setSymbols(symbolCache[endpoint]);
@@ -120,9 +147,11 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     useEffect(() => {
         // Listen for rating changes and refresh data
         const handleRatingsChanged = async () => {
+            console.log('ratingsChanged event received, refreshing symbols...');
             delete symbolCache[endpoint];
             delete fetchingCache[endpoint];
             await fetchSymbols();
+            console.log('Symbols refreshed, new count:', symbols.length);
         };
         
         window.addEventListener('ratingsChanged', handleRatingsChanged);
@@ -278,7 +307,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                 <p className="text-gray-600 text-sm mb-3">{description}</p>
                 
                 {/* Filters */}
-                <div className="grid grid-cols-5 gap-2 mb-2">
+                <div className="grid grid-cols-4 gap-2 mb-2">
                     <input
                         type="text"
                         placeholder="Ticker or company name..."
@@ -310,9 +339,6 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                         <option value="">All Sectors</option>
                         {sectors.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <p className="text-gray-500 text-xs flex items-center">
-                        {matchedSymbols.length.toLocaleString()} results
-                    </p>
                 </div>
 
                 <div className="grid grid-cols-6 gap-2">
@@ -323,13 +349,33 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                     <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                 </div>
-                <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="grid grid-cols-4 gap-2 mt-2">
                     <input type="number" placeholder="Rating Min" value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <input type="number" placeholder="Rating Max" value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
                     <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
                         <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
                         <span>⭐ Favorites only</span>
                     </label>
+                    <button
+                        onClick={() => {
+                            setSearchTerm('');
+                            setExchangeFilter('');
+                            setCountryFilter('');
+                            setSectorFilter('');
+                            setMcapMin('');
+                            setMcapMax('');
+                            setInceptionMin('');
+                            setInceptionMax('');
+                            setOldestPriceMin('');
+                            setOldestPriceMax('');
+                            setFavoritesOnly(false);
+                            setRatingMin('');
+                            setRatingMax('');
+                        }}
+                        className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50"
+                    >
+                        Reset Filters
+                    </button>
                 </div>
             </div>
 

@@ -78,8 +78,8 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                     const data = await historyResponse.json();
                     setRatingHistory(data || []);
                 }
-                // Clear symbol list cache to force refresh
-                window.dispatchEvent(new CustomEvent('ratingsChanged'));
+                // Clear symbol list cache to force refresh when user returns to stocks tab
+                sessionStorage.setItem('symbolCacheInvalidated', Date.now().toString());
             } else {
                 alert('Failed to delete rating');
             }
@@ -112,8 +112,8 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 setNotes('');
                 const textarea = document.querySelector('textarea[placeholder*="Optional notes"]') as HTMLTextAreaElement;
                 if (textarea) textarea.blur();
-                // Clear symbol list cache to force refresh
-                window.dispatchEvent(new CustomEvent('ratingsChanged'));
+                // Clear symbol list cache to force refresh when user returns to stocks tab
+                sessionStorage.setItem('symbolCacheInvalidated', Date.now().toString());
             } else {
                 alert('Failed to submit rating');
             }
