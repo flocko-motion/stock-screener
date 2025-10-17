@@ -80,6 +80,7 @@ func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly [
 
 // fetchAndStore fetches forex data from the API and stores it in cache
 func (c *cache) fetchAndStore(currency string) error {
+	// Currency should already be normalized by the profile updater
 	symbol := fmt.Sprintf("%sUSD", currency)
 
 	forexData, err := fmp.FetchForexHistory(symbol)

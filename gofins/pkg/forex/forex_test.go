@@ -33,6 +33,30 @@ func TestGetUsdForexRawData(t *testing.T) {
 	t.Log("This is why currency conversion is failing")
 }
 
+func TestGetUsdForexRawDataILS(t *testing.T) {
+	// First, let's check what raw data we get from FMP
+	symbol := "ILSUSD"
+
+	fmt.Printf("\n=== Testing Raw Forex Data from FMP ===\n")
+	fmt.Printf("Fetching %s...\n", symbol)
+
+	forexData, err := fmp.FetchForexHistory(symbol)
+	assert.NoError(t, err, "Should fetch raw forex data")
+	assert.NotEmpty(t, forexData, "Should have raw data")
+
+	fmt.Printf("Got %d raw data points\n", len(forexData))
+	fmt.Printf("First 5 raw data points:\n")
+	for i := 0; i < 5 && i < len(forexData); i++ {
+		fmt.Printf("  %d: Date=%s, Price=%.4f\n",
+			i, forexData[i].Date, forexData[i].Price)
+	}
+
+	// The issue is that FMP's light endpoint returns zeros for forex
+	// This is a known limitation - we need to use a different approach
+	t.Log("NOTE: FMP light endpoint returns zeros for forex data")
+	t.Log("This is why currency conversion is failing")
+}
+
 func TestGetUsdForex(t *testing.T) {
 	// Test with EUR to USD conversion
 	currency := "EUR"
@@ -61,9 +85,9 @@ func TestGetUsdForex(t *testing.T) {
 }
 
 func TestConvertToUsdMonthly(t *testing.T) {
-	// Test converting 1000 EUR to USD
+	// Test converting 1000 ILS to USD
 	amount := 1000.0
-	currency := "EUR"
+	currency := "ILS"
 	date := time.Now()
 
 	converted, err := ConvertToUsdMonthly(amount, currency, date)
@@ -74,10 +98,10 @@ func TestConvertToUsdMonthly(t *testing.T) {
 	fmt.Printf("Converted: %.2f USD\n", converted)
 	fmt.Printf("Exchange rate: %.4f\n", converted/amount)
 
-	// EUR to USD rate should be around 1.0-1.2 typically
+	// ILS to USD rate should be around 0.25-0.30 typically
 	assert.Greater(t, converted, 0.0, "Converted amount should be greater than 0")
-	assert.Greater(t, converted, amount*0.8, "Converted amount should be reasonable (> 80% of original)")
-	assert.Less(t, converted, amount*2.0, "Converted amount should be reasonable (< 200% of original)")
+	assert.Greater(t, converted, amount*0.2, "Converted amount should be reasonable (> 20% of original)")
+	assert.Less(t, converted, amount*0.4, "Converted amount should be reasonable (< 40% of original)")
 
 	// Verify the rate is not zero
 	rate := converted / amount
@@ -86,7 +110,7 @@ func TestConvertToUsdMonthly(t *testing.T) {
 }
 
 func TestConvertToUsdWeekly(t *testing.T) {
-	// Test converting 1000 EUR to USD
+	// Test converting 1000 ILS to USD
 	amount := 1000.0
 	currency := "EUR"
 	date := time.Now()

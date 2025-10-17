@@ -19,6 +19,19 @@ const (
 	ProfileBatchSize      = 200
 )
 
+// currencyCodeMap maps non-standard currency codes from FMP to standard ISO codes
+var currencyCodeMap = map[string]string{
+	"ILA": "ILS", // Israeli New Shekel
+}
+
+// normalizeCurrencyCode converts non-standard currency codes to standard ISO codes
+func normalizeCurrencyCode(currency string) string {
+	if normalized, exists := currencyCodeMap[currency]; exists {
+		return normalized
+	}
+	return currency
+}
+
 func UpdateProfiles(ctx context.Context) {
 	log := NewLogger("Profile")
 
@@ -152,10 +165,13 @@ func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string)
 		}
 	}
 
+	status := types.StatusOK
+
 	// Detect secondary listings by comparing exchange with primary listing
 	symbolType := deriveType(profile)
 
 	// Convert market cap to USD if needed
+	profile.Currency = normalizeCurrencyCode(profile.Currency)
 	marketCapUSD := profile.MarketCap
 	if profile.Currency != "" && profile.Currency != "USD" && profile.MarketCap > 0 {
 		converted, err := forex.ConvertToUsdMonthly(profile.MarketCap, profile.Currency, now)
@@ -163,6 +179,7 @@ func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string)
 			// Log warning but continue with unconverted value
 			// This can happen if forex data is not available for the currency
 			fmt.Printf("Warning: Failed to convert market cap for %s from %s to USD: %v\n", ticker, profile.Currency, err)
+			status = types.StatusFailed
 		} else {
 			marketCapUSD = converted
 		}
@@ -181,7 +198,7 @@ func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string)
 		Website:           f.Ptr(profile.Website),
 		Inception:         inception,
 		LastProfileUpdate: f.Ptr(now),
-		LastProfileStatus: f.Ptr(types.StatusOK),
+		LastProfileStatus: f.Ptr(status),
 		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
 		MarketCap:         f.Ptr(int64(marketCapUSD)), // Convert float64 to int64, already in USD
 	}
