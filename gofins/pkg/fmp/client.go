@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/f"
@@ -34,8 +35,25 @@ type Client struct {
 	rateLimiter *ratelimit.Limiter
 }
 
-// NewClient creates a new FMP API client
-func NewClient(apiKeyPath *string) (*Client, error) {
+var (
+	globalClient *Client
+	clientOnce   sync.Once
+)
+
+// Fmp returns the global FMP client, initializing it on first call
+func Fmp() *Client {
+	clientOnce.Do(func() {
+		client, err := newClient(nil)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to initialize FMP client: %v", err))
+		}
+		globalClient = client
+	})
+	return globalClient
+}
+
+// newClient creates a new FMP API client
+func newClient(apiKeyPath *string) (*Client, error) {
 	if apiKeyPath == nil {
 		apiKeyPath = f.Ptr(ApiKeyPathDefault)
 	}

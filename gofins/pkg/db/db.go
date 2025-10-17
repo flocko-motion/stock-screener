@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/files"
@@ -15,6 +16,24 @@ func logf(format string, args ...interface{}) {
 
 type DB struct {
 	conn *sql.DB
+}
+
+var (
+	globalDB *DB
+	dbOnce   sync.Once
+)
+
+// Db returns the global database connection, initializing it on first call
+// Panics if the connection cannot be established
+func Db() *DB {
+	dbOnce.Do(func() {
+		db, err := NewDB()
+		if err != nil {
+			panic(fmt.Sprintf("Failed to initialize database connection: %v", err))
+		}
+		globalDB = db
+	})
+	return globalDB
 }
 
 // NewDB creates a new database connection with hardcoded config

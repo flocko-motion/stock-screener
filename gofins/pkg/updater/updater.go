@@ -5,12 +5,6 @@ import (
 	"time"
 )
 
-const (
-	StatusOK       = "ok"
-	StatusNotFound = "not_found"
-	StatusFailed   = "failed"
-)
-
 type Logger struct {
 	prefix string
 }

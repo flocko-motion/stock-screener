@@ -24,10 +24,10 @@ type PriceStats struct {
 	Failed   []string
 }
 
-func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
+func UpdatePrices(ctx context.Context) {
 	log := NewLogger("Prices")
 
-	totalStale, err := database.CountStalePrices()
+	totalStale, err := db.Db().CountStalePrices()
 	if err != nil {
 		log.Error("Failed to count stale prices: %v\n", err)
 		return
@@ -43,7 +43,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		default:
 		}
 
-		symbols, err := database.GetSymbolsWithStalePrices(PriceBatchSize)
+		symbols, err := db.Db().GetSymbolsWithStalePrices(PriceBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale prices: %v\n", err)
 			return
@@ -56,7 +56,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 			continue
 		}
 
-		currentStale, _ := database.CountStalePrices()
+		currentStale, _ := db.Db().CountStalePrices()
 		log.Batch(currentStale, len(symbols))
 
 		startTime := time.Now()
@@ -68,23 +68,25 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		}
 
 		// Worker pool
-		tickerChan := make(chan string, len(symbols))
+		symbolChan := make(chan types.Symbol, len(symbols))
 		var wg sync.WaitGroup
 
 		for i := 0; i < PriceWorkers; i++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				for ticker := range tickerChan {
-					result := updatePrices(ticker, database, fmpClient)
+				for symbol := range symbolChan {
+					updatedSymbol, _, _ := updatePrices(symbol)
 					statsMu.Lock()
-					switch result {
-					case StatusOK:
-						stats.Updated = append(stats.Updated, ticker)
-					case StatusNotFound:
-						stats.NotFound = append(stats.NotFound, ticker)
-					case StatusFailed:
-						stats.Failed = append(stats.Failed, ticker)
+					if updatedSymbol.LastPriceStatus != nil {
+						switch *updatedSymbol.LastPriceStatus {
+						case types.StatusOK:
+							stats.Updated = append(stats.Updated, symbol.Ticker)
+						case types.StatusNotFound:
+							stats.NotFound = append(stats.NotFound, symbol.Ticker)
+						case types.StatusFailed:
+							stats.Failed = append(stats.Failed, symbol.Ticker)
+						}
 					}
 					statsMu.Unlock()
 				}
@@ -92,41 +94,37 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		}
 
 		for _, symbol := range symbols {
-			tickerChan <- symbol.Ticker
+			symbolChan <- symbol
 		}
-		close(tickerChan)
+		close(symbolChan)
 
 		wg.Wait()
 
 		elapsed := time.Since(startTime)
-		currentStale, _ = database.CountStalePrices()
+		currentStale, _ = db.Db().CountStalePrices()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
 	}
 }
 
-func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string {
-	dailyPrices, err := fmpClient.FetchPriceHistory(ticker)
+// updatePrices fetches and processes price data for a symbol
+// Returns symbol metadata, monthly prices, and weekly prices
+func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types.PriceData) {
+	dailyPrices, err := fmp.Fmp().FetchPriceHistory(symbol.Ticker)
 	now := time.Now()
 
 	if err != nil {
+		status := types.StatusFailed
 		if fmp.IsNotFoundError(err) {
-			status := StatusNotFound
-			database.PutSymbol(&types.Symbol{
-				Ticker:          ticker,
-				LastPriceUpdate: &now,
-				LastPriceStatus: &status,
-			})
-			return StatusNotFound
+			status = types.StatusNotFound
 		}
-		status := StatusFailed
-		database.PutSymbol(&types.Symbol{
-			Ticker:          ticker,
-			LastPriceUpdate: &now,
-			LastPriceStatus: &status,
-		})
-		return StatusFailed
+
+		symbol.LastPriceUpdate = &now
+		symbol.LastPriceStatus = &status
+		db.Db().PutSymbol(&symbol)
+
+		return symbol, nil, nil
 	}
 
 	// Sort by date
@@ -135,15 +133,7 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 	})
 
 	// Single-loop conversion: daily → weekly + monthly + YoY
-	monthly, weekly := calculator.ConvertPrices(dailyPrices, ticker)
-
-	// Save to database
-	if err := database.PutMonthlyPrices(monthly); err != nil {
-		return StatusFailed
-	}
-	if err := database.PutWeeklyPrices(weekly); err != nil {
-		return StatusFailed
-	}
+	monthly, weekly := calculator.ConvertPrices(dailyPrices, symbol.Ticker)
 
 	// Parse oldest price date
 	var oldestPrice *time.Time
@@ -153,15 +143,26 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 		}
 	}
 
-	// Update last_price_update timestamp and oldest_price
-	status := StatusOK
-	database.PutSymbol(&types.Symbol{
-		Ticker:          ticker,
-		LastPriceUpdate: &now,
-		LastPriceStatus: &status,
-		OldestPrice:     oldestPrice,
-	})
+	// Update symbol metadata
+	status := types.StatusOK
+	symbol.LastPriceUpdate = &now
+	symbol.LastPriceStatus = &status
+	symbol.OldestPrice = oldestPrice
 
-	return StatusOK
+	// Save to database
+	if err := db.Db().PutMonthlyPrices(monthly); err != nil {
+		failStatus := types.StatusFailed
+		symbol.LastPriceStatus = &failStatus
+		db.Db().PutSymbol(&symbol)
+		return symbol, monthly, weekly
+	}
+	if err := db.Db().PutWeeklyPrices(weekly); err != nil {
+		failStatus := types.StatusFailed
+		symbol.LastPriceStatus = &failStatus
+		db.Db().PutSymbol(&symbol)
+		return symbol, monthly, weekly
+	}
+	db.Db().PutSymbol(&symbol)
+
+	return symbol, monthly, weekly
 }
-

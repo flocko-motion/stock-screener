@@ -10,39 +10,39 @@ import (
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
-func SyncSymbols(database *db.DB, fmpClient *fmp.Client) {
+func SyncSymbols() {
 	log := NewLogger("Symbols")
 
 	for {
-		if err := syncSymbolsImpl(database, fmpClient, log); err != nil {
+		if err := syncSymbolsImpl(log); err != nil {
 			log.Error("Symbol sync failed: %v\n", err)
 		}
 		time.Sleep(time.Hour * 24 * 7) // Sleep for 7 days
 	}
 }
 
-func SyncSymbolsOnce(database *db.DB, fmpClient *fmp.Client) error {
+func SyncSymbolsOnce() error {
 	log := NewLogger("Symbols")
-	return syncSymbolsImpl(database, fmpClient, log)
+	return syncSymbolsImpl(log)
 }
 
-func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error {
+func syncSymbolsImpl(log *Logger) error {
 	// Fetch stocks
-	stocks, err := fmpClient.FetchStockList()
+	stocks, err := fmp.Fmp().FetchStockList()
 	if err != nil {
 		return fmt.Errorf("failed to fetch stock list: %w", err)
 	}
 	log.Printf("✓ Fetched %d stocks from FMP\n", len(stocks))
 
 	// Fetch indices
-	indices, err := fmpClient.FetchIndexList()
+	indices, err := fmp.Fmp().FetchIndexList()
 	if err != nil {
 		return fmt.Errorf("failed to fetch index list: %w", err)
 	}
 	log.Printf("✓ Fetched %d indices from FMP\n", len(indices))
 
 	// Fetch delisted companies
-	delisted, err := fmpClient.FetchDelistedCompanies()
+	delisted, err := fmp.Fmp().FetchDelistedCompanies()
 	if err != nil {
 		return fmt.Errorf("failed to fetch delisted companies: %w", err)
 	}
@@ -58,7 +58,7 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 	allSymbols := append(stocks, indices...)
 	filteredSymbols := make([]fmp.Symbol, 0, len(allSymbols))
 	delistedCount := 0
-	
+
 	for _, symbol := range allSymbols {
 		if !delistedMap[symbol.Symbol] {
 			filteredSymbols = append(filteredSymbols, symbol)
@@ -66,14 +66,14 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 			delistedCount++
 		}
 	}
-	
+
 	if delistedCount > 0 {
 		log.Printf("  Filtered out %d delisted symbols\n", delistedCount)
 	}
-	
+
 	allSymbols = filteredSymbols
 
-	dbTickers, err := database.GetAllTickers()
+	dbTickers, err := db.Db().GetAllTickers()
 	if err != nil {
 		return fmt.Errorf("failed to get DB tickers: %w", err)
 	}
@@ -84,7 +84,7 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 	for _, symbol := range allSymbols {
 		keepList = append(keepList, symbol.Symbol)
 	}
-	if err := database.DeactivateSymbolsNotInList(keepList); err != nil {
+	if err := db.Db().DeactivateSymbolsNotInList(keepList); err != nil {
 		return fmt.Errorf("failed to deactivate old symbols: %w", err)
 	}
 
@@ -111,7 +111,7 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 				dbSymbol.Type = f.Ptr(string(types.TypeStock))
 			}
 
-			if err := database.PutSymbol(dbSymbol); err != nil {
+			if err := db.Db().PutSymbol(dbSymbol); err != nil {
 				return fmt.Errorf("failed to insert %s: %w", symbol.Symbol, err)
 			}
 			newCount++

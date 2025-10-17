@@ -10,12 +10,10 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/api"
 	"github.com/flocko-motion/gofins/pkg/db"
-	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/updater"
 	"github.com/spf13/cobra"
 )
 
-var apiKeyPath string
 var noUpdates bool
 
 var serverCmd = &cobra.Command{
@@ -29,42 +27,29 @@ var serverCmd = &cobra.Command{
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-		// init DB
+		// init DB - initialize singleton
 		fmt.Println("=== Initializing ===")
-		database, err := db.NewDB()
-		if err != nil {
-			return fmt.Errorf("failed to connect to database: %w", err)
-		}
-		defer database.Close()
+		_ = db.Db() // Initialize database singleton (will panic if it fails)
 		fmt.Println("✓ Database connected")
 
-		// init FMP (only if updates are enabled)
-		var fmpClient *fmp.Client
-		if !noUpdates {
-			fmpClient, err = fmp.NewClient(&apiKeyPath)
-			if err != nil {
-				return fmt.Errorf("failed to create FMP client: %w", err)
-			}
-			fmt.Println("✓ FMP client ready")
-		}
+		// Start REST API server
+		apiServer := api.NewServer(db.Db(), 8080)
+		go apiServer.Start(ctx)
+		fmt.Println("✓ REST API server listening on :8080")
 
 		// Start updaters only if --no-updates is not set
 		fmt.Println("\n=== Starting Services ===")
 		if !noUpdates {
 			// sync symbols once before starting updaters
-			if err := updater.SyncSymbolsOnce(database, fmpClient); err != nil {
+			if err := updater.SyncSymbolsOnce(); err != nil {
 				return fmt.Errorf("symbol sync failed: %w", err)
 			}
-			go updater.UpdateProfiles(ctx, database, fmpClient)
-			go updater.UpdatePrices(ctx, database, fmpClient)
-			go updater.SyncSymbols(database, fmpClient)
+			go updater.UpdateProfiles(ctx)
+			go updater.UpdatePrices(ctx)
+			go updater.SyncSymbols()
 		} else {
 			fmt.Println("⚠️  Updates disabled - working with existing data only")
 		}
-
-		// Start REST API server
-		apiServer := api.NewServer(database, 8080)
-		go apiServer.Start(ctx)
 
 		fmt.Println("✓ Server running (Ctrl+C to stop)")
 		<-sigChan
@@ -79,8 +64,6 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	serverCmd.Flags().StringVar(&apiKeyPath, "api-key", fmp.ApiKeyPathDefault,
-		"Path to FMP API key file")
 	serverCmd.Flags().BoolVar(&noUpdates, "no-updates", false,
 		"Disable all data updates and work with existing data only")
 }
