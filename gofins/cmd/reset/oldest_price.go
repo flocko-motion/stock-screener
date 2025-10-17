@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/spf13/cobra"
 )
 
@@ -53,7 +54,7 @@ var oldestPriceCmd = &cobra.Command{
 			}
 
 			// Update the symbol with oldest_price
-			if err := database.PutSymbol(&db.Symbol{
+			if err := database.PutSymbol(&types.Symbol{
 				Ticker:      ticker,
 				OldestPrice: oldestDate,
 			}); err != nil {

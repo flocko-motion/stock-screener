@@ -13,3 +13,18 @@ type PriceData struct {
 	YoY          *float64
 	SymbolTicker string
 }
+
+// PriceInterval represents the time interval for price data
+type PriceInterval string
+
+const (
+	IntervalMonthly PriceInterval = "monthly"
+	IntervalWeekly  PriceInterval = "weekly"
+)
+
+// Price status constants (mirror updater statuses)
+const (
+	StatusOK       = "ok"
+	StatusNotFound = "not_found"
+	StatusFailed   = "failed"
+)

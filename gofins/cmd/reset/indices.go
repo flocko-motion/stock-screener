@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ var indicesCmd = &cobra.Command{
 			    last_profile_status = NULL,
 			    is_actively_trading = true
 			WHERE type = $1
-		`, db.TypeIndex)
+		`, types.TypeIndex)
 		if err != nil {
 			return fmt.Errorf("failed to reset index timestamps: %w", err)
 		}

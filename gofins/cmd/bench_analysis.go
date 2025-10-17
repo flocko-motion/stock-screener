@@ -6,6 +6,7 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/spf13/cobra"
 )
 
@@ -103,7 +104,7 @@ var benchAnalysisCmd = &cobra.Command{
 			Tickers:    tickers,
 			TimeFrom:   from,
 			TimeTo:     to,
-			Interval:   db.IntervalMonthly,
+			Interval:   types.IntervalMonthly,
 			HistConfig: histConfig,
 		})
 		if err != nil {

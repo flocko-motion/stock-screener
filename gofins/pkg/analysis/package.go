@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/google/uuid"
 )
@@ -19,7 +20,7 @@ func logf(format string, args ...interface{}) {
 type AnalysisPackageConfig struct {
 	PackageID    string
 	Name         string
-	Interval     db.PriceInterval
+	Interval     types.PriceInterval
 	TimeFrom     time.Time
 	TimeTo       time.Time
 	HistConfig   HistogramConfig

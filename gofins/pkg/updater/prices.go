@@ -9,6 +9,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 const (
@@ -42,13 +43,13 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		default:
 		}
 
-		tickers, err := database.GetStalePrices(PriceBatchSize)
+		symbols, err := database.GetSymbolsWithStalePrices(PriceBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale prices: %v\n", err)
 			return
 		}
 
-		if len(tickers) == 0 {
+		if len(symbols) == 0 {
 			const sleepTimeHours = 8
 			log.AllDone(sleepTimeHours)
 			time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
@@ -56,7 +57,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		}
 
 		currentStale, _ := database.CountStalePrices()
-		log.Batch(currentStale, len(tickers))
+		log.Batch(currentStale, len(symbols))
 
 		startTime := time.Now()
 		var statsMu sync.Mutex
@@ -67,7 +68,7 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 		}
 
 		// Worker pool
-		tickerChan := make(chan string, len(tickers))
+		tickerChan := make(chan string, len(symbols))
 		var wg sync.WaitGroup
 
 		for i := 0; i < PriceWorkers; i++ {
@@ -90,8 +91,8 @@ func UpdatePrices(ctx context.Context, database *db.DB, fmpClient *fmp.Client) {
 			}()
 		}
 
-		for _, ticker := range tickers {
-			tickerChan <- ticker
+		for _, symbol := range symbols {
+			tickerChan <- symbol.Ticker
 		}
 		close(tickerChan)
 
@@ -112,7 +113,7 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
 			status := StatusNotFound
-			database.PutSymbol(&db.Symbol{
+			database.PutSymbol(&types.Symbol{
 				Ticker:          ticker,
 				LastPriceUpdate: &now,
 				LastPriceStatus: &status,
@@ -120,7 +121,7 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 			return StatusNotFound
 		}
 		status := StatusFailed
-		database.PutSymbol(&db.Symbol{
+		database.PutSymbol(&types.Symbol{
 			Ticker:          ticker,
 			LastPriceUpdate: &now,
 			LastPriceStatus: &status,
@@ -154,7 +155,7 @@ func updatePrices(ticker string, database *db.DB, fmpClient *fmp.Client) string 
 
 	// Update last_price_update timestamp and oldest_price
 	status := StatusOK
-	database.PutSymbol(&db.Symbol{
+	database.PutSymbol(&types.Symbol{
 		Ticker:          ticker,
 		LastPriceUpdate: &now,
 		LastPriceStatus: &status,

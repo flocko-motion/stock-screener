@@ -8,6 +8,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 const (
@@ -117,7 +118,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
 			status := StatusNotFound
-			database.PutSymbol(&db.Symbol{
+			database.PutSymbol(&types.Symbol{
 				Ticker:            ticker,
 				LastProfileUpdate: &now,
 				LastProfileStatus: &status,
@@ -125,7 +126,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 			return StatusNotFound
 		}
 		status := StatusFailed
-		database.PutSymbol(&db.Symbol{
+		database.PutSymbol(&types.Symbol{
 			Ticker:            ticker,
 			LastProfileUpdate: &now,
 			LastProfileStatus: &status,
@@ -143,7 +144,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 	// Detect secondary listings by comparing exchange with primary listing
 	symbolType := deriveType(profile, fmpClient)
 
-	symbol := &db.Symbol{
+	symbol := &types.Symbol{
 		Ticker:            ticker,
 		Name:              f.Ptr(profile.CompanyName),
 		Exchange:          f.Ptr(profile.Exchange),
@@ -162,7 +163,7 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 
 	if err := database.PutSymbol(symbol); err != nil {
 		failStatus := StatusFailed
-		database.PutSymbol(&db.Symbol{
+		database.PutSymbol(&types.Symbol{
 			Ticker:            ticker,
 			LastProfileUpdate: &now,
 			LastProfileStatus: &failStatus,
@@ -175,13 +176,13 @@ func updateProfile(ticker string, database *db.DB, fmpClient *fmp.Client) string
 
 func deriveType(profile *fmp.Profile, fmpClient *fmp.Client) string {
 	if profile.IsEtf {
-		return db.TypeETF
+		return types.TypeETF
 	}
 	if profile.IsFund {
-		return db.TypeFund
+		return types.TypeFund
 	}
 	if profile.IsAdr {
-		return db.TypeADR
+		return types.TypeADR
 	}
 
 	// Check if this is a secondary listing by comparing with primary exchange
@@ -189,9 +190,9 @@ func deriveType(profile *fmp.Profile, fmpClient *fmp.Client) string {
 		primaryProfile, err := fmpClient.GetProfileByCIK(profile.CIK)
 		if err == nil && primaryProfile.Exchange != profile.Exchange {
 			// Different exchange than primary = secondary listing
-			return db.TypeSecondary
+			return types.TypeSecondary
 		}
 	}
 
-	return db.TypeStock
+	return types.TypeStock
 }

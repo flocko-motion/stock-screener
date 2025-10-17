@@ -7,6 +7,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 func SyncSymbols(database *db.DB, fmpClient *fmp.Client) {
@@ -98,16 +99,16 @@ func syncSymbolsImpl(database *db.DB, fmpClient *fmp.Client, log *Logger) error 
 	for _, symbol := range allSymbols {
 		if !dbTickerMap[symbol.Symbol] {
 
-			dbSymbol := &db.Symbol{
+			dbSymbol := &types.Symbol{
 				Ticker: symbol.Symbol,
 			}
 
 			// Set type for indices
 			if symbol.IsIndex() {
-				dbSymbol.Type = f.Ptr(string(db.TypeIndex))
+				dbSymbol.Type = f.Ptr(string(types.TypeIndex))
 				dbSymbol.IsActivelyTrading = f.Ptr(true)
 			} else {
-				dbSymbol.Type = f.Ptr(string(db.TypeStock))
+				dbSymbol.Type = f.Ptr(string(types.TypeStock))
 			}
 
 			if err := database.PutSymbol(dbSymbol); err != nil {

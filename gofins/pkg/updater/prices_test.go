@@ -5,13 +5,14 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFetchPrices(t *testing.T) {
-	ticker := "GLL.CN"
+	ticker := "AAPL"
 	fmpClient, err := fmp.NewClient(nil)
 	assert.NoError(t, err)
 
@@ -23,7 +24,7 @@ func TestFetchPrices(t *testing.T) {
 		return dailyPrices[i].Date < dailyPrices[j].Date
 	})
 	// Single-loop conversion: daily → weekly + monthly + YoY
-	monthly, weekly := convertPrices(dailyPrices, ticker)
+	monthly, weekly := calculator.ConvertPrices(dailyPrices, ticker)
 
 	for i, price := range monthly {
 		fmt.Printf("monthly %d: %s\n", i, f.MaybeToString(price.YoY, "n/a"))

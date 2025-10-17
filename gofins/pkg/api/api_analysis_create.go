@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
-	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
+	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 type CreateAnalysisRequest struct {
@@ -80,11 +80,11 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 		intervalStr = "weekly" // Default to weekly
 	}
 
-	var interval db.PriceInterval
+	var interval types.PriceInterval
 	if intervalStr == "weekly" {
-		interval = db.IntervalWeekly
+		interval = types.IntervalWeekly
 	} else if intervalStr == "monthly" {
-		interval = db.IntervalMonthly
+		interval = types.IntervalMonthly
 	} else {
 		http.Error(w, "Invalid interval (must be 'weekly' or 'monthly')", http.StatusBadRequest)
 		return
