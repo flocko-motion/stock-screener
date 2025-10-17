@@ -36,6 +36,7 @@ type Profile struct {
 	Symbol            string  `json:"symbol"`
 	CompanyName       string  `json:"companyName"`
 	Exchange          string  `json:"exchange"`
+	Currency          string  `json:"currency"`
 	Industry          string  `json:"industry"`
 	Sector            string  `json:"sector"`
 	Country           string  `json:"country"`

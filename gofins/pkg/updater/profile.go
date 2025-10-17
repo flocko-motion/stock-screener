@@ -2,12 +2,14 @@ package updater
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/forex"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -112,25 +114,33 @@ type UpdateStats struct {
 }
 
 func updateProfile(ticker string) string {
+	return updateProfileInternal(ticker, false)
+}
+
+func updateProfileInternal(ticker string, testMode bool) string {
 	profile, err := fmp.GetProfile(ticker)
 	now := time.Now()
 
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
 			status := types.StatusNotFound
+			if !testMode {
+				db.PutSymbol(&types.Symbol{
+					Ticker:            ticker,
+					LastProfileUpdate: &now,
+					LastProfileStatus: &status,
+				})
+			}
+			return types.StatusNotFound
+		}
+		status := types.StatusFailed
+		if !testMode {
 			db.PutSymbol(&types.Symbol{
 				Ticker:            ticker,
 				LastProfileUpdate: &now,
 				LastProfileStatus: &status,
 			})
-			return types.StatusNotFound
 		}
-		status := types.StatusFailed
-		db.PutSymbol(&types.Symbol{
-			Ticker:            ticker,
-			LastProfileUpdate: &now,
-			LastProfileStatus: &status,
-		})
 		return types.StatusFailed
 	}
 
@@ -144,10 +154,24 @@ func updateProfile(ticker string) string {
 	// Detect secondary listings by comparing exchange with primary listing
 	symbolType := deriveType(profile)
 
+	// Convert market cap to USD if needed
+	marketCapUSD := profile.MarketCap
+	if profile.Currency != "" && profile.Currency != "USD" && profile.MarketCap > 0 {
+		converted, err := forex.ConvertToUsdMonthly(profile.MarketCap, profile.Currency, now)
+		if err != nil {
+			// Log warning but continue with unconverted value
+			// This can happen if forex data is not available for the currency
+			fmt.Printf("Warning: Failed to convert market cap for %s from %s to USD: %v\n", ticker, profile.Currency, err)
+		} else {
+			marketCapUSD = converted
+		}
+	}
+
 	symbol := &types.Symbol{
 		Ticker:            ticker,
 		Name:              f.Ptr(profile.CompanyName),
 		Exchange:          f.Ptr(profile.Exchange),
+		Currency:          f.Ptr(profile.Currency),
 		Type:              f.Ptr(symbolType),
 		Sector:            f.Ptr(profile.Sector),
 		Industry:          f.Ptr(profile.Industry),
@@ -158,17 +182,19 @@ func updateProfile(ticker string) string {
 		LastProfileUpdate: f.Ptr(now),
 		LastProfileStatus: f.Ptr(types.StatusOK),
 		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
-		MarketCap:         f.Ptr(int64(profile.MarketCap)), // Convert float64 to int64
+		MarketCap:         f.Ptr(int64(marketCapUSD)), // Convert float64 to int64, already in USD
 	}
 
-	if err := db.PutSymbol(symbol); err != nil {
-		failStatus := types.StatusFailed
-		db.PutSymbol(&types.Symbol{
-			Ticker:            ticker,
-			LastProfileUpdate: &now,
-			LastProfileStatus: &failStatus,
-		})
-		return types.StatusFailed
+	if !testMode {
+		if err := db.PutSymbol(symbol); err != nil {
+			failStatus := types.StatusFailed
+			db.PutSymbol(&types.Symbol{
+				Ticker:            ticker,
+				LastProfileUpdate: &now,
+				LastProfileStatus: &failStatus,
+			})
+			return types.StatusFailed
+		}
 	}
 
 	return types.StatusOK

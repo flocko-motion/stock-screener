@@ -111,6 +111,10 @@ func UpdatePrices(ctx context.Context) {
 // updatePrices fetches and processes price data for a symbol
 // Returns symbol metadata, monthly prices, and weekly prices
 func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types.PriceData) {
+	return updatePricesInternal(symbol, false)
+}
+
+func updatePricesInternal(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData) {
 	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)
 	now := time.Now()
 
@@ -122,7 +126,9 @@ func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types
 
 		symbol.LastPriceUpdate = &now
 		symbol.LastPriceStatus = &status
-		db.PutSymbol(&symbol)
+		if !testMode {
+			db.PutSymbol(&symbol)
+		}
 
 		return symbol, nil, nil
 	}
@@ -150,19 +156,21 @@ func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types
 	symbol.OldestPrice = oldestPrice
 
 	// Save to database
-	if err := db.PutMonthlyPrices(monthly); err != nil {
-		failStatus := types.StatusFailed
-		symbol.LastPriceStatus = &failStatus
+	if !testMode {
+		if err := db.PutMonthlyPrices(monthly); err != nil {
+			failStatus := types.StatusFailed
+			symbol.LastPriceStatus = &failStatus
+			db.PutSymbol(&symbol)
+			return symbol, monthly, weekly
+		}
+		if err := db.PutWeeklyPrices(weekly); err != nil {
+			failStatus := types.StatusFailed
+			symbol.LastPriceStatus = &failStatus
+			db.PutSymbol(&symbol)
+			return symbol, monthly, weekly
+		}
 		db.PutSymbol(&symbol)
-		return symbol, monthly, weekly
 	}
-	if err := db.PutWeeklyPrices(weekly); err != nil {
-		failStatus := types.StatusFailed
-		symbol.LastPriceStatus = &failStatus
-		db.PutSymbol(&symbol)
-		return symbol, monthly, weekly
-	}
-	db.PutSymbol(&symbol)
 
 	return symbol, monthly, weekly
 }
