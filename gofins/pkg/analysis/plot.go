@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"gonum.org/v1/gonum/stat/distuv"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -19,7 +19,7 @@ import (
 const growthLineMax = 0.5
 
 // PlotYoYAnalysis creates a price chart with proper axis formatting
-func PlotYoYAnalysis(timeFrom, timeTo time.Time, ticker string, prices []db.PriceData, stats Stats, outputPath string) error {
+func PlotYoYAnalysis(timeFrom, timeTo time.Time, ticker string, prices []types.PriceData, stats Stats, outputPath string) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func PlotHistogram(ticker string, stats Stats, outputPath string) error {
 	return histChart.Save(width, height, outputPath)
 }
 
-func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []db.PriceData) (*plot.Plot, error) {
+func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []types.PriceData) (*plot.Plot, error) {
 	p := plot.New()
 	p.Title.Text = fmt.Sprintf("%s - Normalized Price (Log Scale)", ticker)
 	p.X.Label.Text = "Date"
@@ -121,13 +121,13 @@ func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []db.Pri
 	return p, nil
 }
 
-func addYearBackgrounds(p *plot.Plot, prices []db.PriceData) {
+func addYearBackgrounds(p *plot.Plot, prices []types.PriceData) {
 	if len(prices) == 0 {
 		return
 	}
 
 	// Group prices by year and find the last price of each year
-	yearData := make(map[int][]db.PriceData)
+	yearData := make(map[int][]types.PriceData)
 	for _, price := range prices {
 		year := price.Date.Year()
 		yearData[year] = append(yearData[year], price)
@@ -174,7 +174,7 @@ func addYearBackgrounds(p *plot.Plot, prices []db.PriceData) {
 		}
 
 		// Find the price from one year ago (or closest available)
-		var yearAgoPrice *db.PriceData
+		var yearAgoPrice *types.PriceData
 
 		// Look for the closest price to one year ago
 		minDiff := time.Duration(365 * 24 * time.Hour) // Max difference
@@ -433,7 +433,7 @@ func addVerticalLineWithDashes(p *plot.Plot, x float64, col color.Color, label s
 	p.Add(line)
 }
 
-func addGrowthLines(timeFrom, timeTo time.Time, p *plot.Plot, prices []db.PriceData) {
+func addGrowthLines(timeFrom, timeTo time.Time, p *plot.Plot, prices []types.PriceData) {
 	if len(prices) == 0 {
 		return
 	}
@@ -546,7 +546,7 @@ func (l *logTickFormatter) Ticks(min, max float64) []plot.Tick {
 }
 
 type dateTickFormatter struct {
-	prices []db.PriceData
+	prices []types.PriceData
 }
 
 func (d *dateTickFormatter) Ticks(min, max float64) []plot.Tick {

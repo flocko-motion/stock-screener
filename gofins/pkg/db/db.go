@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/files"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/lib/pq"
 )
 
@@ -86,17 +87,6 @@ type Symbol struct {
 	UserRating        *int       `json:"userRating,omitempty"`
 }
 
-// PriceData represents price data (daily, weekly, or monthly)
-type PriceData struct {
-	Date         time.Time
-	Open         float64
-	High         float64
-	Low          float64
-	Avg          float64
-	Close        float64
-	YoY          *float64
-	SymbolTicker string
-}
 
 // SaveSymbol inserts or updates a symbol profile
 // Only updates non-nil fields to avoid overwriting data from other updaters
@@ -191,7 +181,7 @@ func (db *DB) GetOldestPriceDate(ticker string) (*time.Time, error) {
 }
 
 // PutMonthlyPrices batch inserts monthly price data
-func (db *DB) PutMonthlyPrices(prices []PriceData) error {
+func (db *DB) PutMonthlyPrices(prices []types.PriceData) error {
 	if len(prices) == 0 {
 		return nil
 	}
@@ -233,7 +223,7 @@ func (db *DB) PutMonthlyPrices(prices []PriceData) error {
 }
 
 // PutWeeklyPrices batch inserts weekly price data
-func (db *DB) PutWeeklyPrices(prices []PriceData) error {
+func (db *DB) PutWeeklyPrices(prices []types.PriceData) error {
 	if len(prices) == 0 {
 		return nil
 	}
@@ -275,7 +265,7 @@ func (db *DB) PutWeeklyPrices(prices []PriceData) error {
 }
 
 // GetPrices retrieves price data for a symbol at the specified interval
-func (db *DB) GetPrices(ticker string, from, to time.Time, interval PriceInterval) ([]PriceData, error) {
+func (db *DB) GetPrices(ticker string, from, to time.Time, interval PriceInterval) ([]types.PriceData, error) {
 	tableName := string(interval) + "_prices"
 
 	query := fmt.Sprintf(`
@@ -291,9 +281,9 @@ func (db *DB) GetPrices(ticker string, from, to time.Time, interval PriceInterva
 	}
 	defer rows.Close()
 
-	var prices []PriceData
+	var prices []types.PriceData
 	for rows.Next() {
-		var p PriceData
+		var p types.PriceData
 		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.YoY, &p.SymbolTicker); err != nil {
 			return nil, err
 		}
@@ -304,20 +294,20 @@ func (db *DB) GetPrices(ticker string, from, to time.Time, interval PriceInterva
 }
 
 // GetMonthlyPrices retrieves monthly prices for a symbol
-func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
+func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
 	return db.GetPrices(ticker, from, to, IntervalMonthly)
 }
 
 // GetWeeklyPrices retrieves weekly prices for a symbol
-func (db *DB) GetWeeklyPrices(ticker string, from, to time.Time) ([]PriceData, error) {
+func (db *DB) GetWeeklyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
 	return db.GetPrices(ticker, from, to, IntervalWeekly)
 }
 
 // GetPricesBatch retrieves price data for multiple symbols in a single query
 // Returns a map of ticker -> []PriceData
-func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval PriceInterval) (map[string][]PriceData, error) {
+func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval PriceInterval) (map[string][]types.PriceData, error) {
 	if len(tickers) == 0 {
-		return make(map[string][]PriceData), nil
+		return make(map[string][]types.PriceData), nil
 	}
 
 	tableName := string(interval) + "_prices"
@@ -335,9 +325,9 @@ func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval Pric
 	}
 	defer rows.Close()
 
-	result := make(map[string][]PriceData)
+	result := make(map[string][]types.PriceData)
 	for rows.Next() {
-		var p PriceData
+		var p types.PriceData
 		if err := rows.Scan(&p.Date, &p.Open, &p.High, &p.Low, &p.Avg, &p.Close, &p.YoY, &p.SymbolTicker); err != nil {
 			return nil, err
 		}
