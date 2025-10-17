@@ -82,7 +82,7 @@ func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly [
 func (c *cache) fetchAndStore(currency string) error {
 	symbol := fmt.Sprintf("%sUSD", currency)
 
-	rawData, err := fmp.Fmp().FetchForexHistory(symbol)
+	rawData, err := fmp.FetchForexHistory(symbol)
 	if err != nil {
 		return fmt.Errorf("failed to fetch forex data for %s: %w", symbol, err)
 	}

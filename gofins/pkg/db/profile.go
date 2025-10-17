@@ -10,9 +10,10 @@ import (
 )
 
 
-// SaveSymbol inserts or updates a symbol profile
+// PutSymbol inserts or updates a symbol profile
 // Only updates non-nil fields to avoid overwriting data from other updaters
-func (db *DB) PutSymbol(s *types.Symbol) error {
+func PutSymbol(s *types.Symbol) error {
+	db := Db()
 	query := `
 		INSERT INTO symbols (
 			ticker, exchange, last_price_update, last_profile_update, 
@@ -53,7 +54,8 @@ func (db *DB) PutSymbol(s *types.Symbol) error {
 }
 
 // GetSymbol retrieves a symbol by ticker
-func (db *DB) GetSymbol(ticker string) (*types.Symbol, error) {
+func GetSymbol(ticker string) (*types.Symbol, error) {
+	db := Db()
 	query := `
 		SELECT ticker, exchange, last_price_update, last_profile_update,
 			   last_price_status, last_profile_status,
@@ -82,7 +84,8 @@ func (db *DB) GetSymbol(ticker string) (*types.Symbol, error) {
 }
 
 // GetAllTickers returns all tickers from the symbols table
-func (db *DB) GetAllTickers() ([]string, error) {
+func GetAllTickers() ([]string, error) {
+	db := Db()
 	rows, err := db.conn.Query("SELECT ticker FROM symbols")
 	if err != nil {
 		return nil, err
@@ -102,13 +105,14 @@ func (db *DB) GetAllTickers() ([]string, error) {
 }
 
 // DeactivateSymbolsNotInList marks symbols not in the provided list as inactive
-func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
+func DeactivateSymbolsNotInList(keepTickers []string) error {
+	db := Db()
 	if len(keepTickers) == 0 {
 		return nil
 	}
 
 	// Get all current tickers from database
-	allTickers, err := db.GetAllTickers()
+	allTickers, err := GetAllTickers()
 	if err != nil {
 		return fmt.Errorf("failed to get all tickers: %w", err)
 	}
@@ -159,7 +163,8 @@ func (db *DB) DeactivateSymbolsNotInList(keepTickers []string) error {
 }
 
 // GetActiveSymbols returns all actively trading stocks (excludes indices and secondary listings)
-func (db *DB) GetActiveSymbols() ([]types.Symbol, error) {
+func GetActiveSymbols() ([]types.Symbol, error) {
+	db := Db()
 	query := `
 		SELECT 
 			s.ticker, s.exchange, s.name, s.type, s.currency, s.sector, s.industry, s.country, 
@@ -204,7 +209,8 @@ func (db *DB) GetActiveSymbols() ([]types.Symbol, error) {
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)
 // Excludes indices and secondary listings (they don't need profile updates)
-func (db *DB) GetStaleProfiles(limit int) ([]string, error) {
+func GetStaleProfiles(limit int) ([]string, error) {
+	db := Db()
 	query := `
 		SELECT ticker FROM symbols
 		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
@@ -237,7 +243,8 @@ func GetProfileThreshold() time.Time {
 }
 
 // CountSymbols returns the total number of symbols
-func (db *DB) CountSymbols() (int, error) {
+func CountSymbols() (int, error) {
+	db := Db()
 	query := `SELECT COUNT(*) FROM symbols`
 
 	var count int
@@ -246,7 +253,8 @@ func (db *DB) CountSymbols() (int, error) {
 }
 
 // CountActivelyTrading returns the count of actively trading symbols
-func (db *DB) CountActivelyTrading() (int, error) {
+func CountActivelyTrading() (int, error) {
+	db := Db()
 	query := `SELECT COUNT(*) FROM symbols WHERE is_actively_trading = true`
 
 	var count int
@@ -256,7 +264,8 @@ func (db *DB) CountActivelyTrading() (int, error) {
 
 // CountStaleProfiles returns the count of stale profiles
 // Excludes indices as they don't have profile endpoints
-func (db *DB) CountStaleProfiles() (int, error) {
+func CountStaleProfiles() (int, error) {
+	db := Db()
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
@@ -269,7 +278,8 @@ func (db *DB) CountStaleProfiles() (int, error) {
 }
 
 // GetOldestProfileUpdate returns the oldest profile update timestamp
-func (db *DB) GetOldestProfileUpdate() (*time.Time, error) {
+func GetOldestProfileUpdate() (*time.Time, error) {
+	db := Db()
 	query := `
 		SELECT MIN(last_profile_update) FROM symbols
 		WHERE last_profile_update IS NOT NULL
@@ -281,4 +291,48 @@ func (db *DB) GetOldestProfileUpdate() (*time.Time, error) {
 		return nil, nil
 	}
 	return oldest, err
+}
+
+// ResetPriceTimestamps resets all price update timestamps to force fresh reload
+func ResetPriceTimestamps() (int64, error) {
+	db := Db()
+	result, err := db.conn.Exec(`
+		UPDATE symbols 
+		SET last_price_update = NULL, last_price_status = NULL
+	`)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// ResetProfileTimestamps resets all profile update timestamps to force fresh reload
+func ResetProfileTimestamps() (int64, error) {
+	db := Db()
+	result, err := db.conn.Exec(`
+		UPDATE symbols 
+		SET last_profile_update = NULL, last_profile_status = NULL
+	`)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// ResetIndexTimestamps resets timestamps for indices and marks them as actively trading
+func ResetIndexTimestamps() (int64, error) {
+	db := Db()
+	result, err := db.conn.Exec(`
+		UPDATE symbols 
+		SET last_price_update = NULL, 
+		    last_price_status = NULL,
+		    last_profile_update = NULL,
+		    last_profile_status = NULL,
+		    is_actively_trading = true
+		WHERE type = $1
+	`, types.TypeIndex)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }

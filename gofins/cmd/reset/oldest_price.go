@@ -12,16 +12,10 @@ var oldestPriceCmd = &cobra.Command{
 	Use:   "oldest-price",
 	Short: "Recalculate oldest_price field for all symbols based on existing price data",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.NewDB()
-		if err != nil {
-			return fmt.Errorf("failed to connect to database: %w", err)
-		}
-		defer database.Close()
-
 		fmt.Println("Recalculating oldest_price for all symbols...")
 		
 		// Get all tickers
-		tickers, err := database.GetAllTickers()
+		tickers, err := db.GetAllTickers()
 		if err != nil {
 			return fmt.Errorf("failed to get tickers: %w", err)
 		}
@@ -40,7 +34,7 @@ var oldestPriceCmd = &cobra.Command{
 			}
 
 			// Get oldest monthly price for this ticker
-			oldestDate, err := database.GetOldestPriceDate(ticker)
+			oldestDate, err := db.GetOldestPriceDate(ticker)
 			if err != nil {
 				fmt.Printf("  ❌ %s: failed to query: %v\n", ticker, err)
 				failed++
@@ -54,7 +48,7 @@ var oldestPriceCmd = &cobra.Command{
 			}
 
 			// Update the symbol with oldest_price
-			if err := database.PutSymbol(&types.Symbol{
+			if err := db.PutSymbol(&types.Symbol{
 				Ticker:      ticker,
 				OldestPrice: oldestDate,
 			}); err != nil {

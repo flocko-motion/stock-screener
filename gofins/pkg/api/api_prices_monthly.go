@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"time"
 )
@@ -17,7 +18,7 @@ func (s *Server) handleGetMonthlyPrices(w http.ResponseWriter, r *http.Request) 
 	to := time.Now()
 	from := to.AddDate(-5, 0, 0)
 
-	prices, err := s.db.GetMonthlyPrices(ticker, from, to)
+	prices, err := db.GetMonthlyPrices(ticker, from, to)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

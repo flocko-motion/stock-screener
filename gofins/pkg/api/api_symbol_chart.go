@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -43,7 +44,7 @@ func (s *Server) handleSymbolChart(w http.ResponseWriter, r *http.Request, plotT
 
 func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) ([]byte, error) {
 	// Get the symbol info
-	symbol, err := s.db.GetSymbol(ticker)
+	symbol, err := db.GetSymbol(ticker)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get symbol: %w", err)
 	}
@@ -56,7 +57,7 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 	timeFrom := *symbol.OldestPrice
 	timeTo := time.Now()
 	
-	prices, err := s.db.GetMonthlyPrices(ticker, timeFrom, timeTo)
+	prices, err := db.GetMonthlyPrices(ticker, timeFrom, timeTo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get prices: %w", err)
 	}

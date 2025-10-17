@@ -10,7 +10,8 @@ import (
 )
 
 // GetOldestPriceDate returns the oldest price date for a ticker from monthly_prices
-func (db *DB) GetOldestPriceDate(ticker string) (*time.Time, error) {
+func GetOldestPriceDate(ticker string) (*time.Time, error) {
+	db := Db()
 	query := `
 		SELECT MIN(date) 
 		FROM monthly_prices 
@@ -31,7 +32,8 @@ func (db *DB) GetOldestPriceDate(ticker string) (*time.Time, error) {
 }
 
 // PutMonthlyPrices batch inserts monthly price data
-func (db *DB) PutMonthlyPrices(prices []types.PriceData) error {
+func PutMonthlyPrices(prices []types.PriceData) error {
+	db := Db()
 	if len(prices) == 0 {
 		return nil
 	}
@@ -73,7 +75,8 @@ func (db *DB) PutMonthlyPrices(prices []types.PriceData) error {
 }
 
 // PutWeeklyPrices batch inserts weekly price data
-func (db *DB) PutWeeklyPrices(prices []types.PriceData) error {
+func PutWeeklyPrices(prices []types.PriceData) error {
+	db := Db()
 	if len(prices) == 0 {
 		return nil
 	}
@@ -115,7 +118,8 @@ func (db *DB) PutWeeklyPrices(prices []types.PriceData) error {
 }
 
 // GetPrices retrieves price data for a symbol at the specified interval
-func (db *DB) GetPrices(ticker string, from, to time.Time, interval types.PriceInterval) ([]types.PriceData, error) {
+func GetPrices(ticker string, from, to time.Time, interval types.PriceInterval) ([]types.PriceData, error) {
+	db := Db()
 	tableName := string(interval) + "_prices"
 
 	query := fmt.Sprintf(`
@@ -144,18 +148,19 @@ func (db *DB) GetPrices(ticker string, from, to time.Time, interval types.PriceI
 }
 
 // GetMonthlyPrices retrieves monthly prices for a symbol
-func (db *DB) GetMonthlyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
-	return db.GetPrices(ticker, from, to, types.IntervalMonthly)
+func GetMonthlyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
+	return GetPrices(ticker, from, to, types.IntervalMonthly)
 }
 
 // GetWeeklyPrices retrieves weekly prices for a symbol
-func (db *DB) GetWeeklyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
-	return db.GetPrices(ticker, from, to, types.IntervalWeekly)
+func GetWeeklyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
+	return GetPrices(ticker, from, to, types.IntervalWeekly)
 }
 
 // GetPricesBatch retrieves price data for multiple symbols in a single query
 // Returns a map of ticker -> []PriceData
-func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval types.PriceInterval) (map[string][]types.PriceData, error) {
+func GetPricesBatch(tickers []string, from, to time.Time, interval types.PriceInterval) (map[string][]types.PriceData, error) {
+	db := Db()
 	if len(tickers) == 0 {
 		return make(map[string][]types.PriceData), nil
 	}
@@ -188,7 +193,8 @@ func (db *DB) GetPricesBatch(tickers []string, from, to time.Time, interval type
 }
 
 // GetFilteredTickers returns tickers matching filters (for analysis packages)
-func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]string, error) {
+func GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]string, error) {
+	db := Db()
 	// Be lenient on price table presence: allow any interval that has data.
 	// Still prioritize/reflect requested interval in logs.
 	query := `
@@ -234,7 +240,8 @@ func (db *DB) GetFilteredTickers(mcapMin *int64, inceptionMax *time.Time) ([]str
 }
 
 // GetTickersWithPrices returns tickers that have price data (limited to specified count)
-func (db *DB) GetTickersWithPrices(limit int) ([]string, error) {
+func GetTickersWithPrices(limit int) ([]string, error) {
+	db := Db()
 	query := `
 		SELECT DISTINCT symbol_ticker FROM monthly_prices 
 		ORDER BY symbol_ticker 
@@ -261,7 +268,8 @@ func (db *DB) GetTickersWithPrices(limit int) ([]string, error) {
 
 // GetSymbolsWithStalePrices returns symbols with outdated price data
 // Returns Symbol structs with only ticker and currency populated
-func (db *DB) GetSymbolsWithStalePrices(limit int) ([]types.Symbol, error) {
+func GetSymbolsWithStalePrices(limit int) ([]types.Symbol, error) {
+	db := Db()
 	query := `
 		SELECT ticker, currency FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
@@ -296,7 +304,8 @@ func GetPriceThreshold() time.Time {
 }
 
 // CountStalePrices returns the count of stale prices
-func (db *DB) CountStalePrices() (int, error) {
+func CountStalePrices() (int, error) {
+	db := Db()
 	query := `
 		SELECT COUNT(*) FROM symbols
 		WHERE (last_price_update IS NULL OR last_price_update < $1)
@@ -310,7 +319,8 @@ func (db *DB) CountStalePrices() (int, error) {
 }
 
 // GetOldestPriceUpdate returns the oldest price update timestamp (only for actively trading symbols)
-func (db *DB) GetOldestPriceUpdate() (*time.Time, error) {
+func GetOldestPriceUpdate() (*time.Time, error) {
+	db := Db()
 	query := `
 		SELECT MIN(last_price_update) FROM symbols
 		WHERE last_price_update IS NOT NULL

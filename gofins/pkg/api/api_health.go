@@ -25,12 +25,12 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 	response := HealthResponse{
 		Status:           "ok",
-		TotalSymbols:     f.First(s.db.CountSymbols()),
-		ActivelyTrading:  f.First(s.db.CountActivelyTrading()),
-		StaleProfiles:    f.First(s.db.CountStaleProfiles()),
-		StalePrices:      f.First(s.db.CountStalePrices()),
-		OldestProfile:    f.MaybeDateToMaybeString(f.First(s.db.GetOldestProfileUpdate()), timeFormat),
-		OldestPrice:      f.MaybeDateToMaybeString(f.First(s.db.GetOldestPriceUpdate()), timeFormat),
+		TotalSymbols:     f.First(db.CountSymbols()),
+		ActivelyTrading:  f.First(db.CountActivelyTrading()),
+		StaleProfiles:    f.First(db.CountStaleProfiles()),
+		StalePrices:      f.First(db.CountStalePrices()),
+		OldestProfile:    f.MaybeDateToMaybeString(f.First(db.GetOldestProfileUpdate()), timeFormat),
+		OldestPrice:      f.MaybeDateToMaybeString(f.First(db.GetOldestPriceUpdate()), timeFormat),
 		ProfileThreshold: db.GetProfileThreshold().Format(timeFormat),
 		PriceThreshold:   db.GetPriceThreshold().Format(timeFormat),
 	}

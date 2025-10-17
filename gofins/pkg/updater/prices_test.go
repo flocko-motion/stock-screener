@@ -2,6 +2,7 @@ package updater
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/flocko-motion/gofins/pkg/db"
@@ -33,33 +34,79 @@ func TestFetchPrices(t *testing.T) {
 }
 
 func TestFetchPricesCurrencyConversion(t *testing.T) {
-	ticker := "EBA.DE"
+	tickerUSD := "EBAY"  // US ticker in USD
+	tickerEUR := "EBA.DE" // German ticker in EUR
 
-	// Connect to database to fetch symbol profile
-	database, err := db.NewDB()
+	// Fetch both symbols from database
+	symbolUSD, err := db.GetSymbol(tickerUSD)
 	assert.NoError(t, err)
-	defer database.Close()
+	assert.NotNil(t, symbolUSD)
 
-	// Fetch symbol from database
-	symbol, err := database.GetSymbol(ticker)
+	symbolEUR, err := db.GetSymbol(tickerEUR)
 	assert.NoError(t, err)
-	assert.NotNil(t, symbol)
+	assert.NotNil(t, symbolEUR)
 
-	// Call updatePrices with nil database to skip DB writes
-	updatedSymbol, monthly, weekly := updatePrices(*symbol)
+	// Fetch prices for both tickers
+	_, monthlyUSD, weeklyUSD := updatePrices(*symbolUSD)
+	_, monthlyEUR, weeklyEUR := updatePrices(*symbolEUR)
 
-	assert.Equal(t, ticker, updatedSymbol.Ticker)
-	assert.NotNil(t, updatedSymbol.LastPriceStatus)
-	assert.Equal(t, types.StatusOK, *updatedSymbol.LastPriceStatus)
+	// Both should have data
+	assert.NotEmpty(t, monthlyUSD)
+	assert.NotEmpty(t, monthlyEUR)
+	assert.NotEmpty(t, weeklyUSD)
+	assert.NotEmpty(t, weeklyEUR)
 
-	assert.NotEmpty(t, monthly)
-	assert.NotEmpty(t, weekly)
+	fmt.Printf("\n=== Currency Conversion Test ===\n")
+	fmt.Printf("USD ticker: %s (%d monthly, %d weekly)\n", tickerUSD, len(monthlyUSD), len(weeklyUSD))
+	fmt.Printf("EUR ticker: %s (%d monthly, %d weekly)\n", tickerEUR, len(monthlyEUR), len(weeklyEUR))
 
-	fmt.Printf("Fetched %d monthly and %d weekly prices for %s\n", len(monthly), len(weekly), ticker)
-	for i, price := range monthly {
-		fmt.Printf("monthly %d: %s\n", i, f.MaybeToString(price.YoY, "n/a"))
+	// Compare a sample of monthly prices (last 12 months or whatever is available)
+	compareCount := 12
+	if len(monthlyUSD) < compareCount {
+		compareCount = len(monthlyUSD)
 	}
-	for i, price := range weekly {
-		fmt.Printf("weekly %d: %s\n", i, f.MaybeToString(price.YoY, "n/a"))
+	if len(monthlyEUR) < compareCount {
+		compareCount = len(monthlyEUR)
 	}
+
+	fmt.Printf("\nComparing last %d monthly prices:\n", compareCount)
+	matchCount := 0
+	totalDiff := 0.0
+
+	for i := 0; i < compareCount; i++ {
+		usdIdx := len(monthlyUSD) - compareCount + i
+		eurIdx := len(monthlyEUR) - compareCount + i
+
+		priceUSD := monthlyUSD[usdIdx]
+		priceEUR := monthlyEUR[eurIdx]
+
+		// Compare close prices (should be similar after currency conversion)
+		if priceUSD.Close > 0 && priceEUR.Close > 0 {
+			diff := ((priceUSD.Close - priceEUR.Close) / priceUSD.Close) * 100
+			totalDiff += math.Abs(diff)
+
+			fmt.Printf("  %s: USD=%.2f EUR=%.2f diff=%.2f%%\n",
+				priceUSD.Date.Format("2006-01"), priceUSD.Close, priceEUR.Close, diff)
+
+			// Prices should be within 1% after currency conversion
+			if math.Abs(diff) <= 1.0 {
+				matchCount++
+			}
+		}
+	}
+
+	avgDiff := totalDiff / float64(compareCount)
+	matchRate := float64(matchCount) / float64(compareCount) * 100
+
+	fmt.Printf("\nResults:\n")
+	fmt.Printf("  Average difference: %.2f%%\n", avgDiff)
+	fmt.Printf("  Match rate (≤1%% diff): %.0f%% (%d/%d)\n", matchRate, matchCount, compareCount)
+
+	// At least 80% of prices should match within 1% tolerance
+	assert.GreaterOrEqual(t, matchRate, 80.0,
+		"Currency conversion failed: only %.0f%% of prices matched (expected ≥80%%)", matchRate)
+
+	// Average difference should be less than 0.5%
+	assert.LessOrEqual(t, avgDiff, 0.5,
+		"Currency conversion inaccurate: average difference %.2f%% (expected ≤0.5%%)", avgDiff)
 }

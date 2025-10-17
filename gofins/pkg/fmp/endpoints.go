@@ -71,7 +71,8 @@ type HistoricalPriceResponse struct {
 }
 
 // GetProfile fetches the company profile for a ticker
-func (c *Client) GetProfile(ticker string) (*Profile, error) {
+func GetProfile(ticker string) (*Profile, error) {
+	c := Fmp()
 	var profiles []Profile
 	params := map[string]string{
 		"symbol": ticker,
@@ -89,7 +90,8 @@ func (c *Client) GetProfile(ticker string) (*Profile, error) {
 }
 
 // GetProfileByCIK fetches the primary listing profile for a company by CIK
-func (c *Client) GetProfileByCIK(cik string) (*Profile, error) {
+func GetProfileByCIK(cik string) (*Profile, error) {
+	c := Fmp()
 	var profiles []Profile
 	params := map[string]string{
 		"cik": cik,
@@ -107,7 +109,8 @@ func (c *Client) GetProfileByCIK(cik string) (*Profile, error) {
 }
 
 // GetHistoricalPrices fetches historical price data for a ticker
-func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*HistoricalPriceResponse, error) {
+func GetHistoricalPrices(ticker string, from, to time.Time) (*HistoricalPriceResponse, error) {
+	c := Fmp()
 	params := map[string]string{
 		"from": from.Format("2006-01-02"),
 		"to":   to.Format("2006-01-02"),
@@ -124,7 +127,8 @@ func (c *Client) GetHistoricalPrices(ticker string, from, to time.Time) (*Histor
 }
 
 // FetchStockList fetches the complete list of stocks from FMP
-func (c *Client) FetchStockList() ([]Symbol, error) {
+func FetchStockList() ([]Symbol, error) {
+	c := Fmp()
 	var symbols []Symbol
 	params := map[string]string{}
 
@@ -136,7 +140,8 @@ func (c *Client) FetchStockList() ([]Symbol, error) {
 }
 
 // FetchIndexList fetches the complete list of indices from FMP
-func (c *Client) FetchIndexList() ([]Symbol, error) {
+func FetchIndexList() ([]Symbol, error) {
+	c := Fmp()
 	var symbols []Symbol
 	params := map[string]string{}
 
@@ -148,7 +153,8 @@ func (c *Client) FetchIndexList() ([]Symbol, error) {
 }
 
 // FetchDelistedCompanies fetches all delisted companies from FMP with pagination
-func (c *Client) FetchDelistedCompanies() ([]Symbol, error) {
+func FetchDelistedCompanies() ([]Symbol, error) {
+	c := Fmp()
 	allDelisted := []Symbol{}
 	page := 0
 	limit := 100

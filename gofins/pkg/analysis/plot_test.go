@@ -8,19 +8,12 @@ import (
 )
 
 func TestPlot(t *testing.T) {
-	// Connect to database
-	database, err := db.NewDB()
-	if err != nil {
-		t.Fatalf("Failed to connect to DB: %v", err)
-	}
-	defer database.Close()
-
 	to := time.Now()
 	from := time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	const symbol = "NVA"
 
-	prices, err := database.GetWeeklyPrices(symbol, from, to)
+	prices, err := db.GetWeeklyPrices(symbol, from, to)
 	if err != nil {
 		t.Fatalf("Failed to fetch prices: %v", err)
 	}

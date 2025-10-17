@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 )
 
 func (s *Server) handleListActiveSymbols(w http.ResponseWriter, r *http.Request) {
 	// Get all active symbols
-	symbols, err := s.db.GetActiveSymbols()
+	symbols, err := db.GetActiveSymbols()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

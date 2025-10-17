@@ -27,7 +27,7 @@ type PriceStats struct {
 func UpdatePrices(ctx context.Context) {
 	log := NewLogger("Prices")
 
-	totalStale, err := db.Db().CountStalePrices()
+	totalStale, err := db.CountStalePrices()
 	if err != nil {
 		log.Error("Failed to count stale prices: %v\n", err)
 		return
@@ -43,7 +43,7 @@ func UpdatePrices(ctx context.Context) {
 		default:
 		}
 
-		symbols, err := db.Db().GetSymbolsWithStalePrices(PriceBatchSize)
+		symbols, err := db.GetSymbolsWithStalePrices(PriceBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale prices: %v\n", err)
 			return
@@ -56,7 +56,7 @@ func UpdatePrices(ctx context.Context) {
 			continue
 		}
 
-		currentStale, _ := db.Db().CountStalePrices()
+		currentStale, _ := db.CountStalePrices()
 		log.Batch(currentStale, len(symbols))
 
 		startTime := time.Now()
@@ -101,7 +101,7 @@ func UpdatePrices(ctx context.Context) {
 		wg.Wait()
 
 		elapsed := time.Since(startTime)
-		currentStale, _ = db.Db().CountStalePrices()
+		currentStale, _ = db.CountStalePrices()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
@@ -111,7 +111,7 @@ func UpdatePrices(ctx context.Context) {
 // updatePrices fetches and processes price data for a symbol
 // Returns symbol metadata, monthly prices, and weekly prices
 func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types.PriceData) {
-	dailyPrices, err := fmp.Fmp().FetchPriceHistory(symbol.Ticker)
+	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)
 	now := time.Now()
 
 	if err != nil {
@@ -122,7 +122,7 @@ func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types
 
 		symbol.LastPriceUpdate = &now
 		symbol.LastPriceStatus = &status
-		db.Db().PutSymbol(&symbol)
+		db.PutSymbol(&symbol)
 
 		return symbol, nil, nil
 	}
@@ -150,19 +150,19 @@ func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types
 	symbol.OldestPrice = oldestPrice
 
 	// Save to database
-	if err := db.Db().PutMonthlyPrices(monthly); err != nil {
+	if err := db.PutMonthlyPrices(monthly); err != nil {
 		failStatus := types.StatusFailed
 		symbol.LastPriceStatus = &failStatus
-		db.Db().PutSymbol(&symbol)
+		db.PutSymbol(&symbol)
 		return symbol, monthly, weekly
 	}
-	if err := db.Db().PutWeeklyPrices(weekly); err != nil {
+	if err := db.PutWeeklyPrices(weekly); err != nil {
 		failStatus := types.StatusFailed
 		symbol.LastPriceStatus = &failStatus
-		db.Db().PutSymbol(&symbol)
+		db.PutSymbol(&symbol)
 		return symbol, monthly, weekly
 	}
-	db.Db().PutSymbol(&symbol)
+	db.PutSymbol(&symbol)
 
 	return symbol, monthly, weekly
 }

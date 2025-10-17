@@ -10,14 +10,7 @@ import (
 )
 
 func TestGetFiltered(t *testing.T) {
-	// Connect to database
-	database, err := NewDB()
-	if err != nil {
-		t.Fatalf("Failed to connect to DB: %v", err)
-	}
-	defer database.Close()
-
-	tickers, err := database.GetFilteredTickers(f.Ptr(int64(1_000_000_000)),
+	tickers, err := Db().GetFilteredTickers(f.Ptr(int64(1_000_000_000)),
 		f.Ptr(time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)))
 	assert.NoError(t, err)
 	assert.NotNil(t, tickers)

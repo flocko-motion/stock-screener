@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,7 +16,7 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 	
 	if r.Method == "GET" && path == "" {
 		// List all favorites
-		tickers, err := s.db.GetFavorites()
+		tickers, err := db.GetFavorites()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -33,7 +34,7 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		isFavorite, err := s.db.ToggleFavorite(ticker)
+		isFavorite, err := db.ToggleFavorite(ticker)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -58,7 +59,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" && path == "" {
 		// Get all latest ratings
-		ratings, err := s.db.GetAllLatestRatings()
+		ratings, err := db.GetAllLatestRatings()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -79,7 +80,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		if len(parts) == 2 && parts[1] == "history" {
 			// Get rating history
-			ratings, err := s.db.GetRatingHistory(ticker)
+			ratings, err := db.GetRatingHistory(ticker)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -90,7 +91,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get latest rating
-		rating, err := s.db.GetLatestRating(ticker)
+		rating, err := db.GetLatestRating(ticker)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -117,7 +118,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		rating, err := s.db.AddRating(ticker, req.Rating, req.Notes)
+		rating, err := db.AddRating(ticker, req.Rating, req.Notes)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -137,7 +138,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := s.db.DeleteRating(ratingID); err != nil {
+		if err := db.DeleteRating(ratingID); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

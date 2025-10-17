@@ -220,6 +220,10 @@ func (c *Client) handleResponse(resp *http.Response, endpoint string, result int
 }
 
 // Shutdown gracefully shuts down the client
+func Shutdown() {
+	Fmp().Shutdown()
+}
+
 func (c *Client) Shutdown() {
 	c.rateLimiter.Shutdown()
 }

@@ -18,9 +18,9 @@ type SymbolStats struct {
 
 // AnalyzeBatch performs YoY analysis on multiple symbols using batch query
 // Returns statistics for each symbol that has YoY data
-func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats, error) {
+func AnalyzeBatch(config AnalysisPackageConfig) ([]SymbolStats, error) {
 	// Fetch all prices in a single batch query
-	pricesMap, err := database.GetPricesBatch(config.Tickers, config.TimeFrom, config.TimeTo, config.Interval)
+	pricesMap, err := db.GetPricesBatch(config.Tickers, config.TimeFrom, config.TimeTo, config.Interval)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 					currentProcessed, totalTickers, currentResults, float64(currentProcessed)/float64(totalTickers)*100)
 				
 				// Update package status in database with current progress
-				database.UpdateAnalysisPackageStatus(config.PackageID, "processing", currentResults)
+				db.UpdateAnalysisPackageStatus(config.PackageID, "processing", currentResults)
 			}
 		}
 	}()
@@ -111,7 +111,7 @@ func AnalyzeBatch(database *db.DB, config AnalysisPackageConfig) ([]SymbolStats,
 				// Save to database immediately if requested
 				if config.SaveToDB {
 					histogramJSON, _ := json.Marshal(stats.Histogram)
-					database.SaveAnalysisResult(
+					db.SaveAnalysisResult(
 						config.PackageID, ticker,
 						stats.Count, stats.Mean, stats.StdDev, stats.Variance,
 						stats.Min, stats.Max, histogramJSON,

@@ -28,21 +28,21 @@ func SyncSymbolsOnce() error {
 
 func syncSymbolsImpl(log *Logger) error {
 	// Fetch stocks
-	stocks, err := fmp.Fmp().FetchStockList()
+	stocks, err := fmp.FetchStockList()
 	if err != nil {
 		return fmt.Errorf("failed to fetch stock list: %w", err)
 	}
 	log.Printf("✓ Fetched %d stocks from FMP\n", len(stocks))
 
 	// Fetch indices
-	indices, err := fmp.Fmp().FetchIndexList()
+	indices, err := fmp.FetchIndexList()
 	if err != nil {
 		return fmt.Errorf("failed to fetch index list: %w", err)
 	}
 	log.Printf("✓ Fetched %d indices from FMP\n", len(indices))
 
 	// Fetch delisted companies
-	delisted, err := fmp.Fmp().FetchDelistedCompanies()
+	delisted, err := fmp.FetchDelistedCompanies()
 	if err != nil {
 		return fmt.Errorf("failed to fetch delisted companies: %w", err)
 	}
@@ -73,7 +73,7 @@ func syncSymbolsImpl(log *Logger) error {
 
 	allSymbols = filteredSymbols
 
-	dbTickers, err := db.Db().GetAllTickers()
+	dbTickers, err := db.GetAllTickers()
 	if err != nil {
 		return fmt.Errorf("failed to get DB tickers: %w", err)
 	}
@@ -84,7 +84,7 @@ func syncSymbolsImpl(log *Logger) error {
 	for _, symbol := range allSymbols {
 		keepList = append(keepList, symbol.Symbol)
 	}
-	if err := db.Db().DeactivateSymbolsNotInList(keepList); err != nil {
+	if err := db.DeactivateSymbolsNotInList(keepList); err != nil {
 		return fmt.Errorf("failed to deactivate old symbols: %w", err)
 	}
 
@@ -111,7 +111,7 @@ func syncSymbolsImpl(log *Logger) error {
 				dbSymbol.Type = f.Ptr(string(types.TypeStock))
 			}
 
-			if err := db.Db().PutSymbol(dbSymbol); err != nil {
+			if err := db.PutSymbol(dbSymbol); err != nil {
 				return fmt.Errorf("failed to insert %s: %w", symbol.Symbol, err)
 			}
 			newCount++

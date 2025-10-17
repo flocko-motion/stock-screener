@@ -14,14 +14,8 @@ var benchAnalysisCmd = &cobra.Command{
 	Use:   "bench-analysis",
 	Short: "Benchmark YoY analysis performance",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		database, err := db.NewDB()
-		if err != nil {
-			return fmt.Errorf("failed to connect to database: %w", err)
-		}
-		defer database.Close()
-
 		// Get 100 stocks that have price data
-		tickers, err := database.GetTickersWithPrices(100)
+		tickers, err := db.GetTickersWithPrices(100)
 		if err != nil {
 			return fmt.Errorf("failed to get tickers: %w", err)
 		}
@@ -54,7 +48,7 @@ var benchAnalysisCmd = &cobra.Command{
 		successCount := 0
 
 		for i, ticker := range tickers {
-			prices, err := database.GetMonthlyPrices(ticker, from, to)
+			prices, err := db.GetMonthlyPrices(ticker, from, to)
 			if err != nil {
 				if i < 5 {
 					fmt.Printf("[%s] Error fetching prices: %v\n", ticker, err)
@@ -100,7 +94,7 @@ var benchAnalysisCmd = &cobra.Command{
 		fmt.Println("=== Method 2: Batch Analysis ===")
 		startBatch := time.Now()
 
-		results, err := analysis.AnalyzeBatch(database, analysis.AnalysisPackageConfig{
+		results, err := analysis.AnalyzeBatch(analysis.AnalysisPackageConfig{
 			Tickers:    tickers,
 			TimeFrom:   from,
 			TimeTo:     to,

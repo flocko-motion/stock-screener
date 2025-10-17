@@ -83,16 +83,16 @@ func CreatePackage(database *db.DB, config AnalysisPackageConfig) (string, error
 		Status:       "processing",
 	}
 
-	if err := database.CreateAnalysisPackage(pkg); err != nil {
+	if err := db.CreateAnalysisPackage(pkg); err != nil {
 		return "", err
 	}
 
-	go processPackage(database, config)
+	go processPackage(config)
 
 	return config.PackageID, nil
 }
 
-func processPackage(database *db.DB, config AnalysisPackageConfig) {
+func processPackage(config AnalysisPackageConfig) {
 	var err error
 	logf("Starting package processing: %s (ID: %s)\n", config.Name, config.PackageID)
 	logf("%s config raw: %+v\n", config.PackageID, config)
@@ -111,10 +111,10 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 	}
 
 	logf("%s Fetching filtered tickers...\n", config.PackageID)
-	config.Tickers, err = database.GetFilteredTickers(config.McapMin, config.InceptionMax)
+	config.Tickers, err = db.GetFilteredTickers(config.McapMin, config.InceptionMax)
 	if err != nil {
 		logf("ERROR: Failed to get filtered tickers: %v\n", err)
-		database.UpdateAnalysisPackageStatus(config.PackageID, "failed", 0)
+		db.UpdateAnalysisPackageStatus(config.PackageID, "failed", 0)
 		return
 	}
 
@@ -124,17 +124,17 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 		logf("%s First %d tickers: %v\n", config.PackageID, sampleSize, config.Tickers[:sampleSize])
 	} else {
 		logf("%s WARNING: No tickers found, nothing to analyze\n", config.PackageID)
-		database.UpdateAnalysisPackageStatus(config.PackageID, "ready", 0)
+		db.UpdateAnalysisPackageStatus(config.PackageID, "ready", 0)
 		return
 	}
 
 	logf("%s Starting batch analysis of %d symbols...\n", config.PackageID, len(config.Tickers))
 	config.SaveToDB = true // Enable database saving
 	startTime := time.Now()
-	results, err := AnalyzeBatch(database, config)
+	results, err := AnalyzeBatch(config)
 	if err != nil {
 		logf("%s ERROR: Batch analysis failed: %v\n", config.PackageID, err)
-		database.UpdateAnalysisPackageStatus(config.PackageID, "failed", 0)
+		db.UpdateAnalysisPackageStatus(config.PackageID, "failed", 0)
 		return
 	}
 	elapsed := time.Since(startTime)
@@ -145,6 +145,6 @@ func processPackage(database *db.DB, config AnalysisPackageConfig) {
 	}
 
 	logf("%s Package processing complete: %d results\n", config.PackageID, len(results))
-	database.UpdateAnalysisPackageStatus(config.PackageID, "ready", len(results))
+	db.UpdateAnalysisPackageStatus(config.PackageID, "ready", len(results))
 	logf("%s Package %s is now ready\n", config.PackageID, config.PackageID)
 }

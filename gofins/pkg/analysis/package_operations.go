@@ -9,19 +9,19 @@ import (
 )
 
 // GetPackage retrieves a package by ID
-func GetPackage(database *db.DB, packageID string) (*db.AnalysisPackage, error) {
-	return database.GetAnalysisPackage(packageID)
+func GetPackage(packageID string) (*db.AnalysisPackage, error) {
+	return db.GetAnalysisPackage(packageID)
 }
 
 // ListPackages returns all analysis packages
-func ListPackages(database *db.DB) ([]db.AnalysisPackage, error) {
-	return database.ListAnalysisPackages()
+func ListPackages() ([]db.AnalysisPackage, error) {
+	return db.ListAnalysisPackages()
 }
 
 // UpdatePackageName updates the name of an analysis package
-func UpdatePackageName(database *db.DB, packageID string, name string) (*db.AnalysisPackage, error) {
+func UpdatePackageName(packageID string, name string) (*db.AnalysisPackage, error) {
 	// Check if package exists
-	pkg, err := database.GetAnalysisPackage(packageID)
+	pkg, err := db.GetAnalysisPackage(packageID)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func UpdatePackageName(database *db.DB, packageID string, name string) (*db.Anal
 	}
 
 	// Update in database
-	if err := database.UpdateAnalysisPackageName(packageID, name); err != nil {
+	if err := db.UpdateAnalysisPackageName(packageID, name); err != nil {
 		return nil, err
 	}
 
@@ -40,9 +40,9 @@ func UpdatePackageName(database *db.DB, packageID string, name string) (*db.Anal
 }
 
 // DeletePackage deletes an analysis package and its associated files
-func DeletePackage(database *db.DB, packageID string) error {
+func DeletePackage(packageID string) error {
 	// First, check if package exists
-	pkg, err := database.GetAnalysisPackage(packageID)
+	pkg, err := db.GetAnalysisPackage(packageID)
 	if err != nil {
 		return fmt.Errorf("failed to get package: %w", err)
 	}
@@ -51,7 +51,7 @@ func DeletePackage(database *db.DB, packageID string) error {
 	}
 
 	// Delete from database first
-	if err := database.DeleteAnalysisPackage(packageID); err != nil {
+	if err := db.DeleteAnalysisPackage(packageID); err != nil {
 		return fmt.Errorf("failed to delete package from database: %w", err)
 	}
 

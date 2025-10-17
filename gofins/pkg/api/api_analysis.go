@@ -32,7 +32,7 @@ func (s *Server) handleAnalyses(w http.ResponseWriter, r *http.Request) {
 
 // handleListAnalyses lists all analysis packages
 func (s *Server) handleListAnalyses(w http.ResponseWriter, r *http.Request) {
-	packages, err := analysis.ListPackages(s.db)
+	packages, err := analysis.ListPackages()
 	if err != nil {
 		http.Error(w, "Failed to list analyses: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -102,7 +102,7 @@ func (s *Server) handleAnalysis(w http.ResponseWriter, r *http.Request) {
 
 // handleGetAnalysis retrieves a single analysis package
 func (s *Server) handleGetAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
-	pkg, err := analysis.GetPackage(s.db, packageID)
+	pkg, err := analysis.GetPackage(packageID)
 	if err != nil {
 		http.Error(w, "Failed to get analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +130,7 @@ func (s *Server) handleUpdateAnalysis(w http.ResponseWriter, r *http.Request, pa
 		return
 	}
 
-	pkg, err := analysis.UpdatePackageName(s.db, packageID, req.Name)
+	pkg, err := analysis.UpdatePackageName(packageID, req.Name)
 	if err != nil {
 		http.Error(w, "Failed to update analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -147,7 +147,7 @@ func (s *Server) handleUpdateAnalysis(w http.ResponseWriter, r *http.Request, pa
 
 // handleDeleteAnalysis deletes an analysis package
 func (s *Server) handleDeleteAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
-	err := analysis.DeletePackage(s.db, packageID)
+	err := analysis.DeletePackage(packageID)
 	if err != nil {
 		http.Error(w, "Failed to delete analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -169,7 +169,7 @@ func (s *Server) handleAnalysisResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results, err := s.db.GetAnalysisResults(packageID)
+	results, err := db.GetAnalysisResults(packageID)
 	if err != nil {
 		http.Error(w, "Failed to get results: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -233,7 +233,7 @@ func (s *Server) handleSymbolProfile(w http.ResponseWriter, r *http.Request) {
 	ticker = strings.ReplaceAll(ticker, "..", "")
 
 	// Get symbol profile from database
-	profile, err := s.db.GetSymbolProfile(ticker)
+	profile, err := db.GetSymbolProfile(ticker)
 	if err != nil {
 		http.Error(w, "Failed to get symbol profile: "+err.Error(), http.StatusInternalServerError)
 		return

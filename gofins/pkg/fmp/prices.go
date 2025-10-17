@@ -13,7 +13,8 @@ type PriceDataRaw struct {
 
 // FetchPriceHistory fetches historical price data for a ticker.
 // Automatically detects index symbols (starting with ^) and routes to the correct endpoint.
-func (c *Client) FetchPriceHistory(ticker string) ([]PriceDataRaw, error) {
+func FetchPriceHistory(ticker string) ([]PriceDataRaw, error) {
+	c := Fmp()
 	var prices []PriceDataRaw
 	var endpoint string
 	params := map[string]string{
@@ -40,7 +41,8 @@ func (c *Client) FetchPriceHistory(ticker string) ([]PriceDataRaw, error) {
 
 // FetchForexHistory fetches historical forex data.
 // Symbol should be in format like "EURUSD", "GBPUSD", etc.
-func (c *Client) FetchForexHistory(symbol string) ([]PriceDataRaw, error) {
+func FetchForexHistory(symbol string) ([]PriceDataRaw, error) {
+	c := Fmp()
 	var prices []PriceDataRaw
 	params := map[string]string{
 		"symbol": symbol,

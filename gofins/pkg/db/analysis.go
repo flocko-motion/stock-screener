@@ -23,7 +23,8 @@ type AnalysisPackage struct {
 }
 
 // CreateAnalysisPackage inserts a new analysis package with status='processing'
-func (db *DB) CreateAnalysisPackage(pkg *AnalysisPackage) error {
+func CreateAnalysisPackage(pkg *AnalysisPackage) error {
+	db := Db()
 	query := `
 		INSERT INTO analysis_packages (
 			id, name, created_at, interval, time_from, time_to,
@@ -42,7 +43,8 @@ func (db *DB) CreateAnalysisPackage(pkg *AnalysisPackage) error {
 }
 
 // UpdateAnalysisPackageStatus updates the status and symbol count of a package
-func (db *DB) UpdateAnalysisPackageStatus(packageID string, status string, symbolCount int) error {
+func UpdateAnalysisPackageStatus(packageID string, status string, symbolCount int) error {
+	db := Db()
 	query := `UPDATE analysis_packages SET status = $1, symbol_count = $2 WHERE id = $3`
 	_, err := db.conn.Exec(query, status, symbolCount, packageID)
 	return err
@@ -62,7 +64,8 @@ type AnalysisResult struct {
 }
 
 // SaveAnalysisResult saves a single analysis result
-func (db *DB) SaveAnalysisResult(packageID, ticker string, count int, mean, stddev, variance, min, max float64, histogramJSON []byte) error {
+func SaveAnalysisResult(packageID, ticker string, count int, mean, stddev, variance, min, max float64, histogramJSON []byte) error {
+	db := Db()
 	query := `
 		INSERT INTO analysis_results (
 			package_id, ticker, count, mean, stddev, variance, min, max, histogram
@@ -77,7 +80,8 @@ func (db *DB) SaveAnalysisResult(packageID, ticker string, count int, mean, stdd
 }
 
 // GetAnalysisResults retrieves all results for a package
-func (db *DB) GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
+func GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
+	db := Db()
 	query := `
 		SELECT ar.package_id, ar.ticker, ar.count, ar.mean, ar.stddev, ar.variance, ar.min, ar.max, s.inception
 		FROM analysis_results ar
@@ -105,7 +109,8 @@ func (db *DB) GetAnalysisResults(packageID string) ([]AnalysisResult, error) {
 }
 
 // GetAnalysisPackage retrieves a package by ID
-func (db *DB) GetAnalysisPackage(packageID string) (*AnalysisPackage, error) {
+func GetAnalysisPackage(packageID string) (*AnalysisPackage, error) {
+	db := Db()
 	query := `
 		SELECT id, name, created_at, interval, time_from, time_to,
 		       hist_bins, hist_min, hist_max, mcap_min, inception_max, symbol_count, status
@@ -135,7 +140,8 @@ func (db *DB) GetAnalysisPackage(packageID string) (*AnalysisPackage, error) {
 }
 
 // ListAnalysisPackages returns all analysis packages
-func (db *DB) ListAnalysisPackages() ([]AnalysisPackage, error) {
+func ListAnalysisPackages() ([]AnalysisPackage, error) {
+	db := Db()
 	query := `
 		SELECT id, name, created_at, interval, time_from, time_to,
 		       hist_bins, hist_min, hist_max, mcap_min, inception_max, symbol_count, status
@@ -172,14 +178,16 @@ func (db *DB) ListAnalysisPackages() ([]AnalysisPackage, error) {
 }
 
 // UpdateAnalysisPackageName updates the name of a package
-func (db *DB) UpdateAnalysisPackageName(packageID string, name string) error {
+func UpdateAnalysisPackageName(packageID string, name string) error {
+	db := Db()
 	query := `UPDATE analysis_packages SET name = $1 WHERE id = $2`
 	_, err := db.conn.Exec(query, name, packageID)
 	return err
 }
 
 // DeleteAnalysisPackage deletes a package (CASCADE will delete results)
-func (db *DB) DeleteAnalysisPackage(packageID string) error {
+func DeleteAnalysisPackage(packageID string) error {
+	db := Db()
 	query := `DELETE FROM analysis_packages WHERE id = $1`
 	_, err := db.conn.Exec(query, packageID)
 	return err
@@ -205,7 +213,8 @@ type SymbolProfile struct {
 }
 
 // GetSymbolProfile retrieves profile information for a symbol
-func (db *DB) GetSymbolProfile(ticker string) (*SymbolProfile, error) {
+func GetSymbolProfile(ticker string) (*SymbolProfile, error) {
+	db := Db()
 	query := `
 		SELECT 
 			ticker, exchange, name, type, currency, sector, industry, 

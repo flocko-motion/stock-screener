@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"strings"
 
@@ -26,7 +27,7 @@ func (s *Server) handleGetSymbol(w http.ResponseWriter, r *http.Request) {
 
 	// Otherwise, return symbol profile
 	ticker := strings.TrimSpace(path)
-	profile, err := s.db.GetSymbolProfile(ticker)
+	profile, err := db.GetSymbolProfile(ticker)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -23,11 +23,13 @@ var (
 	dbOnce   sync.Once
 )
 
-// Db returns the global database connection, initializing it on first call
-// Panics if the connection cannot be established
+// Db returns the global database connection singleton, initializing it on first call.
+// This connection is shared across the entire application and should NEVER be closed.
+// The connection is automatically managed and will be closed when the application exits.
+// Panics if the connection cannot be established.
 func Db() *DB {
 	dbOnce.Do(func() {
-		db, err := NewDB()
+		db, err := newDB()
 		if err != nil {
 			panic(fmt.Sprintf("Failed to initialize database connection: %v", err))
 		}
@@ -36,8 +38,8 @@ func Db() *DB {
 	return globalDB
 }
 
-// NewDB creates a new database connection with hardcoded config
-func NewDB() (*DB, error) {
+// newDB creates a new database connection with hardcoded config
+func newDB() (*DB, error) {
 	// Read password from config
 	password, err := files.GetEnvValue("~/.fins/config/db.env", "POSTGRES_PASSWORD")
 	if err != nil {
@@ -64,17 +66,64 @@ func NewDB() (*DB, error) {
 	return &DB{conn: conn}, nil
 }
 
-// Close closes the database connection
-func (db *DB) Close() error {
-	return db.conn.Close()
+// PrepareForShutdown closes the database connection during application shutdown.
+// This should only be called once during graceful shutdown, not during normal operation.
+// The singleton will remain closed after this call.
+func PrepareForShutdown() error {
+	db := Db()
+	if db.conn != nil {
+		return db.conn.Close()
+	}
+	return nil
 }
 
-// Exec executes a query without returning rows
-func (db *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	return db.conn.Exec(query, args...)
+// Internal helper functions - not exported
+func exec(query string, args ...interface{}) (sql.Result, error) {
+	return Db().conn.Exec(query, args...)
 }
 
-// Query executes a query that returns rows
-func (db *DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	return db.conn.Query(query, args...)
+func query(query string, args ...interface{}) (*sql.Rows, error) {
+	return Db().conn.Query(query, args...)
+}
+
+// ColumnInfo represents database column metadata
+type ColumnInfo struct {
+	TableName     string
+	ColumnName    string
+	DataType      string
+	IsNullable    string
+	ColumnDefault *string
+}
+
+// GetSchema returns the database schema information
+func GetSchema() ([]ColumnInfo, error) {
+	db := Db()
+	query := `
+		SELECT 
+			c.table_name,
+			c.column_name,
+			c.data_type,
+			c.is_nullable,
+			c.column_default
+		FROM information_schema.columns c
+		WHERE c.table_schema = 'public'
+		ORDER BY c.table_name, c.ordinal_position
+	`
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var columns []ColumnInfo
+	for rows.Next() {
+		var col ColumnInfo
+		if err := rows.Scan(&col.TableName, &col.ColumnName, &col.DataType, &col.IsNullable, &col.ColumnDefault); err != nil {
+			return nil, err
+		}
+		columns = append(columns, col)
+	}
+
+	return columns, rows.Err()
 }

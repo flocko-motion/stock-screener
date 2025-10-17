@@ -20,7 +20,7 @@ const (
 func UpdateProfiles(ctx context.Context) {
 	log := NewLogger("Profile")
 
-	totalStale, err := db.Db().CountStaleProfiles()
+	totalStale, err := db.CountStaleProfiles()
 	if err != nil {
 		log.Error("Failed to count stale profiles: %v\n", err)
 		return
@@ -36,7 +36,7 @@ func UpdateProfiles(ctx context.Context) {
 		default:
 		}
 
-		tickers, err := db.Db().GetStaleProfiles(ProfileBatchSize)
+		tickers, err := db.GetStaleProfiles(ProfileBatchSize)
 		if err != nil {
 			log.Error("Failed to get stale profiles: %v\n", err)
 			return
@@ -49,7 +49,7 @@ func UpdateProfiles(ctx context.Context) {
 			continue
 		}
 
-		currentStale, _ := db.Db().CountStaleProfiles()
+		currentStale, _ := db.CountStaleProfiles()
 		log.Batch(currentStale, len(tickers))
 
 		// Stats tracking
@@ -97,7 +97,7 @@ func UpdateProfiles(ctx context.Context) {
 
 		// Print stats
 		elapsed := time.Since(startTime)
-		currentStale, _ = db.Db().CountStaleProfiles()
+		currentStale, _ = db.CountStaleProfiles()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
@@ -112,13 +112,13 @@ type UpdateStats struct {
 }
 
 func updateProfile(ticker string) string {
-	profile, err := fmp.Fmp().GetProfile(ticker)
+	profile, err := fmp.GetProfile(ticker)
 	now := time.Now()
 
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
 			status := types.StatusNotFound
-			db.Db().PutSymbol(&types.Symbol{
+			db.PutSymbol(&types.Symbol{
 				Ticker:            ticker,
 				LastProfileUpdate: &now,
 				LastProfileStatus: &status,
@@ -126,7 +126,7 @@ func updateProfile(ticker string) string {
 			return types.StatusNotFound
 		}
 		status := types.StatusFailed
-		db.Db().PutSymbol(&types.Symbol{
+		db.PutSymbol(&types.Symbol{
 			Ticker:            ticker,
 			LastProfileUpdate: &now,
 			LastProfileStatus: &status,
@@ -161,9 +161,9 @@ func updateProfile(ticker string) string {
 		MarketCap:         f.Ptr(int64(profile.MarketCap)), // Convert float64 to int64
 	}
 
-	if err := db.Db().PutSymbol(symbol); err != nil {
+	if err := db.PutSymbol(symbol); err != nil {
 		failStatus := types.StatusFailed
-		db.Db().PutSymbol(&types.Symbol{
+		db.PutSymbol(&types.Symbol{
 			Ticker:            ticker,
 			LastProfileUpdate: &now,
 			LastProfileStatus: &failStatus,
@@ -187,7 +187,7 @@ func deriveType(profile *fmp.Profile) string {
 
 	// Check if this is a secondary listing by comparing with primary exchange
 	if profile.CIK != "" {
-		primaryProfile, err := fmp.Fmp().GetProfileByCIK(profile.CIK)
+		primaryProfile, err := fmp.GetProfileByCIK(profile.CIK)
 		if err == nil && primaryProfile.Exchange != profile.Exchange {
 			// Different exchange than primary = secondary listing
 			return types.TypeSecondary
