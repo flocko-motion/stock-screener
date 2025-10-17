@@ -22,6 +22,7 @@ const (
 // currencyCodeMap maps non-standard currency codes from FMP to standard ISO codes
 var currencyCodeMap = map[string]string{
 	"ILA": "ILS", // Israeli New Shekel
+	"KWF": "KWD", // Kuwaiti Dinar
 }
 
 // normalizeCurrencyCode converts non-standard currency codes to standard ISO codes
