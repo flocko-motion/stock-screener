@@ -39,11 +39,20 @@ func FetchPriceHistory(ticker string) ([]PriceDataRaw, error) {
 	return prices, nil
 }
 
+// ForexDataRaw represents raw forex data from FMP API light endpoint
+// The light endpoint returns a simplified structure with just price and volume
+type ForexData struct {
+	Symbol string  `json:"symbol"`
+	Date   string  `json:"date"`
+	Price  float64 `json:"price"` // The exchange rate
+	Volume int64   `json:"volume"`
+}
+
 // FetchForexHistory fetches historical forex data.
 // Symbol should be in format like "EURUSD", "GBPUSD", etc.
-func FetchForexHistory(symbol string) ([]PriceDataRaw, error) {
+func FetchForexHistory(symbol string) ([]ForexData, error) {
 	c := Fmp()
-	var prices []PriceDataRaw
+	var forexData []ForexData
 	params := map[string]string{
 		"symbol": symbol,
 	}
@@ -51,13 +60,13 @@ func FetchForexHistory(symbol string) ([]PriceDataRaw, error) {
 	// Use the light endpoint for forex historical data
 	endpoint := "stable/historical-price-eod/light"
 
-	if err := c.apiGet(endpoint, params, &prices); err != nil {
+	if err := c.apiGet(endpoint, params, &forexData); err != nil {
 		return nil, err
 	}
 
-	if len(prices) == 0 {
+	if len(forexData) == 0 {
 		return nil, &NotFoundError{Ticker: symbol}
 	}
 
-	return prices, nil
+	return forexData, nil
 }

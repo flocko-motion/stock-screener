@@ -150,3 +150,44 @@ func startOfWeek(date time.Time) time.Time {
 	}
 	return date.AddDate(0, 0, -(weekday - 1)).Truncate(24 * time.Hour)
 }
+
+// ConvertForexPrices converts forex data to weekly and monthly time series
+// Takes first price of each period (no averaging needed for exchange rates)
+func ConvertForexPrices(forexData []fmp.ForexData, currency string) (monthly, weekly []types.PriceData) {
+	if len(forexData) == 0 {
+		return nil, nil
+	}
+
+	var currentWeek, currentMonth time.Time
+
+	for _, fx := range forexData {
+		date, err := time.Parse("2006-01-02", fx.Date)
+		if err != nil {
+			continue
+		}
+
+		// Monthly - take first price of each month
+		monthStart := time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
+		if currentMonth.IsZero() || !monthStart.Equal(currentMonth) {
+			monthly = append(monthly, types.PriceData{
+				Date:         monthStart,
+				Close:        fx.Price,
+				SymbolTicker: currency,
+			})
+			currentMonth = monthStart
+		}
+
+		// Weekly - take first price of each week (Monday)
+		weekStart := startOfWeek(date)
+		if currentWeek.IsZero() || !weekStart.Equal(currentWeek) {
+			weekly = append(weekly, types.PriceData{
+				Date:         weekStart,
+				Close:        fx.Price,
+				SymbolTicker: currency,
+			})
+			currentWeek = weekStart
+		}
+	}
+
+	return monthly, weekly
+}

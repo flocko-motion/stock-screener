@@ -82,47 +82,32 @@ func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly [
 func (c *cache) fetchAndStore(currency string) error {
 	symbol := fmt.Sprintf("%sUSD", currency)
 
-	rawData, err := fmp.FetchForexHistory(symbol)
+	forexData, err := fmp.FetchForexHistory(symbol)
 	if err != nil {
 		return fmt.Errorf("failed to fetch forex data for %s: %w", symbol, err)
 	}
 
-	if len(rawData) == 0 {
+	if len(forexData) == 0 {
 		return fmt.Errorf("no forex data returned for %s", symbol)
 	}
 
-	// Convert raw data to time series
-	ts, err := convertToTimeSeries(currency, rawData)
-	if err != nil {
-		return fmt.Errorf("failed to convert forex data: %w", err)
-	}
-
-	ts.LastFetchTime = time.Now()
-	c.data[currency] = ts
-
-	return nil
-}
-
-// convertToTimeSeries converts raw API data to weekly and monthly time series
-func convertToTimeSeries(currency string, rawData []fmp.PriceDataRaw) (*ForexTimeSeries, error) {
-	if len(rawData) == 0 {
-		return nil, fmt.Errorf("no data to convert")
-	}
-
 	// Sort by date (oldest first) - FMP returns newest first
-	sort.Slice(rawData, func(i, j int) bool {
-		return rawData[i].Date < rawData[j].Date
+	sort.Slice(forexData, func(i, j int) bool {
+		return forexData[i].Date < forexData[j].Date
 	})
 
-	// Use existing conversion logic from calculator package
-	monthlyData, weeklyData := calculator.ConvertPrices(rawData, currency)
+	// Convert forex data to time series using calculator
+	monthlyData, weeklyData := calculator.ConvertForexPrices(forexData, currency)
 
 	ts := &ForexTimeSeries{
 		Weekly:  weeklyData,
 		Monthly: monthlyData,
 	}
 
-	return ts, nil
+	ts.LastFetchTime = time.Now()
+	c.data[currency] = ts
+
+	return nil
 }
 
 // Clear removes all cached data

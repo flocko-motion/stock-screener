@@ -114,10 +114,11 @@ type UpdateStats struct {
 }
 
 func updateProfile(ticker string) string {
-	return updateProfileInternal(ticker, false)
+	_, status := updateProfileInternal(ticker, false)
+	return status
 }
 
-func updateProfileInternal(ticker string, testMode bool) string {
+func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string) {
 	profile, err := fmp.GetProfile(ticker)
 	now := time.Now()
 
@@ -131,7 +132,7 @@ func updateProfileInternal(ticker string, testMode bool) string {
 					LastProfileStatus: &status,
 				})
 			}
-			return types.StatusNotFound
+			return nil, types.StatusNotFound
 		}
 		status := types.StatusFailed
 		if !testMode {
@@ -141,7 +142,7 @@ func updateProfileInternal(ticker string, testMode bool) string {
 				LastProfileStatus: &status,
 			})
 		}
-		return types.StatusFailed
+		return nil, types.StatusFailed
 	}
 
 	var inception *time.Time
@@ -193,11 +194,11 @@ func updateProfileInternal(ticker string, testMode bool) string {
 				LastProfileUpdate: &now,
 				LastProfileStatus: &failStatus,
 			})
-			return types.StatusFailed
+			return nil, failStatus
 		}
 	}
 
-	return types.StatusOK
+	return symbol, types.StatusOK
 }
 
 func deriveType(profile *fmp.Profile) string {
