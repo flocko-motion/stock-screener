@@ -14,12 +14,12 @@ func TestUpdateProfileCurrencyConversion(t *testing.T) {
 	// Fetch profiles from FMP (test mode - no DB writes, but returns the symbol object)
 	fmt.Printf("\n=== Profile Currency Conversion Test ===\n")
 
-	symbolUSD, statusUSD := updateProfileInternal(tickerUSD, true)
+	symbolUSD, statusUSD := updateProfileInternal(tickerUSD, true, nil)
 	fmt.Printf("USD ticker: %s - status: %s\n", tickerUSD, statusUSD)
 	assert.Equal(t, "ok", statusUSD)
 	assert.NotNil(t, symbolUSD, "Symbol should be returned even in test mode")
 
-	symbolEUR, statusEUR := updateProfileInternal(tickerEUR, true)
+	symbolEUR, statusEUR := updateProfileInternal(tickerEUR, true, nil)
 	fmt.Printf("EUR ticker: %s - status: %s\n", tickerEUR, statusEUR)
 	assert.Equal(t, "ok", statusEUR)
 	assert.NotNil(t, symbolEUR, "Symbol should be returned even in test mode")

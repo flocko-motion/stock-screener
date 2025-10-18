@@ -2,7 +2,6 @@ package updater
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -99,7 +98,7 @@ func updateProfilesImpl(log *Logger) error {
 			go func() {
 				defer wg.Done()
 				for ticker := range tickerChan {
-					result := updateProfile(ticker)
+					result := updateProfile(ticker, log)
 					statsMu.Lock()
 					switch result {
 					case types.StatusOK:
@@ -138,12 +137,12 @@ type UpdateStats struct {
 	Failed   []string
 }
 
-func updateProfile(ticker string) string {
-	_, status := updateProfileInternal(ticker, false)
+func updateProfile(ticker string, log *Logger) string {
+	_, status := updateProfileInternal(ticker, false, log)
 	return status
 }
 
-func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string) {
+func updateProfileInternal(ticker string, testMode bool, log *Logger) (*types.Symbol, string) {
 	profile, err := fmp.GetProfile(ticker)
 	now := time.Now()
 
@@ -188,9 +187,12 @@ func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string)
 	if profile.Currency != "" && profile.Currency != "USD" && profile.MarketCap > 0 {
 		converted, err := forex.ConvertToUsdMonthly(profile.MarketCap, profile.Currency, now)
 		if err != nil {
-			// Log warning but continue with unconverted value
+			// Log error but continue with unconverted value
 			// This can happen if forex data is not available for the currency
-			fmt.Printf("Warning: Failed to convert market cap for %s from %s to USD: %v\n", ticker, profile.Currency, err)
+			if log != nil {
+				log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n", 
+					ticker, profile.Currency, err, profile.MarketCap)
+			}
 			status = types.StatusFailed
 		} else {
 			marketCapUSD = converted

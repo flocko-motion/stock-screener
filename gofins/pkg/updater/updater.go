@@ -2,7 +2,10 @@ package updater
 
 import (
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/flocko-motion/gofins/pkg/db"
 )
 
 type Logger struct {
@@ -50,7 +53,12 @@ func (l *Logger) Stopped() {
 }
 
 func (l *Logger) Error(format string, args ...interface{}) {
-	l.Printf("✗ "+format, args...)
+	message := fmt.Sprintf(format, args...)
+	l.Printf("✗ " + message)
+	
+	// Log to database
+	source := "updater." + strings.TrimSpace(l.prefix)
+	_ = db.LogError(source, "error", message, nil)
 }
 
 func (l *Logger) NotFoundList(tickers []string) {
