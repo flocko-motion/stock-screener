@@ -98,7 +98,7 @@ func updateProfilesImpl(log *Logger) error {
 			go func() {
 				defer wg.Done()
 				for ticker := range tickerChan {
-					result := updateProfile(ticker, log)
+					_, result := updateProfile(ticker, false, log)
 					statsMu.Lock()
 					switch result {
 					case types.StatusOK:
@@ -137,12 +137,7 @@ type UpdateStats struct {
 	Failed   []string
 }
 
-func updateProfile(ticker string, log *Logger) string {
-	_, status := updateProfileInternal(ticker, false, log)
-	return status
-}
-
-func updateProfileInternal(ticker string, testMode bool, log *Logger) (*types.Symbol, string) {
+func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, string) {
 	profile, err := fmp.GetProfile(ticker)
 	now := time.Now()
 
@@ -190,7 +185,7 @@ func updateProfileInternal(ticker string, testMode bool, log *Logger) (*types.Sy
 			// Log error but continue with unconverted value
 			// This can happen if forex data is not available for the currency
 			if log != nil {
-				log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n", 
+				log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n",
 					ticker, profile.Currency, err, profile.MarketCap)
 			}
 			status = types.StatusFailed
