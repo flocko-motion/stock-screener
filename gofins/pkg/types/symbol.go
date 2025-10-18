@@ -31,12 +31,13 @@ type Symbol struct {
 
 // Symbol types
 const (
-	TypeStock     = "stock"
-	TypeETF       = "etf"
-	TypeFund      = "fund"
-	TypeADR       = "adr"
-	TypeIndex     = "index"
-	TypeSecondary = "secondary" // Secondary exchange listing (duplicate of primary)
+	TypeStock = "stock"
+	TypeETF   = "etf"
+	TypeFund  = "fund"
+	TypeADR   = "adr"
+	TypeIndex = "index"
+	// Note: Secondary listings are now identified by the PrimaryListing field
+	// rather than a separate type, so they maintain their TypeStock classification
 )
 
 // PriceUpdateTypes defines which symbol types should receive price updates

@@ -242,14 +242,5 @@ func deriveType(profile *fmp.Profile) string {
 		return types.TypeADR
 	}
 
-	// Check if this is a secondary listing by comparing with primary exchange
-	if profile.CIK != "" {
-		primaryProfile, err := fmp.GetProfileByCIK(profile.CIK)
-		if err == nil && primaryProfile.Exchange != profile.Exchange {
-			// Different exchange than primary = secondary listing
-			return types.TypeSecondary
-		}
-	}
-
 	return types.TypeStock
 }

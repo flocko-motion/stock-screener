@@ -40,13 +40,7 @@ var serverCmd = &cobra.Command{
 		// Start updaters only if --no-updates is not set
 		fmt.Println("\n=== Starting Services ===")
 		if !noUpdates {
-			// sync symbols once before starting updaters
-			if err := updater.SyncSymbolsOnce(); err != nil {
-				return fmt.Errorf("symbol sync failed: %w", err)
-			}
-			go updater.UpdateProfiles(ctx)
-			go updater.UpdatePrices(ctx)
-			go updater.SyncSymbols()
+			go updater.RunAllUpdaters()
 		} else {
 			fmt.Println("⚠️  Updates disabled - working with existing data only")
 		}

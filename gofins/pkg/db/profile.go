@@ -62,7 +62,7 @@ func GetSymbol(ticker string) (*types.Symbol, error) {
 		SELECT ticker, exchange, last_price_update, last_profile_update,
 			   last_price_status, last_profile_status,
 			   name, type, currency, sector, industry, country,
-			   description, website, isin, inception, oldest_price, is_actively_trading, market_cap
+			   description, website, isin, cik, inception, oldest_price, is_actively_trading, market_cap, primary_listing
 		FROM symbols
 		WHERE ticker = $1
 	`
@@ -72,7 +72,7 @@ func GetSymbol(ticker string) (*types.Symbol, error) {
 		&s.Ticker, &s.Exchange, &s.LastPriceUpdate, &s.LastProfileUpdate,
 		&s.LastPriceStatus, &s.LastProfileStatus,
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
-		&s.Description, &s.Website, &s.ISIN, &s.Inception, &s.OldestPrice, &s.IsActivelyTrading, &s.MarketCap,
+		&s.Description, &s.Website, &s.ISIN, &s.CIK, &s.Inception, &s.OldestPrice, &s.IsActivelyTrading, &s.MarketCap, &s.PrimaryListing,
 	)
 
 	if err == sql.ErrNoRows {
@@ -184,11 +184,11 @@ func GetActiveSymbols() ([]types.Symbol, error) {
 		) r ON true
 		WHERE s.is_actively_trading = true
 		  AND (s.type = $1 OR s.type IS NULL)
-		  AND s.type != $2
+		  AND (s.primary_listing IS NULL OR s.primary_listing = '')
 		ORDER BY s.ticker
 	`
 
-	rows, err := db.conn.Query(query, types.TypeStock, types.TypeSecondary)
+	rows, err := db.conn.Query(query, types.TypeStock)
 	if err != nil {
 		return nil, err
 	}
@@ -216,12 +216,13 @@ func GetStaleProfiles(limit int) ([]string, error) {
 	query := `
 		SELECT ticker FROM symbols
 		WHERE (last_profile_update IS NULL OR last_profile_update < $1)
-		  AND (type IS NULL OR (type != $2 AND type != $3))
+		  AND (type IS NULL OR type != $2)
+		  AND (primary_listing IS NULL OR primary_listing = '')
 		ORDER BY last_profile_update ASC NULLS FIRST
-		LIMIT $4
+		LIMIT $3
 	`
 
-	rows, err := db.conn.Query(query, GetProfileThreshold(), types.TypeIndex, types.TypeSecondary, limit)
+	rows, err := db.conn.Query(query, GetProfileThreshold(), types.TypeIndex, limit)
 	if err != nil {
 		return nil, err
 	}
