@@ -208,6 +208,7 @@ func updateProfileInternal(ticker string, testMode bool) (*types.Symbol, string)
 		Country:           f.Ptr(profile.Country),
 		Description:       f.Ptr(profile.Description),
 		Website:           f.Ptr(profile.Website),
+		CIK:               f.Ptr(profile.CIK),
 		Inception:         inception,
 		LastProfileUpdate: f.Ptr(now),
 		LastProfileStatus: f.Ptr(status),

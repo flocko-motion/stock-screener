@@ -18,9 +18,9 @@ func PutSymbol(s *types.Symbol) error {
 		INSERT INTO symbols (
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
-			name, type, currency, sector, industry, country, description, website, isin, inception, oldest_price,
-			is_actively_trading, market_cap
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+			name, type, currency, sector, industry, country, description, website, isin, cik, inception, oldest_price,
+			is_actively_trading, market_cap, primary_listing
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 		ON CONFLICT (ticker) DO UPDATE SET
 			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
 			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
@@ -36,18 +36,20 @@ func PutSymbol(s *types.Symbol) error {
 			description = COALESCE(EXCLUDED.description, symbols.description),
 			website = COALESCE(EXCLUDED.website, symbols.website),
 			isin = COALESCE(EXCLUDED.isin, symbols.isin),
+			cik = COALESCE(EXCLUDED.cik, symbols.cik),
 			inception = COALESCE(EXCLUDED.inception, symbols.inception),
 			oldest_price = COALESCE(EXCLUDED.oldest_price, symbols.oldest_price),
 			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading),
-			market_cap = COALESCE(EXCLUDED.market_cap, symbols.market_cap)
+			market_cap = COALESCE(EXCLUDED.market_cap, symbols.market_cap),
+			primary_listing = COALESCE(EXCLUDED.primary_listing, symbols.primary_listing)
 	`
 
 	_, err := db.conn.Exec(
 		query,
 		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
 		s.LastPriceStatus, s.LastProfileStatus,
-		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.Inception, s.OldestPrice,
-		s.IsActivelyTrading, s.MarketCap,
+		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.CIK, s.Inception, s.OldestPrice,
+		s.IsActivelyTrading, s.MarketCap, s.PrimaryListing,
 	)
 
 	return err

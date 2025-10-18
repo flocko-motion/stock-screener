@@ -19,6 +19,7 @@ type Symbol struct {
 	Description       *string    `json:"description,omitempty"`
 	Website           *string    `json:"website,omitempty"`
 	ISIN              *string    `json:"isin,omitempty"`
+	CIK               *string    `json:"cik,omitempty"`
 	Inception         *time.Time `json:"inception,omitempty"`
 	OldestPrice       *time.Time `json:"oldestPrice,omitempty"`
 	IsActivelyTrading *bool      `json:"isActivelyTrading,omitempty"`
