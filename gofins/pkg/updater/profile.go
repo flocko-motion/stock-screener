@@ -36,14 +36,6 @@ func normalizeCurrencyCode(currency string) string {
 func UpdateProfiles(ctx context.Context) {
 	log := NewLogger("Profile")
 
-	totalStale, err := db.CountStaleProfiles()
-	if err != nil {
-		log.Error("Failed to count stale profiles: %v\n", err)
-		return
-	}
-
-	log.Started(totalStale, ProfileWorkers)
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -52,17 +44,37 @@ func UpdateProfiles(ctx context.Context) {
 		default:
 		}
 
+		if err := updateProfilesImpl(log); err != nil {
+			log.Error("Profile update failed: %v\n", err)
+		}
+
+		const sleepTimeHours = 8
+		log.AllDone(sleepTimeHours)
+		time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
+	}
+}
+
+func UpdateProfilesOnce() error {
+	log := NewLogger("Profile")
+	return updateProfilesImpl(log)
+}
+
+func updateProfilesImpl(log *Logger) error {
+	totalStale, err := db.CountStaleProfiles()
+	if err != nil {
+		return err
+	}
+
+	log.Started(totalStale, ProfileWorkers)
+
+	for {
 		tickers, err := db.GetStaleProfiles(ProfileBatchSize)
 		if err != nil {
-			log.Error("Failed to get stale profiles: %v\n", err)
-			return
+			return err
 		}
 
 		if len(tickers) == 0 {
-			const sleepTimeHours = 8
-			log.AllDone(sleepTimeHours)
-			time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
-			continue
+			return nil
 		}
 
 		currentStale, _ := db.CountStaleProfiles()
@@ -117,7 +129,6 @@ func UpdateProfiles(ctx context.Context) {
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
-
 	}
 }
 

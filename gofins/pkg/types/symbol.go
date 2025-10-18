@@ -23,6 +23,7 @@ type Symbol struct {
 	OldestPrice       *time.Time `json:"oldestPrice,omitempty"`
 	IsActivelyTrading *bool      `json:"isActivelyTrading,omitempty"`
 	MarketCap         *int64     `json:"marketCap,omitempty"`
+	PrimaryListing    *string    `json:"primaryListing,omitempty"`
 	IsFavorite        bool       `json:"isFavorite"`
 	UserRating        *int       `json:"userRating,omitempty"`
 }

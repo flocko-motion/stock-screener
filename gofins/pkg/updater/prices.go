@@ -27,14 +27,6 @@ type PriceStats struct {
 func UpdatePrices(ctx context.Context) {
 	log := NewLogger("Prices")
 
-	totalStale, err := db.CountStalePrices()
-	if err != nil {
-		log.Error("Failed to count stale prices: %v\n", err)
-		return
-	}
-
-	log.Started(totalStale, PriceWorkers)
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -43,17 +35,37 @@ func UpdatePrices(ctx context.Context) {
 		default:
 		}
 
+		if err := updatePricesImpl(log); err != nil {
+			log.Error("Price update failed: %v\n", err)
+		}
+
+		const sleepTimeHours = 8
+		log.AllDone(sleepTimeHours)
+		time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
+	}
+}
+
+func UpdatePricesOnce() error {
+	log := NewLogger("Prices")
+	return updatePricesImpl(log)
+}
+
+func updatePricesImpl(log *Logger) error {
+	totalStale, err := db.CountStalePrices()
+	if err != nil {
+		return err
+	}
+
+	log.Started(totalStale, PriceWorkers)
+
+	for {
 		symbols, err := db.GetSymbolsWithStalePrices(PriceBatchSize)
 		if err != nil {
-			log.Error("Failed to get stale prices: %v\n", err)
-			return
+			return err
 		}
 
 		if len(symbols) == 0 {
-			const sleepTimeHours = 8
-			log.AllDone(sleepTimeHours)
-			time.Sleep(time.Duration(sleepTimeHours) * time.Hour)
-			continue
+			return nil
 		}
 
 		currentStale, _ := db.CountStalePrices()
