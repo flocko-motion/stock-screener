@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -16,6 +17,7 @@ type ErrorEntry struct {
 
 // LogError logs an error to the database
 func LogError(source, errorType, message string, details *string) error {
+	fmt.Printf("[%s] %s: %s\n", source, errorType, message)
 	db := Db()
 	query := `
 		INSERT INTO errors (source, error_type, message, details)
@@ -99,6 +101,38 @@ func ClearOldErrors(olderThan time.Duration) (int, error) {
 	query := `DELETE FROM errors WHERE timestamp < $1`
 
 	result, err := db.conn.Exec(query, cutoff)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	return int(rowsAffected), err
+}
+
+// GetErrorByID retrieves a specific error by its ID
+func GetErrorByID(id int) (*ErrorEntry, error) {
+	db := Db()
+	query := `
+		SELECT id, timestamp, source, error_type, message, details
+		FROM errors
+		WHERE id = $1
+	`
+
+	var e ErrorEntry
+	err := db.conn.QueryRow(query, id).Scan(&e.ID, &e.Timestamp, &e.Source, &e.ErrorType, &e.Message, &e.Details)
+	if err != nil {
+		return nil, err
+	}
+
+	return &e, nil
+}
+
+// ClearAllErrors deletes all errors from the database
+func ClearAllErrors() (int, error) {
+	db := Db()
+	query := `DELETE FROM errors`
+
+	result, err := db.conn.Exec(query)
 	if err != nil {
 		return 0, err
 	}

@@ -59,7 +59,8 @@ func DeletePackage(packageID string) error {
 	plotsDir := PathPlots(packageID)
 	if err := cleanupPackageFiles(packageID, plotsDir); err != nil {
 		// Log the error but don't fail the deletion since DB is already cleaned
-		fmt.Printf("[ANALYSIS] Warning: Failed to cleanup files for package %s: %v\n", packageID, err)
+		errMsg := fmt.Sprintf("Failed to cleanup files for package %s: %v", packageID, err)
+		_ = db.LogError("analysis.package", "filesystem", "Failed to cleanup package files", &errMsg)
 	}
 
 	return nil
@@ -83,7 +84,8 @@ func cleanupPackageFiles(packageID, plotsDir string) error {
 	deletedCount := 0
 	for _, file := range matches {
 		if err := os.Remove(file); err != nil {
-			fmt.Printf("[ANALYSIS] Warning: Failed to delete file %s: %v\n", file, err)
+			errMsg := fmt.Sprintf("Failed to delete file %s: %v", file, err)
+			_ = db.LogError("analysis.package", "filesystem", "Failed to delete analysis file", &errMsg)
 		} else {
 			deletedCount++
 		}

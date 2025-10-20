@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
+	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
@@ -41,7 +42,7 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 
 	var req CreateAnalysisRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Println("[API] Failed to decode request body:", err)
+		_ = db.LogError("api.analysis", "validation", "Failed to decode request body", f.Ptr(err.Error()))
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -143,7 +144,7 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 
 	packageID, err := analysis.CreatePackage(s.db, config)
 	if err != nil {
-		fmt.Println("[API] Failed to create package:", err)
+		_ = db.LogError("api.analysis", "database", "Failed to create analysis package", f.Ptr(err.Error()))
 		http.Error(w, "Failed to create package: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -159,6 +160,6 @@ func (s *Server) handleCreateAnalysis(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		fmt.Println("[API] Failed to encode response:", err)
+		_ = db.LogError("api.analysis", "encoding", "Failed to encode response", f.Ptr(err.Error()))
 	}
 }

@@ -53,7 +53,8 @@ var serverCmd = &cobra.Command{
 		
 		// Graceful shutdown
 		if err := db.PrepareForShutdown(); err != nil {
-			fmt.Printf("Warning: Failed to close database: %v\n", err)
+			errMsg := err.Error()
+			_ = db.LogError("server.shutdown", "database", "Failed to close database connection", &errMsg)
 		}
 		
 		fmt.Println("✓ Server stopped")

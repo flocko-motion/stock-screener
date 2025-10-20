@@ -51,7 +51,8 @@ var benchAnalysisCmd = &cobra.Command{
 			prices, err := db.GetMonthlyPrices(ticker, from, to)
 			if err != nil {
 				if i < 5 {
-					fmt.Printf("[%s] Error fetching prices: %v\n", ticker, err)
+					errMsg := fmt.Sprintf("Error fetching prices for %s: %v", ticker, err)
+					_ = db.LogError("bench.analysis", "database", "Failed to fetch prices", &errMsg)
 				}
 				continue
 			}
