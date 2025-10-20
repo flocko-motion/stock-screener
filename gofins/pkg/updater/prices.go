@@ -160,11 +160,27 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 		}
 	}
 
+	// Calculate ATH12M (all-time high in last 12 months)
+	var ath12m *float64
+	if len(monthly) > 0 {
+		twelveMonthsAgo := now.AddDate(0, -12, 0)
+		maxPrice := 0.0
+		for _, price := range monthly {
+			if price.Date.After(twelveMonthsAgo) && price.High > maxPrice {
+				maxPrice = price.High
+			}
+		}
+		if maxPrice > 0 {
+			ath12m = &maxPrice
+		}
+	}
+
 	// Update symbol metadata
 	status := types.StatusOK
 	symbol.LastPriceUpdate = &now
 	symbol.LastPriceStatus = &status
 	symbol.OldestPrice = oldestPrice
+	symbol.Ath12M = ath12m
 
 	// Save to database
 	if !testMode {

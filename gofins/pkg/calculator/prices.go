@@ -160,6 +160,10 @@ func StartOfMonth(date time.Time) time.Time {
 	return time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
 }
 
+func StartOfDay(date time.Time) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+}
+
 // ConvertForexPrices converts forex data to a single time series map
 // Takes first price of each period (no averaging needed for exchange rates)
 // Returns map keyed by date (week start Monday or month start) for efficient lookups
@@ -170,7 +174,7 @@ func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom ti
 
 	data = make(map[time.Time]types.PriceData)
 
-	for _, fx := range forexData {
+	for i, fx := range forexData {
 		date, err := time.Parse("2006-01-02", fx.Date)
 		if err != nil {
 			continue
@@ -182,24 +186,25 @@ func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom ti
 			timeTo = date
 		}
 
-		// Monthly - take first price of each month
-		monthStart := time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
-		if _, exists := data[monthStart]; !exists {
-			data[monthStart] = types.PriceData{
-				Date:         monthStart,
-				Close:        fx.Price,
-				SymbolTicker: currency,
-			}
+		// Monthly and weekly - take first price of each period
+		monthStart := StartOfMonth(date)
+		weekStart := StartOfWeek(date)
+
+		priceData := types.PriceData{
+			Close:        fx.Price,
+			SymbolTicker: currency,
 		}
 
-		// Weekly - take first price of each week (Monday)
-		weekStart := StartOfWeek(date)
+		if _, exists := data[monthStart]; !exists {
+			priceData.Date = monthStart
+			data[monthStart] = priceData
+		}
 		if _, exists := data[weekStart]; !exists {
-			data[weekStart] = types.PriceData{
-				Date:         weekStart,
-				Close:        fx.Price,
-				SymbolTicker: currency,
-			}
+			priceData.Date = weekStart
+			data[weekStart] = priceData
+		}
+		if i == len(forexData)-1 {
+			data[StartOfDay(date)] = priceData
 		}
 	}
 

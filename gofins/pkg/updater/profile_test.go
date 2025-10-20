@@ -7,6 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUpdateProfileLight(t *testing.T) {
+	ticker := "QAMC.QA" // put ticker to debug here
+
+	logger := NewLoggerTest("profile")
+
+	updateProfile(ticker, true, logger)
+}
+
 func TestUpdateProfileCurrencyConversion(t *testing.T) {
 	tickerUSD := "EBAY"   // US ticker in USD
 	tickerEUR := "EBA.DE" // German ticker in EUR

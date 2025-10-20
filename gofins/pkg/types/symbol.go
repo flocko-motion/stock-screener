@@ -25,6 +25,9 @@ type Symbol struct {
 	IsActivelyTrading *bool      `json:"isActivelyTrading,omitempty"`
 	MarketCap         *int64     `json:"marketCap,omitempty"`
 	PrimaryListing    *string    `json:"primaryListing,omitempty"`
+	Ath12M            *float64   `json:"ath12m,omitempty"`
+	CurrentPriceUsd   *float64   `json:"currentPriceUsd,omitempty"`
+	CurrentPriceTime  *time.Time `json:"currentPriceTime,omitempty"`
 	IsFavorite        bool       `json:"isFavorite"`
 	UserRating        *int       `json:"userRating,omitempty"`
 }

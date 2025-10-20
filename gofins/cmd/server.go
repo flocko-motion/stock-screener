@@ -10,6 +10,7 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/api"
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/updater"
 	"github.com/spf13/cobra"
 )
@@ -53,8 +54,7 @@ var serverCmd = &cobra.Command{
 		
 		// Graceful shutdown
 		if err := db.PrepareForShutdown(); err != nil {
-			errMsg := err.Error()
-			_ = db.LogError("server.shutdown", "database", "Failed to close database connection", &errMsg)
+			_ = db.LogError("server.shutdown", "database", "Failed to close database connection", f.Ptr(err.Error()))
 		}
 		
 		fmt.Println("✓ Server stopped")

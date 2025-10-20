@@ -19,8 +19,8 @@ func PutSymbol(s *types.Symbol) error {
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
 			name, type, currency, sector, industry, country, description, website, isin, cik, inception, oldest_price,
-			is_actively_trading, market_cap, primary_listing
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+			is_actively_trading, market_cap, primary_listing, ath12m, current_price_usd, current_price_time
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
 		ON CONFLICT (ticker) DO UPDATE SET
 			exchange = COALESCE(EXCLUDED.exchange, symbols.exchange),
 			last_price_update = COALESCE(EXCLUDED.last_price_update, symbols.last_price_update),
@@ -41,7 +41,10 @@ func PutSymbol(s *types.Symbol) error {
 			oldest_price = COALESCE(EXCLUDED.oldest_price, symbols.oldest_price),
 			is_actively_trading = COALESCE(EXCLUDED.is_actively_trading, symbols.is_actively_trading),
 			market_cap = COALESCE(EXCLUDED.market_cap, symbols.market_cap),
-			primary_listing = COALESCE(EXCLUDED.primary_listing, symbols.primary_listing)
+			primary_listing = COALESCE(EXCLUDED.primary_listing, symbols.primary_listing),
+			ath12m = COALESCE(EXCLUDED.ath12m, symbols.ath12m),
+			current_price_usd = COALESCE(EXCLUDED.current_price_usd, symbols.current_price_usd),
+			current_price_time = COALESCE(EXCLUDED.current_price_time, symbols.current_price_time)
 	`
 
 	_, err := db.conn.Exec(
@@ -49,7 +52,7 @@ func PutSymbol(s *types.Symbol) error {
 		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
 		s.LastPriceStatus, s.LastProfileStatus,
 		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.CIK, s.Inception, s.OldestPrice,
-		s.IsActivelyTrading, s.MarketCap, s.PrimaryListing,
+		s.IsActivelyTrading, s.MarketCap, s.PrimaryListing, s.Ath12M, s.CurrentPriceUsd, s.CurrentPriceTime,
 	)
 
 	return err
@@ -62,7 +65,8 @@ func GetSymbol(ticker string) (*types.Symbol, error) {
 		SELECT ticker, exchange, last_price_update, last_profile_update,
 			   last_price_status, last_profile_status,
 			   name, type, currency, sector, industry, country,
-			   description, website, isin, cik, inception, oldest_price, is_actively_trading, market_cap, primary_listing
+			   description, website, isin, cik, inception, oldest_price, is_actively_trading, market_cap, primary_listing,
+			   ath12m, current_price_usd, current_price_time
 		FROM symbols
 		WHERE ticker = $1
 	`
@@ -73,6 +77,7 @@ func GetSymbol(ticker string) (*types.Symbol, error) {
 		&s.LastPriceStatus, &s.LastProfileStatus,
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
 		&s.Description, &s.Website, &s.ISIN, &s.CIK, &s.Inception, &s.OldestPrice, &s.IsActivelyTrading, &s.MarketCap, &s.PrimaryListing,
+		&s.Ath12M, &s.CurrentPriceUsd, &s.CurrentPriceTime,
 	)
 
 	if err == sql.ErrNoRows {

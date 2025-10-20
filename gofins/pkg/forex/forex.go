@@ -31,16 +31,27 @@ func ConvertToUsd(amount float64, currency string, date time.Time) (float64, err
 		return 0, fmt.Errorf("failed to get forex data for %s: %w", currency, err)
 	}
 
+	if date.After(ts.TimeTo) && date.Sub(ts.TimeTo) <= 7*24*time.Hour {
+		date = ts.TimeTo
+	}
+
 	// Direct lookup - caller must provide correct date (week/month start)
 	priceData, exists := ts.Data[date]
 	if !exists {
-		keys := f.Keys(ts.Data)
-		keyStrs := make([]string, len(keys))
-		for i, k := range keys {
-			keyStrs[i] = k.Format("2006-01-02")
+		// If date is up to 7 days after the latest available date, use the latest date
+		if date.After(ts.TimeTo) && date.Sub(ts.TimeTo) <= 7*24*time.Hour {
+			priceData, exists = ts.Data[ts.TimeTo]
 		}
-		slices.Sort(keyStrs)
-		return 0, fmt.Errorf("no forex data for %s at %s, available keys: %s", currency, date.Format("2006-01-02"), strings.Join(keyStrs, ", "))
+
+		if !exists {
+			keys := f.Keys(ts.Data)
+			keyStrs := make([]string, len(keys))
+			for i, k := range keys {
+				keyStrs[i] = k.Format("2006-01-02")
+			}
+			slices.Sort(keyStrs)
+			return 0, fmt.Errorf("no forex data for %s at %s, available keys: %s", currency, date.Format("2006-01-02"), strings.Join(keyStrs, ", "))
+		}
 	}
 
 	return amount * priceData.Close, nil
