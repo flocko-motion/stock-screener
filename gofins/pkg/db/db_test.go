@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetFiltered(t *testing.T) {
-	tickers, err := Db().GetFilteredTickers(f.Ptr(int64(1_000_000_000)),
+	tickers, err := GetFilteredTickers(f.Ptr(int64(1_000_000_000)),
 		f.Ptr(time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)))
 	assert.NoError(t, err)
 	assert.NotNil(t, tickers)

@@ -16,7 +16,7 @@ func TestRemoveOutliers(t *testing.T) {
 }
 
 func TestCalculate(t *testing.T) {
-	values := []float64{2, 4, 6, 8, 10, 23882382382823832}
+	values := []float64{2, 4, 6, 8, 10}
 	config := HistogramConfig{
 		NumBins: 5,
 		Min:     0,

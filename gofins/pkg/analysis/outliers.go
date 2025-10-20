@@ -176,8 +176,11 @@ func WinsorizeOutliers(values []float64, percentileLow, percentileHigh int) []fl
 	sort.Float64s(sorted)
 
 	// Find percentile indices
-	lowIndex := int(math.Floor(float64(len(sorted)) * float64(percentileLow) / 100.0))
-	highIndex := int(math.Ceil(float64(len(sorted)) * float64(percentileHigh) / 100.0))
+	// For a 10-element array with percentileLow=10, percentileHigh=90:
+	// - lowIndex should be 1 (10th percentile = index 1)
+	// - highIndex should be 8 (90th percentile = index 8, not 9)
+	lowIndex := int(math.Floor(float64(len(sorted)-1) * float64(percentileLow) / 100.0))
+	highIndex := int(math.Floor(float64(len(sorted)-1) * float64(percentileHigh) / 100.0))
 
 	if lowIndex < 0 {
 		lowIndex = 0

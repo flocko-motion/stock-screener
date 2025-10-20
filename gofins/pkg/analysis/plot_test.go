@@ -18,7 +18,11 @@ func TestPlot(t *testing.T) {
 		t.Fatalf("Failed to fetch prices: %v", err)
 	}
 	for i, price := range prices {
-		t.Logf("%d: %f", i, *price.YoY)
+		if price.YoY != nil {
+			t.Logf("%d: %f", i, *price.YoY)
+		} else {
+			t.Logf("%d: <nil>", i)
+		}
 	}
 
 	if len(prices) == 0 {
