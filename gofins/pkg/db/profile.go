@@ -9,7 +9,6 @@ import (
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
-
 // PutSymbol inserts or updates a symbol profile
 // Only updates non-nil fields to avoid overwriting data from other updaters
 func PutSymbol(s *types.Symbol) error {
@@ -331,21 +330,21 @@ func ResetProfileTimestamps() (int64, error) {
 // statusType should be "profile" or "price"
 func GetSymbolsByStatus(status string, statusType string) ([]types.Symbol, error) {
 	db := Db()
-	
+
 	var query string
 	if statusType == "profile" {
 		query = `
 			SELECT ticker, exchange, name, type, last_profile_status, last_profile_update
 			FROM symbols
 			WHERE last_profile_status = $1
-			ORDER BY ticker
+			ORDER BY last_profile_update ASC, ticker
 		`
 	} else if statusType == "price" {
 		query = `
 			SELECT ticker, exchange, name, type, last_price_status, last_price_update
 			FROM symbols
 			WHERE last_price_status = $1
-			ORDER BY ticker
+			ORDER BY last_price_update ASC, ticker
 		`
 	} else {
 		return nil, nil
