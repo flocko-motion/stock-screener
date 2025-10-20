@@ -180,7 +180,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 	profile.Currency = normalizeCurrencyCode(profile.Currency)
 	marketCapUSD := profile.MarketCap
 	if profile.Currency != "" && profile.Currency != "USD" && profile.MarketCap > 0 {
-		converted, err := forex.ConvertToUsdMonthly(profile.MarketCap, profile.Currency, now)
+		converted, err := forex.ConvertToUsd(profile.MarketCap, profile.Currency, now)
 		if err != nil {
 			// Log error but continue with unconverted value
 			// This can happen if forex data is not available for the currency

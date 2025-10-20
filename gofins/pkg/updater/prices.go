@@ -192,11 +192,11 @@ func convertForexPrices(monthly, weekly []types.PriceData, currency string) ([]t
 	for i, price := range monthly {
 		convertedMonthly[i] = types.PriceData{
 			Date:  price.Date,
-			Open:  f.First(forex.ConvertToUsdMonthly(price.Open, currency, price.Date)),
-			Close: f.First(forex.ConvertToUsdMonthly(price.Close, currency, price.Date)),
-			High:  f.First(forex.ConvertToUsdMonthly(price.High, currency, price.Date)),
-			Low:   f.First(forex.ConvertToUsdMonthly(price.Low, currency, price.Date)),
-			Avg:   f.First(forex.ConvertToUsdMonthly(price.Avg, currency, price.Date)),
+			Open:  f.First(forex.ConvertToUsd(price.Open, currency, price.Date)),
+			Close: f.First(forex.ConvertToUsd(price.Close, currency, price.Date)),
+			High:  f.First(forex.ConvertToUsd(price.High, currency, price.Date)),
+			Low:   f.First(forex.ConvertToUsd(price.Low, currency, price.Date)),
+			Avg:   f.First(forex.ConvertToUsd(price.Avg, currency, price.Date)),
 		}
 	}
 
@@ -204,11 +204,11 @@ func convertForexPrices(monthly, weekly []types.PriceData, currency string) ([]t
 	for i, price := range weekly {
 		convertedWeekly[i] = types.PriceData{
 			Date:  price.Date,
-			Open:  f.First(forex.ConvertToUsdWeekly(price.Open, currency, price.Date)),
-			Close: f.First(forex.ConvertToUsdWeekly(price.Close, currency, price.Date)),
-			High:  f.First(forex.ConvertToUsdWeekly(price.High, currency, price.Date)),
-			Low:   f.First(forex.ConvertToUsdWeekly(price.Low, currency, price.Date)),
-			Avg:   f.First(forex.ConvertToUsdWeekly(price.Avg, currency, price.Date)),
+			Open:  f.First(forex.ConvertToUsd(price.Open, currency, price.Date)),
+			Close: f.First(forex.ConvertToUsd(price.Close, currency, price.Date)),
+			High:  f.First(forex.ConvertToUsd(price.High, currency, price.Date)),
+			Low:   f.First(forex.ConvertToUsd(price.Low, currency, price.Date)),
+			Avg:   f.First(forex.ConvertToUsd(price.Avg, currency, price.Date)),
 		}
 	}
 

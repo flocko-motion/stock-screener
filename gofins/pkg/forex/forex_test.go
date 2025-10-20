@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/stretchr/testify/assert"
 )
@@ -57,40 +58,15 @@ func TestGetUsdForexRawDataILS(t *testing.T) {
 	t.Log("This is why currency conversion is failing")
 }
 
-func TestGetUsdForex(t *testing.T) {
-	// Test with EUR to USD conversion
-	currency := "EUR"
-	timeTo := time.Now()
-	timeFrom := timeTo.AddDate(0, -1, 0) // 1 month ago
-
-	weekly, monthly, err := GetUsdForex(timeFrom, timeTo, currency)
-	assert.NoError(t, err, "Should fetch forex data without error")
-	assert.NotEmpty(t, weekly, "Should have weekly data")
-	assert.NotEmpty(t, monthly, "Should have monthly data")
-
-	fmt.Printf("\n=== Forex Data for %s ===\n", currency)
-	fmt.Printf("Weekly data points: %d\n", len(weekly))
-	fmt.Printf("Monthly data points: %d\n", len(monthly))
-
-	// Check that prices are not zero
-	if len(weekly) > 0 {
-		fmt.Printf("First weekly: Date=%s, Close=%.4f\n", weekly[0].Date.Format("2006-01-02"), weekly[0].Close)
-		assert.Greater(t, weekly[0].Close, 0.0, "Weekly forex rate should be greater than 0")
-	}
-
-	if len(monthly) > 0 {
-		fmt.Printf("First monthly: Date=%s, Close=%.4f\n", monthly[0].Date.Format("2006-01-02"), monthly[0].Close)
-		assert.Greater(t, monthly[0].Close, 0.0, "Monthly forex rate should be greater than 0")
-	}
-}
-
-func TestConvertToUsdMonthly(t *testing.T) {
+func TestConvertToUsd(t *testing.T) {
 	// Test converting 1000 ILS to USD
 	amount := 1000.0
 	currency := "ILS"
-	date := time.Now()
+	// Use first of month for lookup
+	now := time.Now()
+	date := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	converted, err := ConvertToUsdMonthly(amount, currency, date)
+	converted, err := ConvertToUsd(amount, currency, date)
 	assert.NoError(t, err, "Should convert without error")
 
 	fmt.Printf("\n=== Currency Conversion Test ===\n")
@@ -110,12 +86,15 @@ func TestConvertToUsdMonthly(t *testing.T) {
 }
 
 func TestConvertToUsdWeekly(t *testing.T) {
-	// Test converting 1000 ILS to USD
+	// Test converting 1000 EUR to USD using weekly rate
 	amount := 1000.0
 	currency := "EUR"
-	date := time.Now()
+	// Use last week's Monday to ensure data exists
+	// Make sure to truncate to midnight UTC to match the forex data format
+	date := calculator.StartOfWeek(time.Now().AddDate(0, 0, -7))
+	fmt.Printf("Looking for date: %s (weekday: %s)\n", date.Format("2006-01-02 15:04:05 MST"), date.Weekday())
 
-	converted, err := ConvertToUsdWeekly(amount, currency, date)
+	converted, err := ConvertToUsd(amount, currency, date)
 	assert.NoError(t, err, "Should convert without error")
 
 	fmt.Printf("\n=== Weekly Currency Conversion Test ===\n")
@@ -138,27 +117,9 @@ func TestConvertUsdToUsd(t *testing.T) {
 	// USD to USD should return the same amount
 	amount := 1000.0
 	currency := "USD"
-	date := time.Now()
+	date := calculator.StartOfMonth(time.Now())
 
-	converted, err := ConvertToUsdMonthly(amount, currency, date)
+	converted, err := ConvertToUsd(amount, currency, date)
 	assert.NoError(t, err)
 	assert.Equal(t, amount, converted, "USD to USD should return same amount")
-}
-
-func TestGetUsdForexEmptyCurrency(t *testing.T) {
-	timeTo := time.Now()
-	timeFrom := timeTo.AddDate(0, -1, 0)
-
-	_, _, err := GetUsdForex(timeFrom, timeTo, "")
-	assert.Error(t, err, "Should error on empty currency")
-	assert.Contains(t, err.Error(), "currency cannot be empty")
-}
-
-func TestGetUsdForexInvalidTimeRange(t *testing.T) {
-	timeTo := time.Now()
-	timeFrom := timeTo.AddDate(0, 1, 0) // Future date
-
-	_, _, err := GetUsdForex(timeFrom, timeTo, "EUR")
-	assert.Error(t, err, "Should error when timeFrom is after timeTo")
-	assert.Contains(t, err.Error(), "must be before or equal to")
 }

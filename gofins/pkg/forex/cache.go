@@ -8,7 +8,6 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/fmp"
-	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 var (
@@ -34,9 +33,9 @@ func initCache() {
 	}
 }
 
-// getUsdForex returns weekly and monthly forex rates for the given currency
+// getUsdForex returns forex rates for the given currency as a map
 // Internal function that works with the global cache
-func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly []types.PriceData, err error) {
+func getUsdForex(timeFrom, timeTo time.Time, currency string) (*ForexTimeSeries, error) {
 	if globalCache == nil {
 		initCache()
 	}
@@ -52,7 +51,7 @@ func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly [
 		needsFetch = true
 	} else {
 		// Check if cached data covers the requested range
-		if timeFrom.Before(ts.TimeFrom()) || timeTo.After(ts.TimeTo()) {
+		if timeFrom.Before(ts.TimeFrom) || timeTo.After(ts.TimeTo) {
 			// Check if we already fetched today
 			today := time.Now().Truncate(24 * time.Hour)
 			lastFetchDay := ts.LastFetchTime.Truncate(24 * time.Hour)
@@ -68,14 +67,14 @@ func getUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly [
 		if err := globalCache.fetchAndStore(currency); err != nil {
 			// If we have some data, return it with the error
 			if exists {
-				return ts.Weekly, ts.Monthly, fmt.Errorf("partial data available, fetch failed: %w", err)
+				return ts, fmt.Errorf("partial data available, fetch failed: %w", err)
 			}
-			return nil, nil, err
+			return nil, err
 		}
 		ts = globalCache.data[currency]
 	}
 
-	return ts.Weekly, ts.Monthly, nil
+	return ts, nil
 }
 
 // fetchAndStore fetches forex data from the API and stores it in cache
@@ -98,14 +97,15 @@ func (c *cache) fetchAndStore(currency string) error {
 	})
 
 	// Convert forex data to time series using calculator
-	monthlyData, weeklyData := calculator.ConvertForexPrices(forexData, currency)
+	timeFrom, timeTo, data := calculator.ConvertForexPrices(forexData, currency)
 
 	ts := &ForexTimeSeries{
-		Weekly:  weeklyData,
-		Monthly: monthlyData,
+		Data:          data,
+		TimeFrom:      timeFrom,
+		TimeTo:        timeTo,
+		LastFetchTime: time.Now(),
 	}
 
-	ts.LastFetchTime = time.Now()
 	c.data[currency] = ts
 
 	return nil

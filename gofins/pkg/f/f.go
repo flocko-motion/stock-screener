@@ -31,3 +31,12 @@ func MaybeToString[T any](value *T, ifNil string) string {
 	}
 	return fmt.Sprintf("%v", *value)
 }
+
+// Keys returns all keys from a map as a slice (unsorted)
+func Keys[K comparable, V any](m map[K]V) []K {
+	keys := make([]K, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}

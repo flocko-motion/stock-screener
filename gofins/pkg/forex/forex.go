@@ -2,85 +2,66 @@ package forex
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
-	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
 // ForexTimeSeries holds forex data for a currency pair
+// Data is keyed by date (either week start Monday or month start)
 type ForexTimeSeries struct {
-	Weekly        []types.PriceData
-	Monthly       []types.PriceData
+	Data          map[time.Time]types.PriceData
+	TimeTo        time.Time
+	TimeFrom      time.Time
 	LastFetchTime time.Time
 }
 
-// TimeFrom returns the earliest data point we have
-func (ts *ForexTimeSeries) TimeFrom() time.Time {
-	if len(ts.Weekly) > 0 {
-		return ts.Weekly[0].Date
-	}
-	if len(ts.Monthly) > 0 {
-		return ts.Monthly[0].Date
-	}
-	return time.Time{}
-}
-
-// TimeTo returns the latest data point we have
-func (ts *ForexTimeSeries) TimeTo() time.Time {
-	if len(ts.Weekly) > 0 {
-		return ts.Weekly[len(ts.Weekly)-1].Date
-	}
-	if len(ts.Monthly) > 0 {
-		return ts.Monthly[len(ts.Monthly)-1].Date
-	}
-	return time.Time{}
-}
-
-// GetUsdForex returns weekly and monthly forex rates for converting the given currency to USD
-// Auto-initializes on first call. Data is cached in memory.
-func GetUsdForex(timeFrom, timeTo time.Time, currency string) (weekly, monthly []types.PriceData, err error) {
-	if currency == "" {
-		return nil, nil, fmt.Errorf("currency cannot be empty")
-	}
-
-	if timeFrom.After(timeTo) {
-		return nil, nil, fmt.Errorf("timeFrom (%s) must be before or equal to timeTo (%s)",
-			timeFrom.Format("2006-01-02"), timeTo.Format("2006-01-02"))
-	}
-
-	return getUsdForex(timeFrom, timeTo, currency)
-}
-
-// ConvertToUsdWeekly converts an amount using weekly forex rate for the given date
-func ConvertToUsdWeekly(amount float64, currency string, date time.Time) (float64, error) {
+// ConvertToUsd converts an amount using the forex rate for the given date
+// Date should be a week start (Monday) or month start (1st) - no date calculation is performed
+func ConvertToUsd(amount float64, currency string, date time.Time) (float64, error) {
 	if currency == "USD" {
 		return amount, nil
 	}
 
-	weekly, _, err := GetUsdForex(date, date, currency)
-	if err != nil || len(weekly) == 0 {
-		return 0, fmt.Errorf("no weekly forex data for %s at %s: %w", currency, date.Format("2006-01-02"), err)
+	ts, err := getCachedForex(currency)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get forex data for %s: %w", currency, err)
 	}
 
-	return amount * weekly[0].Close, nil
+	// Direct lookup - caller must provide correct date (week/month start)
+	priceData, exists := ts.Data[date]
+	if !exists {
+		keys := f.Keys(ts.Data)
+		keyStrs := make([]string, len(keys))
+		for i, k := range keys {
+			keyStrs[i] = k.Format("2006-01-02")
+		}
+		slices.Sort(keyStrs)
+		return 0, fmt.Errorf("no forex data for %s at %s, available keys: %s", currency, date.Format("2006-01-02"), strings.Join(keyStrs, ", "))
+	}
+
+	return amount * priceData.Close, nil
 }
 
-// ConvertToUsdMonthly converts an amount using monthly forex rate for the given date
-func ConvertToUsdMonthly(amount float64, currency string, date time.Time) (float64, error) {
-	if amount == 0 {
-		return amount, nil
-	}
-	if currency == "USD" {
-		return amount, nil
+// getCachedForex retrieves forex data from cache, fetching if necessary
+func getCachedForex(currency string) (*ForexTimeSeries, error) {
+	if globalCache == nil {
+		initCache()
 	}
 
-	_, monthly, err := GetUsdForex(date, date, currency)
-	if err != nil || len(monthly) == 0 {
-		err = fmt.Errorf("no monthly forex data for %s at %s: %w", currency, date.Format("2006-01-02"), err)
-		db.LogError("forex", "missing price", err.Error(), nil)
-		return 0, err
+	globalCache.mu.Lock()
+	defer globalCache.mu.Unlock()
+
+	ts, exists := globalCache.data[currency]
+	if !exists {
+		if err := globalCache.fetchAndStore(currency); err != nil {
+			return nil, err
+		}
+		ts = globalCache.data[currency]
 	}
 
-	return amount * monthly[0].Close, nil
+	return ts, nil
 }

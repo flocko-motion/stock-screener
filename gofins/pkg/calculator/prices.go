@@ -38,7 +38,7 @@ func ConvertPrices(dailyPrices []fmp.PriceDataRaw, ticker string) (monthly, week
 		monthData.add(daily.Open, daily.High, daily.Low, daily.Close)
 
 		// Weekly aggregation (Monday-Sunday)
-		weekStart := startOfWeek(date)
+		weekStart := StartOfWeek(date)
 		if currentWeek.IsZero() || !weekStart.Equal(currentWeek) {
 			if !currentWeek.IsZero() {
 				weekly = append(weekly, weekData.toWeekly(currentWeek, ticker, weeklyYoY))
@@ -142,52 +142,66 @@ func (a *aggregator) toWeekly(date time.Time, ticker string, yoyMap map[string]f
 	}
 }
 
-func startOfWeek(date time.Time) time.Time {
+// StartOfWeek returns the Monday of the week for the given date in UTC
+func StartOfWeek(date time.Time) time.Time {
+	// Convert to UTC first to ensure consistent date handling
+	date = date.UTC()
 	// Get Monday of the week
 	weekday := int(date.Weekday())
 	if weekday == 0 {
 		weekday = 7 // Sunday = 7
 	}
-	return date.AddDate(0, 0, -(weekday - 1)).Truncate(24 * time.Hour)
+	monday := date.AddDate(0, 0, -(weekday - 1))
+	return time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, time.UTC)
 }
 
-// ConvertForexPrices converts forex data to weekly and monthly time series
+// StartOfMonth returns the first day of the month for the given date
+func StartOfMonth(date time.Time) time.Time {
+	return time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
+}
+
+// ConvertForexPrices converts forex data to a single time series map
 // Takes first price of each period (no averaging needed for exchange rates)
-func ConvertForexPrices(forexData []fmp.ForexData, currency string) (monthly, weekly []types.PriceData) {
+// Returns map keyed by date (week start Monday or month start) for efficient lookups
+func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom time.Time, timeTo time.Time, data map[time.Time]types.PriceData) {
 	if len(forexData) == 0 {
-		return nil, nil
+		return time.Time{}, time.Time{}, nil
 	}
 
-	var currentWeek, currentMonth time.Time
+	data = make(map[time.Time]types.PriceData)
 
 	for _, fx := range forexData {
 		date, err := time.Parse("2006-01-02", fx.Date)
 		if err != nil {
 			continue
 		}
+		if timeFrom.IsZero() || date.Before(timeFrom) {
+			timeFrom = date
+		}
+		if date.After(timeTo) {
+			timeTo = date
+		}
 
 		// Monthly - take first price of each month
 		monthStart := time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.UTC)
-		if currentMonth.IsZero() || !monthStart.Equal(currentMonth) {
-			monthly = append(monthly, types.PriceData{
+		if _, exists := data[monthStart]; !exists {
+			data[monthStart] = types.PriceData{
 				Date:         monthStart,
 				Close:        fx.Price,
 				SymbolTicker: currency,
-			})
-			currentMonth = monthStart
+			}
 		}
 
 		// Weekly - take first price of each week (Monday)
-		weekStart := startOfWeek(date)
-		if currentWeek.IsZero() || !weekStart.Equal(currentWeek) {
-			weekly = append(weekly, types.PriceData{
+		weekStart := StartOfWeek(date)
+		if _, exists := data[weekStart]; !exists {
+			data[weekStart] = types.PriceData{
 				Date:         weekStart,
 				Close:        fx.Price,
 				SymbolTicker: currency,
-			})
-			currentWeek = weekStart
+			}
 		}
 	}
 
-	return monthly, weekly
+	return timeFrom, timeTo, data
 }
