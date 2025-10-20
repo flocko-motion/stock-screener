@@ -8,7 +8,9 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/forex"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -88,7 +90,7 @@ func updatePricesImpl(log *Logger) error {
 			go func() {
 				defer wg.Done()
 				for symbol := range symbolChan {
-					updatedSymbol, _, _ := updatePrices(symbol)
+					updatedSymbol, _, _ := updatePrices(symbol, false)
 					statsMu.Lock()
 					if updatedSymbol.LastPriceStatus != nil {
 						switch *updatedSymbol.LastPriceStatus {
@@ -120,13 +122,7 @@ func updatePricesImpl(log *Logger) error {
 	}
 }
 
-// updatePrices fetches and processes price data for a symbol
-// Returns symbol metadata, monthly prices, and weekly prices
-func updatePrices(symbol types.Symbol) (types.Symbol, []types.PriceData, []types.PriceData) {
-	return updatePricesInternal(symbol, false)
-}
-
-func updatePricesInternal(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData) {
+func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData) {
 	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)
 	now := time.Now()
 
@@ -152,6 +148,9 @@ func updatePricesInternal(symbol types.Symbol, testMode bool) (types.Symbol, []t
 
 	// Single-loop conversion: daily → weekly + monthly + YoY
 	monthly, weekly := calculator.ConvertPrices(dailyPrices, symbol.Ticker)
+	if symbol.Currency != nil && *symbol.Currency != "USD" {
+		monthly, weekly = convertForexPrices(monthly, weekly, *symbol.Currency)
+	}
 
 	// Parse oldest price date
 	var oldestPrice *time.Time
@@ -185,4 +184,33 @@ func updatePricesInternal(symbol types.Symbol, testMode bool) (types.Symbol, []t
 	}
 
 	return symbol, monthly, weekly
+}
+
+// convertForexPrices converts stock prices from a foreign currency to USD
+func convertForexPrices(monthly, weekly []types.PriceData, currency string) ([]types.PriceData, []types.PriceData) {
+	convertedMonthly := make([]types.PriceData, len(monthly))
+	for i, price := range monthly {
+		convertedMonthly[i] = types.PriceData{
+			Date:  price.Date,
+			Open:  f.First(forex.ConvertToUsdMonthly(price.Open, currency, price.Date)),
+			Close: f.First(forex.ConvertToUsdMonthly(price.Close, currency, price.Date)),
+			High:  f.First(forex.ConvertToUsdMonthly(price.High, currency, price.Date)),
+			Low:   f.First(forex.ConvertToUsdMonthly(price.Low, currency, price.Date)),
+			Avg:   f.First(forex.ConvertToUsdMonthly(price.Avg, currency, price.Date)),
+		}
+	}
+
+	convertedWeekly := make([]types.PriceData, len(weekly))
+	for i, price := range weekly {
+		convertedWeekly[i] = types.PriceData{
+			Date:  price.Date,
+			Open:  f.First(forex.ConvertToUsdWeekly(price.Open, currency, price.Date)),
+			Close: f.First(forex.ConvertToUsdWeekly(price.Close, currency, price.Date)),
+			High:  f.First(forex.ConvertToUsdWeekly(price.High, currency, price.Date)),
+			Low:   f.First(forex.ConvertToUsdWeekly(price.Low, currency, price.Date)),
+			Avg:   f.First(forex.ConvertToUsdWeekly(price.Avg, currency, price.Date)),
+		}
+	}
+
+	return convertedMonthly, convertedWeekly
 }

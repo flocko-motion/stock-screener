@@ -15,7 +15,7 @@ func TestFetchPrices(t *testing.T) {
 	ticker := "EBAY"
 
 	// Call updatePrices - uses db.Db() singleton internally
-	symbol, monthly, weekly := updatePrices(types.Symbol{Ticker: ticker})
+	symbol, monthly, weekly := updatePrices(types.Symbol{Ticker: ticker}, true)
 
 	assert.Equal(t, ticker, symbol.Ticker)
 	assert.NotNil(t, symbol.LastPriceStatus)
@@ -48,8 +48,8 @@ func TestFetchPricesCurrencyConversion(t *testing.T) {
 	fmt.Printf("currency: %v\n", symbolEUR.Currency)
 
 	// Fetch prices for both tickers (test mode - no DB writes)
-	_, monthlyUSD, weeklyUSD := updatePricesInternal(*symbolUSD, true)
-	_, monthlyEUR, weeklyEUR := updatePricesInternal(*symbolEUR, true)
+	_, monthlyUSD, weeklyUSD := updatePrices(*symbolUSD, true)
+	_, monthlyEUR, weeklyEUR := updatePrices(*symbolEUR, true)
 
 	// Both should have data
 	assert.NotEmpty(t, monthlyUSD)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -67,13 +68,18 @@ func ConvertToUsdWeekly(amount float64, currency string, date time.Time) (float6
 
 // ConvertToUsdMonthly converts an amount using monthly forex rate for the given date
 func ConvertToUsdMonthly(amount float64, currency string, date time.Time) (float64, error) {
+	if amount == 0 {
+		return amount, nil
+	}
 	if currency == "USD" {
 		return amount, nil
 	}
 
 	_, monthly, err := GetUsdForex(date, date, currency)
 	if err != nil || len(monthly) == 0 {
-		return 0, fmt.Errorf("no monthly forex data for %s at %s: %w", currency, date.Format("2006-01-02"), err)
+		err = fmt.Errorf("no monthly forex data for %s at %s: %w", currency, date.Format("2006-01-02"), err)
+		db.LogError("forex", "missing price", err.Error(), nil)
+		return 0, err
 	}
 
 	return amount * monthly[0].Close, nil
