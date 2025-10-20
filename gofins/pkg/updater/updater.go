@@ -10,10 +10,18 @@ import (
 
 type Logger struct {
 	prefix string
+	test   bool
 }
 
 func NewLogger(prefix string) *Logger {
 	return &Logger{prefix: fmt.Sprintf("%-8s", prefix)} // Fixed width 8 chars
+}
+
+func NewLoggerTest(prefix string) *Logger {
+	return &Logger{
+		prefix: fmt.Sprintf("%-8s", prefix),
+		test:   true,
+	} // Fixed width 8 chars
 }
 
 func (l *Logger) Printf(format string, args ...interface{}) {
@@ -55,10 +63,12 @@ func (l *Logger) Stopped() {
 func (l *Logger) Error(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	l.Printf("✗ " + message)
-	
+
 	// Log to database
 	source := "updater." + strings.TrimSpace(l.prefix)
-	_ = db.LogError(source, "error", message, nil)
+	if !l.test {
+		_ = db.LogError(source, "error", message, nil)
+	}
 }
 
 func (l *Logger) NotFoundList(tickers []string) {

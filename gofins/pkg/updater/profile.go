@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
@@ -139,7 +140,7 @@ type UpdateStats struct {
 
 func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, string) {
 	profile, err := fmp.GetProfile(ticker)
-	now := time.Now()
+	now := calculator.StartOfWeek(time.Now())
 
 	if err != nil {
 		if fmp.IsNotFoundError(err) {
@@ -184,10 +185,8 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 		if err != nil {
 			// Log error but continue with unconverted value
 			// This can happen if forex data is not available for the currency
-			if log != nil {
-				log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n",
-					ticker, profile.Currency, err, profile.MarketCap)
-			}
+			log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n",
+				ticker, profile.Currency, err, profile.MarketCap)
 			status = types.StatusFailed
 		} else {
 			marketCapUSD = converted
