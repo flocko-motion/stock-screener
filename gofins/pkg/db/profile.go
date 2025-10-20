@@ -327,6 +327,53 @@ func ResetProfileTimestamps() (int64, error) {
 	return result.RowsAffected()
 }
 
+// GetSymbolsByStatus returns all symbols with a specific status
+// statusType should be "profile" or "price"
+func GetSymbolsByStatus(status string, statusType string) ([]types.Symbol, error) {
+	db := Db()
+	
+	var query string
+	if statusType == "profile" {
+		query = `
+			SELECT ticker, exchange, name, type, last_profile_status, last_profile_update
+			FROM symbols
+			WHERE last_profile_status = $1
+			ORDER BY ticker
+		`
+	} else if statusType == "price" {
+		query = `
+			SELECT ticker, exchange, name, type, last_price_status, last_price_update
+			FROM symbols
+			WHERE last_price_status = $1
+			ORDER BY ticker
+		`
+	} else {
+		return nil, nil
+	}
+
+	rows, err := db.conn.Query(query, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var symbols []types.Symbol
+	for rows.Next() {
+		var s types.Symbol
+		if statusType == "profile" {
+			err = rows.Scan(&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.LastProfileStatus, &s.LastProfileUpdate)
+		} else {
+			err = rows.Scan(&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.LastPriceStatus, &s.LastPriceUpdate)
+		}
+		if err != nil {
+			return nil, err
+		}
+		symbols = append(symbols, s)
+	}
+
+	return symbols, rows.Err()
+}
+
 // ResetIndexTimestamps resets timestamps for indices and marks them as actively trading
 func ResetIndexTimestamps() (int64, error) {
 	db := Db()

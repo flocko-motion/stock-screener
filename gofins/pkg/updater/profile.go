@@ -148,7 +148,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 			if !testMode {
 				db.PutSymbol(&types.Symbol{
 					Ticker:            ticker,
-					LastProfileUpdate: &now,
+					LastProfileUpdate: f.Ptr(time.Now()),
 					LastProfileStatus: &status,
 				})
 			}
@@ -158,7 +158,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 		if !testMode {
 			db.PutSymbol(&types.Symbol{
 				Ticker:            ticker,
-				LastProfileUpdate: &now,
+				LastProfileUpdate: f.Ptr(time.Now()),
 				LastProfileStatus: &status,
 			})
 		}
@@ -206,7 +206,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 		Website:           f.Ptr(profile.Website),
 		CIK:               f.Ptr(profile.CIK),
 		Inception:         inception,
-		LastProfileUpdate: f.Ptr(now),
+		LastProfileUpdate: f.Ptr(time.Now()),
 		LastProfileStatus: f.Ptr(status),
 		IsActivelyTrading: f.Ptr(profile.IsActivelyTrading),
 		MarketCap:         f.Ptr(int64(marketCapUSD)), // Convert float64 to int64, already in USD
@@ -217,7 +217,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 			failStatus := types.StatusFailed
 			db.PutSymbol(&types.Symbol{
 				Ticker:            ticker,
-				LastProfileUpdate: &now,
+				LastProfileUpdate: f.Ptr(time.Now()),
 				LastProfileStatus: &failStatus,
 			})
 			return nil, failStatus
