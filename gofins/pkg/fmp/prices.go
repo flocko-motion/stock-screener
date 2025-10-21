@@ -19,6 +19,7 @@ func FetchPriceHistory(ticker string) ([]PriceDataRaw, error) {
 	var endpoint string
 	params := map[string]string{
 		"symbol": ticker,
+		"from":   "1900-01-01",
 	}
 
 	// Index symbols (starting with ^) use a different endpoint

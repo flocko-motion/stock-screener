@@ -86,6 +86,18 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	return Db().conn.Query(query, args...)
 }
 
+// QueryRaw executes a raw SQL query and returns the rows
+// This is exported for use by administrative commands
+func QueryRaw(query string, args ...interface{}) (*sql.Rows, error) {
+	return Db().conn.Query(query, args...)
+}
+
+// ExecRaw executes a raw SQL statement and returns the result
+// This is exported for use by administrative commands
+func ExecRaw(query string, args ...interface{}) (sql.Result, error) {
+	return Db().conn.Exec(query, args...)
+}
+
 // ColumnInfo represents database column metadata
 type ColumnInfo struct {
 	TableName     string

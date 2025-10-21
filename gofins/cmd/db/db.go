@@ -12,4 +12,5 @@ func init() {
 	// Attach db subcommands
 	Cmd.AddCommand(schemaCmd)
 	Cmd.AddCommand(errorsCmd)
+	Cmd.AddCommand(sqlCmd)
 }

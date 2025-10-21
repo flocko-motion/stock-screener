@@ -12,7 +12,7 @@ import (
 )
 
 func TestFetchPrices(t *testing.T) {
-	ticker := "EBAY"
+	ticker := "AAPL"
 
 	// Call updatePrices - uses db.Db() singleton internally
 	symbol, monthly, weekly := updatePrices(types.Symbol{Ticker: ticker}, true)
