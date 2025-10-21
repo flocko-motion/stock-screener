@@ -390,3 +390,86 @@ func ResetIndexTimestamps() (int64, error) {
 	}
 	return result.RowsAffected()
 }
+
+// GetAllSymbolCurrencies returns a map of ticker -> currency for all symbols
+func GetAllSymbolCurrencies() (map[string]string, error) {
+	db := Db()
+
+	rows, err := db.conn.Query(`
+		SELECT ticker, COALESCE(currency, 'USD') as currency
+		FROM symbols
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	currencies := make(map[string]string)
+	for rows.Next() {
+		var ticker, currency string
+		if err := rows.Scan(&ticker, &currency); err != nil {
+			return nil, err
+		}
+		currencies[ticker] = currency
+	}
+
+	return currencies, rows.Err()
+}
+
+// MarkStaleProfilesAsNotFound marks all profiles that haven't been updated since the given time as not found
+func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
+	db := Db()
+
+	result, err := db.conn.Exec(`
+		UPDATE symbols
+		SET last_profile_status = $1
+		WHERE last_profile_update < $2
+		   OR last_profile_update IS NULL
+	`, types.StatusNotFound, since)
+	
+	if err != nil {
+		return 0, fmt.Errorf("failed to mark stale profiles as not found: %w", err)
+	}
+
+	return result.RowsAffected()
+}
+
+// UpdateQuoteBatch updates current prices for a batch of symbols
+func UpdateQuoteBatch(quotes []types.Symbol) error {
+	db := Db()
+
+	// Use a transaction for batch updates
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
+		UPDATE symbols
+		SET current_price_usd = $1,
+		    current_price_time = $2
+		WHERE ticker = $3
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, quote := range quotes {
+		if quote.CurrentPriceUsd == nil || quote.CurrentPriceTime == nil {
+			continue
+		}
+		_, err := stmt.Exec(quote.CurrentPriceUsd, quote.CurrentPriceTime, quote.Ticker)
+		if err != nil {
+			return fmt.Errorf("failed to update quote for %s: %w", quote.Ticker, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+

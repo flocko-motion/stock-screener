@@ -1,12 +1,13 @@
 package updater
 
 import (
+	"context"
 	"time"
 )
 
 // RunAllUpdaters runs all updaters in sequence: symbols -> profiles -> prices -> dedupe
 // After completing a full cycle, it sleeps for 8 hours before repeating
-func RunAllUpdaters() {
+func RunAllUpdaters(ctx context.Context) {
 	log := NewLogger("All")
 	log.Printf("Starting all updaters (symbols -> profiles -> prices -> dedupe)\n")
 
@@ -22,9 +23,12 @@ func RunAllUpdaters() {
 
 		// Step 2: Update profiles
 		log.Printf("Step 2/4: Updating profiles...\n")
-		if err := UpdateProfilesOnce(); err != nil {
+		if err := UpdateProfilesBatch(ctx, log); err != nil {
 			log.Error("Profile update failed: %v\n", err)
 		}
+
+		// once we have all profiles we can update EOD quotes
+		go RunQuoteUpdater(ctx, nil, log)
 
 		// Step 3: Update prices
 		log.Printf("Step 3/4: Updating prices...\n")

@@ -18,13 +18,24 @@ import (
 
 const growthLineMax = 0.5
 
-// PlotYoYAnalysis creates a price chart with proper axis formatting
-func PlotYoYAnalysis(timeFrom, timeTo time.Time, ticker string, prices []types.PriceData, stats Stats, outputPath string) error {
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+// ChartOptions contains all options for creating a price chart
+type ChartOptions struct {
+	TimeFrom   time.Time
+	TimeTo     time.Time
+	Ticker     string
+	Prices     []types.PriceData
+	Stats      Stats
+	OutputPath string
+	LimitY     bool // When false, doesn't limit y-values
+}
+
+// PlotChart creates a price chart with proper axis formatting
+func PlotChart(opts ChartOptions) error {
+	if err := os.MkdirAll(filepath.Dir(opts.OutputPath), 0755); err != nil {
 		return err
 	}
 
-	priceChart, err := createPriceChart(timeFrom, timeTo, ticker, prices)
+	priceChart, err := createPriceChart(opts)
 	if err != nil {
 		return err
 	}
@@ -33,7 +44,7 @@ func PlotYoYAnalysis(timeFrom, timeTo time.Time, ticker string, prices []types.P
 	const width = 8 * vg.Inch
 	const height = 6 * vg.Inch
 
-	return priceChart.Save(width, height, outputPath)
+	return priceChart.Save(width, height, opts.OutputPath)
 }
 
 // PlotHistogram creates a separate histogram chart
@@ -54,52 +65,59 @@ func PlotHistogram(ticker string, stats Stats, outputPath string) error {
 	return histChart.Save(width, height, outputPath)
 }
 
-func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []types.PriceData) (*plot.Plot, error) {
+func createPriceChart(opts ChartOptions) (*plot.Plot, error) {
 	p := plot.New()
-	p.Title.Text = fmt.Sprintf("%s - Normalized Price (Log Scale)", ticker)
+	p.Title.Text = fmt.Sprintf("%s - Normalized Price (Log Scale)", opts.Ticker)
 	p.X.Label.Text = "Date"
 	p.Y.Label.Text = "Normalized Price"
 
-	if len(prices) == 0 {
+	if len(opts.Prices) == 0 {
 		return p, nil
 	}
 
-	// Set up log scale with fixed range
+	// Set up log scale
 	p.Y.Scale = plot.LogScale{}
-	p.Y.Min = 1
 
-	yearsElapsed := float64(timeTo.Unix()-timeFrom.Unix()) / (365.25 * 24 * 3600)
-	p.Y.Max = math.Pow(1.0+growthLineMax, yearsElapsed)
+	// Set fixed range only if limitY is true
+	if opts.LimitY {
+		p.Y.Min = 1
+		yearsElapsed := float64(opts.TimeTo.Unix()-opts.TimeFrom.Unix()) / (365.25 * 24 * 3600)
+		p.Y.Max = math.Pow(1.0+growthLineMax, yearsElapsed)
+	}
 
 	// Custom tick formatter for Y-axis (log scale)
 	p.Y.Tick.Marker = &logTickFormatter{}
 
 	// Custom tick formatter for X-axis (dates)
-	p.X.Tick.Marker = &dateTickFormatter{prices: prices}
+	p.X.Tick.Marker = &dateTickFormatter{prices: opts.Prices}
 
 	// Add year-based background colors FIRST (so they appear in background)
-	addYearBackgrounds(p, prices)
+	// addYearBackgrounds(p, opts.Prices)
 
 	// Add grid
-	p.Add(plotter.NewGrid())
+	// p.Add(plotter.NewGrid())
 
 	// Normalize prices to start at 1.0
-	firstPrice := prices[0].Close
-	pts := make(plotter.XYs, len(prices))
+	firstPrice := opts.Prices[0].Close
+	pts := make(plotter.XYs, len(opts.Prices))
 
 	iWrite := 0
-	for _, price := range prices {
+	for _, price := range opts.Prices {
 		normalizedPrice := price.Close / firstPrice
-		// Clip values to our Y-axis range
-		if normalizedPrice < p.Y.Min {
-			pts[iWrite].Y = p.Y.Min
-			// continue
-		} else if normalizedPrice > p.Y.Max {
-			pts[iWrite].Y = p.Y.Max
-			// continue
+
+		// Clip values to our Y-axis range only if limitY is true
+		if opts.LimitY {
+			if normalizedPrice < p.Y.Min {
+				pts[iWrite].Y = p.Y.Min
+			} else if normalizedPrice > p.Y.Max {
+				pts[iWrite].Y = p.Y.Max
+			} else {
+				pts[iWrite].Y = normalizedPrice
+			}
 		} else {
 			pts[iWrite].Y = normalizedPrice
 		}
+
 		pts[iWrite].X = float64(price.Date.Unix())
 		iWrite++
 	}
@@ -116,7 +134,7 @@ func createPriceChart(timeFrom, timeTo time.Time, ticker string, prices []types.
 	p.Add(line)
 
 	// Add constant growth lines
-	addGrowthLines(timeFrom, timeTo, p, prices)
+	// addGrowthLines(opts.TimeFrom, opts.TimeTo, p, opts.Prices)
 
 	return p, nil
 }

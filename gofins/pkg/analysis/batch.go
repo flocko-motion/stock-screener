@@ -97,10 +97,15 @@ func AnalyzeBatch(config AnalysisPackageConfig) ([]SymbolStats, error) {
 			// Only include symbols with YoY data
 			if stats.Count > 0 {
 				if config.PathPlots != "" {
-					if err = PlotYoYAnalysis(config.TimeFrom, config.TimeTo,
-						ticker, prices, stats,
-						filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeChart)),
-					); err != nil {
+					if err = PlotChart(ChartOptions{
+						TimeFrom:   config.TimeFrom,
+						TimeTo:     config.TimeTo,
+						Ticker:     ticker,
+						Prices:     prices,
+						Stats:      stats,
+						OutputPath: filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeChart)),
+						LimitY:     true, // Default to limiting Y-axis
+					}); err != nil {
 						logf("%s ERROR: Failed to generate plot: %v\n", config.PackageID, err)
 					}
 					if err = PlotHistogram(ticker, stats, filepath.Join(config.PathPlots, fmt.Sprintf("%s_%s.png", ticker, PlotTypeHistogram))); err != nil {

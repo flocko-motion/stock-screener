@@ -73,8 +73,6 @@ var errorsCmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.AddCommand(errorsCmd)
-
 	errorsCmd.Flags().IntVarP(&errorsLimit, "limit", "n", 50, "Number of errors to show")
 	errorsCmd.Flags().StringVarP(&errorsSource, "source", "s", "", "Filter by source (e.g., 'updater.symbols')")
 	errorsCmd.Flags().IntVar(&errorsClear, "clear", 0, "Clear errors older than N days")

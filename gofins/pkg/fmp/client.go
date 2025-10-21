@@ -188,6 +188,36 @@ func (c *Client) buildURL(endpoint string, params map[string]string) (string, er
 	return u.String(), nil
 }
 
+// apiGetRaw makes a GET request and returns the raw response body (for non-JSON endpoints like CSV)
+func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCloser, error) {
+	// Build URL with parameters
+	reqURL, err := c.buildURL(endpoint, params)
+	if err != nil {
+		return nil, err
+	}
+
+	// Wait for rate limit
+	if err := c.rateLimiter.Wait(); err != nil {
+		return nil, fmt.Errorf("rate limiter error: %w", err)
+	}
+
+	// Make the request
+	resp, err := c.httpClient.Get(reqURL)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+
+	// Check status code
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("API error: status %d - %s", resp.StatusCode, string(body))
+	}
+
+	c.rateLimiter.LogRequest(endpoint, "ok")
+	return resp.Body, nil
+}
+
 // handleResponse processes the HTTP response
 func (c *Client) handleResponse(resp *http.Response, endpoint string, result interface{}) error {
 	// Read body

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { SymbolProfile } from '../services/api';
 
 interface SymbolDetailProps {
@@ -66,7 +66,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
 
     const handleDeleteRating = async (ratingId: number) => {
         if (!confirm('Delete this rating?')) return;
-        
+
         try {
             const response = await fetch(`http://localhost:8080/api/ratings/${ratingId}`, {
                 method: 'DELETE'
@@ -88,7 +88,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         }
     };
 
-    const handleSubmitRating = useCallback(async () => {
+    const handleSubmitRating = async () => {
         if (rating === null) {
             alert('Please select a rating');
             return;
@@ -122,7 +122,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         } finally {
             setSubmitting(false);
         }
-    }, [rating, notes, symbol]);
+    };
 
     const getRatingColor = (rating: number): string => {
         if (rating === 0) return 'text-gray-500';
@@ -157,7 +157,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         const handleKeyDown = (event: KeyboardEvent) => {
             const target = event.target as HTMLElement;
             const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
-            
+
             // If typing, only allow Enter in textarea to submit, ignore everything else
             if (isTyping) {
                 if (event.key === 'Enter' && target.tagName === 'TEXTAREA') {
@@ -166,7 +166,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 }
                 return; // Ignore all other hotkeys when typing
             }
-            
+
             // Hotkeys only work when NOT typing
             if (event.key === 'Escape' && onClose) {
                 onClose();
@@ -175,27 +175,8 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 window.open(tradingViewUrl, '_blank', 'noopener,noreferrer');
             } else {
                 // Number keys for rating (1-5, Shift+1-5 for negative, 0 for neutral)
-                // Handle both direct numbers and German keyboard layout (Shift produces !, ", §, $, %)
-                let num: number | null = null;
-                
-                if (event.key >= '0' && event.key <= '5') {
-                    num = parseInt(event.key);
-                } else if (event.shiftKey) {
-                    // German keyboard layout: Shift+1=!, Shift+2=", Shift+3=§, Shift+4=$, Shift+5=%
-                    const germanShiftMap: Record<string, number> = {
-                        '!': 1,
-                        '"': 2,
-                        '§': 3,
-                        '$': 4,
-                        '%': 5
-                    };
-                    if (event.key in germanShiftMap) {
-                        num = germanShiftMap[event.key];
-                    }
-                }
-                
-                if (num !== null && num >= 0 && num <= 5) {
-                    event.preventDefault(); // Prevent any default behavior
+                const num = parseInt(event.key);
+                if (!isNaN(num) && num >= 0 && num <= 5) {
                     const newRating = event.shiftKey && num > 0 ? -num : num;
                     setRating(newRating);
                     // Auto-focus the notes textarea
@@ -348,8 +329,8 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-4">
                                 <label className="font-medium text-gray-600 w-20">Rating:</label>
-                                <select 
-                                    value={rating === null ? '' : rating} 
+                                <select
+                                    value={rating === null ? '' : rating}
                                     onChange={(e) => setRating(e.target.value === '' ? null : parseInt(e.target.value))}
                                     className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                                 >
@@ -362,7 +343,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                             </div>
                             <div className="flex items-start gap-4">
                                 <label className="font-medium text-gray-600 w-20 pt-2">Notes:</label>
-                                <textarea 
+                                <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Optional notes about your rating..."
@@ -371,7 +352,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                                 />
                             </div>
                             <div className="flex justify-end">
-                                <button 
+                                <button
                                     onClick={handleSubmitRating}
                                     disabled={submitting || rating === null}
                                     className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"

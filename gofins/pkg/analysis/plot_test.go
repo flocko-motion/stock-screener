@@ -11,7 +11,7 @@ func TestPlot(t *testing.T) {
 	to := time.Now()
 	from := time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	const symbol = "NVA"
+	const symbol = "AAPL"
 
 	prices, err := db.GetWeeklyPrices(symbol, from, to)
 	if err != nil {
@@ -47,7 +47,19 @@ func TestPlot(t *testing.T) {
 	pricePath := "/tmp/test_chart.png"
 	histPath := "/tmp/test_hist.png"
 
-	if err := PlotYoYAnalysis(from, to, symbol, prices, stats, pricePath); err != nil {
+	// print prices
+	for i, price := range prices {
+		t.Logf("%d: %s %f", i, price.Date, price.Close)
+	}
+	if err := PlotChart(ChartOptions{
+		TimeFrom:   from,
+		TimeTo:     to,
+		Ticker:     symbol,
+		Prices:     prices,
+		Stats:      stats,
+		OutputPath: pricePath,
+		LimitY:     true, // Default to limiting Y-axis
+	}); err != nil {
 		t.Fatalf("Failed to generate price plot: %v", err)
 	}
 

@@ -1,6 +1,7 @@
-package db
+package update
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/flocko-motion/gofins/pkg/updater"
@@ -15,7 +16,8 @@ var allCmd = &cobra.Command{
 		fmt.Println("Order: symbols -> profiles -> prices -> dedupe")
 		fmt.Println("Cycle repeats every 8 hours")
 		fmt.Println()
-		updater.RunAllUpdaters()
+		ctx := context.Background()
+		updater.RunAllUpdaters(ctx)
 		return nil
 	},
 }

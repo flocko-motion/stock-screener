@@ -81,7 +81,15 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 	
 	if plotType == analysis.PlotTypeChart {
 		// Generate price chart
-		if err := analysis.PlotYoYAnalysis(timeFrom, timeTo, ticker, prices, stats, tempFile); err != nil {
+		if err := analysis.PlotChart(analysis.ChartOptions{
+			TimeFrom:   timeFrom,
+			TimeTo:     timeTo,
+			Ticker:     ticker,
+			Prices:     prices,
+			Stats:      stats,
+			OutputPath: tempFile,
+			LimitY:     true, // Default to limiting Y-axis
+		}); err != nil {
 			return nil, fmt.Errorf("failed to create chart: %w", err)
 		}
 	} else if plotType == analysis.PlotTypeHistogram {

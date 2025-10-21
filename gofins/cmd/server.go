@@ -41,7 +41,7 @@ var serverCmd = &cobra.Command{
 		// Start updaters only if --no-updates is not set
 		fmt.Println("\n=== Starting Services ===")
 		if !noUpdates {
-			go updater.RunAllUpdaters()
+			go updater.RunAllUpdaters(ctx)
 		} else {
 			fmt.Println("⚠️  Updates disabled - working with existing data only")
 		}
@@ -51,12 +51,12 @@ var serverCmd = &cobra.Command{
 		fmt.Println("\nShutting down...")
 		cancel()
 		time.Sleep(time.Second)
-		
+
 		// Graceful shutdown
 		if err := db.PrepareForShutdown(); err != nil {
 			_ = db.LogError("server.shutdown", "database", "Failed to close database connection", f.Ptr(err.Error()))
 		}
-		
+
 		fmt.Println("✓ Server stopped")
 		return nil
 	},
