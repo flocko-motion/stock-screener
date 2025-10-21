@@ -1,4 +1,101 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+
+interface MultiSelectProps {
+    options: string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+    placeholder: string;
+}
+
+function MultiSelect({ options, selected, onChange, placeholder }: MultiSelectProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleOption = (option: string) => {
+        if (selected.includes(option)) {
+            onChange(selected.filter(s => s !== option));
+        } else {
+            onChange([...selected, option]);
+        }
+    };
+
+    const selectAll = () => {
+        onChange([...options]);
+    };
+
+    const selectNone = () => {
+        onChange([]);
+    };
+
+    const displayText = selected.length === 0 
+        ? placeholder 
+        : selected.length === 1 
+            ? selected[0] 
+            : `${selected.length} selected`;
+
+    return (
+        <div ref={dropdownRef} className="relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 bg-white text-left flex justify-between items-center"
+            >
+                <span className="truncate">{displayText}</span>
+                <span className="ml-1">▼</span>
+            </button>
+            {isOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+                    {options.length === 0 ? (
+                        <div className="px-2 py-1 text-sm text-gray-500">No options</div>
+                    ) : (
+                        <>
+                            <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-2 py-1 flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={selectAll}
+                                    className="flex-1 px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 rounded"
+                                >
+                                    All
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={selectNone}
+                                    className="flex-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                                >
+                                    None
+                                </button>
+                            </div>
+                            {options.map(option => (
+                                <label
+                                    key={option}
+                                    className="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer text-sm"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selected.includes(option)}
+                                        onChange={() => toggleOption(option)}
+                                        className="mr-2 rounded"
+                                    />
+                                    <span className="truncate">{option}</span>
+                                </label>
+                            ))}
+                        </>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
 
 interface Symbol {
     ticker: string;
@@ -40,9 +137,9 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const filters = getStoredFilters();
     const [searchTerm, setSearchTerm] = useState(filters.searchTerm || '');
     const [currentPage, setCurrentPage] = useState(1);
-    const [exchangeFilter, setExchangeFilter] = useState(filters.exchangeFilter || '');
-    const [countryFilter, setCountryFilter] = useState(filters.countryFilter || '');
-    const [sectorFilter, setSectorFilter] = useState(filters.sectorFilter || '');
+    const [exchangeFilter, setExchangeFilter] = useState<string[]>(filters.exchangeFilter || []);
+    const [countryFilter, setCountryFilter] = useState<string[]>(filters.countryFilter || []);
+    const [sectorFilter, setSectorFilter] = useState<string[]>(filters.sectorFilter || []);
     const [mcapMin, setMcapMin] = useState(filters.mcapMin || '');
     const [mcapMax, setMcapMax] = useState(filters.mcapMax || '');
     const [inceptionMin, setInceptionMin] = useState(filters.inceptionMin || '');
@@ -52,6 +149,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const [favoritesOnly, setFavoritesOnly] = useState(filters.favoritesOnly || false);
     const [ratingMin, setRatingMin] = useState(filters.ratingMin || '');
     const [ratingMax, setRatingMax] = useState(filters.ratingMax || '');
+    const [ratedOnly, setRatedOnly] = useState(filters.ratedOnly || false);
     const [sortColumn, setSortColumn] = useState<keyof Symbol>(filters.sortColumn || 'ticker');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(filters.sortDirection || 'asc');
     const itemsPerPage = 100;
@@ -62,11 +160,11 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
             searchTerm, exchangeFilter, countryFilter, sectorFilter,
             mcapMin, mcapMax, inceptionMin, inceptionMax,
             oldestPriceMin, oldestPriceMax, favoritesOnly,
-            ratingMin, ratingMax, sortColumn, sortDirection
+            ratingMin, ratingMax, ratedOnly, sortColumn, sortDirection
         }));
     }, [searchTerm, exchangeFilter, countryFilter, sectorFilter, mcapMin, mcapMax, 
         inceptionMin, inceptionMax, oldestPriceMin, oldestPriceMax, favoritesOnly,
-        ratingMin, ratingMax, sortColumn, sortDirection]);
+        ratingMin, ratingMax, ratedOnly, sortColumn, sortDirection]);
 
     const toggleFavorite = async (ticker: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -193,13 +291,13 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
         }
 
         // Exchange filter
-        if (exchangeFilter && symbol.exchange !== exchangeFilter) return false;
+        if (exchangeFilter.length > 0 && (!symbol.exchange || !exchangeFilter.includes(symbol.exchange))) return false;
 
         // Country filter
-        if (countryFilter && symbol.country !== countryFilter) return false;
+        if (countryFilter.length > 0 && (!symbol.country || !countryFilter.includes(symbol.country))) return false;
 
         // Sector filter
-        if (sectorFilter && symbol.sector !== sectorFilter) return false;
+        if (sectorFilter.length > 0 && (!symbol.sector || !sectorFilter.includes(symbol.sector))) return false;
 
         // Market cap filters
         if (mcapMin && (!symbol.marketCap || symbol.marketCap < parseFloat(mcapMin) * 1e9)) return false;
@@ -226,8 +324,19 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
         }
 
         if (favoritesOnly && !symbol.isFavorite) return false;
-        if (ratingMin && (!symbol.userRating || symbol.userRating < parseInt(ratingMin))) return false;
-        if (ratingMax && (!symbol.userRating || symbol.userRating > parseInt(ratingMax))) return false;
+        
+        // Rating filters with ratedOnly logic
+        if (ratedOnly) {
+            // Strict mode: only show rated items that match the filters
+            if (symbol.userRating == null) return false;
+            if (ratingMin && symbol.userRating < parseInt(ratingMin)) return false;
+            if (ratingMax && symbol.userRating > parseInt(ratingMax)) return false;
+        } else {
+            // Lenient mode: treat non-rated as rating=0
+            const effectiveRating = symbol.userRating ?? 0;
+            if (ratingMin && effectiveRating < parseInt(ratingMin)) return false;
+            if (ratingMax && effectiveRating > parseInt(ratingMax)) return false;
+        }
 
         return true;
     });
@@ -297,9 +406,9 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     }
 
     // Get unique exchanges, countries and sectors for dropdowns
-    const exchanges = Array.from(new Set(symbols.map(s => s.exchange).filter(Boolean))).sort();
-    const countries = Array.from(new Set(symbols.map(s => s.country).filter(Boolean))).sort();
-    const sectors = Array.from(new Set(symbols.map(s => s.sector).filter(Boolean))).sort();
+    const exchanges = Array.from(new Set(symbols.map(s => s.exchange).filter((e): e is string => !!e))).sort();
+    const countries = Array.from(new Set(symbols.map(s => s.country).filter((c): c is string => !!c))).sort();
+    const sectors = Array.from(new Set(symbols.map(s => s.sector).filter((s): s is string => !!s))).sort();
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -315,30 +424,24 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                     />
-                    <select
-                        value={exchangeFilter}
-                        onChange={(e) => setExchangeFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Exchanges</option>
-                        {exchanges.map(e => <option key={e} value={e}>{e}</option>)}
-                    </select>
-                    <select
-                        value={countryFilter}
-                        onChange={(e) => setCountryFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Countries</option>
-                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <select
-                        value={sectorFilter}
-                        onChange={(e) => setSectorFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Sectors</option>
-                        {sectors.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <MultiSelect
+                        options={exchanges}
+                        selected={exchangeFilter}
+                        onChange={setExchangeFilter}
+                        placeholder="All Exchanges"
+                    />
+                    <MultiSelect
+                        options={countries}
+                        selected={countryFilter}
+                        onChange={setCountryFilter}
+                        placeholder="All Countries"
+                    />
+                    <MultiSelect
+                        options={sectors}
+                        selected={sectorFilter}
+                        onChange={setSectorFilter}
+                        placeholder="All Sectors"
+                    />
                 </div>
 
                 <div className="grid grid-cols-6 gap-2">
@@ -363,10 +466,30 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                         <option value="100">$100B</option>
                         <option value="1000">$1T</option>
                     </select>
-                    <input type="number" placeholder="Inception Min" value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Inception Max" value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <select value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Inception Min</option>
+                        {Array.from({ length: 2025 - 1900 + 1 }, (_, i) => 1900 + i).reverse().map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    <select value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Inception Max</option>
+                        {Array.from({ length: 2025 - 1900 + 1 }, (_, i) => 1900 + i).reverse().map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    <select value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Oldest Price Min</option>
+                        {Array.from({ length: 2025 - 1900 + 1 }, (_, i) => 1900 + i).reverse().map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                    <select value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                        <option value="">Oldest Price Max</option>
+                        {Array.from({ length: 2025 - 1900 + 1 }, (_, i) => 1900 + i).reverse().map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="grid grid-cols-4 gap-2 mt-2">
                     <select value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
@@ -382,15 +505,19 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                         ))}
                     </select>
                     <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
+                        <input type="checkbox" checked={ratedOnly} onChange={(e) => setRatedOnly(e.target.checked)} className="rounded" />
+                        <span>📊 Rated only</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
                         <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
                         <span>⭐ Favorites only</span>
                     </label>
                     <button
                         onClick={() => {
                             setSearchTerm('');
-                            setExchangeFilter('');
-                            setCountryFilter('');
-                            setSectorFilter('');
+                            setExchangeFilter([]);
+                            setCountryFilter([]);
+                            setSectorFilter([]);
                             setMcapMin('');
                             setMcapMax('');
                             setInceptionMin('');
@@ -400,6 +527,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                             setFavoritesOnly(false);
                             setRatingMin('');
                             setRatingMax('');
+                            setRatedOnly(false);
                         }}
                         className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50"
                     >

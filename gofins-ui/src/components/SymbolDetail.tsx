@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { SymbolProfile } from '../services/api';
 
 interface SymbolDetailProps {
@@ -88,7 +88,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         }
     };
 
-    const handleSubmitRating = async () => {
+    const handleSubmitRating = useCallback(async () => {
         if (rating === null) {
             alert('Please select a rating');
             return;
@@ -122,7 +122,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         } finally {
             setSubmitting(false);
         }
-    };
+    }, [rating, notes, symbol]);
 
     const getRatingColor = (rating: number): string => {
         if (rating === 0) return 'text-gray-500';
@@ -175,8 +175,27 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 window.open(tradingViewUrl, '_blank', 'noopener,noreferrer');
             } else {
                 // Number keys for rating (1-5, Shift+1-5 for negative, 0 for neutral)
-                const num = parseInt(event.key);
-                if (!isNaN(num) && num >= 0 && num <= 5) {
+                // Handle both direct numbers and German keyboard layout (Shift produces !, ", §, $, %)
+                let num: number | null = null;
+                
+                if (event.key >= '0' && event.key <= '5') {
+                    num = parseInt(event.key);
+                } else if (event.shiftKey) {
+                    // German keyboard layout: Shift+1=!, Shift+2=", Shift+3=§, Shift+4=$, Shift+5=%
+                    const germanShiftMap: Record<string, number> = {
+                        '!': 1,
+                        '"': 2,
+                        '§': 3,
+                        '$': 4,
+                        '%': 5
+                    };
+                    if (event.key in germanShiftMap) {
+                        num = germanShiftMap[event.key];
+                    }
+                }
+                
+                if (num !== null && num >= 0 && num <= 5) {
+                    event.preventDefault(); // Prevent any default behavior
                     const newRating = event.shiftKey && num > 0 ? -num : num;
                     setRating(newRating);
                     // Auto-focus the notes textarea
