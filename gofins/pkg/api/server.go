@@ -36,6 +36,7 @@ func NewServer(database *db.DB, port int) *Server {
 		// Symbols
 		r.Get("/symbols", s.handleListSymbols)
 		r.Get("/symbols/active", s.handleListActiveSymbols)
+		r.Get("/symbols/favorites", s.handleListFavoriteSymbols)
 		r.Get("/symbol/{ticker}", s.handleGetSymbol)
 		r.Get("/symbol/{ticker}/chart", s.handleSymbolChartRoute)
 		r.Get("/symbol/{ticker}/histogram", s.handleSymbolHistogramRoute)

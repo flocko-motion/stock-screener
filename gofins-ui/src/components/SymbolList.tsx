@@ -80,6 +80,8 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
             if (symbolCache[endpoint]) {
                 symbolCache[endpoint] = symbolCache[endpoint].map(s => s.ticker === ticker ? { ...s, isFavorite: data.isFavorite } : s);
             }
+            // Invalidate favorites cache since the list changed
+            delete symbolCache['/api/symbols/favorites'];
         } catch (err) {
             console.error('Failed to toggle favorite:', err);
         }

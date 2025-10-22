@@ -230,9 +230,26 @@ func DeactivateSymbolsNotInList(keepTickers []string) error {
 	return nil
 }
 
-// GetActiveSymbols returns all actively trading stocks (excludes indices and secondary listings)
-func GetActiveSymbols() ([]types.Symbol, error) {
+// getFilteredSymbols returns symbols with optional additional WHERE conditions
+func getFilteredSymbols(additionalWhere []string) ([]types.Symbol, error) {
 	db := Db()
+	
+	// Base WHERE conditions
+	whereConditions := []string{
+		"s.is_actively_trading = true",
+		"(s.type = $1 OR s.type IS NULL)",
+		"(s.primary_listing IS NULL OR s.primary_listing = '')",
+	}
+	
+	// Add any additional conditions
+	whereConditions = append(whereConditions, additionalWhere...)
+	
+	// Build WHERE clause
+	whereClause := "WHERE " + whereConditions[0]
+	for _, condition := range whereConditions[1:] {
+		whereClause += "\n\t\t  AND " + condition
+	}
+	
 	query := `
 		SELECT 
 			s.ticker, s.exchange, s.name, s.type, s.currency, s.sector, s.industry, s.country, 
@@ -248,9 +265,7 @@ func GetActiveSymbols() ([]types.Symbol, error) {
 			ORDER BY created_at DESC 
 			LIMIT 1
 		) r ON true
-		WHERE s.is_actively_trading = true
-		  AND (s.type = $1 OR s.type IS NULL)
-		  AND (s.primary_listing IS NULL OR s.primary_listing = '')
+		` + whereClause + `
 		ORDER BY s.ticker
 	`
 
@@ -273,6 +288,16 @@ func GetActiveSymbols() ([]types.Symbol, error) {
 	}
 
 	return symbols, rows.Err()
+}
+
+// GetActiveSymbols returns all actively trading stocks (excludes indices and secondary listings)
+func GetActiveSymbols() ([]types.Symbol, error) {
+	return getFilteredSymbols(nil)
+}
+
+// GetFavoriteSymbols returns only favorited actively trading stocks
+func GetFavoriteSymbols() ([]types.Symbol, error) {
+	return getFilteredSymbols([]string{"f.ticker IS NOT NULL"})
 }
 
 // GetStaleProfiles returns symbols with outdated profiles (older than threshold or null)
