@@ -3,18 +3,17 @@
 ## ✅ FIXED: SymbolList select value bug
 Fixed by ensuring filter values from sessionStorage are always strings, not arrays or objects.
 
-
 # TODO list for gofins, in order of priority
 
 ## ✅ Refactor API with Chi
 - DONE: Migrated to Chi router
 - DONE: Added /api/errors endpoints (GET list, DELETE clear)
-- TODO: Create UI tab for errors
+- DONE: Created UI tab for errors
 
-## Tab "Errors"
-- Show recent errors from database
-- Button to clear all errors
-- Auto-refresh every 30s
+## ✅ Tab "Errors"
+- DONE: Show recent errors from database
+- DONE: Button to clear all errors
+- DONE: Auto-refresh every 30s
 
 
 ## Tab "Notes"
