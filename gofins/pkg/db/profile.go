@@ -17,21 +17,28 @@ func PutSymbols(symbols []types.Symbol) error {
 	}
 
 	const batchSize = 1000
-
+	totalSymbols := len(symbols)
+	
+	logf("Updating %d symbols in batches of %d...\n", totalSymbols, batchSize)
+	
 	// Process in batches
-	for i := 0; i < len(symbols); i += batchSize {
+	for i := 0; i < totalSymbols; i += batchSize {
 		end := i + batchSize
-		if end > len(symbols) {
-			end = len(symbols)
+		if end > totalSymbols {
+			end = totalSymbols
 		}
-
+		
 		batch := symbols[i:end]
-
+		
 		if err := putSymbolsBatch(batch); err != nil {
 			return fmt.Errorf("failed to insert batch %d-%d: %w", i+1, end, err)
 		}
+		
+		// Log progress every batch
+		logf("  Progress: %d/%d symbols (%.1f%%)\n", end, totalSymbols, float64(end)/float64(totalSymbols)*100)
 	}
 
+	logf("✓ Completed updating %d symbols\n", totalSymbols)
 	return nil
 }
 
