@@ -4,43 +4,18 @@
 Weekly prices show blocks of N/A YoY values during 2020-2021 period (e.g., AAPL from July 2020 to April 2021). Pattern shows every other week has N/A, suggesting missing weekly price data or calculation issue for that period. Need to investigate why YoY calculation fails for these specific weeks.
 
 ## ✅ FIXED: SymbolList select value bug
-Fixed by ensuring filter values from sessionStorage are always strings, not arrays or objects.
 
 # TODO list for gofins, in order of priority
 
 ## ✅ Refactor API with Chi
-- DONE: Migrated to Chi router
-- DONE: Added /api/errors endpoints (GET list, DELETE clear)
-- DONE: Created UI tab for errors
 
 ## ✅ Tab "Errors"
-- DONE: Show recent errors from database
-- DONE: Button to clear all errors
-- DONE: Auto-refresh every 30s
-
 
 ## ✅ Tab "Notes"
-- DONE: Tab showing notes grouped by ticker
-- DONE: Notes sorted chronologically (oldest→newest) to show opinion evolution
-- DONE: Click ticker to open symbol detail
-- DONE: Shows latest rating with stars in header
-- DONE: Individual notes show numeric rating (-5 to +5)
-- DONE: Arrow indicators (↑/↓) when rating changes
-- DONE: Fetches ALL notes (no limit)
-- DONE: ISO date format (YYYY-MM-DD)
 
 ## ✅ List of ratings in stock details view
-- DONE: Rating history shown in SymbolDetail component
-- DONE: Delete button for each rating
-- DONE: Ratings sorted chronologically (oldest→newest) to show opinion evolution
-- DONE: Added API endpoints: GET /ratings/{ticker}/history and DELETE /ratings/{id}
 
 ## ✅ Tab "Favorites"
-- DONE: Tab showing favorite stocks
-- DONE: Uses same SymbolList component with defaultFavoritesOnly=true
-- DONE: Filter box is now collapsible (Show/Hide Filters button)
-- DONE: Filters collapsed by default to save space
-- DONE: All stock lists now have collapsible filters
 
 ## Journal / Notebook Feature
 
@@ -93,115 +68,52 @@ Fixed by ensuring filter values from sessionStorage are always strings, not arra
 
 ## Deployment Setup
 
-**Target**: Single Linux server, single user (expandable to friends later)
+**Target**: Single Linux server with Docker
 
-**Stack**:
-- Apache on port 80 (serves React build + proxies /api to backend)
-- Go API server on localhost:8080 (systemd service)
-- PostgreSQL (system package)
+**Architecture**:
+- 3 Docker containers: `gofins-ui`, `gofins-api`, `gofins-db`
+- Apache reverse proxy on host (port 80) with .htaccess auth
+- Systemd manages Docker containers
 
-**Deployment method**: Git-based (simple, transparent, easy rollback)
+**Deployment method**: Git-based with Docker builds
 
 **Directory structure**:
 ```
 /opt/stock-screener/          # Git repo
   ├── gofins/                 # Go backend
+  │   └── Dockerfile
   ├── gofins-ui/              # React frontend
-  └── update.sh               # Deployment script
-/var/www/html/gofins/         # Built React files (served by Apache)
+  │   └── Dockerfile
+  ├── docker-compose.yml
+  └── deploy.sh               # Build & restart containers
 ```
 
-**Update process**:
+**Deploy script** (`deploy.sh`):
 ```bash
-ssh server "sudo /opt/stock-screener/update.sh"
+#!/bin/bash
+cd /opt/stock-screener
+git pull
+HASH=$(git rev-parse --short HEAD)
+docker-compose build --build-arg GIT_HASH=$HASH
+docker-compose up -d
 ```
 
-**Apache config**:
-- Proxy `/api/*` → `http://localhost:8080/api/*`
-- Serve static files from `/var/www/html/gofins/`
-- SPA fallback to `index.html`
+**Docker containers**:
+- `gofins-db`: PostgreSQL with persistent volume
+- `gofins-api`: Go server on port 8080, tagged with git hash
+- `gofins-ui`: Nginx serving React build, tagged with git hash
 
-**Systemd services**:
-- `gofins-api.service` - Go backend
+**Apache config** (on host):
+- Proxy `/api/*` → `http://localhost:8080/api/*`
+- Serve static files → proxy to `gofins-ui` container
+- .htaccess auth sets `X-Remote-User` header
+
+**Systemd service**:
+- `gofins.service` - Manages docker-compose
 - Auto-restart on failure
 
-## Multi-User Support (Minimal Concept)
+## ✅ Multi-User Support
 
-**Goal**: Let a few friends use the app with separate ratings/notes/favorites
-
-**Authentication**: Apache .htaccess with hand-edited user list (no signup, no password reset)
-
-**User identification**:
-1. Web: Apache sets `X-Remote-User` header after auth
-2. CLI/Local: Read from `~/.gofins/config.yaml` (default user)
-3. Go server hashes username → UUID (stable user ID)
-4. Store UUID in context, use for all queries
-5. UI displays username in header
-
-**Config file** (`~/.gofins/config.yaml`):
-```yaml
-default_user: "yourname"  # Used for CLI commands and localhost API calls
-```
-
-**User resolution logic** (in middleware/context):
-```go
-func getUserID(r *http.Request) uuid.UUID {
-    var username string
-    
-    // 1. Check X-Remote-User header (from Apache auth)
-    if user := r.Header.Get("X-Remote-User"); user != "" {
-        username = user
-    } else {
-        // 2. Fallback to config file default user
-        username = config.GetDefaultUser() // reads ~/.gofins/config.yaml
-    }
-    
-    // 3. Hash username to stable UUID
-    return hashUsernameToUUID(username)
-}
-```
-
-**CLI behavior**:
-- All CLI commands use default user from config
-- `go run . symbol profile AAPL` → uses your configured user
-- `go run . rating add AAPL 5 "Great company"` → adds rating for your user
-- No need to pass user flag to every command
-
-**Database changes**:
-```sql
--- Add user_id to user-specific tables
-ALTER TABLE user_ratings ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
-ALTER TABLE user_favorites ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
-ALTER TABLE user_journal ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
-
--- Add indexes
-CREATE INDEX idx_user_ratings_user ON user_ratings(user_id);
-CREATE INDEX idx_user_favorites_user ON user_favorites(user_id);
-CREATE INDEX idx_user_journal_user ON user_journal(user_id);
-
--- Composite unique constraints
-ALTER TABLE user_ratings DROP CONSTRAINT IF EXISTS user_ratings_pkey;
-ALTER TABLE user_ratings ADD PRIMARY KEY (user_id, ticker, created_at);
-ALTER TABLE user_favorites ADD UNIQUE (user_id, ticker);
-```
-
-**Code changes**:
-- Middleware: Extract `X-Remote-User` → hash to UUID → store in context
-- All user-specific queries: Add `WHERE user_id = $1`
-- Affected endpoints: `/api/ratings/*`, `/api/favorites/*`, `/api/notes`, `/api/journal/*`
-- Symbol/price/analysis data: Shared (no user_id filter)
-
-**UI changes**:
-- Show username in top-right corner
-- No other changes needed
-
-**Migration for existing data**:
-```sql
--- Set all existing data to default user (you)
-UPDATE user_ratings SET user_id = 'your-uuid-here';
-UPDATE user_favorites SET user_id = 'your-uuid-here';
-```
-
-**Effort**: ~2-3 hours (schema changes, middleware, query updates)
+All user data (ratings, favorites, notes, analyses) properly isolated per user. Uses Apache .htaccess auth (X-Remote-User header) or config file for localhost. Admin-only features (errors tab) restricted to default user.
 
 
