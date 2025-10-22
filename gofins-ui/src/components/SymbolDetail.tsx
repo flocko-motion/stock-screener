@@ -264,15 +264,21 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
 
             if (event.key.toLowerCase() === 'c') {
                 event.preventDefault();
-                chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => setFullscreenImage(chartUrl), 300);
+                if (fullscreenImage === chartUrl) {
+                    setFullscreenImage(null);
+                } else {
+                    setFullscreenImage(chartUrl);
+                }
                 return;
             }
 
             if (event.key.toLowerCase() === 'h') {
                 event.preventDefault();
-                chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => setFullscreenImage(histogramUrl), 300);
+                if (fullscreenImage === histogramUrl) {
+                    setFullscreenImage(null);
+                } else {
+                    setFullscreenImage(histogramUrl);
+                }
                 return;
             }
 
