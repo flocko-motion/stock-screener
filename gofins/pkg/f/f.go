@@ -40,3 +40,27 @@ func Keys[K comparable, V any](m map[K]V) []K {
 	}
 	return keys
 }
+
+// DurationToString formats a duration in a human-readable way
+func DurationToString(d time.Duration) string {
+	days := int(d.Hours() / 24)
+	hours := int(d.Hours()) % 24
+	minutes := int(d.Minutes()) % 60
+	seconds := int(d.Seconds()) % 60
+
+	if days > 0 {
+		return fmt.Sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)
+	}
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm %ds", hours, minutes, seconds)
+	}
+	if minutes > 0 {
+		return fmt.Sprintf("%dm %ds", minutes, seconds)
+	}
+	return fmt.Sprintf("%ds", seconds)
+}
+
+// SecondsToString converts seconds (as float64) to a human-readable duration string
+func SecondsToString(seconds float64) string {
+	return DurationToString(time.Duration(seconds * float64(time.Second)))
+}

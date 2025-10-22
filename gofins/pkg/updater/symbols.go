@@ -7,6 +7,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 

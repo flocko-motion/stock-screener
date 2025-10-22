@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -112,7 +113,7 @@ func (l *Logger) Stats(success, notFound, failed, remaining int, elapsed time.Du
 	var eta string
 	if rate > 0 {
 		etaSeconds := float64(remaining) / rate
-		eta = l.FormatDuration(time.Duration(etaSeconds * float64(time.Second)))
+		eta = f.SecondsToString(etaSeconds)
 	} else {
 		eta = "unknown"
 	}
@@ -155,28 +156,4 @@ func trimSpace(s string) string {
 		}
 	}
 	return result
-}
-
-// FormatDuration formats a duration in a human-readable way
-func (l *Logger) FormatDuration(d time.Duration) string {
-	days := int(d.Hours() / 24)
-	hours := int(d.Hours()) % 24
-	minutes := int(d.Minutes()) % 60
-	seconds := int(d.Seconds()) % 60
-
-	if days > 0 {
-		return fmt.Sprintf("%dd %dh %dm %ds", days, hours, minutes, seconds)
-	}
-	if hours > 0 {
-		return fmt.Sprintf("%dh %dm %ds", hours, minutes, seconds)
-	}
-	if minutes > 0 {
-		return fmt.Sprintf("%dm %ds", minutes, seconds)
-	}
-	return fmt.Sprintf("%ds", seconds)
-}
-
-func formatDuration(d time.Duration) string {
-	// Internal helper for Stats method
-	return (&Logger{}).FormatDuration(d)
 }
