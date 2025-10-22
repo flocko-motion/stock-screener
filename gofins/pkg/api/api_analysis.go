@@ -9,6 +9,7 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/go-chi/chi/v5"
 )
 
 // UpdateAnalysisRequest represents the request body for updating an analysis
@@ -79,9 +80,8 @@ func (s *Server) handleAnalysisRouting(w http.ResponseWriter, r *http.Request) {
 // PUT    /api/analysis/{id} - Update analysis (rename)
 // DELETE /api/analysis/{id} - Delete analysis
 func (s *Server) handleAnalysis(w http.ResponseWriter, r *http.Request) {
-	// Extract ID from path
-	path := strings.TrimPrefix(r.URL.Path, "/api/analysis/")
-	packageID := strings.TrimSuffix(path, "/")
+	// Extract ID from URL parameter
+	packageID := chi.URLParam(r, "id")
 
 	if packageID == "" {
 		http.Error(w, "Package ID required", http.StatusBadRequest)

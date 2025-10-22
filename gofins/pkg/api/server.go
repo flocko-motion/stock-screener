@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {
@@ -19,29 +21,50 @@ func NewServer(database *db.DB, port int) *Server {
 		db: database,
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api/symbol/", s.handleGetSymbol)
-	mux.HandleFunc("/api/symbols", s.handleListSymbols)
-	mux.HandleFunc("/api/symbols/active", s.handleListActiveSymbols)
-	mux.HandleFunc("/api/prices/monthly/", s.handleGetMonthlyPrices)
-	mux.HandleFunc("/api/health", s.handleHealth)
+	r := chi.NewRouter()
 
-	// RESTful analysis endpoints
-	mux.HandleFunc("/api/analyses", s.handleAnalyses)         // GET (list) / POST (create)
-	mux.HandleFunc("/api/analysis/", s.handleAnalysisRouting) // Route to specific handlers
+	// Middleware
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(corsMiddleware)
 
-	// User data endpoints
-	mux.HandleFunc("/api/favorites", s.handleFavorites)   // GET (list) / POST /{ticker} (toggle)
-	mux.HandleFunc("/api/favorites/", s.handleFavorites)  // POST /{ticker} (toggle)
-	mux.HandleFunc("/api/ratings", s.handleRatings)       // GET (all latest)
-	mux.HandleFunc("/api/ratings/", s.handleRatings)      // GET/POST /{ticker}
+	// Routes
+	r.Route("/api", func(r chi.Router) {
+		// Health
+		r.Get("/health", s.handleHealth)
 
-	// Wrap with CORS middleware
-	handler := corsMiddleware(mux)
+		// Symbols
+		r.Get("/symbols", s.handleListSymbols)
+		r.Get("/symbols/active", s.handleListActiveSymbols)
+		r.Get("/symbol/{ticker}", s.handleGetSymbol)
+		r.Get("/symbol/{ticker}/chart", s.handleSymbolChartRoute)
+		r.Get("/symbol/{ticker}/histogram", s.handleSymbolHistogramRoute)
+
+		// Prices
+		r.Get("/prices/monthly/{ticker}", s.handleGetMonthlyPrices)
+
+		// Analyses
+		r.Get("/analyses", s.handleAnalyses)
+		r.Post("/analyses", s.handleAnalyses)
+		r.Get("/analysis/{id}", s.handleAnalysisRouting)
+		r.Put("/analysis/{id}", s.handleAnalysisRouting)
+		r.Delete("/analysis/{id}", s.handleAnalysisRouting)
+
+		// User data
+		r.Get("/favorites", s.handleFavorites)
+		r.Post("/favorites/{ticker}", s.handleFavorites)
+		r.Get("/ratings", s.handleRatings)
+		r.Get("/ratings/{ticker}", s.handleRatings)
+		r.Post("/ratings/{ticker}", s.handleRatings)
+
+		// Errors
+		r.Get("/errors", s.handleListErrors)
+		r.Delete("/errors", s.handleClearErrors)
+	})
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: handler,
+		Handler: r,
 	}
 
 	return s

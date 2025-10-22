@@ -2,13 +2,15 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
+
+	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/go-chi/chi/v5"
 	"time"
 )
 
 func (s *Server) handleGetMonthlyPrices(w http.ResponseWriter, r *http.Request) {
-	ticker := r.URL.Path[len("/api/prices/monthly/"):]
+	ticker := chi.URLParam(r, "ticker")
 	if ticker == "" {
 		http.Error(w, "ticker required", http.StatusBadRequest)
 		return

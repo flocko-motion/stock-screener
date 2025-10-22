@@ -2,19 +2,20 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"strconv"
-	"strings"
+
+	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/go-chi/chi/v5"
 )
 
 // handleFavorites handles favorite operations
 // POST /api/favorites/{ticker} - Toggle favorite
 // GET /api/favorites - List all favorites
 func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
-	path := strings.TrimPrefix(r.URL.Path, "/api/favorites")
+	ticker := chi.URLParam(r, "ticker")
 	
-	if r.Method == "GET" && path == "" {
+	if r.Method == "GET" && ticker == "" {
 		// List all favorites
 		tickers, err := db.GetFavorites()
 		if err != nil {
@@ -28,7 +29,6 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		// Toggle favorite
-		ticker := strings.Trim(path, "/")
 		if ticker == "" {
 			http.Error(w, "ticker required", http.StatusBadRequest)
 			return
@@ -55,9 +55,9 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 // GET /api/ratings - Get all latest ratings
 // DELETE /api/ratings/{id} - Delete rating by ID
 func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
-	path := strings.TrimPrefix(r.URL.Path, "/api/ratings")
+	ticker := chi.URLParam(r, "ticker")
 
-	if r.Method == "GET" && path == "" {
+	if r.Method == "GET" && ticker == "" {
 		// Get all latest ratings
 		ratings, err := db.GetAllLatestRatings()
 		if err != nil {
@@ -69,27 +69,12 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parts := strings.Split(strings.Trim(path, "/"), "/")
-	if len(parts) == 0 || parts[0] == "" {
+	if ticker == "" {
 		http.Error(w, "ticker required", http.StatusBadRequest)
 		return
 	}
 
-	ticker := parts[0]
-
 	if r.Method == "GET" {
-		if len(parts) == 2 && parts[1] == "history" {
-			// Get rating history
-			ratings, err := db.GetRatingHistory(ticker)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(ratings)
-			return
-		}
-
 		// Get latest rating
 		rating, err := db.GetLatestRating(ticker)
 		if err != nil {
