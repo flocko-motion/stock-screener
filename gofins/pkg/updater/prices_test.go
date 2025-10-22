@@ -28,11 +28,11 @@ func TestUpdatePrices(t *testing.T) {
 }
 
 func TestFetchPrices(t *testing.T) {
-	ticker := "AAPL"
+	ticker := "NOVO-B.CO"
 
 	// Call updatePrices - uses db.Db() singleton internally
 	log := NewLoggerTest("FetchTest")
-	config := PriceUpdateConfig{WriteToDb: false, EnableProfiling: false}
+	config := PriceUpdateConfig{WriteToDb: true, EnableProfiling: false}
 	symbol, monthly, weekly, _ := updatePrices(types.Symbol{Ticker: ticker}, config, log)
 
 	assert.Equal(t, ticker, symbol.Ticker)
