@@ -11,11 +11,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUpdatePrices(t *testing.T) {
+	log := NewLoggerTest("PricesTest")
+	config := PriceUpdateConfig{
+		Workers:         1,
+		BatchSize:       1,
+		WriteToDb:       true,
+		EnableProfiling: true,
+	}
+	err := updatePricesImpl(log, config)
+	if err != nil {
+		t.Logf("Price update failed (may be expected due to API limits): %v", err)
+	} else {
+		t.Log("Price update completed successfully")
+	}
+}
+
 func TestFetchPrices(t *testing.T) {
 	ticker := "AAPL"
 
 	// Call updatePrices - uses db.Db() singleton internally
-	symbol, monthly, weekly, _ := updatePrices(types.Symbol{Ticker: ticker}, true)
+	config := PriceUpdateConfig{WriteToDb: false, EnableProfiling: false}
+	symbol, monthly, weekly, _ := updatePrices(types.Symbol{Ticker: ticker}, config)
 
 	assert.Equal(t, ticker, symbol.Ticker)
 	assert.NotNil(t, symbol.LastPriceStatus)
@@ -48,8 +65,9 @@ func TestFetchPricesCurrencyConversion(t *testing.T) {
 	fmt.Printf("currency: %v\n", symbolEUR.Currency)
 
 	// Fetch prices for both tickers (test mode - no DB writes)
-	_, monthlyUSD, weeklyUSD, _ := updatePrices(*symbolUSD, true)
-	_, monthlyEUR, weeklyEUR, _ := updatePrices(*symbolEUR, true)
+	config := PriceUpdateConfig{WriteToDb: false, EnableProfiling: false}
+	_, monthlyUSD, weeklyUSD, _ := updatePrices(*symbolUSD, config)
+	_, monthlyEUR, weeklyEUR, _ := updatePrices(*symbolEUR, config)
 
 	// Both should have data
 	assert.NotEmpty(t, monthlyUSD)

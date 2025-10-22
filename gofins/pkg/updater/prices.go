@@ -17,19 +17,92 @@ import (
 
 const (
 	PriceUpdateInterval = 7 * 24 * time.Hour // Update weekly
-	PriceWorkers        = 8
-	PriceBatchSize      = 200
 )
 
+type PriceUpdateConfig struct {
+	Workers         int
+	BatchSize       int
+	WriteToDb       bool
+	EnableProfiling bool
+	MaxSymbols      int // 0 = unlimited
+}
+
+func DefaultPriceUpdateConfig() PriceUpdateConfig {
+	return PriceUpdateConfig{
+		Workers:         8,
+		BatchSize:       200,
+		WriteToDb:       true,
+		EnableProfiling: false,
+		MaxSymbols:      0,
+	}
+}
+
+func TestPriceUpdateConfig() PriceUpdateConfig {
+	return PriceUpdateConfig{
+		Workers:         1,
+		BatchSize:       10,
+		WriteToDb:       false,
+		EnableProfiling: true,
+		MaxSymbols:      100,
+	}
+}
+
 type PriceStats struct {
-	Updated      []string
-	NotFound     []string
-	Failed       []string
+	Updated        []string
+	NotFound       []string
+	Failed         []string
 	FailureReasons map[string]string // ticker -> error message
+}
+
+var (
+	batchWriteMutex sync.Mutex
+)
+
+// batchWritePrices writes collected price data to database in background
+// Blocks if another batch write is in progress, then runs in background
+// Ensures only one background write happens at a time
+func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly []types.PriceData, config PriceUpdateConfig, log *Logger) {
+	// Wait for any previous batch write to complete, then start new one
+	batchWriteMutex.Lock()
+
+	go func() {
+		defer batchWriteMutex.Unlock()
+
+		if len(symbols) == 0 {
+			return // Empty call for shutdown sync
+		}
+
+		if !config.WriteToDb {
+			return // Skip write in test mode
+		}
+
+		startTime := time.Now()
+
+		if len(monthly) > 0 {
+			if err := db.PutMonthlyPrices(monthly); err != nil {
+				log.Error("Failed to batch write monthly prices: %v\n", err)
+			}
+		}
+		if len(weekly) > 0 {
+			if err := db.PutWeeklyPrices(weekly); err != nil {
+				log.Error("Failed to batch write weekly prices: %v\n", err)
+			}
+		}
+		if len(symbols) > 0 {
+			if err := db.PutSymbols(symbols); err != nil {
+				log.Error("Failed to batch write symbols: %v\n", err)
+			}
+		}
+
+		duration := time.Since(startTime)
+		log.Printf("  [BATCH WRITE] %d symbols, %d monthly, %d weekly in %v\n",
+			len(symbols), len(monthly), len(weekly), duration)
+	}()
 }
 
 func UpdatePrices(ctx context.Context) {
 	log := NewLogger("Prices")
+	config := DefaultPriceUpdateConfig()
 
 	for {
 		select {
@@ -39,7 +112,7 @@ func UpdatePrices(ctx context.Context) {
 		default:
 		}
 
-		if err := updatePricesImpl(log); err != nil {
+		if err := updatePricesImpl(log, config); err != nil {
 			log.Error("Price update failed: %v\n", err)
 		}
 
@@ -51,19 +124,34 @@ func UpdatePrices(ctx context.Context) {
 
 func UpdatePricesOnce() error {
 	log := NewLogger("Prices")
-	return updatePricesImpl(log)
+	config := DefaultPriceUpdateConfig()
+	return updatePricesImpl(log, config)
 }
 
-func updatePricesImpl(log *Logger) error {
+func updatePricesImpl(log *Logger, config PriceUpdateConfig) error {
+	// Ensure last batch write completes before exit
+	defer batchWritePrices(nil, nil, nil, config, log)
+
 	totalStale, err := db.CountStalePrices()
 	if err != nil {
 		return err
 	}
 
-	log.Started(totalStale, PriceWorkers)
+	log.Started(totalStale, config.Workers)
+
+	processedCount := 0
 
 	for {
-		symbols, err := db.GetSymbolsWithStalePrices(PriceBatchSize)
+		batchSize := config.BatchSize
+		if config.MaxSymbols > 0 && processedCount+batchSize > config.MaxSymbols {
+			batchSize = config.MaxSymbols - processedCount
+			if batchSize <= 0 {
+				log.Printf("Reached max symbols limit (%d)\n", config.MaxSymbols)
+				return nil
+			}
+		}
+
+		symbols, err := db.GetSymbolsWithStalePrices(batchSize)
 		if err != nil {
 			return err
 		}
@@ -84,16 +172,26 @@ func updatePricesImpl(log *Logger) error {
 			FailureReasons: make(map[string]string),
 		}
 
+		// Collect results for batch writing
+		var resultsMu sync.Mutex
+		updatedSymbols := make([]types.Symbol, 0)
+		monthlyPrices := make([]types.PriceData, 0)
+		weeklyPrices := make([]types.PriceData, 0)
+
 		// Worker pool
 		symbolChan := make(chan types.Symbol, len(symbols))
 		var wg sync.WaitGroup
 
-		for i := 0; i < PriceWorkers; i++ {
+		for i := 0; i < config.Workers; i++ {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				for symbol := range symbolChan {
-					updatedSymbol, _, _, err := updatePrices(symbol, false)
+					// Process with WriteToDb=false to collect data
+					workerConfig := config
+					workerConfig.WriteToDb = false
+					updatedSymbol, monthly, weekly, err := updatePrices(symbol, workerConfig)
+
 					statsMu.Lock()
 					if updatedSymbol.LastPriceStatus != nil {
 						switch *updatedSymbol.LastPriceStatus {
@@ -109,6 +207,15 @@ func updatePricesImpl(log *Logger) error {
 						}
 					}
 					statsMu.Unlock()
+
+					// Collect results for batch write (always collect, even in tests)
+					if updatedSymbol.LastPriceStatus != nil && *updatedSymbol.LastPriceStatus == types.StatusOK {
+						resultsMu.Lock()
+						updatedSymbols = append(updatedSymbols, updatedSymbol)
+						monthlyPrices = append(monthlyPrices, monthly...)
+						weeklyPrices = append(weeklyPrices, weekly...)
+						resultsMu.Unlock()
+					}
 				}
 			}()
 		}
@@ -120,12 +227,19 @@ func updatePricesImpl(log *Logger) error {
 
 		wg.Wait()
 
+		// Batch write all results in background
+		if len(updatedSymbols) > 0 {
+			batchWritePrices(updatedSymbols, monthlyPrices, weeklyPrices, config, log)
+		}
+
+		processedCount += len(symbols)
+
 		elapsed := time.Since(startTime)
 		currentStale, _ = db.CountStalePrices()
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
-		
+
 		// Show sample failure reasons if there are failures
 		if len(stats.FailureReasons) > 0 && len(stats.FailureReasons) <= 5 {
 			for ticker, reason := range stats.FailureReasons {
@@ -146,8 +260,12 @@ func updatePricesImpl(log *Logger) error {
 	}
 }
 
-func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData, error) {
+func updatePrices(symbol types.Symbol, config PriceUpdateConfig) (types.Symbol, []types.PriceData, []types.PriceData, error) {
+	startTime := time.Now()
+
 	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)
+	fetchDuration := time.Since(startTime)
+
 	now := time.Now()
 
 	if err != nil {
@@ -158,7 +276,7 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 
 		symbol.LastPriceUpdate = &now
 		symbol.LastPriceStatus = &status
-		if !testMode {
+		if config.WriteToDb {
 			db.PutSymbols([]types.Symbol{symbol})
 		}
 
@@ -171,10 +289,15 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 	})
 
 	// Single-loop conversion: daily → weekly + monthly + YoY
+	convertStart := time.Now()
 	monthly, weekly := calculator.ConvertPrices(dailyPrices, symbol.Ticker)
+	convertDuration := time.Since(convertStart)
+
+	forexStart := time.Now()
 	if symbol.Currency != nil && *symbol.Currency != "USD" {
 		monthly, weekly = convertForexPrices(monthly, weekly, *symbol.Currency)
 	}
+	forexDuration := time.Since(forexStart)
 
 	// Parse oldest price date
 	var oldestPrice *time.Time
@@ -206,31 +329,44 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 	symbol.OldestPrice = oldestPrice
 	symbol.Ath12M = ath12m
 
-	// Save to database
-	if !testMode {
+	// Save to database (batch write happens at end of batch, not per symbol)
+	if config.WriteToDb {
 		if err := db.PutMonthlyPrices(monthly); err != nil {
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
 			db.PutSymbols([]types.Symbol{symbol})
-			
+
 			// Log foreign key violations as errors
+			tickerInfo := symbol.Ticker
+			if len(monthly) > 0 {
+				tickerInfo = fmt.Sprintf("%s (price data has ticker: %s)", symbol.Ticker, monthly[0].SymbolTicker)
+			}
 			_ = db.LogError("updater.prices", "db_constraint_violation",
-				fmt.Sprintf("Failed to insert monthly prices for %s: %v", symbol.Ticker, err), nil)
-			
+				fmt.Sprintf("Failed to insert monthly prices for %s: %v", tickerInfo, err), nil)
+
 			return symbol, monthly, weekly, fmt.Errorf("failed to insert monthly prices: %w", err)
 		}
 		if err := db.PutWeeklyPrices(weekly); err != nil {
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
 			db.PutSymbols([]types.Symbol{symbol})
-			
+
 			// Log foreign key violations as errors
 			_ = db.LogError("updater.prices", "db_constraint_violation",
 				fmt.Sprintf("Failed to insert weekly prices for %s: %v", symbol.Ticker, err), nil)
-			
+
 			return symbol, monthly, weekly, fmt.Errorf("failed to insert weekly prices: %w", err)
 		}
 		db.PutSymbols([]types.Symbol{symbol})
+	}
+
+	totalDuration := time.Since(startTime)
+
+	// Log timing breakdown if profiling enabled
+	if config.EnableProfiling {
+		fmt.Printf("[TIMING] %s: total=%v fetch=%v convert=%v forex=%v (monthly=%d weekly=%d)\n",
+			symbol.Ticker, totalDuration, fetchDuration, convertDuration, forexDuration,
+			len(monthly), len(weekly))
 	}
 
 	return symbol, monthly, weekly, nil
@@ -240,25 +376,33 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 func convertForexPrices(monthly, weekly []types.PriceData, currency string) ([]types.PriceData, []types.PriceData) {
 	convertedMonthly := make([]types.PriceData, len(monthly))
 	for i, price := range monthly {
+		// Get exchange rate once per price point (not 5 times!)
+		rate := f.First(forex.ConvertToUsd(1.0, currency, price.Date))
 		convertedMonthly[i] = types.PriceData{
-			Date:  price.Date,
-			Open:  f.First(forex.ConvertToUsd(price.Open, currency, price.Date)),
-			Close: f.First(forex.ConvertToUsd(price.Close, currency, price.Date)),
-			High:  f.First(forex.ConvertToUsd(price.High, currency, price.Date)),
-			Low:   f.First(forex.ConvertToUsd(price.Low, currency, price.Date)),
-			Avg:   f.First(forex.ConvertToUsd(price.Avg, currency, price.Date)),
+			Date:         price.Date,
+			Open:         price.Open * rate,
+			Close:        price.Close * rate,
+			High:         price.High * rate,
+			Low:          price.Low * rate,
+			Avg:          price.Avg * rate,
+			YoY:          price.YoY,          // Preserve YoY percentage
+			SymbolTicker: price.SymbolTicker, // Preserve ticker
 		}
 	}
 
 	convertedWeekly := make([]types.PriceData, len(weekly))
 	for i, price := range weekly {
+		// Get exchange rate once per price point (not 5 times!)
+		rate := f.First(forex.ConvertToUsd(1.0, currency, price.Date))
 		convertedWeekly[i] = types.PriceData{
-			Date:  price.Date,
-			Open:  f.First(forex.ConvertToUsd(price.Open, currency, price.Date)),
-			Close: f.First(forex.ConvertToUsd(price.Close, currency, price.Date)),
-			High:  f.First(forex.ConvertToUsd(price.High, currency, price.Date)),
-			Low:   f.First(forex.ConvertToUsd(price.Low, currency, price.Date)),
-			Avg:   f.First(forex.ConvertToUsd(price.Avg, currency, price.Date)),
+			Date:         price.Date,
+			Open:         price.Open * rate,
+			Close:        price.Close * rate,
+			High:         price.High * rate,
+			Low:          price.Low * rate,
+			Avg:          price.Avg * rate,
+			YoY:          price.YoY,          // Preserve YoY percentage
+			SymbolTicker: price.SymbolTicker, // Preserve ticker
 		}
 	}
 
