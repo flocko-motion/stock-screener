@@ -56,87 +56,112 @@ func AppendSinglePrice(price types.PriceData, interval types.PriceInterval) erro
 	return err
 }
 
-// PutMonthlyPrices batch inserts monthly price data
+// PutMonthlyPrices batch inserts monthly price data using bulk INSERT
 func PutMonthlyPrices(prices []types.PriceData) error {
 	db := Db()
 	if len(prices) == 0 {
 		return nil
 	}
 
-	tx, err := db.conn.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	stmt, err := tx.Prepare(`
-		INSERT INTO monthly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		ON CONFLICT (date, symbol_ticker) DO UPDATE SET
-			open = EXCLUDED.open,
-			high = EXCLUDED.high,
-			low = EXCLUDED.low,
-			avg = EXCLUDED.avg,
-			close = EXCLUDED.close,
-			yoy = EXCLUDED.yoy
-	`)
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
-	defer stmt.Close()
-
-	for _, p := range prices {
-		_, err := stmt.Exec(p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
-		if err != nil {
-			return fmt.Errorf("failed to insert price for %s: %w", p.SymbolTicker, err)
+	// Build bulk INSERT with all VALUES in one query
+	// Split into chunks of 1000 to avoid parameter limits
+	chunkSize := 1000
+	for i := 0; i < len(prices); i += chunkSize {
+		end := i + chunkSize
+		if end > len(prices) {
+			end = len(prices)
 		}
-	}
+		chunk := prices[i:end]
 
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		// Build VALUES list: ($1,$2,...), ($9,$10,...), ...
+		valueStrings := make([]string, 0, len(chunk))
+		valueArgs := make([]interface{}, 0, len(chunk)*8)
+		
+		for idx, p := range chunk {
+			paramOffset := idx * 8
+			valueStrings = append(valueStrings, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
+				paramOffset+1, paramOffset+2, paramOffset+3, paramOffset+4,
+				paramOffset+5, paramOffset+6, paramOffset+7, paramOffset+8))
+			valueArgs = append(valueArgs, p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
+		}
+
+		query := fmt.Sprintf(`
+			INSERT INTO monthly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
+			VALUES %s
+			ON CONFLICT (date, symbol_ticker) DO UPDATE SET
+				open = EXCLUDED.open,
+				high = EXCLUDED.high,
+				low = EXCLUDED.low,
+				avg = EXCLUDED.avg,
+				close = EXCLUDED.close,
+				yoy = EXCLUDED.yoy
+		`, joinStrings(valueStrings, ","))
+
+		_, err := db.conn.Exec(query, valueArgs...)
+		if err != nil {
+			return fmt.Errorf("failed to batch insert monthly prices: %w", err)
+		}
 	}
 
 	return nil
 }
 
-// PutWeeklyPrices batch inserts weekly price data
+func joinStrings(strs []string, sep string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+	result := strs[0]
+	for i := 1; i < len(strs); i++ {
+		result += sep + strs[i]
+	}
+	return result
+}
+
+// PutWeeklyPrices batch inserts weekly price data using bulk INSERT
 func PutWeeklyPrices(prices []types.PriceData) error {
 	db := Db()
 	if len(prices) == 0 {
 		return nil
 	}
 
-	tx, err := db.conn.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	stmt, err := tx.Prepare(`
-		INSERT INTO weekly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		ON CONFLICT (date, symbol_ticker) DO UPDATE SET
-			open = EXCLUDED.open,
-			high = EXCLUDED.high,
-			low = EXCLUDED.low,
-			avg = EXCLUDED.avg,
-			close = EXCLUDED.close,
-			yoy = EXCLUDED.yoy
-	`)
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
-	defer stmt.Close()
-
-	for _, p := range prices {
-		_, err := stmt.Exec(p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
-		if err != nil {
-			return fmt.Errorf("failed to insert price for %s: %w", p.SymbolTicker, err)
+	// Build bulk INSERT with all VALUES in one query
+	// Split into chunks of 1000 to avoid parameter limits
+	chunkSize := 1000
+	for i := 0; i < len(prices); i += chunkSize {
+		end := i + chunkSize
+		if end > len(prices) {
+			end = len(prices)
 		}
-	}
+		chunk := prices[i:end]
 
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		// Build VALUES list: ($1,$2,...), ($9,$10,...), ...
+		valueStrings := make([]string, 0, len(chunk))
+		valueArgs := make([]interface{}, 0, len(chunk)*8)
+		
+		for idx, p := range chunk {
+			paramOffset := idx * 8
+			valueStrings = append(valueStrings, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
+				paramOffset+1, paramOffset+2, paramOffset+3, paramOffset+4,
+				paramOffset+5, paramOffset+6, paramOffset+7, paramOffset+8))
+			valueArgs = append(valueArgs, p.Date, p.Open, p.High, p.Low, p.Avg, p.Close, p.YoY, p.SymbolTicker)
+		}
+
+		query := fmt.Sprintf(`
+			INSERT INTO weekly_prices (date, open, high, low, avg, close, yoy, symbol_ticker)
+			VALUES %s
+			ON CONFLICT (date, symbol_ticker) DO UPDATE SET
+				open = EXCLUDED.open,
+				high = EXCLUDED.high,
+				low = EXCLUDED.low,
+				avg = EXCLUDED.avg,
+				close = EXCLUDED.close,
+				yoy = EXCLUDED.yoy
+		`, joinStrings(valueStrings, ","))
+
+		_, err := db.conn.Exec(query, valueArgs...)
+		if err != nil {
+			return fmt.Errorf("failed to batch insert weekly prices: %w", err)
+		}
 	}
 
 	return nil

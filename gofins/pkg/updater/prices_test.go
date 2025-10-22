@@ -14,10 +14,10 @@ import (
 func TestUpdatePrices(t *testing.T) {
 	log := NewLoggerTest("PricesTest")
 	config := PriceUpdateConfig{
-		Workers:         1,
-		BatchSize:       1,
+		Workers:         8,
+		BatchSize:       1000,
 		WriteToDb:       true,
-		EnableProfiling: true,
+		EnableProfiling: false,
 	}
 	err := updatePricesImpl(log, config)
 	if err != nil {
@@ -31,8 +31,9 @@ func TestFetchPrices(t *testing.T) {
 	ticker := "AAPL"
 
 	// Call updatePrices - uses db.Db() singleton internally
+	log := NewLoggerTest("FetchTest")
 	config := PriceUpdateConfig{WriteToDb: false, EnableProfiling: false}
-	symbol, monthly, weekly, _ := updatePrices(types.Symbol{Ticker: ticker}, config)
+	symbol, monthly, weekly, _ := updatePrices(types.Symbol{Ticker: ticker}, config, log)
 
 	assert.Equal(t, ticker, symbol.Ticker)
 	assert.NotNil(t, symbol.LastPriceStatus)
@@ -65,9 +66,10 @@ func TestFetchPricesCurrencyConversion(t *testing.T) {
 	fmt.Printf("currency: %v\n", symbolEUR.Currency)
 
 	// Fetch prices for both tickers (test mode - no DB writes)
+	log := NewLoggerTest("CurrTest")
 	config := PriceUpdateConfig{WriteToDb: false, EnableProfiling: false}
-	_, monthlyUSD, weeklyUSD, _ := updatePrices(*symbolUSD, config)
-	_, monthlyEUR, weeklyEUR, _ := updatePrices(*symbolEUR, config)
+	_, monthlyUSD, weeklyUSD, _ := updatePrices(*symbolUSD, config, log)
+	_, monthlyEUR, weeklyEUR, _ := updatePrices(*symbolEUR, config, log)
 
 	// Both should have data
 	assert.NotEmpty(t, monthlyUSD)

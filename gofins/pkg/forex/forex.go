@@ -2,11 +2,8 @@ package forex
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 	"time"
 
-	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -26,10 +23,16 @@ func ConvertToUsd(amount float64, currency string, date time.Time) (float64, err
 		return amount, nil
 	}
 
-	ts, err := getCachedForex(currency)
+	ts, err := GetCachedForex(currency)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get forex data for %s: %w", currency, err)
 	}
+	
+	return ConvertToUsdWithTimeSeries(amount, ts, date)
+}
+
+// ConvertToUsdWithTimeSeries converts using pre-fetched forex data (avoids mutex lock)
+func ConvertToUsdWithTimeSeries(amount float64, ts *ForexTimeSeries, date time.Time) (float64, error) {
 
 	if date.After(ts.TimeTo) && date.Sub(ts.TimeTo) <= 7*24*time.Hour {
 		date = ts.TimeTo
@@ -44,21 +47,15 @@ func ConvertToUsd(amount float64, currency string, date time.Time) (float64, err
 		}
 
 		if !exists {
-			keys := f.Keys(ts.Data)
-			keyStrs := make([]string, len(keys))
-			for i, k := range keys {
-				keyStrs[i] = k.Format("2006-01-02")
-			}
-			slices.Sort(keyStrs)
-			return 0, fmt.Errorf("no forex data for %s at %s, available keys: %s", currency, date.Format("2006-01-02"), strings.Join(keyStrs, ", "))
+			return 0, fmt.Errorf("no forex data at %s", date.Format("2006-01-02"))
 		}
 	}
 
 	return amount * priceData.Close, nil
 }
 
-// getCachedForex retrieves forex data from cache, fetching if necessary
-func getCachedForex(currency string) (*ForexTimeSeries, error) {
+// GetCachedForex retrieves forex data from cache, fetching if necessary
+func GetCachedForex(currency string) (*ForexTimeSeries, error) {
 	if globalCache == nil {
 		initCache()
 	}

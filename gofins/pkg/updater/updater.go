@@ -25,7 +25,9 @@ func NewLoggerTest(prefix string) *Logger {
 }
 
 func (l *Logger) Printf(format string, args ...interface{}) {
-	fmt.Printf("[%s] "+format, append([]interface{}{l.prefix}, args...)...)
+	timestamp := time.Now().Format("15:04:05.000")
+	message := fmt.Sprintf(format, args...)
+	fmt.Printf("[%s][%s] %s", timestamp, l.prefix, message)
 }
 
 func (l *Logger) Started(total, workers int) {
