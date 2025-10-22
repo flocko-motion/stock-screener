@@ -3,6 +3,8 @@ package updater
 import (
 	"context"
 	"time"
+
+	"github.com/flocko-motion/gofins/pkg/f"
 )
 
 // RunAllUpdaters runs all updaters in sequence: symbols -> profiles -> quotes -> prices -> dedupe
@@ -47,7 +49,7 @@ func RunAllUpdaters(ctx context.Context) {
 		}
 
 		cycleDuration := time.Since(cycleStart)
-		log.Printf("✓ Full cycle completed in %s\n", log.FormatDuration(cycleDuration))
+		log.Printf("✓ Full cycle completed in %s\n", f.DurationToString(cycleDuration))
 
 		// Sleep for 8 hours before next cycle
 		const sleepHours = 8

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
@@ -108,8 +109,7 @@ func dedupeByCIK(log *log.Logger) (int, int, error) {
 			remaining := totalGroups - groupCount
 			var eta string
 			if rate > 0 {
-				etaSeconds := float64(remaining) / rate
-				eta = log.FormatDuration(time.Duration(etaSeconds * float64(time.Second)))
+				eta = f.SecondsToString(float64(remaining) / rate)
 			} else {
 				eta = "unknown"
 			}
@@ -200,8 +200,7 @@ func dedupeByName(log *log.Logger) (int, int, error) {
 			remaining := totalGroups - groupCount
 			var eta string
 			if rate > 0 {
-				etaSeconds := float64(remaining) / rate
-				eta = log.FormatDuration(time.Duration(etaSeconds * float64(time.Second)))
+				eta = f.SecondsToString(float64(remaining) / rate)
 			} else {
 				eta = "unknown"
 			}
