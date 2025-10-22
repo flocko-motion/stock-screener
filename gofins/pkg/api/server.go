@@ -33,40 +33,56 @@ func NewServer(database *db.DB, port int) *Server {
 		// Health
 		r.Get("/health", s.handleHealth)
 
-		// Symbols
+		// Symbols (public - no user context needed)
 		r.Get("/symbols", s.handleListSymbols)
 		r.Get("/symbols/active", s.handleListActiveSymbols)
-		r.Get("/symbols/favorites", s.handleListFavoriteSymbols)
 		r.Get("/symbol/{ticker}", s.handleGetSymbol)
 		r.Get("/symbol/{ticker}/chart", s.handleSymbolChartRoute)
 		r.Get("/symbol/{ticker}/histogram", s.handleSymbolHistogramRoute)
 
-		// Prices
+		// Prices (public)
 		r.Get("/prices/monthly/{ticker}", s.handleGetMonthlyPrices)
 		r.Get("/prices/weekly/{ticker}", s.handleGetWeeklyPrices)
 
-		// Analyses
-		r.Get("/analyses", s.handleAnalyses)
-		r.Post("/analyses", s.handleAnalyses)
-		r.Get("/analysis/{id}", s.handleAnalysisRouting)
-		r.Put("/analysis/{id}", s.handleAnalysisRouting)
-		r.Delete("/analysis/{id}", s.handleAnalysisRouting)
+		// Admin-only routes (require admin user from config)
+		r.Group(func(r chi.Router) {
+			r.Use(userMiddleware)
+			r.Use(adminOnlyMiddleware)
 
-		// User data
-		r.Get("/favorites", s.handleFavorites)
-		r.Post("/favorites/{ticker}", s.handleFavorites)
-		r.Get("/ratings", s.handleRatings)
-		r.Get("/ratings/{ticker}", s.handleRatings)
-		r.Post("/ratings/{ticker}", s.handleRatings)
-		r.Get("/ratings/{ticker}/history", s.handleRatingHistory)
-		r.Delete("/ratings/{id}", s.handleDeleteRating)
+			// Errors
+			r.Get("/errors", s.handleListErrors)
+			r.Delete("/errors", s.handleClearErrors)
+		})
 
-		// Errors
-		r.Get("/errors", s.handleListErrors)
-		r.Delete("/errors", s.handleClearErrors)
+		// User-specific routes (require user context)
+		r.Group(func(r chi.Router) {
+			r.Use(userMiddleware)
 
-		// Notes
-		r.Get("/notes", s.handleListNotes)
+			// User info
+			r.Get("/user", s.handleGetCurrentUser)
+
+			// Analyses
+			r.Get("/analyses", s.handleAnalyses)
+			r.Post("/analyses", s.handleAnalyses)
+			r.Get("/analysis/{id}", s.handleAnalysisRouting)
+			r.Put("/analysis/{id}", s.handleAnalysisRouting)
+			r.Delete("/analysis/{id}", s.handleAnalysisRouting)
+
+			// Favorites
+			r.Get("/symbols/favorites", s.handleListFavoriteSymbols)
+			r.Get("/favorites", s.handleFavorites)
+			r.Post("/favorites/{ticker}", s.handleFavorites)
+
+			// Ratings
+			r.Get("/ratings", s.handleRatings)
+			r.Get("/ratings/{ticker}", s.handleRatings)
+			r.Post("/ratings/{ticker}", s.handleRatings)
+			r.Get("/ratings/{ticker}/history", s.handleRatingHistory)
+			r.Delete("/ratings/{id}", s.handleDeleteRating)
+
+			// Notes
+			r.Get("/notes", s.handleListNotes)
+		})
 	})
 
 	s.server = &http.Server{
