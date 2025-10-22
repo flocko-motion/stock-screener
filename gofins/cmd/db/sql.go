@@ -130,7 +130,13 @@ func executeSelectQuery(database *db.DB, query string) error {
 			if val == nil {
 				str = "NULL"
 			} else {
-				str = fmt.Sprintf("%v", val)
+				// Handle byte arrays (convert to string)
+				switch v := val.(type) {
+				case []byte:
+					str = string(v)
+				default:
+					str = fmt.Sprintf("%v", v)
+				}
 			}
 			// Truncate if too long
 			if len(str) > 20 {

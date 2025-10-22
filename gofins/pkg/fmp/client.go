@@ -1,12 +1,16 @@
 package fmp
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +22,66 @@ import (
 
 func logf(format string, args ...interface{}) {
 	fmt.Printf("[FMP] "+format, args...)
+}
+
+func init() {
+	// Clean up cache files older than 7 days at startup
+	cleanupOldCache()
+}
+
+// getCacheDir returns the cache directory path
+func getCacheDir() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(homeDir, ".gofins", "cache"), nil
+}
+
+// cleanupOldCache removes cache files older than 7 days
+func cleanupOldCache() {
+	cacheDir, err := getCacheDir()
+	if err != nil {
+		return // Silently fail - cache cleanup is not critical
+	}
+	
+	// Check if cache directory exists
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
+		return // No cache directory, nothing to clean
+	}
+	
+	// Read all files in cache directory
+	entries, err := os.ReadDir(cacheDir)
+	if err != nil {
+		return // Silently fail
+	}
+	
+	now := time.Now()
+	maxAge := 7 * 24 * time.Hour
+	removedCount := 0
+	
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+		
+		// Check if file is older than 7 days
+		if now.Sub(info.ModTime()) > maxAge {
+			filePath := filepath.Join(cacheDir, entry.Name())
+			if err := os.Remove(filePath); err == nil {
+				removedCount++
+			}
+		}
+	}
+	
+	if removedCount > 0 {
+		logf("Cleaned up %d old cache files\n", removedCount)
+	}
 }
 
 const (
@@ -188,8 +252,95 @@ func (c *Client) buildURL(endpoint string, params map[string]string) (string, er
 	return u.String(), nil
 }
 
+// getCacheKey generates a cache key from endpoint, params, and current date
+func getCacheKey(endpoint string, params map[string]string) string {
+	// Get current date (YYYY-MM-DD)
+	date := time.Now().Format("2006-01-02")
+	
+	// Sort params alphabetically for consistent hashing
+	var keys []string
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	
+	// Build string to hash: endpoint + sorted params + date
+	var sb strings.Builder
+	sb.WriteString(endpoint)
+	for _, k := range keys {
+		sb.WriteString("|")
+		sb.WriteString(k)
+		sb.WriteString("=")
+		sb.WriteString(params[k])
+	}
+	sb.WriteString("|")
+	sb.WriteString(date)
+	
+	// Hash it
+	hash := sha256.Sum256([]byte(sb.String()))
+	return hex.EncodeToString(hash[:])
+}
+
+// getCachePath returns the cache file path for a given cache key
+func getCachePath(cacheKey string) (string, error) {
+	cacheDir, err := getCacheDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(cacheDir, cacheKey), nil
+}
+
+// readFromCache attempts to read cached response
+func readFromCache(cacheKey string) ([]byte, error) {
+	cachePath, err := getCachePath(cacheKey)
+	if err != nil {
+		return nil, err
+	}
+	
+	data, err := os.ReadFile(cachePath)
+	if err != nil {
+		return nil, err // Cache miss or read error
+	}
+	
+	return data, nil
+}
+
+// writeToCache writes response data to cache
+func writeToCache(cacheKey string, data []byte) error {
+	cachePath, err := getCachePath(cacheKey)
+	if err != nil {
+		return err
+	}
+	
+	// Create cache directory if it doesn't exist
+	cacheDir := filepath.Dir(cachePath)
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		return err
+	}
+	
+	return os.WriteFile(cachePath, data, 0644)
+}
+
 // apiGetRaw makes a GET request and returns the raw response body (for non-JSON endpoints like CSV)
+// Automatically caches responses based on endpoint, params, and date
 func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCloser, error) {
+	// Generate cache key
+	cacheKey := getCacheKey(endpoint, params)
+	
+	// Try to read from cache first
+	if cachedData, err := readFromCache(cacheKey); err == nil {
+		// Check if this is a cached error
+		if strings.HasPrefix(string(cachedData), "ERROR:") {
+			errorMsg := strings.TrimPrefix(string(cachedData), "ERROR:")
+			logf("⚡ Cache HIT (error cached) for %s - returning cached error\n", endpoint)
+			return nil, fmt.Errorf("%s", errorMsg)
+		}
+		logf("⚡ Cache HIT for %s - %d bytes\n", endpoint, len(cachedData))
+		return io.NopCloser(strings.NewReader(string(cachedData))), nil
+	}
+	
+	logf("Cache MISS for %s - fetching from API\n", endpoint)
+	
 	// Build URL with parameters
 	reqURL, err := c.buildURL(endpoint, params)
 	if err != nil {
@@ -207,15 +358,38 @@ func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCl
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
+	// Read response body
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+
 	// Check status code
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		return nil, fmt.Errorf("API error: status %d - %s", resp.StatusCode, string(body))
+		errorMsg := fmt.Sprintf("API error: status %d - %s", resp.StatusCode, string(body))
+		
+		// Cache 400 errors (invalid parameters, end of pagination, etc.)
+		if resp.StatusCode == http.StatusBadRequest {
+			cachedError := []byte("ERROR:" + errorMsg)
+			if err := writeToCache(cacheKey, cachedError); err != nil {
+				logf("Warning: failed to cache error: %v\n", err)
+			}
+		}
+		
+		return nil, fmt.Errorf("%s", errorMsg)
 	}
 
 	c.rateLimiter.LogRequest(endpoint, "ok")
-	return resp.Body, nil
+	
+	// Write successful response to cache (ignore errors - caching is best-effort)
+	if err := writeToCache(cacheKey, body); err != nil {
+		logf("Warning: failed to write to cache: %v\n", err)
+	}
+	
+	// Sleep for 30 seconds to be nice to the API
+	logf("Sleeping 30s to be nice to the API...\n")
+	time.Sleep(30 * time.Second)
+	
+	// Return the body as a ReadCloser
+	return io.NopCloser(strings.NewReader(string(body))), nil
 }
 
 // handleResponse processes the HTTP response

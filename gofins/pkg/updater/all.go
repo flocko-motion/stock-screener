@@ -23,12 +23,12 @@ func RunAllUpdaters(ctx context.Context) {
 
 		// Step 2: Update profiles
 		log.Printf("Step 2/4: Updating profiles...\n")
-		if err := UpdateProfilesBatch(ctx, log); err != nil {
+		if err := UpdateProfilesBatch(ctx, NewLogger("ProfileBatch")); err != nil {
 			log.Error("Profile update failed: %v\n", err)
 		}
 
 		// once we have all profiles we can update EOD quotes
-		go RunQuoteUpdater(ctx, nil, log)
+		go RunQuoteUpdater(ctx, nil, NewLogger("QuoteBatch"))
 
 		// Step 3: Update prices
 		log.Printf("Step 3/4: Updating prices...\n")
