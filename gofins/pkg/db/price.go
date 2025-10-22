@@ -31,6 +31,31 @@ func GetOldestPriceDate(ticker string) (*time.Time, error) {
 	return oldestDate, nil
 }
 
+// AppendSinglePrice adds a single price point to the price history
+// Used for incremental updates when we just need to add the latest period
+func AppendSinglePrice(price types.PriceData, interval types.PriceInterval) error {
+	db := Db()
+	tableName := string(interval) + "_prices"
+	
+	query := fmt.Sprintf(`
+		INSERT INTO %s (symbol_ticker, date, open, high, low, avg, close, yoy)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (symbol_ticker, date) DO UPDATE SET
+			open = EXCLUDED.open,
+			high = EXCLUDED.high,
+			low = EXCLUDED.low,
+			avg = EXCLUDED.avg,
+			close = EXCLUDED.close,
+			yoy = EXCLUDED.yoy
+	`, tableName)
+	
+	_, err := db.conn.Exec(query,
+		price.SymbolTicker, price.Date, price.Open, price.High, price.Low,
+		price.Avg, price.Close, price.YoY)
+	
+	return err
+}
+
 // PutMonthlyPrices batch inserts monthly price data
 func PutMonthlyPrices(prices []types.PriceData) error {
 	db := Db()
@@ -155,6 +180,30 @@ func GetMonthlyPrices(ticker string, from, to time.Time) ([]types.PriceData, err
 // GetWeeklyPrices retrieves weekly prices for a symbol
 func GetWeeklyPrices(ticker string, from, to time.Time) ([]types.PriceData, error) {
 	return GetPrices(ticker, from, to, types.IntervalWeekly)
+}
+
+// GetLatestPriceDate returns the most recent price date for a symbol at the specified interval
+// Returns nil if no prices exist
+func GetLatestPriceDate(ticker string, interval types.PriceInterval) (*time.Time, error) {
+	db := Db()
+	tableName := string(interval) + "_prices"
+	
+	query := fmt.Sprintf(`
+		SELECT MAX(date) 
+		FROM %s
+		WHERE symbol_ticker = $1
+	`, tableName)
+	
+	var latestDate *time.Time
+	err := db.conn.QueryRow(query, ticker).Scan(&latestDate)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	
+	return latestDate, nil
 }
 
 // GetPricesBatch retrieves price data for multiple symbols in a single query

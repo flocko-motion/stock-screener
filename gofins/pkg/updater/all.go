@@ -5,39 +5,43 @@ import (
 	"time"
 )
 
-// RunAllUpdaters runs all updaters in sequence: symbols -> profiles -> prices -> dedupe
+// RunAllUpdaters runs all updaters in sequence: symbols -> profiles -> quotes -> prices -> dedupe
+// Quotes must run before prices to enable incremental price updates
 // After completing a full cycle, it sleeps for 8 hours before repeating
 func RunAllUpdaters(ctx context.Context) {
 	log := NewLogger("All")
-	log.Printf("Starting all updaters (symbols -> profiles -> prices -> dedupe)\n")
+	log.Printf("Starting all updaters (symbols -> profiles -> quotes -> prices -> dedupe)\n")
 
 	for {
 		log.Printf("Starting full update cycle...\n")
 		cycleStart := time.Now()
 
 		// Step 1: Sync symbols
-		log.Printf("Step 1/4: Syncing symbols...\n")
+		log.Printf("Step 1/5: Syncing symbols...\n")
 		if err := SyncSymbolsOnce(); err != nil {
 			log.Error("Symbol sync failed: %v\n", err)
 		}
 
 		// Step 2: Update profiles
-		log.Printf("Step 2/4: Updating profiles...\n")
+		log.Printf("Step 2/5: Updating profiles...\n")
 		if err := UpdateProfilesBatch(ctx, NewLogger("ProfileBatch")); err != nil {
 			log.Error("Profile update failed: %v\n", err)
 		}
 
-		// once we have all profiles we can update EOD quotes
-		go RunQuoteUpdater(ctx, nil, NewLogger("QuoteBatch"))
+		// Step 3: Update EOD quotes (must run before prices for incremental updates)
+		log.Printf("Step 3/5: Updating quotes...\n")
+		if err := UpdateQuotesOnce(ctx); err != nil {
+			log.Error("Quote update failed: %v\n", err)
+		}
 
-		// Step 3: Update prices
-		log.Printf("Step 3/4: Updating prices...\n")
+		// Step 4: Update prices (can now use incremental updates from quotes)
+		log.Printf("Step 4/5: Updating prices...\n")
 		if err := UpdatePricesOnce(); err != nil {
 			log.Error("Price update failed: %v\n", err)
 		}
 
-		// Step 4: Deduplicate
-		log.Printf("Step 4/4: Deduplicating symbols...\n")
+		// Step 5: Deduplicate
+		log.Printf("Step 5/5: Deduplicating symbols...\n")
 		if err := DedupeSymbolsOnce(); err != nil {
 			log.Error("Deduplication failed: %v\n", err)
 		}

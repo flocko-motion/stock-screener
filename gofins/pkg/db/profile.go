@@ -18,22 +18,22 @@ func PutSymbols(symbols []types.Symbol) error {
 
 	const batchSize = 1000
 	totalSymbols := len(symbols)
-	
+
 	logf("Updating %d symbols in batches of %d...\n", totalSymbols, batchSize)
-	
+
 	// Process in batches
 	for i := 0; i < totalSymbols; i += batchSize {
 		end := i + batchSize
 		if end > totalSymbols {
 			end = totalSymbols
 		}
-		
+
 		batch := symbols[i:end]
-		
+
 		if err := putSymbolsBatch(batch); err != nil {
 			return fmt.Errorf("failed to insert batch %d-%d: %w", i+1, end, err)
 		}
-		
+
 		// Log progress every batch
 		logf("  Progress: %d/%d symbols (%.1f%%)\n", end, totalSymbols, float64(end)/float64(totalSymbols)*100)
 	}
@@ -484,8 +484,41 @@ func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
 	return result.RowsAffected()
 }
 
-// UpdateQuoteBatch updates current prices for a batch of symbols
-func UpdateQuoteBatch(quotes []types.Symbol) error {
+// UpdateQuotes updates current prices for symbols using batched transactions
+// Automatically handles large datasets by batching into chunks of 1000 symbols
+func UpdateQuotes(quotes []types.Symbol) error {
+	if len(quotes) == 0 {
+		return nil
+	}
+
+	const batchSize = 1000
+	totalQuotes := len(quotes)
+
+	logf("Updating %d quotes in batches of %d...", totalQuotes, batchSize)
+
+	// Process in batches
+	for i := 0; i < totalQuotes; i += batchSize {
+		end := i + batchSize
+		if end > totalQuotes {
+			end = totalQuotes
+		}
+
+		batch := quotes[i:end]
+
+		if err := updateQuotesBatch(batch); err != nil {
+			return fmt.Errorf("failed to update batch %d-%d: %w", i+1, end, err)
+		}
+
+		// Log progress every batch
+		logf("  Progress: %d/%d quotes (%.1f%%)", end, totalQuotes, float64(end)/float64(totalQuotes)*100)
+	}
+
+	logf("✓ Completed updating %d quotes", totalQuotes)
+	return nil
+}
+
+// updateQuotesBatch updates a single batch of quotes in one transaction
+func updateQuotesBatch(quotes []types.Symbol) error {
 	db := Db()
 
 	// Use a transaction for batch updates

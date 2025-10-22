@@ -164,9 +164,19 @@ func StartOfDay(date time.Time) time.Time {
 	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 }
 
+// IsStartOfWeek returns true if the given date is a Monday (start of week)
+func IsStartOfWeek(date time.Time) bool {
+	return date.Weekday() == time.Monday
+}
+
+// IsStartOfMonth returns true if the given date is the 1st of the month
+func IsStartOfMonth(date time.Time) bool {
+	return date.Day() == 1
+}
+
 // ConvertForexPrices converts forex data to a single time series map
 // Takes first price of each period (no averaging needed for exchange rates)
-// Returns map keyed by date (week start Monday or month start) for efficient lookups
+// Returns map keyed by date (daily, week start Monday, or month start) for efficient lookups
 func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom time.Time, timeTo time.Time, data map[time.Time]types.PriceData) {
 	if len(forexData) == 0 {
 		return time.Time{}, time.Time{}, nil
@@ -174,11 +184,14 @@ func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom ti
 
 	data = make(map[time.Time]types.PriceData)
 
-	for i, fx := range forexData {
+	for _, fx := range forexData {
 		date, err := time.Parse("2006-01-02", fx.Date)
 		if err != nil {
 			continue
 		}
+
+		date = StartOfDay(date)
+
 		if timeFrom.IsZero() || date.Before(timeFrom) {
 			timeFrom = date
 		}
@@ -186,25 +199,10 @@ func ConvertForexPrices(forexData []fmp.ForexData, currency string) (timeFrom ti
 			timeTo = date
 		}
 
-		// Monthly and weekly - take first price of each period
-		monthStart := StartOfMonth(date)
-		weekStart := StartOfWeek(date)
-
-		priceData := types.PriceData{
+		data[date] = types.PriceData{
+			Date:         date,
 			Close:        fx.Price,
 			SymbolTicker: currency,
-		}
-
-		if _, exists := data[monthStart]; !exists {
-			priceData.Date = monthStart
-			data[monthStart] = priceData
-		}
-		if _, exists := data[weekStart]; !exists {
-			priceData.Date = weekStart
-			data[weekStart] = priceData
-		}
-		if i == len(forexData)-1 {
-			data[StartOfDay(date)] = priceData
 		}
 	}
 

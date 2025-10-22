@@ -56,13 +56,13 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 	quotes := convertQuotesToUSD(bulkQuotes, symbolCurrencies, weekStart, log)
 	log.Printf("  Converted %d quotes to USD\n", len(quotes))
 
-	// Update database in batches
-	updated, err := updateQuotesInBatches(quotes, log)
-	if err != nil {
+	// Update database (batching handled in db.UpdateQuotes)
+	if err := db.UpdateQuotes(quotes); err != nil {
 		log.Error("Failed to update quotes: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to update quotes: %v", err))
 		return fmt.Errorf("failed to update quotes: %w", err)
 	}
+	updated := len(quotes)
 
 	// Complete batch update log
 	if err := db.CompleteBatchUpdate(logID, len(bulkQuotes), updated); err != nil {
@@ -95,8 +95,8 @@ func convertQuotesToUSD(bulkQuotes map[string]*types.PriceData, symbolCurrencies
 			if err != nil {
 				conversionErrors++
 				// Log to database for persistence
-				_ = db.LogError("updater.quote", "conversion_error", 
-					fmt.Sprintf("Failed to convert %s from %s to USD: %v", symbol, currency, err), 
+				_ = db.LogError("updater.quote", "conversion_error",
+					fmt.Sprintf("Failed to convert %s from %s to USD: %v", symbol, currency, err),
 					nil)
 				continue
 			}
@@ -117,28 +117,11 @@ func convertQuotesToUSD(bulkQuotes map[string]*types.PriceData, symbolCurrencies
 	return quotes
 }
 
-// updateQuotesInBatches updates quotes in the database in batches
-func updateQuotesInBatches(quotes []types.Symbol, log *Logger) (int, error) {
-	totalUpdated := 0
-
-	for i := 0; i < len(quotes); i += QuoteBatchSize {
-		end := i + QuoteBatchSize
-		if end > len(quotes) {
-			end = len(quotes)
-		}
-
-		batch := quotes[i:end]
-
-		// Update batch using database module
-		if err := db.UpdateQuoteBatch(batch); err != nil {
-			return totalUpdated, fmt.Errorf("failed to update batch %d-%d: %w", i+1, end, err)
-		}
-
-		totalUpdated += len(batch)
-		log.Printf("Updated batch %d-%d (%d/%d symbols)\n", i+1, end, totalUpdated, len(quotes))
-	}
-
-	return totalUpdated, nil
+// UpdateQuotesOnce runs a single quote update for yesterday's date
+func UpdateQuotesOnce(ctx context.Context) error {
+	log := NewLogger("Quotes")
+	yesterday := time.Now().AddDate(0, 0, -1)
+	return UpdateQuotes(ctx, yesterday, log)
 }
 
 // RunQuoteUpdater runs the quote updater in a loop
