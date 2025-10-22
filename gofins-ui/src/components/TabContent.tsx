@@ -5,9 +5,10 @@ import SymbolView from './SymbolView';
 import SymbolList from './SymbolList';
 import ErrorsView from './ErrorsView';
 import NotesView from './NotesView';
+import FavoritesView from './FavoritesView';
 
 interface TabContentProps {
-    tabType: 'analyses' | 'stocks' | 'analysis' | 'symbol' | 'create' | 'errors' | 'notes';
+    tabType: 'analyses' | 'stocks' | 'analysis' | 'symbol' | 'create' | 'errors' | 'notes' | 'favorites';
     data?: any;
     onOpenAnalysis?: (id: string, name: string) => void;
     onOpenSymbol?: (symbol: string) => void;
@@ -37,6 +38,8 @@ export default function TabContent({ tabType, data, onOpenAnalysis, onOpenSymbol
             return <ErrorsView />;
         case 'notes':
             return <NotesView onOpenSymbol={onOpenSymbol} />;
+        case 'favorites':
+            return <FavoritesView onOpenSymbol={onOpenSymbol} />;
         default:
             return <div>Unknown tab type</div>;
     }

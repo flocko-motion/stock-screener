@@ -32,11 +32,12 @@ Fixed by ensuring filter values from sessionStorage are always strings, not arra
 - DONE: Ratings sorted chronologically (oldest→newest) to show opinion evolution
 - DONE: Added API endpoints: GET /ratings/{ticker}/history and DELETE /ratings/{id}
 
-## Tab "Favorites"
-
-- tab by favourites sorted by rating
-- same filter box as standard stocks list
-- filter box should be made foldable, so that it doesn't take up too much space in a default view
+## ✅ Tab "Favorites"
+- DONE: Tab showing favorite stocks
+- DONE: Uses same SymbolList component with defaultFavoritesOnly=true
+- DONE: Filter box is now collapsible (Show/Hide Filters button)
+- DONE: Filters collapsed by default to save space
+- DONE: All stock lists now have collapsible filters
 
 ## Beta correlation
 

@@ -132,10 +132,21 @@ export default function NotesView({ onOpenSymbol }: NotesViewProps) {
                         const tickerNotes = groupedNotes[ticker];
                         const latestNote = tickerNotes[tickerNotes.length - 1]; // Last note is latest (oldest→newest sort)
                         
+                        // Determine border color based on rating
+                        const getBorderColor = (rating: number) => {
+                            if (rating >= 4) return 'border-t-green-500';
+                            if (rating >= 2) return 'border-t-green-400';
+                            if (rating >= 1) return 'border-t-green-300';
+                            if (rating === 0) return 'border-t-gray-400';
+                            if (rating >= -1) return 'border-t-red-300';
+                            if (rating >= -3) return 'border-t-red-400';
+                            return 'border-t-red-500';
+                        };
+                        
                         return (
                             <div
                                 key={ticker}
-                                className="border border-gray-200 bg-white rounded-lg p-4 hover:shadow-md transition"
+                                className={`border border-gray-200 border-t-4 ${getBorderColor(latestNote.rating)} bg-white rounded-lg p-4 hover:shadow-md transition`}
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 interface Symbol {
     ticker: string;
@@ -20,6 +21,7 @@ interface SymbolListProps {
     endpoint: string;
     description: string;
     onOpenSymbol?: (symbol: string) => void;
+    defaultFavoritesOnly?: boolean;
 }
 
 // Cache for symbol lists by endpoint
@@ -27,7 +29,7 @@ const symbolCache: Record<string, Symbol[]> = {};
 // Track ongoing fetches to prevent duplicates
 const fetchingCache: Record<string, boolean> = {};
 
-export default function SymbolList({ endpoint, description, onOpenSymbol }: SymbolListProps) {
+export default function SymbolList({ endpoint, description, onOpenSymbol, defaultFavoritesOnly = false }: SymbolListProps) {
     const [symbols, setSymbols] = useState<Symbol[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,8 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const [inceptionMax, setInceptionMax] = useState(filters.inceptionMax || '');
     const [oldestPriceMin, setOldestPriceMin] = useState(filters.oldestPriceMin || '');
     const [oldestPriceMax, setOldestPriceMax] = useState(filters.oldestPriceMax || '');
-    const [favoritesOnly, setFavoritesOnly] = useState(filters.favoritesOnly || false);
+    const [favoritesOnly, setFavoritesOnly] = useState(filters.favoritesOnly ?? defaultFavoritesOnly);
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
     const [ratingMin, setRatingMin] = useState(filters.ratingMin || '');
     const [ratingMax, setRatingMax] = useState(filters.ratingMax || '');
     const [sortColumn, setSortColumn] = useState<keyof Symbol>(filters.sortColumn || 'ticker');
@@ -304,9 +307,19 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     return (
         <div className="max-w-7xl mx-auto">
             <div className="mb-4">
-                <p className="text-gray-600 text-sm mb-3">{description}</p>
+                <div className="flex items-center justify-between mb-3">
+                    <p className="text-gray-600 text-sm">{description}</p>
+                    <button
+                        onClick={() => setFiltersExpanded(!filtersExpanded)}
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded transition"
+                    >
+                        {filtersExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                        {filtersExpanded ? 'Hide' : 'Show'} Filters
+                    </button>
+                </div>
 
                 {/* Filters */}
+                {filtersExpanded && (<>
                 <div className="grid grid-cols-4 gap-2 mb-2">
                     <input
                         type="text"
@@ -406,6 +419,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
                         Reset Filters
                     </button>
                 </div>
+                </>)}
             </div>
 
             <div className="form-card">
