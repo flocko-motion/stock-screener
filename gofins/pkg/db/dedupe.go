@@ -66,6 +66,52 @@ func GetStockSymbolsWithoutCIK() ([]types.Symbol, error) {
 	return symbols, rows.Err()
 }
 
+// GetStockSymbolsForNameDedupe returns all stock symbols with names for name-based deduplication
+func GetStockSymbolsForNameDedupe() ([]types.Symbol, error) {
+	db := Db()
+	query := `
+		SELECT ticker, name, oldest_price, primary_listing
+		FROM symbols
+		WHERE (type = $1 OR type IS NULL)
+		  AND name IS NOT NULL
+		ORDER BY name, oldest_price ASC NULLS LAST
+	`
+
+	rows, err := db.conn.Query(query, types.TypeStock)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var symbols []types.Symbol
+	for rows.Next() {
+		s := types.Symbol{}
+		err := rows.Scan(&s.Ticker, &s.Name, &s.OldestPrice, &s.PrimaryListing)
+		if err != nil {
+			return nil, err
+		}
+		symbols = append(symbols, s)
+	}
+
+	return symbols, rows.Err()
+}
+
+// ResetPrimaryListings sets all primary_listing fields to NULL
+func ResetPrimaryListings() (int, error) {
+	db := Db()
+	result, err := db.conn.Exec(`UPDATE symbols SET primary_listing = NULL`)
+	if err != nil {
+		return 0, err
+	}
+	
+	count, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	
+	return int(count), nil
+}
+
 // UpdatePrimaryListingGroup updates primary_listing for a group of symbols
 // primaryTicker gets primary_listing = '', all others get primary_listing = primaryTicker
 func UpdatePrimaryListingGroup(primaryTicker string, secondaryTickers []string) error {

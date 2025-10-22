@@ -97,3 +97,19 @@ func GetLastBatchUpdate(updaterName string) (*BatchUpdateLog, error) {
 
 	return &log, nil
 }
+
+// DeleteBatchUpdate deletes all batch update logs for a given updater
+func DeleteBatchUpdate(updaterName string) error {
+	db := Db()
+
+	_, err := db.conn.Exec(`
+		DELETE FROM batch_update_log
+		WHERE updater_name = $1
+	`, updaterName)
+
+	if err != nil {
+		return fmt.Errorf("failed to delete batch update logs: %w", err)
+	}
+
+	return nil
+}

@@ -28,9 +28,30 @@ func SyncSymbolsOnce() error {
 }
 
 func syncSymbolsImpl(log *log.Logger) error {
+	// Check if we already ran today
+	lastRun, err := db.GetLastBatchUpdate("symbols")
+	if err == nil && lastRun != nil && lastRun.CompletedAt != nil {
+		today := time.Now().Truncate(24 * time.Hour)
+		lastRunDay := lastRun.CompletedAt.Truncate(24 * time.Hour)
+		if today.Equal(lastRunDay) {
+			log.Printf("Symbol sync already ran today at %s, skipping\n", lastRun.CompletedAt.Format("15:04:05"))
+			return nil
+		}
+	}
+
+	// Start batch log
+	batchID, err := db.StartBatchUpdate("symbols")
+	if err != nil {
+		log.Errorf("Failed to start batch log: %v\n", err)
+		// Continue anyway
+	}
+
 	// Fetch stocks
 	stocks, err := fmp.FetchStockList()
 	if err != nil {
+		if batchID > 0 {
+			db.FailBatchUpdate(batchID, err.Error())
+		}
 		return fmt.Errorf("failed to fetch stock list: %w", err)
 	}
 	log.Printf("✓ Fetched %d stocks from FMP\n", len(stocks))
@@ -120,5 +141,14 @@ func syncSymbolsImpl(log *log.Logger) error {
 	}
 
 	log.Printf("✓ Added %d new symbols\n", newCount)
+	
+	// Complete batch log
+	if batchID > 0 {
+		totalProcessed := len(allSymbols)
+		if err := db.CompleteBatchUpdate(batchID, totalProcessed, newCount); err != nil {
+			log.Errorf("Failed to complete batch log: %v\n", err)
+		}
+	}
+	
 	return nil
 }

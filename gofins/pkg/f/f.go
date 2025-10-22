@@ -32,6 +32,38 @@ func MaybeToString[T any](value *T, ifNil string) string {
 	return fmt.Sprintf("%v", *value)
 }
 
+// MaybeBoolToString converts a nullable bool to a string, returning ifNil if the value is nil
+func MaybeBoolToString(value *bool, ifNil string) string {
+	if value == nil {
+		return ifNil
+	}
+	return fmt.Sprintf("%t", *value)
+}
+
+// MaybeDateToString converts a nullable time.Time to a formatted string, returning ifNil if the value is nil
+func MaybeDateToString(value *time.Time, format string, ifNil string) string {
+	if value == nil {
+		return ifNil
+	}
+	return value.Format(format)
+}
+
+// MaybeFloat64ToString converts a nullable float64 to a formatted string, returning ifNil if the value is nil
+func MaybeFloat64ToString(value *float64, format string, ifNil string) string {
+	if value == nil {
+		return ifNil
+	}
+	return fmt.Sprintf(format, *value)
+}
+
+// MaybeInt64ToString converts a nullable int64 to a formatted string, returning ifNil if the value is nil
+func MaybeInt64ToString(value *int64, format string, ifNil string) string {
+	if value == nil {
+		return ifNil
+	}
+	return fmt.Sprintf(format, *value)
+}
+
 // Keys returns all keys from a map as a slice (unsorted)
 func Keys[K comparable, V any](m map[K]V) []K {
 	keys := make([]K, 0, len(m))

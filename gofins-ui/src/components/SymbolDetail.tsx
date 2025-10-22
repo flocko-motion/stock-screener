@@ -38,6 +38,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const [pricesLoading, setPricesLoading] = useState(false);
     const [pricesExpanded, setPricesExpanded] = useState(false);
     const [pricesFetched, setPricesFetched] = useState(false);
+    const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
     const ratingSectionRef = useRef<HTMLDivElement>(null);
     const chartSectionRef = useRef<HTMLDivElement>(null);
     const pricesSectionRef = useRef<HTMLDivElement>(null);
@@ -264,6 +265,14 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             if (event.key.toLowerCase() === 'c') {
                 event.preventDefault();
                 chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => setFullscreenImage(chartUrl), 300);
+                return;
+            }
+
+            if (event.key.toLowerCase() === 'h') {
+                event.preventDefault();
+                chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => setFullscreenImage(histogramUrl), 300);
                 return;
             }
 
@@ -338,10 +347,22 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        onClick={() => {
+                            chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => setFullscreenImage(chartUrl), 300);
+                        }}
                         className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
                     >
                         [C]hart
+                    </button>
+                    <button
+                        onClick={() => {
+                            chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => setFullscreenImage(histogramUrl), 300);
+                        }}
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                    >
+                        [H]istogram
                     </button>
                     <button
                         onClick={togglePrices}
@@ -381,18 +402,41 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         <img
                             src={chartUrl}
                             alt={`Chart for ${symbol}`}
-                            className="w-full h-[50vh] object-contain border border-gray-200 rounded"
+                            className="w-full h-[50vh] object-contain border border-gray-200 rounded cursor-pointer hover:opacity-90"
+                            onClick={() => setFullscreenImage(chartUrl)}
                         />
                     </div>
                     <div>
                         <img
                             src={histogramUrl}
                             alt={`Histogram for ${symbol}`}
-                            className="w-full h-[50vh] object-contain border border-gray-200 rounded"
+                            className="w-full h-[50vh] object-contain border border-gray-200 rounded cursor-pointer hover:opacity-90"
+                            onClick={() => setFullscreenImage(histogramUrl)}
                         />
                     </div>
                 </div>
             </div>
+
+            {/* Fullscreen Image Modal */}
+            {fullscreenImage && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+                    onClick={() => setFullscreenImage(null)}
+                >
+                    <img
+                        src={fullscreenImage}
+                        alt="Fullscreen view"
+                        className="max-w-full max-h-full object-contain"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                        className="absolute top-4 right-4 text-white text-4xl font-bold hover:text-gray-300"
+                        onClick={() => setFullscreenImage(null)}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
 
             {/* Monthly Prices Table - Collapsible */}
             <div ref={pricesSectionRef} className="mb-8">

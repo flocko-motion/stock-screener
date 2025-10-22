@@ -11,11 +11,18 @@ import (
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
+// DedupeConfig holds configuration for deduplication runs
+type DedupeConfig struct {
+	MaxGroups int      // Maximum number of groups to process (0 = unlimited)
+	Symbols   []string // Specific symbols to include (empty = all symbols)
+}
+
 func DedupeSymbols() {
 	log := NewLogger("Dedupe")
+	config := &DedupeConfig{MaxGroups: 0} // unlimited
 
 	for {
-		if err := dedupeSymbolsImpl(log); err != nil {
+		if err := dedupeSymbolsImpl(log, config); err != nil {
 			log.Errorf("Dedupe failed: %v\n", err)
 		}
 		time.Sleep(time.Hour * 24 * 7) // Sleep for 7 days
@@ -23,11 +30,18 @@ func DedupeSymbols() {
 }
 
 func DedupeSymbolsOnce() error {
-	log := NewLogger("Dedupe")
-	return dedupeSymbolsImpl(log)
+	return DedupeSymbolsOnceWithConfig(nil)
 }
 
-func dedupeSymbolsImpl(log *log.Logger) error {
+func DedupeSymbolsOnceWithConfig(config *DedupeConfig) error {
+	if config == nil {
+		config = &DedupeConfig{MaxGroups: 0} // unlimited
+	}
+	log := NewLogger("Dedupe")
+	return dedupeSymbolsImpl(log, config)
+}
+
+func dedupeSymbolsImpl(log *log.Logger, config *DedupeConfig) error {
 	// Check if we already ran today
 	lastRun, err := db.GetLastBatchUpdate("dedupe")
 	if err == nil && lastRun != nil && lastRun.CompletedAt != nil {
@@ -40,8 +54,11 @@ func dedupeSymbolsImpl(log *log.Logger) error {
 	}
 
 	log.Printf("Starting deduplication (CIK and Name in parallel)...\n")
+	if config.MaxGroups > 0 {
+		log.Printf("Limited to %d groups per deduper\n", config.MaxGroups)
+	}
 	startTime := time.Now()
-	
+
 	// Start batch log
 	batchID, err := db.StartBatchUpdate("dedupe")
 	if err != nil {
@@ -54,18 +71,18 @@ func dedupeSymbolsImpl(log *log.Logger) error {
 	var cikUpdated, cikFailed, nameUpdated, nameFailed int
 	var cikErr, nameErr error
 
-	wg.Add(2)
-
 	// Phase 1: Process symbols with CIK
-	go func() {
-		defer wg.Done()
-		cikUpdated, cikFailed, cikErr = dedupeByCIK()
-	}()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+	// 	cikUpdated, cikFailed, cikErr = dedupeByCIK(config)
+	// }()
 
 	// Phase 2: Process stocks without CIK by name
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		nameUpdated, nameFailed, nameErr = dedupeByName()
+		nameUpdated, nameFailed, nameErr = dedupeByName(config)
 	}()
 
 	wg.Wait()
@@ -95,7 +112,7 @@ func dedupeSymbolsImpl(log *log.Logger) error {
 }
 
 // dedupeByCIK groups symbols by CIK and identifies primary listings
-func dedupeByCIK() (int, int, error) {
+func dedupeByCIK(config *DedupeConfig) (int, int, error) {
 	log := NewLogger("Dedupe.CIK")
 	symbols, err := db.GetSymbolsWithCIK()
 	if err != nil {
@@ -120,8 +137,32 @@ func dedupeByCIK() (int, int, error) {
 	var groups []cikGroup
 	for cik, group := range cikGroups {
 		if len(group) > 1 {
+			// If specific symbols are requested, only include groups containing those symbols
+			if len(config.Symbols) > 0 {
+				hasRequestedSymbol := false
+				for _, sym := range group {
+					for _, requested := range config.Symbols {
+						if sym.Ticker == requested {
+							hasRequestedSymbol = true
+							break
+						}
+					}
+					if hasRequestedSymbol {
+						break
+					}
+				}
+				if !hasRequestedSymbol {
+					continue
+				}
+			}
 			groups = append(groups, cikGroup{cik, group})
 		}
+	}
+
+	// Limit groups if MaxGroups is set
+	if config.MaxGroups > 0 && len(groups) > config.MaxGroups {
+		log.Printf("Limiting to first %d groups (out of %d)\n", config.MaxGroups, len(groups))
+		groups = groups[:config.MaxGroups]
 	}
 
 	totalGroups := len(groups)
@@ -209,15 +250,15 @@ func findPrimaryByCIK(cik string, group []types.Symbol) (string, error) {
 	return group[0].Ticker, nil
 }
 
-// dedupeByName groups stocks without CIK by exact name match
-func dedupeByName() (int, int, error) {
+// dedupeByName groups stocks by exact name match
+func dedupeByName(config *DedupeConfig) (int, int, error) {
 	log := NewLogger("Dedupe.Name")
-	symbols, err := db.GetStockSymbolsWithoutCIK()
+	symbols, err := db.GetStockSymbolsForNameDedupe()
 	if err != nil {
 		return 0, 0, err
 	}
 
-	log.Printf("Processing %d stocks without CIK...\n", len(symbols))
+	log.Printf("Processing %d stocks by name...\n", len(symbols))
 
 	// Group symbols by exact name
 	nameGroups := make(map[string][]types.Symbol)
@@ -235,8 +276,32 @@ func dedupeByName() (int, int, error) {
 	var groups []nameGroup
 	for name, group := range nameGroups {
 		if len(group) > 1 {
+			// If specific symbols are requested, only include groups containing those symbols
+			if len(config.Symbols) > 0 {
+				hasRequestedSymbol := false
+				for _, sym := range group {
+					for _, requested := range config.Symbols {
+						if sym.Ticker == requested {
+							hasRequestedSymbol = true
+							break
+						}
+					}
+					if hasRequestedSymbol {
+						break
+					}
+				}
+				if !hasRequestedSymbol {
+					continue
+				}
+			}
 			groups = append(groups, nameGroup{name, group})
 		}
+	}
+
+	// Limit groups if MaxGroups is set
+	if config.MaxGroups > 0 && len(groups) > config.MaxGroups {
+		log.Printf("Limiting to first %d groups (out of %d)\n", config.MaxGroups, len(groups))
+		groups = groups[:config.MaxGroups]
 	}
 
 	totalGroups := len(groups)
