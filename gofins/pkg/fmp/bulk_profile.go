@@ -28,7 +28,7 @@ func (c *Client) getBulkProfiles() ([]*Profile, error) {
 		if err != nil {
 			// Check if this is a 400 error indicating we've reached the end of pagination
 			if strings.Contains(err.Error(), "status 400") || strings.Contains(err.Error(), "Invalid or missing query parameter") {
-				logf("Reached end of pagination at part %d\n", part)
+				logger.Printf("Reached end of pagination at part %d\n", part)
 				break
 			}
 			return nil, fmt.Errorf("failed to fetch bulk profiles part %d: %w", part, err)
@@ -79,7 +79,7 @@ func (c *Client) getBulkProfiles() ([]*Profile, error) {
 		}
 
 		allProfiles = append(allProfiles, profiles...)
-		logf("Fetched part %d: %d profiles (total: %d)\n", part, len(profiles), len(allProfiles))
+		logger.Printf("Fetched part %d: %d profiles (total: %d)\n", part, len(profiles), len(allProfiles))
 		
 		part++
 		
@@ -92,7 +92,7 @@ func (c *Client) getBulkProfiles() ([]*Profile, error) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	logf("Fetched all profiles: %d total\n", len(allProfiles))
+	logger.Printf("Fetched all profiles: %d total\n", len(allProfiles))
 	return allProfiles, nil
 }
 

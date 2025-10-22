@@ -17,12 +17,11 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/files"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/ratelimit"
 )
 
-func logf(format string, args ...interface{}) {
-	fmt.Printf("[FMP] "+format, args...)
-}
+var logger = log.New("FMP")
 
 func init() {
 	// Clean up cache files older than 7 days at startup
@@ -80,7 +79,7 @@ func cleanupOldCache() {
 	}
 	
 	if removedCount > 0 {
-		logf("Cleaned up %d old cache files\n", removedCount)
+		logger.Printf("Cleaned up %d old cache files\n", removedCount)
 	}
 }
 
@@ -187,7 +186,7 @@ func (c *Client) apiGet(endpoint string, params map[string]string, result interf
 		// Make the request
 		resp, err := c.httpClient.Get(reqURL)
 		if err != nil {
-			logf("Network error (attempt %d/%d): %v\n", attempt+1, MaxRetries, err)
+			logger.Printf("Network error (attempt %d/%d): %v\n", attempt+1, MaxRetries, err)
 			lastErr = err
 			delay := BaseRetryDelay * time.Duration(1<<uint(attempt))
 			time.Sleep(delay)
@@ -205,7 +204,7 @@ func (c *Client) apiGet(endpoint string, params map[string]string, result interf
 
 		// Check for rate limit error
 		if IsRateLimitError(err) {
-			logf("Rate limit hit on %s - recovering...\n", endpoint)
+			logger.Printf("Rate limit hit on %s - recovering...\n", endpoint)
 			c.rateLimiter.LogRequest(endpoint, "rate-limit")
 			if recErr := c.rateLimiter.RecoverFromLimit(); recErr != nil {
 				return recErr
@@ -215,20 +214,20 @@ func (c *Client) apiGet(endpoint string, params map[string]string, result interf
 
 		// Check for bad request (don't retry)
 		if IsBadRequestError(err) {
-			logf("Bad request on %s: %v\n", endpoint, err)
+			logger.Printf("Bad request on %s: %v\n", endpoint, err)
 			c.rateLimiter.LogRequest(endpoint, "bad-request")
 			return err
 		}
 
 		// Other errors - retry with backoff
-		logf("API error (attempt %d/%d) on %s: %v\n", attempt+1, MaxRetries, endpoint, err)
+		logger.Printf("API error (attempt %d/%d) on %s: %v\n", attempt+1, MaxRetries, endpoint, err)
 		lastErr = err
 		c.rateLimiter.LogRequest(endpoint, fmt.Sprintf("error-%d", attempt))
 		delay := BaseRetryDelay * time.Duration(1<<uint(attempt))
 		time.Sleep(delay)
 	}
 
-	logf("Request failed after %d attempts: %v\n", MaxRetries, lastErr)
+	logger.Printf("Request failed after %d attempts: %v\n", MaxRetries, lastErr)
 	return fmt.Errorf("request failed after %d attempts: %w", MaxRetries, lastErr)
 }
 
@@ -332,14 +331,14 @@ func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCl
 		// Check if this is a cached error
 		if strings.HasPrefix(string(cachedData), "ERROR:") {
 			errorMsg := strings.TrimPrefix(string(cachedData), "ERROR:")
-			logf("⚡ Cache HIT (error cached) for %s - returning cached error\n", endpoint)
+			logger.Printf("⚡ Cache HIT (error cached) for %s - returning cached error\n", endpoint)
 			return nil, fmt.Errorf("%s", errorMsg)
 		}
-		logf("⚡ Cache HIT for %s - %d bytes\n", endpoint, len(cachedData))
+		logger.Printf("⚡ Cache HIT for %s - %d bytes\n", endpoint, len(cachedData))
 		return io.NopCloser(strings.NewReader(string(cachedData))), nil
 	}
 	
-	logf("Cache MISS for %s - fetching from API\n", endpoint)
+	logger.Printf("Cache MISS for %s - fetching from API\n", endpoint)
 	
 	// Build URL with parameters
 	reqURL, err := c.buildURL(endpoint, params)
@@ -370,7 +369,7 @@ func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCl
 		if resp.StatusCode == http.StatusBadRequest {
 			cachedError := []byte("ERROR:" + errorMsg)
 			if err := writeToCache(cacheKey, cachedError); err != nil {
-				logf("Warning: failed to cache error: %v\n", err)
+				logger.Printf("Warning: failed to cache error: %v\n", err)
 			}
 		}
 		
@@ -381,11 +380,11 @@ func (c *Client) apiGetRaw(endpoint string, params map[string]string) (io.ReadCl
 	
 	// Write successful response to cache (ignore errors - caching is best-effort)
 	if err := writeToCache(cacheKey, body); err != nil {
-		logf("Warning: failed to write to cache: %v\n", err)
+		logger.Printf("Warning: failed to write to cache: %v\n", err)
 	}
 	
 	// Sleep for 30 seconds to be nice to the API
-	logf("Sleeping 30s to be nice to the API...\n")
+	logger.Printf("Sleeping 30s to be nice to the API...\n")
 	time.Sleep(30 * time.Second)
 	
 	// Return the body as a ReadCloser

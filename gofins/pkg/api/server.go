@@ -43,6 +43,7 @@ func NewServer(database *db.DB, port int) *Server {
 
 		// Prices
 		r.Get("/prices/monthly/{ticker}", s.handleGetMonthlyPrices)
+		r.Get("/prices/weekly/{ticker}", s.handleGetWeeklyPrices)
 
 		// Analyses
 		r.Get("/analyses", s.handleAnalyses)
