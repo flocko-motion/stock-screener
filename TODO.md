@@ -1,29 +1,7 @@
-# Bugs (fix bugs first bofore working on TODOs)
+# Bugs (fix bugs first before working on TODOs)
 
-## A JS bug in gofins-ui
-SymbolList.tsx:318 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-SymbolList.tsx:326 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-SymbolList.tsx:334 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-client:865 [vite] server connection lost. Polling for restart...
-Navigated to chrome-error://chromewebdata/
-Navigated to http://localhost:5173/
-react-dom_client.js?v=7cfb0357:20101 Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
-SymbolList.tsx:318 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-SymbolList.tsx:326 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-SymbolList.tsx:334 The `value` prop supplied to <select> must be a scalar value if `multiple` is false.
-
-Check the render method of `SymbolList`.
-﻿
+## ✅ FIXED: SymbolList select value bug
+Fixed by ensuring filter values from sessionStorage are always strings, not arrays or objects.
 
 
 # TODO list for gofins, in order of priority

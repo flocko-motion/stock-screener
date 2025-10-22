@@ -40,9 +40,9 @@ export default function SymbolList({ endpoint, description, onOpenSymbol }: Symb
     const filters = getStoredFilters();
     const [searchTerm, setSearchTerm] = useState(filters.searchTerm || '');
     const [currentPage, setCurrentPage] = useState(1);
-    const [exchangeFilter, setExchangeFilter] = useState(filters.exchangeFilter || '');
-    const [countryFilter, setCountryFilter] = useState(filters.countryFilter || '');
-    const [sectorFilter, setSectorFilter] = useState(filters.sectorFilter || '');
+    const [exchangeFilter, setExchangeFilter] = useState(typeof filters.exchangeFilter === 'string' ? filters.exchangeFilter : '');
+    const [countryFilter, setCountryFilter] = useState(typeof filters.countryFilter === 'string' ? filters.countryFilter : '');
+    const [sectorFilter, setSectorFilter] = useState(typeof filters.sectorFilter === 'string' ? filters.sectorFilter : '');
     const [mcapMin, setMcapMin] = useState(filters.mcapMin || '');
     const [mcapMax, setMcapMax] = useState(filters.mcapMax || '');
     const [inceptionMin, setInceptionMin] = useState(filters.inceptionMin || '');
