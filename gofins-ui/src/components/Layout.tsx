@@ -7,13 +7,14 @@ import {
     BuildingLibraryIcon,
     FunnelIcon,
     DocumentChartBarIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import TabContent from './TabContent';
 
 interface Tab {
     id: string;
-    type: 'analyses' | 'stocks' | 'analysis' | 'symbol' | 'create' | 'errors';
+    type: 'analyses' | 'stocks' | 'analysis' | 'symbol' | 'create' | 'errors' | 'notes';
     title: string;
     data?: any;
     isPermanent?: boolean;
@@ -23,6 +24,7 @@ export default function Layout() {
     const [tabs, setTabs] = useState<Tab[]>([
         { id: 'stocks', type: 'stocks', title: 'Stocks', isPermanent: true },
         { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true },
+        { id: 'notes', type: 'notes', title: 'Notes', isPermanent: true },
         { id: 'errors', type: 'errors', title: 'Errors', isPermanent: true }
     ]);
     const [activeTabId, setActiveTabId] = useState<string>('stocks');
@@ -36,6 +38,7 @@ export default function Layout() {
             case 'symbol': return DocumentChartBarIcon;
             case 'create': return PlusIcon;
             case 'errors': return ExclamationTriangleIcon;
+            case 'notes': return DocumentTextIcon;
             default: return ChartBarIcon;
         }
     };

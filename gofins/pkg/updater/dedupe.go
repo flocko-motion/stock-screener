@@ -28,8 +28,26 @@ func DedupeSymbolsOnce() error {
 }
 
 func dedupeSymbolsImpl(log *log.Logger) error {
+	// Check if we already ran today
+	lastRun, err := db.GetLastBatchUpdate("dedupe")
+	if err == nil && lastRun != nil && lastRun.CompletedAt != nil {
+		today := time.Now().Truncate(24 * time.Hour)
+		lastRunDay := lastRun.CompletedAt.Truncate(24 * time.Hour)
+		if today.Equal(lastRunDay) {
+			log.Printf("Dedupe already ran today at %s, skipping\n", lastRun.CompletedAt.Format("15:04:05"))
+			return nil
+		}
+	}
+
 	log.Printf("Starting deduplication (CIK and Name in parallel)...\n")
 	startTime := time.Now()
+	
+	// Start batch log
+	batchID, err := db.StartBatchUpdate("dedupe")
+	if err != nil {
+		log.Errorf("Failed to start batch log: %v\n", err)
+		// Continue anyway
+	}
 
 	// Run CIK and Name dedupe concurrently (they operate on different symbol sets)
 	var wg sync.WaitGroup
@@ -64,6 +82,14 @@ func dedupeSymbolsImpl(log *log.Logger) error {
 	totalFailed := cikFailed + nameFailed
 	elapsed := time.Since(startTime)
 	log.ProgressShort(totalUpdated+totalFailed, 0, elapsed)
+
+	// Complete batch log
+	if batchID > 0 {
+		totalProcessed := totalUpdated + totalFailed
+		if err := db.CompleteBatchUpdate(batchID, totalProcessed, totalUpdated); err != nil {
+			log.Errorf("Failed to complete batch log: %v\n", err)
+		}
+	}
 
 	return nil
 }

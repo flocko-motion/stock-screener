@@ -16,9 +16,21 @@ Fixed by ensuring filter values from sessionStorage are always strings, not arra
 - DONE: Auto-refresh every 30s
 
 
-## Tab "Notes"
+## ✅ Tab "Notes"
+- DONE: Tab showing notes grouped by ticker
+- DONE: Notes sorted chronologically (oldest→newest) to show opinion evolution
+- DONE: Click ticker to open symbol detail
+- DONE: Shows latest rating with stars in header
+- DONE: Individual notes show numeric rating (-5 to +5)
+- DONE: Arrow indicators (↑/↓) when rating changes
+- DONE: Fetches ALL notes (no limit)
+- DONE: ISO date format (YYYY-MM-DD)
 
-- another tab for notes sorted by time they were taken.. to see what was noted down recently
+## ✅ List of ratings in stock details view
+- DONE: Rating history shown in SymbolDetail component
+- DONE: Delete button for each rating
+- DONE: Ratings sorted chronologically (oldest→newest) to show opinion evolution
+- DONE: Added API endpoints: GET /ratings/{ticker}/history and DELETE /ratings/{id}
 
 ## Tab "Favorites"
 

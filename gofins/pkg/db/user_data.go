@@ -153,3 +153,29 @@ func DeleteRating(id int) error {
 	_, err := db.conn.Exec("DELETE FROM user_ratings WHERE id = $1", id)
 	return err
 }
+
+// GetAllNotesChronological returns all ratings that have notes, sorted by creation time (newest first)
+func GetAllNotesChronological() ([]UserRating, error) {
+	db := Db()
+	rows, err := db.conn.Query(`
+		SELECT id, ticker, rating, notes, created_at
+		FROM user_ratings
+		WHERE notes IS NOT NULL AND notes != ''
+		ORDER BY created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var notes []UserRating
+	for rows.Next() {
+		var r UserRating
+		if err := rows.Scan(&r.ID, &r.Ticker, &r.Rating, &r.Notes, &r.CreatedAt); err != nil {
+			return nil, err
+		}
+		notes = append(notes, r)
+	}
+
+	return notes, rows.Err()
+}

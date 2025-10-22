@@ -56,10 +56,15 @@ func NewServer(database *db.DB, port int) *Server {
 		r.Get("/ratings", s.handleRatings)
 		r.Get("/ratings/{ticker}", s.handleRatings)
 		r.Post("/ratings/{ticker}", s.handleRatings)
+		r.Get("/ratings/{ticker}/history", s.handleRatingHistory)
+		r.Delete("/ratings/{id}", s.handleDeleteRating)
 
 		// Errors
 		r.Get("/errors", s.handleListErrors)
 		r.Delete("/errors", s.handleClearErrors)
+
+		// Notes
+		r.Get("/notes", s.handleListNotes)
 	})
 
 	s.server = &http.Server{
