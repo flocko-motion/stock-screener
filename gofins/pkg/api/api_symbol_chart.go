@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
-	"github.com/flocko-motion/gofins/pkg/db"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/flocko-motion/gofins/pkg/db"
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
 )
@@ -56,7 +57,7 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 	// Get monthly prices for full history
 	timeFrom := *symbol.OldestPrice
 	timeTo := time.Now()
-	
+
 	prices, err := db.GetMonthlyPrices(ticker, timeFrom, timeTo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get prices: %w", err)
@@ -75,10 +76,10 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 	if err := os.MkdirAll(tempDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create temp dir: %w", err)
 	}
-	
+
 	tempFile := filepath.Join(tempDir, fmt.Sprintf("%s_%s_%d.png", ticker, plotType, time.Now().UnixNano()))
 	defer os.Remove(tempFile) // Clean up after serving
-	
+
 	if plotType == analysis.PlotTypeChart {
 		// Generate price chart
 		if err := analysis.PlotChart(analysis.ChartOptions{
@@ -88,7 +89,7 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 			Prices:     prices,
 			Stats:      stats,
 			OutputPath: tempFile,
-			LimitY:     true, // Default to limiting Y-axis
+			LimitY:     false, // Default to limiting Y-axis
 		}); err != nil {
 			return nil, fmt.Errorf("failed to create chart: %w", err)
 		}

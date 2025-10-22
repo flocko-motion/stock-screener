@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { SymbolProfile } from '../services/api';
 
 interface SymbolDetailProps {
@@ -15,6 +15,17 @@ interface UserRating {
     createdAt: string;
 }
 
+interface PriceData {
+    Date: string;
+    Open: number;
+    High: number;
+    Low: number;
+    Avg: number;
+    Close: number;
+    YoY: number | null;
+    SymbolTicker: string;
+}
+
 export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDetailProps) {
     const [profile, setProfile] = useState<SymbolProfile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -23,6 +34,12 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const [notes, setNotes] = useState<string>('');
     const [ratingHistory, setRatingHistory] = useState<UserRating[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    const [monthlyPrices, setMonthlyPrices] = useState<PriceData[]>([]);
+    const [pricesLoading, setPricesLoading] = useState(false);
+    const [pricesExpanded, setPricesExpanded] = useState(false);
+    const [pricesFetched, setPricesFetched] = useState(false);
+    const ratingSectionRef = useRef<HTMLDivElement>(null);
+    const chartSectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -62,6 +79,38 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             }
         };
         fetchRatingHistory();
+    }, [symbol]);
+
+    const fetchMonthlyPrices = async () => {
+        if (pricesFetched) return; // Already fetched
+        setPricesLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8080/api/prices/monthly/${symbol}`);
+            if (response.ok) {
+                const data = await response.json();
+                setMonthlyPrices(data.prices || []);
+                setPricesFetched(true);
+            }
+        } catch (err) {
+            console.error('Failed to fetch monthly prices:', err);
+        } finally {
+            setPricesLoading(false);
+        }
+    };
+
+    const togglePrices = () => {
+        const newExpanded = !pricesExpanded;
+        setPricesExpanded(newExpanded);
+        if (newExpanded && !pricesFetched) {
+            fetchMonthlyPrices();
+        }
+    };
+
+    // Reset prices state when symbol changes
+    useEffect(() => {
+        setPricesExpanded(false);
+        setPricesFetched(false);
+        setMonthlyPrices([]);
     }, [symbol]);
 
     const handleDeleteRating = async (ratingId: number) => {
@@ -153,6 +202,32 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         return `$${marketCap}`;
     };
 
+    const formatPrice = (price: number): string => {
+        const absValue = Math.abs(price);
+        if (absValue === 0) return '0.00';
+
+        // Use log10 to determine decimal places
+        // For prices >= 100: 2 decimals
+        // For prices >= 10: 3 decimals
+        // For prices >= 1: 4 decimals
+        // For prices < 1: 5+ decimals
+        const log = Math.log10(absValue);
+        let decimals: number;
+
+        // if (log >= 2) {
+        //     decimals = 0; // >= 100
+        // } else if (log >= 1) {
+        //     decimals = 1; // >= 10
+        // } else if (log >= 0) {
+        //     decimals = 2; // >= 1
+        // } else {
+        //     // For very small numbers, add more decimals
+        //     decimals = Math.ceil(Math.abs(log));
+        // }
+        decimals = Math.max(0, 3 - Math.ceil(Math.abs(log)));
+        return price.toFixed(decimals);
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             const target = event.target as HTMLElement;
@@ -170,6 +245,43 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             // Hotkeys only work when NOT typing
             if (event.key === 'Escape' && onClose) {
                 onClose();
+                return;
+            }
+
+            if (event.key.toLowerCase() === 'r') {
+                event.preventDefault();
+                ratingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
+            if (event.key.toLowerCase() === 'c') {
+                event.preventDefault();
+                chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
+            if (event.key.toLowerCase() === 'm') {
+                event.preventDefault();
+                togglePrices();
+                return;
+            }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleSubmitRating();
+                return;
+            }
+
+            // Number keys for rating (1-5, Shift+1-5 for negative, 0 for neutral)
+            const num = parseInt(event.key);
+            if (!isNaN(num) && num >= 0 && num <= 5) {
+                const newRating = event.shiftKey && num > 0 ? -num : num;
+                setRating(newRating);
+                // Auto-focus the notes textarea
+                setTimeout(() => {
+                    const textarea = document.querySelector('textarea[placeholder*="Optional notes"]') as HTMLTextAreaElement;
+                    if (textarea) textarea.focus();
+                }, 0);
             } else if (event.key.toLowerCase() === 't') {
                 const tradingViewUrl = `https://www.tradingview.com/chart/?symbol=${symbol}`;
                 window.open(tradingViewUrl, '_blank', 'noopener,noreferrer');
@@ -217,28 +329,46 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         <p className="text-lg text-gray-600 mt-1">{profile.name}</p>
                     )}
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => chartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                    >
+                        [C]hart
+                    </button>
+                    <button
+                        onClick={togglePrices}
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                    >
+                        [M]onthly
+                    </button>
+                    <button
+                        onClick={() => ratingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                    >
+                        [R]atings
+                    </button>
                     <a
                         href={`https://www.tradingview.com/chart/?symbol=${symbol}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 text-gray-500 hover:text-gray-700 border rounded"
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
                     >
                         [T]radingView
                     </a>
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-500 hover:text-gray-700 border rounded"
+                            className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
                         >
-                            [ESC] to close
+                            [ESC] close
                         </button>
                     )}
                 </div>
             </div>
 
             {/* Charts */}
-            <div className="mb-8">
+            <div ref={chartSectionRef} className="mb-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
                         <img
@@ -255,6 +385,64 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Monthly Prices Table - Collapsible */}
+            <div className="mb-8">
+                <button
+                    onClick={togglePrices}
+                    className="flex items-center gap-2 text-lg font-semibold mb-4 hover:text-gray-700"
+                >
+                    <span>{pricesExpanded ? '▼' : '▶'}</span>
+                    <span>Monthly Prices</span>
+                </button>
+                {pricesExpanded && (
+                    <div>
+                        {pricesLoading ? (
+                            <div className="text-center py-4">
+                                <p className="text-gray-500">Loading prices...</p>
+                            </div>
+                        ) : monthlyPrices.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full border border-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-2 text-left font-medium text-gray-600 border-b">Date</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Open</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">High</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Low</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Close</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Avg</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">YoY %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {monthlyPrices.map((price, idx) => (
+                                            <tr key={idx} className="hover:bg-gray-50">
+                                                <td className="px-4 py-2 border-b">
+                                                    {new Date(price.Date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                                                </td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Open)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.High)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Low)}</td>
+                                                <td className="px-4 py-2 text-right border-b font-medium">{formatPrice(price.Close)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Avg)}</td>
+                                                <td className={`px-4 py-2 text-right border-b ${price.YoY === null ? 'text-gray-400' :
+                                                    price.YoY > 0 ? 'text-green-600' :
+                                                        price.YoY < 0 ? 'text-red-600' : 'text-gray-600'
+                                                    }`}>
+                                                    {price.YoY === null ? 'N/A' : `${price.YoY > 0 ? '+' : ''}${price.YoY.toFixed(1)}%`}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-gray-500">No monthly price data available</p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Profile Information */}
@@ -321,10 +509,10 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                     )}
 
                     {/* Rating Form */}
-                    <div className="mt-6 pt-6 border-t border-gray-300">
+                    <div ref={ratingSectionRef} className="mt-6 pt-6 border-t border-gray-300">
                         <div className="flex items-baseline gap-3 mb-3">
                             <h4 className="text-md font-semibold">Rate This Stock</h4>
-                            <span className="text-xs text-gray-500">(Keys: 1-5, Shift+1-5 for negative, 0 for neutral, Enter to submit)</span>
+                            <span className="text-xs text-gray-500">(Keys: R to scroll here, 1-5, Shift+1-5 for negative, 0 for neutral, Enter to submit)</span>
                         </div>
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-4">

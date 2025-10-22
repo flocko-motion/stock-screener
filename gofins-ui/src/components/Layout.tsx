@@ -25,8 +25,8 @@ export default function Layout() {
     const [tabs, setTabs] = useState<Tab[]>([
         { id: 'stocks', type: 'stocks', title: 'Stocks', isPermanent: true },
         { id: 'favorites', type: 'favorites', title: 'Favorites', isPermanent: true },
-        { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true },
         { id: 'notes', type: 'notes', title: 'Notes', isPermanent: true },
+        { id: 'analyses', type: 'analyses', title: 'Analyses', isPermanent: true },
         { id: 'errors', type: 'errors', title: 'Errors', isPermanent: true }
     ]);
     const [activeTabId, setActiveTabId] = useState<string>('stocks');

@@ -68,8 +68,8 @@ func PlotHistogram(ticker string, stats Stats, outputPath string) error {
 func createPriceChart(opts ChartOptions) (*plot.Plot, error) {
 	p := plot.New()
 	p.Title.Text = fmt.Sprintf("%s - Normalized Price (Log Scale)", opts.Ticker)
-	p.X.Label.Text = "Date"
-	p.Y.Label.Text = "Normalized Price"
+	p.X.Label.Text = "Year"
+	p.Y.Label.Text = "Price"
 
 	if len(opts.Prices) == 0 {
 		return p, nil
@@ -92,10 +92,10 @@ func createPriceChart(opts ChartOptions) (*plot.Plot, error) {
 	p.X.Tick.Marker = &dateTickFormatter{prices: opts.Prices}
 
 	// Add year-based background colors FIRST (so they appear in background)
-	// addYearBackgrounds(p, opts.Prices)
+	addYearBackgrounds(p, opts.Prices)
 
 	// Add grid
-	// p.Add(plotter.NewGrid())
+	p.Add(plotter.NewGrid())
 
 	// Normalize prices to start at 1.0
 	firstPrice := opts.Prices[0].Close
@@ -134,7 +134,7 @@ func createPriceChart(opts ChartOptions) (*plot.Plot, error) {
 	p.Add(line)
 
 	// Add constant growth lines
-	// addGrowthLines(opts.TimeFrom, opts.TimeTo, p, opts.Prices)
+	addGrowthLines(p, opts)
 
 	return p, nil
 }
@@ -218,7 +218,11 @@ func addYearBackgrounds(p *plot.Plot, prices []types.PriceData) {
 			EndX:   float64(yearEnd.Unix()),
 			Color:  percentageToColor(yoyPercentage, 0.95), // Very light background
 		}
+		if i == 0 {
+			region.StartX = float64(prices[0].Date.Unix())
+		}
 		p.Add(region)
+
 	}
 }
 
@@ -451,12 +455,12 @@ func addVerticalLineWithDashes(p *plot.Plot, x float64, col color.Color, label s
 	p.Add(line)
 }
 
-func addGrowthLines(timeFrom, timeTo time.Time, p *plot.Plot, prices []types.PriceData) {
-	if len(prices) == 0 {
+func addGrowthLines(p *plot.Plot, opts ChartOptions) {
+	if len(opts.Prices) == 0 {
 		return
 	}
 
-	startTime := float64(timeFrom.Unix())
+	startTime := float64(opts.TimeFrom.Unix())
 
 	// Growth rates with their colors using the HSL color function
 	lightness := 0.4
@@ -468,17 +472,26 @@ func addGrowthLines(timeFrom, timeTo time.Time, p *plot.Plot, prices []types.Pri
 	for rate, col := range growthConfig {
 		// Calculate exponential growth: value = 1 * (1 + rate)^years
 		// For each time point, calculate years elapsed since start
-		pts := make(plotter.XYs, len(prices))
+		pts := make(plotter.XYs, len(opts.Prices))
 
-		for j, price := range prices {
+		ptsCounter := 0
+		for _, price := range opts.Prices {
 			currentTime := float64(price.Date.Unix())
 			yearsElapsed := (currentTime - startTime) / (365.25 * 24 * 3600) // Convert seconds to years
 			growthValue := math.Pow(1+rate, yearsElapsed)
 
-			pts[j].X = currentTime
-			pts[j].Y = growthValue
+			if growthValue > p.Y.Max {
+				continue
+			}
+			pts[ptsCounter].X = currentTime
+			pts[ptsCounter].Y = growthValue
+			ptsCounter++
 		}
+		pts = pts[0:ptsCounter]
 
+		if len(pts) == 0 {
+			continue
+		}
 		line, err := plotter.NewLine(pts)
 		if err != nil {
 			continue

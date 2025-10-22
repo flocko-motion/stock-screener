@@ -11,7 +11,7 @@ func TestPlot(t *testing.T) {
 	to := time.Now()
 	from := time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	const symbol = "AAPL"
+	const symbol = "3457.T/"
 
 	prices, err := db.GetWeeklyPrices(symbol, from, to)
 	if err != nil {
@@ -58,7 +58,7 @@ func TestPlot(t *testing.T) {
 		Prices:     prices,
 		Stats:      stats,
 		OutputPath: pricePath,
-		LimitY:     true, // Default to limiting Y-axis
+		LimitY:     false, // Default to limiting Y-axis
 	}); err != nil {
 		t.Fatalf("Failed to generate price plot: %v", err)
 	}
