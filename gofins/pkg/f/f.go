@@ -1,8 +1,11 @@
 package f
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // First returns the first value from a pair, ignoring the second (useful for ignoring errors)
@@ -95,4 +98,13 @@ func DurationToString(d time.Duration) string {
 // SecondsToString converts seconds (as float64) to a human-readable duration string
 func SecondsToString(seconds float64) string {
 	return DurationToString(time.Duration(seconds * float64(time.Second)))
+}
+
+// StringToUUID converts a string to a stable UUID using SHA-256 hash
+func StringToUUID(s string) uuid.UUID {
+	hash := sha256.Sum256([]byte(s))
+	// Use first 16 bytes of hash as UUID
+	var uuidBytes [16]byte
+	copy(uuidBytes[:], hash[:16])
+	return uuid.UUID(uuidBytes)
 }

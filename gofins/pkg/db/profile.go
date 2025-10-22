@@ -38,7 +38,7 @@ func PutSymbols(symbols []types.Symbol) error {
 		}
 
 		if showProgress {
-			count := i * batchSize
+			count := i*batchSize + len(batch)
 			dbLogger.ProgressShort(count, totalSymbols-count, time.Since(startTime))
 		}
 	}
@@ -236,23 +236,23 @@ func DeactivateSymbolsNotInList(keepTickers []string) error {
 // getFilteredSymbols returns symbols with optional additional WHERE conditions
 func getFilteredSymbols(additionalWhere []string) ([]types.Symbol, error) {
 	db := Db()
-	
+
 	// Base WHERE conditions
 	whereConditions := []string{
 		"s.is_actively_trading = true",
 		"(s.type = $1 OR s.type IS NULL)",
 		"(s.primary_listing IS NULL OR s.primary_listing = '')",
 	}
-	
+
 	// Add any additional conditions
 	whereConditions = append(whereConditions, additionalWhere...)
-	
+
 	// Build WHERE clause
 	whereClause := "WHERE " + whereConditions[0]
 	for _, condition := range whereConditions[1:] {
 		whereClause += "\n\t\t  AND " + condition
 	}
-	
+
 	query := `
 		SELECT 
 			s.ticker, s.exchange, s.name, s.type, s.currency, s.sector, s.industry, s.country, 

@@ -91,4 +91,117 @@ Fixed by ensuring filter values from sessionStorage are always strings, not arra
 - beta should be added as another column
 - the score formula needs beta as third ingredient..so we need three sliders, one for each weight: stddev, mü, beta
 
+## Deployment Setup
+
+**Target**: Single Linux server, single user (expandable to friends later)
+
+**Stack**:
+- Apache on port 80 (serves React build + proxies /api to backend)
+- Go API server on localhost:8080 (systemd service)
+- PostgreSQL (system package)
+
+**Deployment method**: Git-based (simple, transparent, easy rollback)
+
+**Directory structure**:
+```
+/opt/stock-screener/          # Git repo
+  ├── gofins/                 # Go backend
+  ├── gofins-ui/              # React frontend
+  └── update.sh               # Deployment script
+/var/www/html/gofins/         # Built React files (served by Apache)
+```
+
+**Update process**:
+```bash
+ssh server "sudo /opt/stock-screener/update.sh"
+```
+
+**Apache config**:
+- Proxy `/api/*` → `http://localhost:8080/api/*`
+- Serve static files from `/var/www/html/gofins/`
+- SPA fallback to `index.html`
+
+**Systemd services**:
+- `gofins-api.service` - Go backend
+- Auto-restart on failure
+
+## Multi-User Support (Minimal Concept)
+
+**Goal**: Let a few friends use the app with separate ratings/notes/favorites
+
+**Authentication**: Apache .htaccess with hand-edited user list (no signup, no password reset)
+
+**User identification**:
+1. Web: Apache sets `X-Remote-User` header after auth
+2. CLI/Local: Read from `~/.gofins/config.yaml` (default user)
+3. Go server hashes username → UUID (stable user ID)
+4. Store UUID in context, use for all queries
+5. UI displays username in header
+
+**Config file** (`~/.gofins/config.yaml`):
+```yaml
+default_user: "yourname"  # Used for CLI commands and localhost API calls
+```
+
+**User resolution logic** (in middleware/context):
+```go
+func getUserID(r *http.Request) uuid.UUID {
+    var username string
+    
+    // 1. Check X-Remote-User header (from Apache auth)
+    if user := r.Header.Get("X-Remote-User"); user != "" {
+        username = user
+    } else {
+        // 2. Fallback to config file default user
+        username = config.GetDefaultUser() // reads ~/.gofins/config.yaml
+    }
+    
+    // 3. Hash username to stable UUID
+    return hashUsernameToUUID(username)
+}
+```
+
+**CLI behavior**:
+- All CLI commands use default user from config
+- `go run . symbol profile AAPL` → uses your configured user
+- `go run . rating add AAPL 5 "Great company"` → adds rating for your user
+- No need to pass user flag to every command
+
+**Database changes**:
+```sql
+-- Add user_id to user-specific tables
+ALTER TABLE user_ratings ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+ALTER TABLE user_favorites ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+ALTER TABLE user_journal ADD COLUMN user_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+
+-- Add indexes
+CREATE INDEX idx_user_ratings_user ON user_ratings(user_id);
+CREATE INDEX idx_user_favorites_user ON user_favorites(user_id);
+CREATE INDEX idx_user_journal_user ON user_journal(user_id);
+
+-- Composite unique constraints
+ALTER TABLE user_ratings DROP CONSTRAINT IF EXISTS user_ratings_pkey;
+ALTER TABLE user_ratings ADD PRIMARY KEY (user_id, ticker, created_at);
+ALTER TABLE user_favorites ADD UNIQUE (user_id, ticker);
+```
+
+**Code changes**:
+- Middleware: Extract `X-Remote-User` → hash to UUID → store in context
+- All user-specific queries: Add `WHERE user_id = $1`
+- Affected endpoints: `/api/ratings/*`, `/api/favorites/*`, `/api/notes`, `/api/journal/*`
+- Symbol/price/analysis data: Shared (no user_id filter)
+
+**UI changes**:
+- Show username in top-right corner
+- No other changes needed
+
+**Migration for existing data**:
+```sql
+-- Set all existing data to default user (you)
+UPDATE user_ratings SET user_id = 'your-uuid-here';
+UPDATE user_favorites SET user_id = 'your-uuid-here';
+```
+
+**Effort**: ~2-3 hours (schema changes, middleware, query updates)
+
 

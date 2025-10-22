@@ -3,7 +3,139 @@ package db
 import (
 	"database/sql"
 	"time"
+
+	"github.com/flocko-motion/gofins/pkg/f"
+	"github.com/flocko-motion/gofins/pkg/types"
+	"github.com/google/uuid"
 )
+
+// CreateUser creates a new user with a UUID derived from their name
+func CreateUser(name string) (*types.User, error) {
+	db := Db()
+
+	// Generate stable UUID from username (hash-based)
+	userID := f.StringToUUID(name)
+
+	var user types.User
+	err := db.conn.QueryRow(`
+		INSERT INTO users (id, name, created_at)
+		VALUES ($1, $2, NOW())
+		RETURNING id, name, created_at
+	`, userID, name).Scan(&user.ID, &user.Name, &user.CreatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUser retrieves a user by name
+func GetUser(name string) (*types.User, error) {
+	db := Db()
+
+	var user types.User
+	err := db.conn.QueryRow(`
+		SELECT id, name, created_at
+		FROM users
+		WHERE name = $1
+	`, name).Scan(&user.ID, &user.Name, &user.CreatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUserByID retrieves a user by UUID
+func GetUserByID(id uuid.UUID) (*types.User, error) {
+	db := Db()
+
+	var user types.User
+	err := db.conn.QueryRow(`
+		SELECT id, name, created_at
+		FROM users
+		WHERE id = $1
+	`, id).Scan(&user.ID, &user.Name, &user.CreatedAt)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// ListUsers returns all users
+func ListUsers() ([]types.User, error) {
+	db := Db()
+
+	rows, err := db.conn.Query(`
+		SELECT id, name, created_at
+		FROM users
+		ORDER BY created_at ASC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []types.User
+	for rows.Next() {
+		var user types.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, rows.Err()
+}
+
+// DeleteUser deletes a user and all their data (ratings, favorites)
+func DeleteUser(name string) error {
+	db := Db()
+
+	// Get user to find their UUID
+	user, err := GetUser(name)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return nil // User doesn't exist, nothing to delete
+	}
+
+	// Start transaction
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Delete user's ratings
+	if _, err := tx.Exec(`DELETE FROM user_ratings WHERE user_id = $1`, user.ID); err != nil {
+		return err
+	}
+
+	// Delete user's favorites
+	if _, err := tx.Exec(`DELETE FROM user_favorites WHERE user_id = $1`, user.ID); err != nil {
+		return err
+	}
+
+	// Delete user
+	if _, err := tx.Exec(`DELETE FROM users WHERE id = $1`, user.ID); err != nil {
+		return err
+	}
+
+	// Commit transaction
+	return tx.Commit()
+}
 
 // UserRating represents a rating given to a symbol
 type UserRating struct {
