@@ -19,8 +19,13 @@ func PutSymbols(symbols []types.Symbol) error {
 
 	const batchSize = 1000
 	totalSymbols := len(symbols)
+	
+	// Only show detailed progress for larger updates
+	showProgress := totalSymbols > 100
 
-	logf("Updating %d symbols in batches of %d...\n", totalSymbols, batchSize)
+	if showProgress {
+		logf("Updating %d symbols in batches of %d...", totalSymbols, batchSize)
+	}
 
 	// Process in batches
 	for i := 0; i < totalSymbols; i += batchSize {
@@ -35,11 +40,15 @@ func PutSymbols(symbols []types.Symbol) error {
 			return fmt.Errorf("failed to insert batch %d-%d: %w", i+1, end, err)
 		}
 
-		// Log progress every batch
-		logf("  Progress: %d/%d symbols (%.1f%%)\n", end, totalSymbols, float64(end)/float64(totalSymbols)*100)
+		// Log progress every batch for large updates
+		if showProgress {
+			logf("  Progress: %d/%d symbols (%.1f%%)", end, totalSymbols, float64(end)/float64(totalSymbols)*100)
+		}
 	}
 
-	logf("✓ Completed updating %d symbols\n", totalSymbols)
+	if showProgress {
+		logf("✓ Completed updating %d symbols", totalSymbols)
+	}
 	return nil
 }
 
@@ -215,7 +224,7 @@ func DeactivateSymbolsNotInList(keepTickers []string) error {
 		}
 	}
 
-	logf("Deactivated %d obsolete symbols\n", len(toDeactivate))
+	logf("Deactivated %d obsolete symbols", len(toDeactivate))
 	return nil
 }
 
@@ -496,6 +505,36 @@ func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
 	}
 
 	return result.RowsAffected()
+}
+
+// GetTickersNeedingProfileUpdate returns tickers that don't have profiles updated yesterday or later
+func GetTickersNeedingProfileUpdate() (map[string]bool, error) {
+	db := Db()
+	yesterday := calculator.Yesterday()
+	
+	query := `
+		SELECT ticker 
+		FROM symbols 
+		WHERE last_profile_update IS NULL 
+		   OR last_profile_update < $1
+	`
+	
+	rows, err := db.conn.Query(query, yesterday)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tickers needing profile update: %w", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string]bool)
+	for rows.Next() {
+		var ticker string
+		if err := rows.Scan(&ticker); err != nil {
+			return nil, fmt.Errorf("failed to scan ticker: %w", err)
+		}
+		result[ticker] = true
+	}
+
+	return result, rows.Err()
 }
 
 // GetTickersNeedingQuoteUpdate returns tickers that don't have quotes from yesterday

@@ -2,6 +2,7 @@ package updater
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"sync"
 	"time"
@@ -21,9 +22,10 @@ const (
 )
 
 type PriceStats struct {
-	Updated  []string
-	NotFound []string
-	Failed   []string
+	Updated      []string
+	NotFound     []string
+	Failed       []string
+	FailureReasons map[string]string // ticker -> error message
 }
 
 func UpdatePrices(ctx context.Context) {
@@ -76,9 +78,10 @@ func updatePricesImpl(log *Logger) error {
 		startTime := time.Now()
 		var statsMu sync.Mutex
 		stats := &PriceStats{
-			Updated:  make([]string, 0),
-			NotFound: make([]string, 0),
-			Failed:   make([]string, 0),
+			Updated:        make([]string, 0),
+			NotFound:       make([]string, 0),
+			Failed:         make([]string, 0),
+			FailureReasons: make(map[string]string),
 		}
 
 		// Worker pool
@@ -90,7 +93,7 @@ func updatePricesImpl(log *Logger) error {
 			go func() {
 				defer wg.Done()
 				for symbol := range symbolChan {
-					updatedSymbol, _, _ := updatePrices(symbol, false)
+					updatedSymbol, _, _, err := updatePrices(symbol, false)
 					statsMu.Lock()
 					if updatedSymbol.LastPriceStatus != nil {
 						switch *updatedSymbol.LastPriceStatus {
@@ -100,6 +103,9 @@ func updatePricesImpl(log *Logger) error {
 							stats.NotFound = append(stats.NotFound, symbol.Ticker)
 						case types.StatusFailed:
 							stats.Failed = append(stats.Failed, symbol.Ticker)
+							if err != nil {
+								stats.FailureReasons[symbol.Ticker] = err.Error()
+							}
 						}
 					}
 					statsMu.Unlock()
@@ -119,10 +125,28 @@ func updatePricesImpl(log *Logger) error {
 		log.Stats(len(stats.Updated), len(stats.NotFound), len(stats.Failed), currentStale, elapsed)
 		log.NotFoundList(stats.NotFound)
 		log.FailedList(stats.Failed)
+		
+		// Show sample failure reasons if there are failures
+		if len(stats.FailureReasons) > 0 && len(stats.FailureReasons) <= 5 {
+			for ticker, reason := range stats.FailureReasons {
+				log.Printf("  ⚠️  %s: %s\n", ticker, reason)
+			}
+		} else if len(stats.FailureReasons) > 5 {
+			// Show first 5 failures
+			count := 0
+			for ticker, reason := range stats.FailureReasons {
+				if count >= 5 {
+					break
+				}
+				log.Printf("  ⚠️  %s: %s\n", ticker, reason)
+				count++
+			}
+			log.Printf("  ... and %d more failures\n", len(stats.FailureReasons)-5)
+		}
 	}
 }
 
-func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData) {
+func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.PriceData, []types.PriceData, error) {
 	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)
 	now := time.Now()
 
@@ -138,7 +162,7 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 			db.PutSymbols([]types.Symbol{symbol})
 		}
 
-		return symbol, nil, nil
+		return symbol, nil, nil, err
 	}
 
 	// Sort by date
@@ -188,18 +212,28 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
 			db.PutSymbols([]types.Symbol{symbol})
-			return symbol, monthly, weekly
+			
+			// Log foreign key violations as errors
+			_ = db.LogError("updater.prices", "db_constraint_violation",
+				fmt.Sprintf("Failed to insert monthly prices for %s: %v", symbol.Ticker, err), nil)
+			
+			return symbol, monthly, weekly, fmt.Errorf("failed to insert monthly prices: %w", err)
 		}
 		if err := db.PutWeeklyPrices(weekly); err != nil {
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
 			db.PutSymbols([]types.Symbol{symbol})
-			return symbol, monthly, weekly
+			
+			// Log foreign key violations as errors
+			_ = db.LogError("updater.prices", "db_constraint_violation",
+				fmt.Sprintf("Failed to insert weekly prices for %s: %v", symbol.Ticker, err), nil)
+			
+			return symbol, monthly, weekly, fmt.Errorf("failed to insert weekly prices: %w", err)
 		}
 		db.PutSymbols([]types.Symbol{symbol})
 	}
 
-	return symbol, monthly, weekly
+	return symbol, monthly, weekly, nil
 }
 
 // convertForexPrices converts stock prices from a foreign currency to USD

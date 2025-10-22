@@ -27,6 +27,20 @@ var (
 func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	log.Printf("Starting batch profile update\n")
 
+	// Check if profiles were already updated today
+	tickersNeedingUpdate, err := db.GetTickersNeedingProfileUpdate()
+	if err != nil {
+		log.Error("Failed to get tickers needing profile update: %v\n", err)
+		return fmt.Errorf("failed to get tickers needing profile update: %w", err)
+	}
+
+	if len(tickersNeedingUpdate) == 0 {
+		log.Printf("✓ All profiles already up-to-date\n")
+		return nil
+	}
+
+	log.Printf("  %d tickers need profile updates\n", len(tickersNeedingUpdate))
+
 	// Record start time to mark stale profiles later
 	batchStartTime := time.Now()
 
@@ -46,6 +60,23 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	}
 	log.Printf("  Fetched %d profiles from FMP\n", len(profiles))
 
+	// Filter to only profiles that need updating
+	filteredProfiles := make([]*fmp.Profile, 0, len(tickersNeedingUpdate))
+	for _, profile := range profiles {
+		if tickersNeedingUpdate[profile.Symbol] {
+			filteredProfiles = append(filteredProfiles, profile)
+		}
+	}
+	profiles = filteredProfiles
+
+	log.Printf("  Filtered to %d profiles that need updates\n", len(profiles))
+	
+	if len(profiles) == 0 {
+		log.Printf("✓ No profiles to update (tickers needing updates not in FMP bulk data)\n")
+		_ = db.CompleteBatchUpdate(logID, 0, 0)
+		return nil
+	}
+
 	// Convert to symbols with USD market caps
 	now := time.Now()
 	weekStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
@@ -61,11 +92,15 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	}
 
 	// Mark stale profiles as not found (profiles that weren't in this batch)
-	staleCount, err := db.MarkStaleProfilesAsNotFound(batchStartTime)
-	if err != nil {
-		log.Error("Failed to mark stale profiles as not found: %v\n", err)
-	} else if staleCount > 0 {
-		log.Printf("  Marked %d stale profiles as not found\n", staleCount)
+	// Only do this if we actually processed profiles - otherwise we'd incorrectly mark everything as not found
+	var staleCount int64
+	if len(profiles) > 0 {
+		staleCount, err = db.MarkStaleProfilesAsNotFound(batchStartTime)
+		if err != nil {
+			log.Error("Failed to mark stale profiles as not found: %v\n", err)
+		} else if staleCount > 0 {
+			log.Printf("  Marked %d stale profiles as not found\n", staleCount)
+		}
 	}
 
 	// Complete batch update log
