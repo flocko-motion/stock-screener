@@ -43,6 +43,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const [weeklyExpanded, setWeeklyExpanded] = useState(false);
     const [weeklyFetched, setWeeklyFetched] = useState(false);
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+    const [isFavorite, setIsFavorite] = useState(false);
     const ratingSectionRef = useRef<HTMLDivElement>(null);
     const chartSectionRef = useRef<HTMLDivElement>(null);
     const pricesSectionRef = useRef<HTMLDivElement>(null);
@@ -63,6 +64,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 }
                 const profileData = await response.json();
                 setProfile(profileData);
+                setIsFavorite(profileData.isFavorite || false);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load profile');
             } finally {
@@ -87,6 +89,16 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         };
         fetchRatingHistory();
     }, [symbol]);
+
+    const toggleFavorite = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/favorites/${symbol}`, { method: 'POST' });
+            const data = await response.json();
+            setIsFavorite(data.isFavorite);
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+        }
+    };
 
     const fetchMonthlyPrices = async () => {
         if (pricesFetched) return; // Already fetched
@@ -332,6 +344,12 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 return;
             }
 
+            if (event.key.toLowerCase() === 'f') {
+                event.preventDefault();
+                toggleFavorite();
+                return;
+            }
+
             if (event.key === 'Enter') {
                 event.preventDefault();
                 handleSubmitRating();
@@ -384,6 +402,12 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <div className="flex items-baseline gap-3">
+                        <span
+                            onClick={toggleFavorite}
+                            className={`cursor-pointer text-3xl hover:scale-125 inline-block transition-transform ${isFavorite ? 'text-yellow-500' : 'text-gray-300'}`}
+                        >
+                            {isFavorite ? '★' : '☆'}
+                        </span>
                         <h2 className="text-2xl font-semibold">{symbol}</h2>
                         {ratingHistory.length > 0 && (
                             <span className={`font-mono text-2xl font-bold ${getRatingColor(ratingHistory[0].rating)}`}>
@@ -623,11 +647,10 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 <div className="p-6 bg-gray-50 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4">Company Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                        <div>
+                        <div className="md:col-span-2 lg:col-span-3">
                             <span className="font-medium text-gray-600">Sector:</span>
                             <span className="ml-2">{profile.sector || 'N/A'}</span>
-                        </div>
-                        <div>
+                            <span className="mx-3 text-gray-400">|</span>
                             <span className="font-medium text-gray-600">Industry:</span>
                             <span className="ml-2">{profile.industry || 'N/A'}</span>
                         </div>
@@ -655,15 +678,13 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                             <span className="font-medium text-gray-600">History:</span>
                             <span className="ml-2">{profile.oldestPrice ? new Date(profile.oldestPrice).getFullYear() : 'N/A'}</span>
                         </div>
-                        <div>
-                            <span className="font-medium text-gray-600">Current Price:</span>
+                        <div className="md:col-span-2 lg:col-span-3">
+                            <span className="font-medium text-gray-600">Price:</span>
                             <span className="ml-2 font-mono">{profile.currentPriceUsd != null ? `$${profile.currentPriceUsd.toFixed(2)}` : 'N/A'}</span>
-                        </div>
-                        <div>
+                            <span className="mx-3 text-gray-400">|</span>
                             <span className="font-medium text-gray-600">ATH(12):</span>
                             <span className="ml-2 font-mono">{profile.ath12m != null ? `$${profile.ath12m.toFixed(2)}` : 'N/A'}</span>
-                        </div>
-                        <div>
+                            <span className="mx-3 text-gray-400">|</span>
                             <span className="font-medium text-gray-600">ΔATH:</span>
                             <span className="ml-2 font-mono">
                                 {profile.currentPriceUsd != null && profile.ath12m != null && profile.ath12m > 0 ? (

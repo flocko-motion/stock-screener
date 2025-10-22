@@ -40,6 +40,7 @@ var profileCmd = &cobra.Command{
 		fmt.Printf("%-20s %s\n", "Market Cap:", f.MaybeInt64ToString(symbol.MarketCap, "$%d", "n/a"))
 		fmt.Printf("%-20s %s\n", "Inception:", f.MaybeDateToString(symbol.Inception, "2006-01-02", "n/a"))
 		fmt.Printf("%-20s %s\n", "Oldest Price:", f.MaybeDateToString(symbol.OldestPrice, "2006-01-02", "n/a"))
+		fmt.Printf("%-20s %s\n", "Current Price:", f.MaybeFloat64ToString(symbol.CurrentPriceUsd, "$%.2f", "n/a"))
 		fmt.Printf("%-20s %s\n", "ATH 12M:", f.MaybeFloat64ToString(symbol.Ath12M, "%.2f", "n/a"))
 		fmt.Printf("%-20s %s\n", "Actively Trading:", f.MaybeBoolToString(symbol.IsActivelyTrading, "n/a"))
 		fmt.Printf("%-20s %s\n", "Primary Listing:", f.MaybeToString(symbol.PrimaryListing, "n/a"))

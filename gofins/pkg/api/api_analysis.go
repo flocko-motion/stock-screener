@@ -233,17 +233,17 @@ func (s *Server) handleSymbolProfile(w http.ResponseWriter, r *http.Request) {
 	ticker = strings.ReplaceAll(ticker, "..", "")
 
 	// Get symbol profile from database
-	profile, err := db.GetSymbolProfile(ticker)
+	symbol, err := db.GetSymbol(ticker)
 	if err != nil {
 		http.Error(w, "Failed to get symbol profile: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if profile == nil {
+	if symbol == nil {
 		http.Error(w, "Symbol not found", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(profile)
+	json.NewEncoder(w).Encode(symbol)
 }

@@ -8,7 +8,7 @@ export default function FavoritesView({ onOpenSymbol }: FavoritesViewProps) {
     return (
         <SymbolList 
             endpoint="/api/symbols/favorites"
-            description="Your favorite stocks"
+            description=""
             onOpenSymbol={onOpenSymbol}
         />
     );

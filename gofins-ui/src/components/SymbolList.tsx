@@ -322,16 +322,20 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                     </button>
                 </div>
 
-                {/* Filters */}
+                {/* Search box - always visible */}
+                <div className="mb-2">
+                    <input
+                        type="text"
+                        placeholder="Ticker or company name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    />
+                </div>
+
+                {/* Additional Filters */}
                 {filtersExpanded && (<>
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                        <input
-                            type="text"
-                            placeholder="Ticker or company name..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                        />
+                    <div className="grid grid-cols-3 gap-2 mb-2">
                         <select
                             value={exchangeFilter}
                             onChange={(e) => setExchangeFilter(e.target.value)}

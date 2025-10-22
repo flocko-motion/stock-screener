@@ -253,7 +253,7 @@ func getFilteredSymbols(additionalWhere []string) ([]types.Symbol, error) {
 	query := `
 		SELECT 
 			s.ticker, s.exchange, s.name, s.type, s.currency, s.sector, s.industry, s.country, 
-			s.inception, s.oldest_price, s.market_cap,
+			s.inception, s.oldest_price, s.market_cap, s.ath12m, s.current_price_usd,
 			COALESCE(f.ticker IS NOT NULL, false) as is_favorite,
 			r.rating
 		FROM symbols s
@@ -279,7 +279,7 @@ func getFilteredSymbols(additionalWhere []string) ([]types.Symbol, error) {
 	for rows.Next() {
 		var s types.Symbol
 		if err := rows.Scan(
-			&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country, &s.Inception, &s.OldestPrice, &s.MarketCap,
+			&s.Ticker, &s.Exchange, &s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country, &s.Inception, &s.OldestPrice, &s.MarketCap, &s.Ath12M, &s.CurrentPriceUsd,
 			&s.IsFavorite, &s.UserRating,
 		); err != nil {
 			return nil, err

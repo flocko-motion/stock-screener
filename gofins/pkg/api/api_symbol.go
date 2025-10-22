@@ -18,18 +18,18 @@ func (s *Server) handleGetSymbol(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ticker = strings.TrimSpace(ticker)
-	profile, err := db.GetSymbolProfile(ticker)
+	symbol, err := db.GetSymbol(ticker)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if profile == nil {
+	if symbol == nil {
 		http.Error(w, "symbol not found", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(profile)
+	json.NewEncoder(w).Encode(symbol)
 }
 
 func (s *Server) handleSymbolChartRoute(w http.ResponseWriter, r *http.Request) {
