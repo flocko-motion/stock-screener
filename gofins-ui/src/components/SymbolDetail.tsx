@@ -426,17 +426,17 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             {/* Fullscreen Image Modal */}
             {fullscreenImage && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black z-50 flex items-center justify-center"
                     onClick={() => setFullscreenImage(null)}
                 >
                     <img
                         src={fullscreenImage}
                         alt="Fullscreen view"
-                        className="max-w-full max-h-full object-contain"
+                        className="w-full h-full object-contain"
                         onClick={(e) => e.stopPropagation()}
                     />
                     <button
-                        className="absolute top-4 right-4 text-white text-4xl font-bold hover:text-gray-300"
+                        className="absolute top-2 right-2 text-white text-3xl font-bold hover:text-gray-400 px-3 py-1"
                         onClick={() => setFullscreenImage(null)}
                     >
                         ×

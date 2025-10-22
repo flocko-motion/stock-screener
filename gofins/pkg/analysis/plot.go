@@ -573,6 +573,16 @@ func (l *logTickFormatter) Ticks(min, max float64) []plot.Tick {
 		}
 	}
 
+	// If too many ticks, only show labels for every nth tick
+	if len(ticks) > 15 {
+		step := len(ticks) / 20 // Show ~10 labels
+		for i := range ticks {
+			if i%step != 0 {
+				ticks[i].Label = "" // Keep tick mark but remove label
+			}
+		}
+	}
+
 	return ticks
 }
 
@@ -602,6 +612,16 @@ func (d *dateTickFormatter) Ticks(min, max float64) []plot.Tick {
 					Value: yearUnix,
 					Label: fmt.Sprintf("%d", year),
 				})
+			}
+		}
+	}
+
+	// If too many year labels, only show every nth year
+	if len(ticks) > 15 {
+		step := (len(ticks) + 9) / 20 // Show ~10 labels, round up
+		for i := range ticks {
+			if i%step != 0 {
+				ticks[i].Label = "" // Keep tick mark but remove label
 			}
 		}
 	}
