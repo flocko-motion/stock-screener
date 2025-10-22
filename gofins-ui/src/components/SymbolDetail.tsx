@@ -38,10 +38,15 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const [pricesLoading, setPricesLoading] = useState(false);
     const [pricesExpanded, setPricesExpanded] = useState(false);
     const [pricesFetched, setPricesFetched] = useState(false);
+    const [weeklyPrices, setWeeklyPrices] = useState<PriceData[]>([]);
+    const [weeklyLoading, setWeeklyLoading] = useState(false);
+    const [weeklyExpanded, setWeeklyExpanded] = useState(false);
+    const [weeklyFetched, setWeeklyFetched] = useState(false);
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
     const ratingSectionRef = useRef<HTMLDivElement>(null);
     const chartSectionRef = useRef<HTMLDivElement>(null);
     const pricesSectionRef = useRef<HTMLDivElement>(null);
+    const weeklySectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -100,6 +105,23 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         }
     };
 
+    const fetchWeeklyPrices = async () => {
+        if (weeklyFetched) return;
+        setWeeklyLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8080/api/prices/weekly/${symbol}`);
+            if (response.ok) {
+                const data = await response.json();
+                setWeeklyPrices(data.prices || []);
+                setWeeklyFetched(true);
+            }
+        } catch (err) {
+            console.error('Failed to fetch weekly prices:', err);
+        } finally {
+            setWeeklyLoading(false);
+        }
+    };
+
     const togglePrices = () => {
         const newExpanded = !pricesExpanded;
         setPricesExpanded(newExpanded);
@@ -114,11 +136,27 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         }
     };
 
+    const toggleWeekly = () => {
+        const newExpanded = !weeklyExpanded;
+        setWeeklyExpanded(newExpanded);
+        if (newExpanded) {
+            if (!weeklyFetched) {
+                fetchWeeklyPrices();
+            }
+            setTimeout(() => {
+                weeklySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    };
+
     // Reset prices state when symbol changes
     useEffect(() => {
         setPricesExpanded(false);
         setPricesFetched(false);
         setMonthlyPrices([]);
+        setWeeklyExpanded(false);
+        setWeeklyFetched(false);
+        setWeeklyPrices([]);
     }, [symbol]);
 
     const handleDeleteRating = async (ratingId: number) => {
@@ -288,6 +326,12 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                 return;
             }
 
+            if (event.key.toLowerCase() === 'w') {
+                event.preventDefault();
+                toggleWeekly();
+                return;
+            }
+
             if (event.key === 'Enter') {
                 event.preventDefault();
                 handleSubmitRating();
@@ -375,6 +419,12 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                         className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
                     >
                         [M]onthly
+                    </button>
+                    <button
+                        onClick={toggleWeekly}
+                        className="px-2 py-1 text-xs text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                    >
+                        [W]eekly
                     </button>
                     <button
                         onClick={() => ratingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
@@ -497,6 +547,64 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                             </div>
                         ) : (
                             <p className="text-gray-500">No monthly price data available</p>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Weekly Prices Table - Collapsible */}
+            <div ref={weeklySectionRef} className="mb-8">
+                <button
+                    onClick={toggleWeekly}
+                    className="flex items-center gap-2 text-lg font-semibold mb-4 hover:text-gray-700"
+                >
+                    <span>{weeklyExpanded ? '▼' : '▶'}</span>
+                    <span>Weekly Prices</span>
+                </button>
+                {weeklyExpanded && (
+                    <div>
+                        {weeklyLoading ? (
+                            <div className="text-center py-4">
+                                <p className="text-gray-500">Loading prices...</p>
+                            </div>
+                        ) : weeklyPrices.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full border border-gray-200 text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-2 text-left font-medium text-gray-600 border-b">Date</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Open</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">High</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Low</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Close</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">Avg</th>
+                                            <th className="px-4 py-2 text-right font-medium text-gray-600 border-b">YoY %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {weeklyPrices.map((price, idx) => (
+                                            <tr key={idx} className="hover:bg-gray-50">
+                                                <td className="px-4 py-2 border-b">
+                                                    {new Date(price.Date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                </td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Open)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.High)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Low)}</td>
+                                                <td className="px-4 py-2 text-right border-b font-medium">{formatPrice(price.Close)}</td>
+                                                <td className="px-4 py-2 text-right border-b">{formatPrice(price.Avg)}</td>
+                                                <td className={`px-4 py-2 text-right border-b ${price.YoY === null ? 'text-gray-400' :
+                                                    price.YoY > 0 ? 'text-green-600' :
+                                                        price.YoY < 0 ? 'text-red-600' : 'text-gray-600'
+                                                    }`}>
+                                                    {price.YoY === null ? 'N/A' : `${price.YoY > 0 ? '+' : ''}${price.YoY.toFixed(1)}%`}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-gray-500">No weekly price data available</p>
                         )}
                     </div>
                 )}
