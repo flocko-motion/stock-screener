@@ -13,4 +13,5 @@ func init() {
 	Cmd.AddCommand(pricesCmd)
 	Cmd.AddCommand(profilesCmd)
 	Cmd.AddCommand(indicesCmd)
+	Cmd.AddCommand(quotesCmd)
 }

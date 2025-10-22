@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/flocko-motion/gofins/pkg/calculator"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -350,6 +351,19 @@ func GetOldestProfileUpdate() (*time.Time, error) {
 	return oldest, err
 }
 
+// ResetQuoteTimestamps resets all current quote timestamps to force fresh reload
+func ResetQuoteTimestamps() (int64, error) {
+	db := Db()
+	result, err := db.conn.Exec(`
+		UPDATE symbols 
+		SET current_price_time = NULL
+	`)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 // ResetPriceTimestamps resets all price update timestamps to force fresh reload
 func ResetPriceTimestamps() (int64, error) {
 	db := Db()
@@ -482,6 +496,36 @@ func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
 	}
 
 	return result.RowsAffected()
+}
+
+// GetTickersNeedingQuoteUpdate returns tickers that don't have quotes from yesterday
+func GetTickersNeedingQuoteUpdate() (map[string]bool, error) {
+	db := Db()
+	yesterday := calculator.StartOfDay(time.Now().AddDate(0, 0, -1))
+
+	query := `
+		SELECT ticker 
+		FROM symbols 
+		WHERE current_price_time IS NULL 
+		   OR current_price_time < $1
+	`
+
+	rows, err := db.conn.Query(query, yesterday)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tickers needing update: %w", err)
+	}
+	defer rows.Close()
+
+	result := make(map[string]bool)
+	for rows.Next() {
+		var ticker string
+		if err := rows.Scan(&ticker); err != nil {
+			return nil, fmt.Errorf("failed to scan ticker: %w", err)
+		}
+		result[ticker] = true
+	}
+
+	return result, rows.Err()
 }
 
 // UpdateQuotes updates current prices for symbols using batched transactions

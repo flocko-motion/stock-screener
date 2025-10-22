@@ -9,6 +9,17 @@ import (
 )
 
 func TestUpdateQuotesOnce(t *testing.T) {
+	// Check if we have enough time (need at least 5 minutes)
+	if deadline, ok := t.Deadline(); ok {
+		remaining := time.Until(deadline)
+		if remaining < 5*time.Minute {
+			t.Skipf("Test requires at least 5 minutes, but only %v remaining. Run with: go test -timeout 10m", remaining)
+		}
+	} else {
+		// No deadline set, which means default 30s - skip the test
+		t.Skip("Test requires extended timeout. Run with: go test -timeout 10m")
+	}
+
 	// Create a context with 5 minute timeout for this test
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()

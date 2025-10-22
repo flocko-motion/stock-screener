@@ -174,6 +174,10 @@ func IsStartOfMonth(date time.Time) bool {
 	return date.Day() == 1
 }
 
+func Yesterday() time.Time {
+	return StartOfDay(time.Now().AddDate(0, 0, -1))
+}
+
 // ConvertForexPrices converts forex data to a single time series map
 // Takes first price of each period (no averaging needed for exchange rates)
 // Returns map keyed by date (daily, week start Monday, or month start) for efficient lookups
