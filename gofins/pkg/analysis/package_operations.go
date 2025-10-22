@@ -6,22 +6,24 @@ import (
 	"path/filepath"
 
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
+	"github.com/google/uuid"
 )
 
 // GetPackage retrieves a package by ID
-func GetPackage(packageID string) (*db.AnalysisPackage, error) {
-	return db.GetAnalysisPackage(packageID)
+func GetPackage(userID uuid.UUID, packageID string) (*types.AnalysisPackage, error) {
+	return db.GetAnalysisPackage(userID, packageID)
 }
 
 // ListPackages returns all analysis packages
-func ListPackages() ([]db.AnalysisPackage, error) {
-	return db.ListAnalysisPackages()
+func ListPackages(userID uuid.UUID) ([]types.AnalysisPackage, error) {
+	return db.ListAnalysisPackages(userID)
 }
 
 // UpdatePackageName updates the name of an analysis package
-func UpdatePackageName(packageID string, name string) (*db.AnalysisPackage, error) {
+func UpdatePackageName(userID uuid.UUID, packageID string, name string) (*types.AnalysisPackage, error) {
 	// Check if package exists
-	pkg, err := db.GetAnalysisPackage(packageID)
+	pkg, err := db.GetAnalysisPackage(userID, packageID)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +32,7 @@ func UpdatePackageName(packageID string, name string) (*db.AnalysisPackage, erro
 	}
 
 	// Update in database
-	if err := db.UpdateAnalysisPackageName(packageID, name); err != nil {
+	if err := db.UpdateAnalysisPackageName(userID, packageID, name); err != nil {
 		return nil, err
 	}
 
@@ -40,9 +42,9 @@ func UpdatePackageName(packageID string, name string) (*db.AnalysisPackage, erro
 }
 
 // DeletePackage deletes an analysis package and its associated files
-func DeletePackage(packageID string) error {
+func DeletePackage(userID uuid.UUID, packageID string) error {
 	// First, check if package exists
-	pkg, err := db.GetAnalysisPackage(packageID)
+	pkg, err := db.GetAnalysisPackage(userID, packageID)
 	if err != nil {
 		return fmt.Errorf("failed to get package: %w", err)
 	}
@@ -51,7 +53,7 @@ func DeletePackage(packageID string) error {
 	}
 
 	// Delete from database first
-	if err := db.DeleteAnalysisPackage(packageID); err != nil {
+	if err := db.DeleteAnalysisPackage(userID, packageID); err != nil {
 		return fmt.Errorf("failed to delete package from database: %w", err)
 	}
 

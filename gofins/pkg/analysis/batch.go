@@ -49,7 +49,7 @@ func AnalyzeBatch(config AnalysisPackageConfig) ([]SymbolStats, error) {
 					currentProcessed, totalTickers, currentResults, float64(currentProcessed)/float64(totalTickers)*100)
 				
 				// Update package status in database with current progress
-				db.UpdateAnalysisPackageStatus(config.PackageID, "processing", currentResults)
+				db.UpdateAnalysisPackageStatus(config.UserID, config.PackageID, "processing", currentResults)
 			}
 		}
 	}()
@@ -117,7 +117,7 @@ func AnalyzeBatch(config AnalysisPackageConfig) ([]SymbolStats, error) {
 				if config.SaveToDB {
 					histogramJSON, _ := json.Marshal(stats.Histogram)
 					db.SaveAnalysisResult(
-						config.PackageID, ticker,
+						config.UserID, config.PackageID, ticker,
 						stats.Count, stats.Mean, stats.StdDev, stats.Variance,
 						stats.Min, stats.Max, histogramJSON,
 					)

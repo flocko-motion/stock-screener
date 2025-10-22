@@ -9,6 +9,7 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/analysis"
 	"github.com/flocko-motion/gofins/pkg/db"
+	"github.com/flocko-motion/gofins/pkg/types"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -33,7 +34,8 @@ func (s *Server) handleAnalyses(w http.ResponseWriter, r *http.Request) {
 
 // handleListAnalyses lists all analysis packages
 func (s *Server) handleListAnalyses(w http.ResponseWriter, r *http.Request) {
-	packages, err := analysis.ListPackages()
+	userID := getUserID(r)
+	packages, err := analysis.ListPackages(userID)
 	if err != nil {
 		http.Error(w, "Failed to list analyses: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -41,7 +43,7 @@ func (s *Server) handleListAnalyses(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure we return an empty array instead of null
 	if packages == nil {
-		packages = []db.AnalysisPackage{}
+		packages = []types.AnalysisPackage{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -102,7 +104,8 @@ func (s *Server) handleAnalysis(w http.ResponseWriter, r *http.Request) {
 
 // handleGetAnalysis retrieves a single analysis package
 func (s *Server) handleGetAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
-	pkg, err := analysis.GetPackage(packageID)
+	userID := getUserID(r)
+	pkg, err := analysis.GetPackage(userID, packageID)
 	if err != nil {
 		http.Error(w, "Failed to get analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +133,8 @@ func (s *Server) handleUpdateAnalysis(w http.ResponseWriter, r *http.Request, pa
 		return
 	}
 
-	pkg, err := analysis.UpdatePackageName(packageID, req.Name)
+	userID := getUserID(r)
+	pkg, err := analysis.UpdatePackageName(userID, packageID, req.Name)
 	if err != nil {
 		http.Error(w, "Failed to update analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -147,7 +151,8 @@ func (s *Server) handleUpdateAnalysis(w http.ResponseWriter, r *http.Request, pa
 
 // handleDeleteAnalysis deletes an analysis package
 func (s *Server) handleDeleteAnalysis(w http.ResponseWriter, r *http.Request, packageID string) {
-	err := analysis.DeletePackage(packageID)
+	userID := getUserID(r)
+	err := analysis.DeletePackage(userID, packageID)
 	if err != nil {
 		http.Error(w, "Failed to delete analysis: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -169,7 +174,8 @@ func (s *Server) handleAnalysisResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results, err := db.GetAnalysisResults(packageID)
+	userID := getUserID(r)
+	results, err := db.GetAnalysisResults(userID, packageID)
 	if err != nil {
 		http.Error(w, "Failed to get results: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -177,7 +183,7 @@ func (s *Server) handleAnalysisResults(w http.ResponseWriter, r *http.Request) {
 
 	// Return empty array instead of null
 	if results == nil {
-		results = []db.AnalysisResult{}
+		results = []types.AnalysisResult{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
