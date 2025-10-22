@@ -1,5 +1,8 @@
 # Bugs (fix bugs first before working on TODOs)
 
+## Weekly YoY data has N/A blocks in 2020-2021
+Weekly prices show blocks of N/A YoY values during 2020-2021 period (e.g., AAPL from July 2020 to April 2021). Pattern shows every other week has N/A, suggesting missing weekly price data or calculation issue for that period. Need to investigate why YoY calculation fails for these specific weeks.
+
 ## ✅ FIXED: SymbolList select value bug
 Fixed by ensuring filter values from sessionStorage are always strings, not arrays or objects.
 

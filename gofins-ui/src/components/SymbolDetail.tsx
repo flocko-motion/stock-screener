@@ -652,8 +652,26 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
                             <span className="ml-2">{profile.inception ? new Date(profile.inception).getFullYear() : 'N/A'}</span>
                         </div>
                         <div>
-                            <span className="font-medium text-gray-600">Price:</span>
+                            <span className="font-medium text-gray-600">History:</span>
                             <span className="ml-2">{profile.oldestPrice ? new Date(profile.oldestPrice).getFullYear() : 'N/A'}</span>
+                        </div>
+                        <div>
+                            <span className="font-medium text-gray-600">Current Price:</span>
+                            <span className="ml-2 font-mono">{profile.currentPriceUsd != null ? `$${profile.currentPriceUsd.toFixed(2)}` : 'N/A'}</span>
+                        </div>
+                        <div>
+                            <span className="font-medium text-gray-600">ATH(12):</span>
+                            <span className="ml-2 font-mono">{profile.ath12m != null ? `$${profile.ath12m.toFixed(2)}` : 'N/A'}</span>
+                        </div>
+                        <div>
+                            <span className="font-medium text-gray-600">ΔATH:</span>
+                            <span className="ml-2 font-mono">
+                                {profile.currentPriceUsd != null && profile.ath12m != null && profile.ath12m > 0 ? (
+                                    <span className={((profile.currentPriceUsd / profile.ath12m - 1) * 100) >= -10 ? 'text-green-600' : ((profile.currentPriceUsd / profile.ath12m - 1) * 100) >= -30 ? 'text-yellow-600' : 'text-red-600'}>
+                                        {((profile.currentPriceUsd / profile.ath12m - 1) * 100).toFixed(1)}%
+                                    </span>
+                                ) : 'N/A'}
+                            </span>
                         </div>
                         <div className="md:col-span-2 lg:col-span-3">
                             <span className="font-medium text-gray-600">Website:</span>

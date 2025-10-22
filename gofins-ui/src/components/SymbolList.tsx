@@ -15,6 +15,8 @@ interface Symbol {
     marketCap?: number;
     isFavorite: boolean;
     userRating?: number;
+    ath12m?: number;
+    currentPriceUsd?: number;
 }
 
 interface SymbolListProps {
@@ -322,105 +324,105 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
 
                 {/* Filters */}
                 {filtersExpanded && (<>
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                    <input
-                        type="text"
-                        placeholder="Ticker or company name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    />
-                    <select
-                        value={exchangeFilter}
-                        onChange={(e) => setExchangeFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Exchanges</option>
-                        {exchanges.map(e => <option key={e} value={e}>{e}</option>)}
-                    </select>
-                    <select
-                        value={countryFilter}
-                        onChange={(e) => setCountryFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Countries</option>
-                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <select
-                        value={sectorFilter}
-                        onChange={(e) => setSectorFilter(e.target.value)}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                    >
-                        <option value="">All Sectors</option>
-                        {sectors.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                </div>
+                    <div className="grid grid-cols-4 gap-2 mb-2">
+                        <input
+                            type="text"
+                            placeholder="Ticker or company name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        />
+                        <select
+                            value={exchangeFilter}
+                            onChange={(e) => setExchangeFilter(e.target.value)}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">All Exchanges</option>
+                            {exchanges.map(e => <option key={e} value={e}>{e}</option>)}
+                        </select>
+                        <select
+                            value={countryFilter}
+                            onChange={(e) => setCountryFilter(e.target.value)}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">All Countries</option>
+                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <select
+                            value={sectorFilter}
+                            onChange={(e) => setSectorFilter(e.target.value)}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">All Sectors</option>
+                            {sectors.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
 
-                <div className="grid grid-cols-6 gap-2">
-                    <select value={mcapMin} onChange={(e) => setMcapMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
-                        <option value="">MCap Min</option>
-                        <option value="0">$0</option>
-                        <option value="0.001">$1M</option>
-                        <option value="0.01">$10M</option>
-                        <option value="0.1">$100M</option>
-                        <option value="1">$1B</option>
-                        <option value="10">$10B</option>
-                        <option value="100">$100B</option>
-                        <option value="1000">$1T</option>
-                    </select>
-                    <select value={mcapMax} onChange={(e) => setMcapMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
-                        <option value="">MCap Max</option>
-                        <option value="0.001">$1M</option>
-                        <option value="0.01">$10M</option>
-                        <option value="0.1">$100M</option>
-                        <option value="1">$1B</option>
-                        <option value="10">$10B</option>
-                        <option value="100">$100B</option>
-                        <option value="1000">$1T</option>
-                    </select>
-                    <input type="number" placeholder="Inception Min" value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Inception Max" value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Price Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                    <input type="number" placeholder="Price Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
-                </div>
-                <div className="grid grid-cols-4 gap-2 mt-2">
-                    <select value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
-                        <option value="">Rating Min</option>
-                        {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
-                            <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
-                        ))}
-                    </select>
-                    <select value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
-                        <option value="">Rating Max</option>
-                        {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
-                            <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
-                        ))}
-                    </select>
-                    <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
-                        <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
-                        <span>⭐ Favorites only</span>
-                    </label>
-                    <button
-                        onClick={() => {
-                            setSearchTerm('');
-                            setExchangeFilter('');
-                            setCountryFilter('');
-                            setSectorFilter('');
-                            setMcapMin('');
-                            setMcapMax('');
-                            setInceptionMin('');
-                            setInceptionMax('');
-                            setOldestPriceMin('');
-                            setOldestPriceMax('');
-                            setFavoritesOnly(false);
-                            setRatingMin('');
-                            setRatingMax('');
-                        }}
-                        className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50"
-                    >
-                        Reset Filters
-                    </button>
-                </div>
+                    <div className="grid grid-cols-6 gap-2">
+                        <select value={mcapMin} onChange={(e) => setMcapMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                            <option value="">MCap Min</option>
+                            <option value="0">$0</option>
+                            <option value="0.001">$1M</option>
+                            <option value="0.01">$10M</option>
+                            <option value="0.1">$100M</option>
+                            <option value="1">$1B</option>
+                            <option value="10">$10B</option>
+                            <option value="100">$100B</option>
+                            <option value="1000">$1T</option>
+                        </select>
+                        <select value={mcapMax} onChange={(e) => setMcapMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                            <option value="">MCap Max</option>
+                            <option value="0.001">$1M</option>
+                            <option value="0.01">$10M</option>
+                            <option value="0.1">$100M</option>
+                            <option value="1">$1B</option>
+                            <option value="10">$10B</option>
+                            <option value="100">$100B</option>
+                            <option value="1000">$1T</option>
+                        </select>
+                        <input type="number" placeholder="Inception Min" value={inceptionMin} onChange={(e) => setInceptionMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                        <input type="number" placeholder="Inception Max" value={inceptionMax} onChange={(e) => setInceptionMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                        <input type="number" placeholder="History Min" value={oldestPriceMin} onChange={(e) => setOldestPriceMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                        <input type="number" placeholder="History Max" value={oldestPriceMax} onChange={(e) => setOldestPriceMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded" />
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 mt-2">
+                        <select value={ratingMin} onChange={(e) => setRatingMin(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                            <option value="">Rating Min</option>
+                            {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
+                                <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
+                            ))}
+                        </select>
+                        <select value={ratingMax} onChange={(e) => setRatingMax(e.target.value)} className="px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                            <option value="">Rating Max</option>
+                            {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map(r => (
+                                <option key={r} value={r}>{r > 0 ? `+${r}` : r}</option>
+                            ))}
+                        </select>
+                        <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
+                            <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
+                            <span>⭐ Favorites only</span>
+                        </label>
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setExchangeFilter('');
+                                setCountryFilter('');
+                                setSectorFilter('');
+                                setMcapMin('');
+                                setMcapMax('');
+                                setInceptionMin('');
+                                setInceptionMax('');
+                                setOldestPriceMin('');
+                                setOldestPriceMax('');
+                                setFavoritesOnly(false);
+                                setRatingMin('');
+                                setRatingMax('');
+                            }}
+                            className="px-2 py-1 text-sm border border-gray-300 rounded bg-white hover:bg-gray-50"
+                        >
+                            Reset Filters
+                        </button>
+                    </div>
                 </>)}
             </div>
 
@@ -450,7 +452,9 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                                 <th onClick={() => handleSort('country')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-12 cursor-pointer hover:bg-gray-100">Ctry {sortColumn === 'country' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('sector')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-32 cursor-pointer hover:bg-gray-100">Sector {sortColumn === 'sector' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('inception')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Incept {sortColumn === 'inception' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
-                                <th onClick={() => handleSort('oldestPrice')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Price {sortColumn === 'oldestPrice' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('oldestPrice')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">History {sortColumn === 'oldestPrice' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th onClick={() => handleSort('currentPriceUsd')} className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Price {sortColumn === 'currentPriceUsd' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
+                                <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16">ΔATH</th>
                                 <th onClick={() => handleSort('marketCap')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">MCap {sortColumn === 'marketCap' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                             </tr>
                         </thead>
@@ -480,6 +484,14 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                                     <td className="px-2 py-1 text-gray-500 truncate max-w-[8rem]" title={symbol.sector || ''}>{symbol.sector || '-'}</td>
                                     <td className="px-2 py-1 whitespace-nowrap text-gray-500">{formatYear(symbol.inception)}</td>
                                     <td className="px-2 py-1 whitespace-nowrap text-gray-500">{formatYear(symbol.oldestPrice)}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-right text-gray-900 font-mono">{symbol.currentPriceUsd != null ? `$${symbol.currentPriceUsd.toFixed(2)}` : '-'}</td>
+                                    <td className="px-2 py-1 whitespace-nowrap text-right font-mono">
+                                        {symbol.currentPriceUsd != null && symbol.ath12m != null && symbol.ath12m > 0 ? (
+                                            <span className={((symbol.currentPriceUsd / symbol.ath12m - 1) * 100) >= -10 ? 'text-green-600' : ((symbol.currentPriceUsd / symbol.ath12m - 1) * 100) >= -30 ? 'text-yellow-600' : 'text-red-600'}>
+                                                {((symbol.currentPriceUsd / symbol.ath12m - 1) * 100).toFixed(1)}%
+                                            </span>
+                                        ) : '-'}
+                                    </td>
                                     <td className="px-2 py-1 whitespace-nowrap text-gray-500 font-mono">{formatMarketCap(symbol.marketCap)}</td>
                                 </tr>
                             ))}

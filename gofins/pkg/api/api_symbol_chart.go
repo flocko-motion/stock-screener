@@ -68,7 +68,7 @@ func (s *Server) generateSymbolChart(ticker string, plotType analysis.PlotType) 
 	}
 
 	// Calculate statistics
-	histConfig := analysis.HistogramConfig{NumBins: 100, Min: -1.0, Max: 1.0}
+	histConfig := analysis.HistogramConfig{NumBins: 100, Min: -80.0, Max: 80.0}
 	stats := analysis.AnalyzeYoY(prices, histConfig)
 
 	// Generate the plot to a temp file

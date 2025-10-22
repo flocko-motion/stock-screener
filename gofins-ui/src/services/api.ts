@@ -41,6 +41,8 @@ export interface SymbolProfile {
     oldestPrice?: string;
     isActivelyTrading?: boolean;
     marketCap?: number;
+    ath12m?: number;
+    currentPriceUsd?: number;
 }
 
 export interface CreateAnalysisRequest {
