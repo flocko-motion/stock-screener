@@ -111,7 +111,7 @@ func syncSymbolsImpl(log *Logger) error {
 				dbSymbol.Type = f.Ptr(string(types.TypeStock))
 			}
 
-			if err := db.PutSymbol(dbSymbol); err != nil {
+			if err := db.PutSymbols([]types.Symbol{*dbSymbol}); err != nil {
 				return fmt.Errorf("failed to insert %s: %w", symbol.Symbol, err)
 			}
 			newCount++

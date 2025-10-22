@@ -146,31 +146,18 @@ func convertProfilesToSymbols(profiles []*fmp.Profile, date time.Time, log *Logg
 	return symbols
 }
 
-// updateProfilesInBatches updates profiles in the database in batches
+// updateProfilesInBatches updates profiles in the database
+// Batching is handled automatically by PutSymbols
 func updateProfilesInBatches(symbols []types.Symbol, log *Logger) (int, error) {
-	totalUpdated := 0
+	log.Printf("  Updating %d symbols in database...\n", len(symbols))
 
-	for i := 0; i < len(symbols); i += ProfileBulkBatchSize {
-		end := i + ProfileBulkBatchSize
-		if end > len(symbols) {
-			end = len(symbols)
-		}
-
-		batch := symbols[i:end]
-
-		// Update batch using database module
-		for _, symbol := range batch {
-			if err := db.PutSymbol(&symbol); err != nil {
-				log.Error("Failed to update profile for %s: %v\n", symbol.Ticker, err)
-				continue
-			}
-			totalUpdated++
-		}
-
-		log.Printf("  Updated batch %d-%d (%d/%d symbols)\n", i+1, end, totalUpdated, len(symbols))
+	if err := db.PutSymbols(symbols); err != nil {
+		log.Error("Failed to update symbols: %v\n", err)
+		return 0, fmt.Errorf("bulk update failed: %w", err)
 	}
 
-	return totalUpdated, nil
+	log.Printf("  ✓ Updated %d symbols\n", len(symbols))
+	return len(symbols), nil
 }
 
 // RunProfileBatchUpdater runs the batch profile updater in a loop

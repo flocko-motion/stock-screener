@@ -9,11 +9,42 @@ import (
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
-// PutSymbol inserts or updates a symbol profile
-// Only updates non-nil fields to avoid overwriting data from other updaters
-func PutSymbol(s *types.Symbol) error {
+// PutSymbols inserts or updates multiple symbol profiles using batched transactions
+// Automatically handles large datasets by batching into chunks of 1000 symbols
+func PutSymbols(symbols []types.Symbol) error {
+	if len(symbols) == 0 {
+		return nil
+	}
+
+	const batchSize = 1000
+
+	// Process in batches
+	for i := 0; i < len(symbols); i += batchSize {
+		end := i + batchSize
+		if end > len(symbols) {
+			end = len(symbols)
+		}
+
+		batch := symbols[i:end]
+
+		if err := putSymbolsBatch(batch); err != nil {
+			return fmt.Errorf("failed to insert batch %d-%d: %w", i+1, end, err)
+		}
+	}
+
+	return nil
+}
+
+// putSymbolsBatch inserts a single batch of symbols in one transaction
+func putSymbolsBatch(symbols []types.Symbol) error {
 	db := Db()
-	query := `
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
 		INSERT INTO symbols (
 			ticker, exchange, last_price_update, last_profile_update, 
 			last_price_status, last_profile_status,
@@ -44,17 +75,29 @@ func PutSymbol(s *types.Symbol) error {
 			ath12m = COALESCE(EXCLUDED.ath12m, symbols.ath12m),
 			current_price_usd = COALESCE(EXCLUDED.current_price_usd, symbols.current_price_usd),
 			current_price_time = COALESCE(EXCLUDED.current_price_time, symbols.current_price_time)
-	`
+	`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare statement: %w", err)
+	}
+	defer stmt.Close()
 
-	_, err := db.conn.Exec(
-		query,
-		s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
-		s.LastPriceStatus, s.LastProfileStatus,
-		s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.CIK, s.Inception, s.OldestPrice,
-		s.IsActivelyTrading, s.MarketCap, s.PrimaryListing, s.Ath12M, s.CurrentPriceUsd, s.CurrentPriceTime,
-	)
+	for _, s := range symbols {
+		_, err := stmt.Exec(
+			s.Ticker, s.Exchange, s.LastPriceUpdate, s.LastProfileUpdate,
+			s.LastPriceStatus, s.LastProfileStatus,
+			s.Name, s.Type, s.Currency, s.Sector, s.Industry, s.Country, s.Description, s.Website, s.ISIN, s.CIK, s.Inception, s.OldestPrice,
+			s.IsActivelyTrading, s.MarketCap, s.PrimaryListing, s.Ath12M, s.CurrentPriceUsd, s.CurrentPriceTime,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to insert symbol %s: %w", s.Ticker, err)
+		}
+	}
 
-	return err
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
 }
 
 // GetSymbol retrieves a symbol by ticker
@@ -426,7 +469,7 @@ func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
 		WHERE last_profile_update < $2
 		   OR last_profile_update IS NULL
 	`, types.StatusNotFound, since)
-	
+
 	if err != nil {
 		return 0, fmt.Errorf("failed to mark stale profiles as not found: %w", err)
 	}
@@ -472,4 +515,3 @@ func UpdateQuoteBatch(quotes []types.Symbol) error {
 
 	return nil
 }
-

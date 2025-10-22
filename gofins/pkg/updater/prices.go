@@ -135,7 +135,7 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 		symbol.LastPriceUpdate = &now
 		symbol.LastPriceStatus = &status
 		if !testMode {
-			db.PutSymbol(&symbol)
+			db.PutSymbols([]types.Symbol{symbol})
 		}
 
 		return symbol, nil, nil
@@ -187,16 +187,16 @@ func updatePrices(symbol types.Symbol, testMode bool) (types.Symbol, []types.Pri
 		if err := db.PutMonthlyPrices(monthly); err != nil {
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
-			db.PutSymbol(&symbol)
+			db.PutSymbols([]types.Symbol{symbol})
 			return symbol, monthly, weekly
 		}
 		if err := db.PutWeeklyPrices(weekly); err != nil {
 			failStatus := types.StatusFailed
 			symbol.LastPriceStatus = &failStatus
-			db.PutSymbol(&symbol)
+			db.PutSymbols([]types.Symbol{symbol})
 			return symbol, monthly, weekly
 		}
-		db.PutSymbol(&symbol)
+		db.PutSymbols([]types.Symbol{symbol})
 	}
 
 	return symbol, monthly, weekly

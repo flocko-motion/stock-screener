@@ -146,21 +146,21 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 		if fmp.IsNotFoundError(err) {
 			status := types.StatusNotFound
 			if !testMode {
-				db.PutSymbol(&types.Symbol{
+				db.PutSymbols([]types.Symbol{{
 					Ticker:            ticker,
 					LastProfileUpdate: f.Ptr(time.Now()),
 					LastProfileStatus: &status,
-				})
+				}})
 			}
 			return nil, types.StatusNotFound
 		}
 		status := types.StatusFailed
 		if !testMode {
-			db.PutSymbol(&types.Symbol{
+			db.PutSymbols([]types.Symbol{{
 				Ticker:            ticker,
 				LastProfileUpdate: f.Ptr(time.Now()),
 				LastProfileStatus: &status,
-			})
+			}})
 		}
 		return nil, types.StatusFailed
 	}
@@ -213,13 +213,13 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 	}
 
 	if !testMode {
-		if err := db.PutSymbol(symbol); err != nil {
+		if err := db.PutSymbols([]types.Symbol{*symbol}); err != nil {
 			failStatus := types.StatusFailed
-			db.PutSymbol(&types.Symbol{
+			db.PutSymbols([]types.Symbol{{
 				Ticker:            ticker,
 				LastProfileUpdate: f.Ptr(time.Now()),
 				LastProfileStatus: &failStatus,
-			})
+			}})
 			return nil, failStatus
 		}
 	}

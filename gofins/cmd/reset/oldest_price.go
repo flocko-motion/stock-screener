@@ -49,10 +49,10 @@ var oldestPriceCmd = &cobra.Command{
 			}
 
 			// Update the symbol with oldest_price
-			if err := db.PutSymbol(&types.Symbol{
+			if err := db.PutSymbols([]types.Symbol{{
 				Ticker:      ticker,
 				OldestPrice: oldestDate,
-			}); err != nil {
+			}}); err != nil {
 				_ = db.LogError("reset.oldest_price", "database", "Failed to update symbol", f.Ptr(err.Error()))
 				failed++
 				continue
