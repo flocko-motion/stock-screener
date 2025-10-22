@@ -1,6 +1,8 @@
 package updater
 
 import (
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
@@ -26,28 +28,49 @@ func DedupeSymbolsOnce() error {
 }
 
 func dedupeSymbolsImpl(log *log.Logger) error {
-	log.Printf("Starting deduplication...\n")
+	log.Printf("Starting deduplication (CIK and Name in parallel)...\n")
+	startTime := time.Now()
+
+	// Run CIK and Name dedupe concurrently (they operate on different symbol sets)
+	var wg sync.WaitGroup
+	var cikUpdated, cikFailed, nameUpdated, nameFailed int
+	var cikErr, nameErr error
+
+	wg.Add(2)
 
 	// Phase 1: Process symbols with CIK
-	cikUpdated, cikFailed, err := dedupeByCIK(log)
-	if err != nil {
-		return err
-	}
+	go func() {
+		defer wg.Done()
+		cikUpdated, cikFailed, cikErr = dedupeByCIK()
+	}()
 
 	// Phase 2: Process stocks without CIK by name
-	nameUpdated, nameFailed, err := dedupeByName(log)
-	if err != nil {
-		return err
+	go func() {
+		defer wg.Done()
+		nameUpdated, nameFailed, nameErr = dedupeByName()
+	}()
+
+	wg.Wait()
+
+	if cikErr != nil {
+		return cikErr
+	}
+	if nameErr != nil {
+		return nameErr
 	}
 
-	log.Printf("✓ Completed: %d CIK-based, %d name-based | Failed: %d CIK, %d name\n",
-		cikUpdated, nameUpdated, cikFailed, nameFailed)
+	// Show combined results
+	totalUpdated := cikUpdated + nameUpdated
+	totalFailed := cikFailed + nameFailed
+	elapsed := time.Since(startTime)
+	log.ProgressShort(totalUpdated+totalFailed, 0, elapsed)
 
 	return nil
 }
 
 // dedupeByCIK groups symbols by CIK and identifies primary listings
-func dedupeByCIK(log *log.Logger) (int, int, error) {
+func dedupeByCIK() (int, int, error) {
+	log := NewLogger("Dedupe.CIK")
 	symbols, err := db.GetSymbolsWithCIK()
 	if err != nil {
 		return 0, 0, err
@@ -58,60 +81,86 @@ func dedupeByCIK(log *log.Logger) (int, int, error) {
 	// Group symbols by CIK
 	cikGroups := make(map[string][]types.Symbol)
 	for _, symbol := range symbols {
-		if symbol.CIK != nil && *symbol.CIK != "" {
+		if symbol.CIK != nil {
 			cikGroups[*symbol.CIK] = append(cikGroups[*symbol.CIK], symbol)
 		}
 	}
 
-	updated := 0
-	failed := 0
-
-	// Process each CIK group
-	groupCount := 0
-	totalGroups := len(cikGroups)
-	startTime := time.Now()
-
+	// Filter to only groups with multiple symbols
+	type cikGroup struct {
+		cik   string
+		group []types.Symbol
+	}
+	var groups []cikGroup
 	for cik, group := range cikGroups {
-		if len(group) <= 1 {
-			continue // Skip single-symbol groups
-		}
-		groupCount++
-
-		// Find primary ticker for this group
-		primaryTicker, err := findPrimaryByCIK(cik, group)
-		if err != nil {
-			log.Errorf("Failed to find primary for CIK %s: %v\n", cik, err)
-			failed += len(group)
-			continue
-		}
-
-		// Build list of secondary tickers
-		var secondaryTickers []string
-		for _, symbol := range group {
-			if symbol.Ticker != primaryTicker {
-				secondaryTickers = append(secondaryTickers, symbol.Ticker)
-			}
-		}
-
-		// Update the entire group in one transaction
-		if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
-			log.Errorf("Failed to update group for CIK %s: %v\n", cik, err)
-			failed += len(group)
-		} else {
-			updated += len(group)
-		}
-
-		// Log progress every 100 groups with ETA
-		if groupCount%100 == 0 {
-			elapsed := time.Since(startTime)
-			remaining := totalGroups - groupCount
-			log.Progress(updated, failed, 0, remaining, elapsed)
+		if len(group) > 1 {
+			groups = append(groups, cikGroup{cik, group})
 		}
 	}
 
-	log.Printf("✓ CIK-based: %d groups, %d symbols updated, %d failed\n", groupCount, updated, failed)
+	totalGroups := len(groups)
+	var groupCount, updated, failed atomic.Int32
+	startTime := time.Now()
 
-	return updated, failed, nil
+	// Process groups concurrently with workers
+	const numWorkers = 16
+	workChan := make(chan cikGroup, numWorkers*2)
+	var wg sync.WaitGroup
+
+	// Start workers
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for item := range workChan {
+				// Find primary ticker for this group
+				primaryTicker, err := findPrimaryByCIK(item.cik, item.group)
+				if err != nil {
+					log.Errorf("Failed to find primary for CIK %s: %v\n", item.cik, err)
+					failed.Add(int32(len(item.group)))
+					groupCount.Add(1)
+					continue
+				}
+
+				// Build list of secondary tickers
+				var secondaryTickers []string
+				for _, symbol := range item.group {
+					if symbol.Ticker != primaryTicker {
+						secondaryTickers = append(secondaryTickers, symbol.Ticker)
+					}
+				}
+
+				// Update the entire group in one transaction
+				if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
+					log.Errorf("Failed to update group for CIK %s: %v\n", item.cik, err)
+					failed.Add(int32(len(item.group)))
+				} else {
+					updated.Add(int32(len(item.group)))
+				}
+
+				count := int(groupCount.Add(1))
+				// Log progress every 100 groups
+				if count%100 == 0 {
+					elapsed := time.Since(startTime)
+					remaining := totalGroups - count
+					log.Progress(int(updated.Load()), int(failed.Load()), 0, remaining, elapsed)
+				}
+			}
+		}()
+	}
+
+	// Send work to workers
+	for _, group := range groups {
+		workChan <- group
+	}
+	close(workChan)
+	wg.Wait()
+
+	elapsed := time.Since(startTime)
+	total := int(updated.Load()) + int(failed.Load())
+	log.ProgressShort(total, 0, elapsed)
+
+	return int(updated.Load()), int(failed.Load()), nil
 }
 
 // findPrimaryByCIK determines the primary listing for a CIK group
@@ -135,7 +184,8 @@ func findPrimaryByCIK(cik string, group []types.Symbol) (string, error) {
 }
 
 // dedupeByName groups stocks without CIK by exact name match
-func dedupeByName(log *log.Logger) (int, int, error) {
+func dedupeByName() (int, int, error) {
+	log := NewLogger("Dedupe.Name")
 	symbols, err := db.GetStockSymbolsWithoutCIK()
 	if err != nil {
 		return 0, 0, err
@@ -151,50 +201,75 @@ func dedupeByName(log *log.Logger) (int, int, error) {
 		}
 	}
 
-	updated := 0
-	failed := 0
-
-	// Process each name group
-	groupCount := 0
-	totalGroups := len(nameGroups)
-	startTime := time.Now()
-
+	// Filter to only groups with multiple symbols
+	type nameGroup struct {
+		name  string
+		group []types.Symbol
+	}
+	var groups []nameGroup
 	for name, group := range nameGroups {
-		if len(group) <= 1 {
-			continue // Skip single-symbol groups
-		}
-		groupCount++
-
-		// Find primary ticker for this group
-		primaryTicker := findPrimaryByOldestPrice(group)
-
-		// Build list of secondary tickers
-		var secondaryTickers []string
-		for _, symbol := range group {
-			if symbol.Ticker != primaryTicker {
-				secondaryTickers = append(secondaryTickers, symbol.Ticker)
-			}
-		}
-
-		// Update the entire group in one transaction
-		if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
-			log.Errorf("Failed to update group for name '%s': %v\n", name, err)
-			failed += len(group)
-		} else {
-			updated += len(group)
-		}
-
-		// Log progress every 100 groups with ETA
-		if groupCount%100 == 0 {
-			elapsed := time.Since(startTime)
-			remaining := totalGroups - groupCount
-			log.Progress(updated, failed, 0, remaining, elapsed)
+		if len(group) > 1 {
+			groups = append(groups, nameGroup{name, group})
 		}
 	}
 
-	log.Printf("✓ Name-based: %d groups, %d symbols updated, %d failed\n", groupCount, updated, failed)
+	totalGroups := len(groups)
+	var groupCount, updated, failed atomic.Int32
+	startTime := time.Now()
 
-	return updated, failed, nil
+	// Process groups concurrently with workers
+	const numWorkers = 16
+	workChan := make(chan nameGroup, numWorkers*2)
+	var wg sync.WaitGroup
+
+	// Start workers
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for item := range workChan {
+				// Find primary ticker for this group
+				primaryTicker := findPrimaryByOldestPrice(item.group)
+
+				// Build list of secondary tickers
+				var secondaryTickers []string
+				for _, symbol := range item.group {
+					if symbol.Ticker != primaryTicker {
+						secondaryTickers = append(secondaryTickers, symbol.Ticker)
+					}
+				}
+
+				// Update the entire group in one transaction
+				if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
+					log.Errorf("Failed to update group for name '%s': %v\n", item.name, err)
+					failed.Add(int32(len(item.group)))
+				} else {
+					updated.Add(int32(len(item.group)))
+				}
+
+				count := int(groupCount.Add(1))
+				// Log progress every 100 groups
+				if count%100 == 0 {
+					elapsed := time.Since(startTime)
+					remaining := totalGroups - count
+					log.Progress(int(updated.Load()), int(failed.Load()), 0, remaining, elapsed)
+				}
+			}
+		}()
+	}
+
+	// Send work to workers
+	for _, group := range groups {
+		workChan <- group
+	}
+	close(workChan)
+	wg.Wait()
+
+	elapsed := time.Since(startTime)
+	total := int(updated.Load()) + int(failed.Load())
+	log.ProgressShort(total, 0, elapsed)
+
+	return int(updated.Load()), int(failed.Load()), nil
 }
 
 // findPrimaryByOldestPrice finds the symbol with the oldest price date
