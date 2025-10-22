@@ -40,6 +40,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const [pricesFetched, setPricesFetched] = useState(false);
     const ratingSectionRef = useRef<HTMLDivElement>(null);
     const chartSectionRef = useRef<HTMLDivElement>(null);
+    const pricesSectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -101,8 +102,14 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
     const togglePrices = () => {
         const newExpanded = !pricesExpanded;
         setPricesExpanded(newExpanded);
-        if (newExpanded && !pricesFetched) {
-            fetchMonthlyPrices();
+        if (newExpanded) {
+            if (!pricesFetched) {
+                fetchMonthlyPrices();
+            }
+            // Scroll to the section after a brief delay to allow expansion
+            setTimeout(() => {
+                pricesSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
     };
 
@@ -224,7 +231,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
         //     // For very small numbers, add more decimals
         //     decimals = Math.ceil(Math.abs(log));
         // }
-        decimals = Math.max(0, 3 - Math.ceil(Math.abs(log)));
+        decimals = Math.min(10, Math.max(0, 3 - Math.ceil(Math.abs(log))));
         return price.toFixed(decimals);
     };
 
@@ -388,7 +395,7 @@ export default function SymbolDetail({ symbol, analysisId, onClose }: SymbolDeta
             </div>
 
             {/* Monthly Prices Table - Collapsible */}
-            <div className="mb-8">
+            <div ref={pricesSectionRef} className="mb-8">
                 <button
                     onClick={togglePrices}
                     className="flex items-center gap-2 text-lg font-semibold mb-4 hover:text-gray-700"
