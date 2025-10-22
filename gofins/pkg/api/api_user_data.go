@@ -13,11 +13,12 @@ import (
 // POST /api/favorites/{ticker} - Toggle favorite
 // GET /api/favorites - List all favorites
 func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
 	ticker := chi.URLParam(r, "ticker")
 	
 	if r.Method == "GET" && ticker == "" {
 		// List all favorites
-		tickers, err := db.GetFavorites()
+		tickers, err := db.GetFavorites(userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -34,7 +35,7 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		isFavorite, err := db.ToggleFavorite(ticker)
+		isFavorite, err := db.ToggleFavorite(userID, ticker)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -55,11 +56,12 @@ func (s *Server) handleFavorites(w http.ResponseWriter, r *http.Request) {
 // GET /api/ratings - Get all latest ratings
 // DELETE /api/ratings/{id} - Delete rating by ID
 func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
 	ticker := chi.URLParam(r, "ticker")
 
 	if r.Method == "GET" && ticker == "" {
 		// Get all latest ratings
-		ratings, err := db.GetAllLatestRatings()
+		ratings, err := db.GetAllLatestRatings(userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -76,7 +78,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// Get latest rating
-		rating, err := db.GetLatestRating(ticker)
+		rating, err := db.GetLatestRating(userID, ticker)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -103,7 +105,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		rating, err := db.AddRating(ticker, req.Rating, req.Notes)
+		rating, err := db.AddRating(userID, ticker, req.Rating, req.Notes)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -123,7 +125,7 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := db.DeleteRating(ratingID); err != nil {
+		if err := db.DeleteRating(userID, ratingID); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -137,13 +139,14 @@ func (s *Server) handleRatings(w http.ResponseWriter, r *http.Request) {
 
 // handleRatingHistory returns rating history for a ticker
 func (s *Server) handleRatingHistory(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
 	ticker := chi.URLParam(r, "ticker")
 	if ticker == "" {
 		http.Error(w, "ticker required", http.StatusBadRequest)
 		return
 	}
 
-	ratings, err := db.GetRatingHistory(ticker)
+	ratings, err := db.GetRatingHistory(userID, ticker)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -155,6 +158,7 @@ func (s *Server) handleRatingHistory(w http.ResponseWriter, r *http.Request) {
 
 // handleDeleteRating deletes a rating by ID
 func (s *Server) handleDeleteRating(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Error(w, "id required", http.StatusBadRequest)
@@ -167,7 +171,7 @@ func (s *Server) handleDeleteRating(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := db.DeleteRating(id); err != nil {
+	if err := db.DeleteRating(userID, id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

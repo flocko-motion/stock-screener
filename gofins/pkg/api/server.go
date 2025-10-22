@@ -12,13 +12,15 @@ import (
 )
 
 type Server struct {
-	db     *db.DB
-	server *http.Server
+	db      *db.DB
+	server  *http.Server
+	devUser string // If set, all requests use this user (dev mode)
 }
 
-func NewServer(database *db.DB, port int) *Server {
+func NewServer(database *db.DB, port int, devUser string) *Server {
 	s := &Server{
-		db: database,
+		db:      database,
+		devUser: devUser,
 	}
 
 	r := chi.NewRouter()
@@ -46,8 +48,8 @@ func NewServer(database *db.DB, port int) *Server {
 
 		// Admin-only routes (require admin user from config)
 		r.Group(func(r chi.Router) {
-			r.Use(userMiddleware)
-			r.Use(adminOnlyMiddleware)
+			r.Use(s.userMiddleware)
+			r.Use(s.adminOnlyMiddleware)
 
 			// Errors
 			r.Get("/errors", s.handleListErrors)
@@ -56,7 +58,7 @@ func NewServer(database *db.DB, port int) *Server {
 
 		// User-specific routes (require user context)
 		r.Group(func(r chi.Router) {
-			r.Use(userMiddleware)
+			r.Use(s.userMiddleware)
 
 			// User info
 			r.Get("/user", s.handleGetCurrentUser)

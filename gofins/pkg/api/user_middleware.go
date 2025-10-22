@@ -14,15 +14,18 @@ type contextKey string
 const userIDKey contextKey = "userID"
 
 // userMiddleware extracts user from X-Remote-User header (Apache) or config file
-func userMiddleware(next http.Handler) http.Handler {
+func (s *Server) userMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var username string
 
-		// 1. Check X-Remote-User header (from Apache .htaccess auth)
-		if user := r.Header.Get("X-Remote-User"); user != "" {
+		// 1. Check if dev user override is set (--user flag)
+		if s.devUser != "" {
+			username = s.devUser
+		} else if user := r.Header.Get("X-Remote-User"); user != "" {
+			// 2. Check X-Remote-User header (from Apache .htaccess auth)
 			username = user
 		} else {
-			// 2. Fallback to config file default user (for CLI/localhost)
+			// 3. Fallback to config file default user (for CLI/localhost)
 			var err error
 			username, err = config.GetDefaultUser()
 			if err != nil {
@@ -31,10 +34,10 @@ func userMiddleware(next http.Handler) http.Handler {
 			}
 		}
 
-		// 3. Convert username to UUID
+		// 4. Convert username to UUID
 		userID := f.StringToUUID(username)
 
-		// 4. Store in context
+		// 5. Store in context
 		ctx := context.WithValue(r.Context(), userIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -51,7 +54,7 @@ func getUserID(r *http.Request) uuid.UUID {
 }
 
 // adminOnlyMiddleware restricts access to admin user (default user from config)
-func adminOnlyMiddleware(next http.Handler) http.Handler {
+func (s *Server) adminOnlyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get current user ID from context
 		userID := getUserID(r)

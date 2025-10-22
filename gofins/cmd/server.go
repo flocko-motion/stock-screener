@@ -16,6 +16,7 @@ import (
 )
 
 var noUpdates bool
+var devUser string
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -34,9 +35,13 @@ var serverCmd = &cobra.Command{
 		fmt.Println("✓ Database connected")
 
 		// Start REST API server
-		apiServer := api.NewServer(db.Db(), 8080)
+		apiServer := api.NewServer(db.Db(), 8080, devUser)
 		go apiServer.Start(ctx)
-		fmt.Println("✓ REST API server listening on :8080")
+		if devUser != "" {
+			fmt.Printf("✓ REST API server listening on :8080 (DEV MODE - all requests as user '%s')\n", devUser)
+		} else {
+			fmt.Println("✓ REST API server listening on :8080")
+		}
 
 		// Start updaters only if --no-updates is not set
 		fmt.Println("\n=== Starting Services ===")
@@ -67,4 +72,6 @@ func init() {
 
 	serverCmd.Flags().BoolVar(&noUpdates, "no-updates", false,
 		"Disable all data updates and work with existing data only")
+	serverCmd.Flags().StringVar(&devUser, "user", "",
+		"Development mode - override user for all requests (e.g., --user=alice)")
 }

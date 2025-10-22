@@ -9,7 +9,8 @@ import (
 
 // handleListNotes returns all ratings that have notes, sorted by creation time (newest first)
 func (s *Server) handleListNotes(w http.ResponseWriter, r *http.Request) {
-	notes, err := db.GetAllNotesChronological()
+	userID := getUserID(r)
+	notes, err := db.GetAllNotesChronological(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

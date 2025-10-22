@@ -147,38 +147,38 @@ type UserRating struct {
 }
 
 // ToggleFavorite adds or removes a symbol from favorites
-func ToggleFavorite(ticker string) (bool, error) {
+func ToggleFavorite(userID uuid.UUID, ticker string) (bool, error) {
 	db := Db()
 	// Check if already favorited
 	var exists bool
-	err := db.conn.QueryRow("SELECT EXISTS(SELECT 1 FROM user_favorites WHERE ticker = $1)", ticker).Scan(&exists)
+	err := db.conn.QueryRow("SELECT EXISTS(SELECT 1 FROM user_favorites WHERE user_id = $1 AND ticker = $2)", userID, ticker).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
 
 	if exists {
 		// Remove from favorites
-		_, err = db.conn.Exec("DELETE FROM user_favorites WHERE ticker = $1", ticker)
+		_, err = db.conn.Exec("DELETE FROM user_favorites WHERE user_id = $1 AND ticker = $2", userID, ticker)
 		return false, err
 	} else {
 		// Add to favorites
-		_, err = db.conn.Exec("INSERT INTO user_favorites (ticker) VALUES ($1)", ticker)
+		_, err = db.conn.Exec("INSERT INTO user_favorites (user_id, ticker) VALUES ($1, $2)", userID, ticker)
 		return true, err
 	}
 }
 
 // IsFavorite checks if a symbol is favorited
-func IsFavorite(ticker string) (bool, error) {
+func IsFavorite(userID uuid.UUID, ticker string) (bool, error) {
 	db := Db()
 	var exists bool
-	err := db.conn.QueryRow("SELECT EXISTS(SELECT 1 FROM user_favorites WHERE ticker = $1)", ticker).Scan(&exists)
+	err := db.conn.QueryRow("SELECT EXISTS(SELECT 1 FROM user_favorites WHERE user_id = $1 AND ticker = $2)", userID, ticker).Scan(&exists)
 	return exists, err
 }
 
 // GetFavorites returns all favorited tickers
-func GetFavorites() ([]string, error) {
+func GetFavorites(userID uuid.UUID) ([]string, error) {
 	db := Db()
-	rows, err := db.conn.Query("SELECT ticker FROM user_favorites ORDER BY created_at DESC")
+	rows, err := db.conn.Query("SELECT ticker FROM user_favorites WHERE user_id = $1 ORDER BY created_at DESC", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func GetFavorites() ([]string, error) {
 }
 
 // AddRating adds a new rating for a symbol
-func AddRating(ticker string, rating int, notes *string) (*UserRating, error) {
+func AddRating(userID uuid.UUID, ticker string, rating int, notes *string) (*UserRating, error) {
 	db := Db()
 	if rating < -5 || rating > 5 {
 		return nil, sql.ErrNoRows
@@ -204,8 +204,8 @@ func AddRating(ticker string, rating int, notes *string) (*UserRating, error) {
 
 	var r UserRating
 	err := db.conn.QueryRow(
-		"INSERT INTO user_ratings (ticker, rating, notes) VALUES ($1, $2, $3) RETURNING id, ticker, rating, notes, created_at",
-		ticker, rating, notes,
+		"INSERT INTO user_ratings (user_id, ticker, rating, notes) VALUES ($1, $2, $3, $4) RETURNING id, ticker, rating, notes, created_at",
+		userID, ticker, rating, notes,
 	).Scan(&r.ID, &r.Ticker, &r.Rating, &r.Notes, &r.CreatedAt)
 
 	if err != nil {
@@ -215,12 +215,12 @@ func AddRating(ticker string, rating int, notes *string) (*UserRating, error) {
 }
 
 // GetLatestRating returns the most recent rating for a symbol
-func GetLatestRating(ticker string) (*UserRating, error) {
+func GetLatestRating(userID uuid.UUID, ticker string) (*UserRating, error) {
 	db := Db()
 	var r UserRating
 	err := db.conn.QueryRow(
-		"SELECT id, ticker, rating, notes, created_at FROM user_ratings WHERE ticker = $1 ORDER BY created_at DESC LIMIT 1",
-		ticker,
+		"SELECT id, ticker, rating, notes, created_at FROM user_ratings WHERE user_id = $1 AND ticker = $2 ORDER BY created_at DESC LIMIT 1",
+		userID, ticker,
 	).Scan(&r.ID, &r.Ticker, &r.Rating, &r.Notes, &r.CreatedAt)
 
 	if err == sql.ErrNoRows {
@@ -233,11 +233,11 @@ func GetLatestRating(ticker string) (*UserRating, error) {
 }
 
 // GetRatingHistory returns all ratings for a symbol
-func GetRatingHistory(ticker string) ([]UserRating, error) {
+func GetRatingHistory(userID uuid.UUID, ticker string) ([]UserRating, error) {
 	db := Db()
 	rows, err := db.conn.Query(
-		"SELECT id, ticker, rating, notes, created_at FROM user_ratings WHERE ticker = $1 ORDER BY created_at DESC",
-		ticker,
+		"SELECT id, ticker, rating, notes, created_at FROM user_ratings WHERE user_id = $1 AND ticker = $2 ORDER BY created_at DESC",
+		userID, ticker,
 	)
 	if err != nil {
 		return nil, err
@@ -256,13 +256,14 @@ func GetRatingHistory(ticker string) ([]UserRating, error) {
 }
 
 // GetAllLatestRatings returns the latest rating for each rated symbol
-func GetAllLatestRatings() (map[string]*UserRating, error) {
+func GetAllLatestRatings(userID uuid.UUID) (map[string]*UserRating, error) {
 	db := Db()
 	rows, err := db.conn.Query(`
 		SELECT DISTINCT ON (ticker) id, ticker, rating, notes, created_at
 		FROM user_ratings
+		WHERE user_id = $1
 		ORDER BY ticker, created_at DESC
-	`)
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -279,22 +280,22 @@ func GetAllLatestRatings() (map[string]*UserRating, error) {
 	return ratings, rows.Err()
 }
 
-// DeleteRating deletes a rating by ID
-func DeleteRating(id int) error {
+// DeleteRating deletes a rating by ID (for the given user)
+func DeleteRating(userID uuid.UUID, id int) error {
 	db := Db()
-	_, err := db.conn.Exec("DELETE FROM user_ratings WHERE id = $1", id)
+	_, err := db.conn.Exec("DELETE FROM user_ratings WHERE user_id = $1 AND id = $2", userID, id)
 	return err
 }
 
 // GetAllNotesChronological returns all ratings that have notes, sorted by creation time (newest first)
-func GetAllNotesChronological() ([]UserRating, error) {
+func GetAllNotesChronological(userID uuid.UUID) ([]UserRating, error) {
 	db := Db()
 	rows, err := db.conn.Query(`
 		SELECT id, ticker, rating, notes, created_at
 		FROM user_ratings
-		WHERE notes IS NOT NULL AND notes != ''
+		WHERE user_id = $1 AND notes IS NOT NULL AND notes != ''
 		ORDER BY created_at DESC
-	`)
+	`, userID)
 	if err != nil {
 		return nil, err
 	}
