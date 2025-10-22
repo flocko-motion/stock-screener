@@ -249,7 +249,7 @@ func dedupeByName() (int, int, error) {
 
 				count := int(groupCount.Add(1))
 				// Log progress every 100 groups
-				if count%100 == 0 {
+				if count%1000 == 0 {
 					elapsed := time.Since(startTime)
 					remaining := totalGroups - count
 					log.Progress(int(updated.Load()), int(failed.Load()), 0, remaining, elapsed)
