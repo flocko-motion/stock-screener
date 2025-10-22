@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/db"
-	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
@@ -105,16 +104,8 @@ func dedupeByCIK(log *log.Logger) (int, int, error) {
 		// Log progress every 100 groups with ETA
 		if groupCount%100 == 0 {
 			elapsed := time.Since(startTime)
-			rate := float64(groupCount) / elapsed.Seconds()
 			remaining := totalGroups - groupCount
-			var eta string
-			if rate > 0 {
-				eta = f.SecondsToString(float64(remaining) / rate)
-			} else {
-				eta = "unknown"
-			}
-			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n",
-				groupCount, totalGroups, updated, eta, rate)
+			log.Progress(updated, failed, 0, remaining, elapsed)
 		}
 	}
 
@@ -196,16 +187,8 @@ func dedupeByName(log *log.Logger) (int, int, error) {
 		// Log progress every 100 groups with ETA
 		if groupCount%100 == 0 {
 			elapsed := time.Since(startTime)
-			rate := float64(groupCount) / elapsed.Seconds()
 			remaining := totalGroups - groupCount
-			var eta string
-			if rate > 0 {
-				eta = f.SecondsToString(float64(remaining) / rate)
-			} else {
-				eta = "unknown"
-			}
-			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n",
-				groupCount, totalGroups, updated, eta, rate)
+			log.Progress(updated, failed, 0, remaining, elapsed)
 		}
 	}
 

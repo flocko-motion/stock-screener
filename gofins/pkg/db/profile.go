@@ -19,13 +19,10 @@ func PutSymbols(symbols []types.Symbol) error {
 
 	const batchSize = 1000
 	totalSymbols := len(symbols)
-	
+
 	// Only show detailed progress for larger updates
 	showProgress := totalSymbols > 100
-
-	if showProgress {
-		logf("Updating %d symbols in batches of %d...", totalSymbols, batchSize)
-	}
+	startTime := time.Now()
 
 	// Process in batches
 	for i := 0; i < totalSymbols; i += batchSize {
@@ -40,15 +37,12 @@ func PutSymbols(symbols []types.Symbol) error {
 			return fmt.Errorf("failed to insert batch %d-%d: %w", i+1, end, err)
 		}
 
-		// Log progress every batch for large updates
 		if showProgress {
-			logf("  Progress: %d/%d symbols (%.1f%%)", end, totalSymbols, float64(end)/float64(totalSymbols)*100)
+			count := i * batchSize
+			dbLogger.ProgressShort(count, totalSymbols-count, time.Since(startTime))
 		}
 	}
 
-	if showProgress {
-		logf("✓ Completed updating %d symbols", totalSymbols)
-	}
 	return nil
 }
 
@@ -203,10 +197,14 @@ func DeactivateSymbolsNotInList(keepTickers []string) error {
 
 	// Deactivate in batches to avoid parameter limit
 	batchSize := 10000
-	for i := 0; i < len(toDeactivate); i += batchSize {
+	totalToDeactivate := len(toDeactivate)
+	showProgress := totalToDeactivate > 100
+	startTime := time.Now()
+
+	for i := 0; i < totalToDeactivate; i += batchSize {
 		end := i + batchSize
-		if end > len(toDeactivate) {
-			end = len(toDeactivate)
+		if end > totalToDeactivate {
+			end = totalToDeactivate
 		}
 		batch := toDeactivate[i:end]
 
@@ -222,9 +220,13 @@ func DeactivateSymbolsNotInList(keepTickers []string) error {
 		if _, err := db.conn.Exec(query, args...); err != nil {
 			return fmt.Errorf("failed to deactivate batch: %w", err)
 		}
+
+		if showProgress {
+			count := end
+			dbLogger.ProgressShort(count, totalToDeactivate-count, time.Since(startTime))
+		}
 	}
 
-	logf("Deactivated %d obsolete symbols", len(toDeactivate))
 	return nil
 }
 
@@ -511,14 +513,14 @@ func MarkStaleProfilesAsNotFound(since time.Time) (int64, error) {
 func GetTickersNeedingProfileUpdate() (map[string]bool, error) {
 	db := Db()
 	yesterday := calculator.Yesterday()
-	
+
 	query := `
 		SELECT ticker 
 		FROM symbols 
 		WHERE last_profile_update IS NULL 
 		   OR last_profile_update < $1
 	`
-	
+
 	rows, err := db.conn.Query(query, yesterday)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tickers needing profile update: %w", err)
@@ -576,8 +578,8 @@ func UpdateQuotes(quotes []types.Symbol) error {
 
 	const batchSize = 1000
 	totalQuotes := len(quotes)
-
-	logf("Updating %d quotes in batches of %d...", totalQuotes, batchSize)
+	showProgress := totalQuotes > 100
+	startTime := time.Now()
 
 	// Process in batches
 	for i := 0; i < totalQuotes; i += batchSize {
@@ -592,11 +594,12 @@ func UpdateQuotes(quotes []types.Symbol) error {
 			return fmt.Errorf("failed to update batch %d-%d: %w", i+1, end, err)
 		}
 
-		// Log progress every batch
-		logf("  Progress: %d/%d quotes (%.1f%%)", end, totalQuotes, float64(end)/float64(totalQuotes)*100)
+		if showProgress {
+			count := end
+			dbLogger.ProgressShort(count, totalQuotes-count, time.Since(startTime))
+		}
 	}
 
-	logf("✓ Completed updating %d quotes", totalQuotes)
 	return nil
 }
 

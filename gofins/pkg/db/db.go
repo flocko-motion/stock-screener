@@ -7,12 +7,18 @@ import (
 	"time"
 
 	"github.com/flocko-motion/gofins/pkg/files"
+	"github.com/flocko-motion/gofins/pkg/log"
 	_ "github.com/lib/pq"
 )
 
+var dbLogger *log.Logger
+
+func init() {
+	dbLogger = log.New("DB")
+}
+
 func logf(format string, args ...interface{}) {
-	timestamp := time.Now().Format("15:04:05.000")
-	fmt.Printf("[%s][DB      ] "+format+"\n", append([]interface{}{timestamp}, args...)...)
+	dbLogger.Printf(format+"\n", args...)
 }
 
 type DB struct {

@@ -65,8 +65,8 @@ var (
 
 func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly []types.PriceData, config PriceUpdateConfig, log *log.Logger) {
 	// Wait for any previous batch write to complete, then start new one
-	writeJob := writeJobCounter
-	writeJobCounter++
+	// writeJob := writeJobCounter
+	// writeJobCounter++
 	// log.Printf("[PRICES BATCH WRITE %d] aquire lock \n", writeJob)
 	batchWriteMutex.Lock()
 	// log.Printf("[PRICES BATCH WRITE %d] lock acquired - starting write\n", writeJob)
@@ -82,7 +82,7 @@ func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly 
 			return // Skip write in test mode
 		}
 
-		startTime := time.Now()
+		// startTime := time.Now()
 
 		// Run all 3 writes concurrently for 3x speedup
 		var wg sync.WaitGroup
@@ -118,9 +118,9 @@ func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly 
 		}
 
 		wg.Wait()
-		duration := time.Since(startTime)
-		log.Printf("batch write #%d: %d symbols, %d monthly, %d weekly in %v\n",
-			writeJob, len(symbols), len(monthly), len(weekly), duration)
+		// duration := time.Since(startTime)
+		// log.Printf("batch write #%d: %d symbols, %d monthly, %d weekly in %v\n",
+		// writeJob, len(symbols), len(monthly), len(weekly), duration)
 	}()
 }
 

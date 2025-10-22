@@ -105,7 +105,52 @@ func (l *Logger) Batch(remaining, batchSize int) {
 	// Intentionally empty - can be enabled for debugging
 }
 
-// Stats logs progress statistics
+// Progress logs standardized progress with ETA and rate
+// success: number of successful items
+// failed: number of failed items
+// warnings: number of items with warnings
+// remaining: number of items still to process
+// elapsed: time elapsed since start
+func (l *Logger) Progress(success, failed, warnings, remaining int, elapsed time.Duration) {
+	total := success + failed + warnings
+	rate := float64(total) / elapsed.Seconds()
+
+	var eta string
+	if rate > 0 {
+		etaSeconds := float64(remaining) / rate
+		eta = f.SecondsToString(etaSeconds)
+	} else {
+		eta = "unknown"
+	}
+
+	l.Printf("✓ %d\t❌ %d\t⚠️  %d | ETA %s for %d left @ %.1f/s\n",
+		success, failed, warnings, eta, remaining, rate)
+}
+
+// ProgressShort logs compact progress (for quick operations like DB writes)
+// count: number of items processed
+// remaining: number of items left (0 if complete)
+// elapsed: time elapsed
+func (l *Logger) ProgressShort(count, remaining int, elapsed time.Duration) {
+	rate := float64(count) / elapsed.Seconds()
+	
+	if remaining > 0 {
+		// Show ETA for ongoing operations
+		var eta string
+		if rate > 0 {
+			etaSeconds := float64(remaining) / rate
+			eta = f.SecondsToString(etaSeconds)
+		} else {
+			eta = "unknown"
+		}
+		l.Printf("✓ %d | ETA %s for %d left @ %.0f/s\n", count, eta, remaining, rate)
+	} else {
+		// Completion message
+		l.Printf("✓ %d in %.1fs @ %.0f/s\n", count, elapsed.Seconds(), rate)
+	}
+}
+
+// Stats logs progress statistics (legacy method for prices updater)
 func (l *Logger) Stats(success, notFound, failed, remaining int, elapsed time.Duration) {
 	total := success + notFound + failed
 	rate := float64(total) / elapsed.Seconds()
