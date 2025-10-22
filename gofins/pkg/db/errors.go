@@ -15,16 +15,26 @@ type ErrorEntry struct {
 	Details   *string   `json:"details,omitempty"`
 }
 
-// LogError logs an error to the database
-func LogError(source, errorType, message string, details *string) error {
-	fmt.Printf("[%s] %s: %s\n", source, errorType, message)
-	db := Db()
+// LogError logs an error to the database (implements types.ErrorLogger)
+func (db *DB) LogError(source, level, message string, metadata map[string]interface{}) error {
+	var details *string
+	if metadata != nil {
+		detailsStr := fmt.Sprintf("%v", metadata)
+		details = &detailsStr
+	}
+	
 	query := `
 		INSERT INTO errors (source, error_type, message, details)
 		VALUES ($1, $2, $3, $4)
 	`
-	_, err := db.conn.Exec(query, source, errorType, message, details)
+	_, err := db.conn.Exec(query, source, level, message, details)
 	return err
+}
+
+// LogError is a package-level convenience function
+func LogError(source, errorType, message string, details *string) error {
+	fmt.Printf("[%s] %s: %s\n", source, errorType, message)
+	return Db().LogError(source, errorType, message, map[string]interface{}{"details": details})
 }
 
 // GetRecentErrors retrieves the most recent errors

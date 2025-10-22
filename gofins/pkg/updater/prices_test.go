@@ -14,8 +14,8 @@ import (
 func TestUpdatePrices(t *testing.T) {
 	log := NewLoggerTest("PricesTest")
 	config := PriceUpdateConfig{
-		Workers:         8,
-		BatchSize:       1000,
+		Workers:         20,
+		BatchSize:       100,
 		WriteToDb:       true,
 		EnableProfiling: false,
 	}

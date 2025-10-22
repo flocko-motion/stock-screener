@@ -10,6 +10,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/forex"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -45,7 +46,7 @@ func UpdateProfiles(ctx context.Context) {
 		}
 
 		if err := updateProfilesImpl(log); err != nil {
-			log.Error("Profile update failed: %v\n", err)
+			log.Errorf("Profile update failed: %v\n", err)
 		}
 
 		const sleepTimeHours = 8
@@ -59,7 +60,7 @@ func UpdateProfilesOnce() error {
 	return updateProfilesImpl(log)
 }
 
-func updateProfilesImpl(log *Logger) error {
+func updateProfilesImpl(log *log.Logger) error {
 	totalStale, err := db.CountStaleProfiles()
 	if err != nil {
 		return err
@@ -138,7 +139,7 @@ type UpdateStats struct {
 	Failed   []string
 }
 
-func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, string) {
+func updateProfile(ticker string, testMode bool, log *log.Logger) (*types.Symbol, string) {
 	profile, err := fmp.GetProfile(ticker)
 	now := calculator.StartOfWeek(time.Now())
 
@@ -185,7 +186,7 @@ func updateProfile(ticker string, testMode bool, log *Logger) (*types.Symbol, st
 		if err != nil {
 			// Log error but continue with unconverted value
 			// This can happen if forex data is not available for the currency
-			log.Error("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n",
+			log.Errorf("Failed to convert market cap for %s from %s to USD: %v (market cap: %.2f)\n",
 				ticker, profile.Currency, err, profile.MarketCap)
 			status = types.StatusFailed
 		} else {

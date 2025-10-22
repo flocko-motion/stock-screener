@@ -15,7 +15,7 @@ func SyncSymbols() {
 
 	for {
 		if err := syncSymbolsImpl(log); err != nil {
-			log.Error("Symbol sync failed: %v\n", err)
+			log.Errorf("Symbol sync failed: %v\n", err)
 		}
 		time.Sleep(time.Hour * 24 * 7) // Sleep for 7 days
 	}
@@ -26,7 +26,7 @@ func SyncSymbolsOnce() error {
 	return syncSymbolsImpl(log)
 }
 
-func syncSymbolsImpl(log *Logger) error {
+func syncSymbolsImpl(log *log.Logger) error {
 	// Fetch stocks
 	stocks, err := fmp.FetchStockList()
 	if err != nil {

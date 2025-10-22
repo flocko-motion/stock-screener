@@ -5,6 +5,7 @@ import (
 
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/fmp"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -13,7 +14,7 @@ func DedupeSymbols() {
 
 	for {
 		if err := dedupeSymbolsImpl(log); err != nil {
-			log.Error("Dedupe failed: %v\n", err)
+			log.Errorf("Dedupe failed: %v\n", err)
 		}
 		time.Sleep(time.Hour * 24 * 7) // Sleep for 7 days
 	}
@@ -24,7 +25,7 @@ func DedupeSymbolsOnce() error {
 	return dedupeSymbolsImpl(log)
 }
 
-func dedupeSymbolsImpl(log *Logger) error {
+func dedupeSymbolsImpl(log *log.Logger) error {
 	log.Printf("Starting deduplication...\n")
 
 	// Phase 1: Process symbols with CIK
@@ -46,7 +47,7 @@ func dedupeSymbolsImpl(log *Logger) error {
 }
 
 // dedupeByCIK groups symbols by CIK and identifies primary listings
-func dedupeByCIK(log *Logger) (int, int, error) {
+func dedupeByCIK(log *log.Logger) (int, int, error) {
 	symbols, err := db.GetSymbolsWithCIK()
 	if err != nil {
 		return 0, 0, err
@@ -69,7 +70,7 @@ func dedupeByCIK(log *Logger) (int, int, error) {
 	groupCount := 0
 	totalGroups := len(cikGroups)
 	startTime := time.Now()
-	
+
 	for cik, group := range cikGroups {
 		if len(group) <= 1 {
 			continue // Skip single-symbol groups
@@ -79,7 +80,7 @@ func dedupeByCIK(log *Logger) (int, int, error) {
 		// Find primary ticker for this group
 		primaryTicker, err := findPrimaryByCIK(cik, group)
 		if err != nil {
-			log.Error("Failed to find primary for CIK %s: %v\n", cik, err)
+			log.Errorf("Failed to find primary for CIK %s: %v\n", cik, err)
 			failed += len(group)
 			continue
 		}
@@ -94,7 +95,7 @@ func dedupeByCIK(log *Logger) (int, int, error) {
 
 		// Update the entire group in one transaction
 		if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
-			log.Error("Failed to update group for CIK %s: %v\n", cik, err)
+			log.Errorf("Failed to update group for CIK %s: %v\n", cik, err)
 			failed += len(group)
 		} else {
 			updated += len(group)
@@ -108,11 +109,11 @@ func dedupeByCIK(log *Logger) (int, int, error) {
 			var eta string
 			if rate > 0 {
 				etaSeconds := float64(remaining) / rate
-				eta = formatDuration(time.Duration(etaSeconds * float64(time.Second)))
+				eta = log.FormatDuration(time.Duration(etaSeconds * float64(time.Second)))
 			} else {
 				eta = "unknown"
 			}
-			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n", 
+			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n",
 				groupCount, totalGroups, updated, eta, rate)
 		}
 	}
@@ -143,7 +144,7 @@ func findPrimaryByCIK(cik string, group []types.Symbol) (string, error) {
 }
 
 // dedupeByName groups stocks without CIK by exact name match
-func dedupeByName(log *Logger) (int, int, error) {
+func dedupeByName(log *log.Logger) (int, int, error) {
 	symbols, err := db.GetStockSymbolsWithoutCIK()
 	if err != nil {
 		return 0, 0, err
@@ -166,7 +167,7 @@ func dedupeByName(log *Logger) (int, int, error) {
 	groupCount := 0
 	totalGroups := len(nameGroups)
 	startTime := time.Now()
-	
+
 	for name, group := range nameGroups {
 		if len(group) <= 1 {
 			continue // Skip single-symbol groups
@@ -186,7 +187,7 @@ func dedupeByName(log *Logger) (int, int, error) {
 
 		// Update the entire group in one transaction
 		if err := db.UpdatePrimaryListingGroup(primaryTicker, secondaryTickers); err != nil {
-			log.Error("Failed to update group for name '%s': %v\n", name, err)
+			log.Errorf("Failed to update group for name '%s': %v\n", name, err)
 			failed += len(group)
 		} else {
 			updated += len(group)
@@ -200,11 +201,11 @@ func dedupeByName(log *Logger) (int, int, error) {
 			var eta string
 			if rate > 0 {
 				etaSeconds := float64(remaining) / rate
-				eta = formatDuration(time.Duration(etaSeconds * float64(time.Second)))
+				eta = log.FormatDuration(time.Duration(etaSeconds * float64(time.Second)))
 			} else {
 				eta = "unknown"
 			}
-			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n", 
+			log.Printf("Progress: %d/%d groups | %d symbols | ETA %s @ %.1f groups/s\n",
 				groupCount, totalGroups, updated, eta, rate)
 		}
 	}

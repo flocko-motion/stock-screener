@@ -11,7 +11,8 @@ import (
 )
 
 func logf(format string, args ...interface{}) {
-	fmt.Printf("[DB] "+format+"\n", args...)
+	timestamp := time.Now().Format("15:04:05.000")
+	fmt.Printf("[%s][DB      ] "+format+"\n", append([]interface{}{timestamp}, args...)...)
 }
 
 type DB struct {

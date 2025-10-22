@@ -11,6 +11,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/forex"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -62,7 +63,7 @@ var (
 // Blocks if another batch write is in progress, then runs in background
 // Ensures only one background write happens at a time
 
-func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly []types.PriceData, config PriceUpdateConfig, log *Logger) {
+func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly []types.PriceData, config PriceUpdateConfig, log *log.Logger) {
 	// Wait for any previous batch write to complete, then start new one
 	writeJob := writeJobCounter
 	writeJobCounter++
@@ -91,7 +92,7 @@ func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly 
 			go func() {
 				defer wg.Done()
 				if err := db.PutMonthlyPrices(monthly); err != nil {
-					log.Error("Failed to batch write monthly prices: %v\n", err)
+					log.Errorf("Failed to batch write monthly prices: %v\n", err)
 				}
 			}()
 		}
@@ -101,7 +102,7 @@ func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly 
 			go func() {
 				defer wg.Done()
 				if err := db.PutWeeklyPrices(weekly); err != nil {
-					log.Error("Failed to batch write weekly prices: %v\n", err)
+					log.Errorf("Failed to batch write weekly prices: %v\n", err)
 				}
 			}()
 		}
@@ -111,7 +112,7 @@ func batchWritePrices(symbols []types.Symbol, monthly []types.PriceData, weekly 
 			go func() {
 				defer wg.Done()
 				if err := db.PutSymbols(symbols); err != nil {
-					log.Error("Failed to batch write symbols: %v\n", err)
+					log.Errorf("Failed to batch write symbols: %v\n", err)
 				}
 			}()
 		}
@@ -136,7 +137,7 @@ func UpdatePrices(ctx context.Context) {
 		}
 
 		if err := updatePricesImpl(log, config); err != nil {
-			log.Error("Price update failed: %v\n", err)
+			log.Errorf("Price update failed: %v\n", err)
 		}
 
 		const sleepTimeHours = 8
@@ -151,7 +152,7 @@ func UpdatePricesOnce() error {
 	return updatePricesImpl(log, config)
 }
 
-func updatePricesImpl(log *Logger, config PriceUpdateConfig) error {
+func updatePricesImpl(log *log.Logger, config PriceUpdateConfig) error {
 	// Ensure last batch write completes before exit
 	defer batchWritePrices(nil, nil, nil, config, log)
 
@@ -268,7 +269,7 @@ func updatePricesImpl(log *Logger, config PriceUpdateConfig) error {
 		// Show sample failure reasons if there are failures
 		if len(stats.FailureReasons) > 0 && len(stats.FailureReasons) <= 5 {
 			for ticker, reason := range stats.FailureReasons {
-				log.Printf("  ⚠️  %s: %s\n", ticker, reason)
+				log.Warnf("%s: %s\n", ticker, reason)
 			}
 		} else if len(stats.FailureReasons) > 5 {
 			// Show first 5 failures
@@ -277,15 +278,15 @@ func updatePricesImpl(log *Logger, config PriceUpdateConfig) error {
 				if count >= 5 {
 					break
 				}
-				log.Printf("  ⚠️  %s: %s\n", ticker, reason)
+				log.Warnf("%s: %s\n", ticker, reason)
 				count++
 			}
-			log.Printf("  ... and %d more failures\n", len(stats.FailureReasons)-5)
+			log.Warnf("... and %d more failures\n", len(stats.FailureReasons)-5)
 		}
 	}
 }
 
-func updatePrices(symbol types.Symbol, config PriceUpdateConfig, log *Logger) (types.Symbol, []types.PriceData, []types.PriceData, error) {
+func updatePrices(symbol types.Symbol, config PriceUpdateConfig, log *log.Logger) (types.Symbol, []types.PriceData, []types.PriceData, error) {
 	startTime := time.Now()
 
 	dailyPrices, err := fmp.FetchPriceHistory(symbol.Ticker)

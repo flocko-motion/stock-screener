@@ -10,6 +10,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/f"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/forex"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -24,13 +25,13 @@ var (
 )
 
 // UpdateProfilesBatch fetches bulk profile data and updates all profiles
-func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
+func UpdateProfilesBatch(ctx context.Context, log *log.Logger) error {
 	log.Printf("Starting batch profile update\n")
 
 	// Check if profiles were already updated today
 	tickersNeedingUpdate, err := db.GetTickersNeedingProfileUpdate()
 	if err != nil {
-		log.Error("Failed to get tickers needing profile update: %v\n", err)
+		log.Errorf("Failed to get tickers needing profile update: %v\n", err)
 		return fmt.Errorf("failed to get tickers needing profile update: %w", err)
 	}
 
@@ -47,14 +48,14 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	// Start batch update log
 	logID, err := db.StartBatchUpdate("profile_batch")
 	if err != nil {
-		log.Error("Failed to start batch update log: %v\n", err)
+		log.Errorf("Failed to start batch update log: %v\n", err)
 		return fmt.Errorf("failed to start batch update log: %w", err)
 	}
 
 	// Fetch bulk profile data from FMP
 	profiles, err := fmp.GetBulkProfiles()
 	if err != nil {
-		log.Error("Failed to fetch bulk profiles: %v\n", err)
+		log.Errorf("Failed to fetch bulk profiles: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to fetch bulk profiles: %v", err))
 		return fmt.Errorf("failed to fetch bulk profiles: %w", err)
 	}
@@ -86,7 +87,7 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	// Update database in batches
 	updated, err := updateProfilesInBatches(symbols, log)
 	if err != nil {
-		log.Error("Failed to update profiles: %v\n", err)
+		log.Errorf("Failed to update profiles: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to update profiles: %v", err))
 		return fmt.Errorf("failed to update profiles: %w", err)
 	}
@@ -97,7 +98,7 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 	if len(profiles) > 0 {
 		staleCount, err = db.MarkStaleProfilesAsNotFound(batchStartTime)
 		if err != nil {
-			log.Error("Failed to mark stale profiles as not found: %v\n", err)
+			log.Errorf("Failed to mark stale profiles as not found: %v\n", err)
 		} else if staleCount > 0 {
 			log.Printf("  Marked %d stale profiles as not found\n", staleCount)
 		}
@@ -105,7 +106,7 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 
 	// Complete batch update log
 	if err := db.CompleteBatchUpdate(logID, len(profiles), updated); err != nil {
-		log.Error("Failed to complete batch update log: %v\n", err)
+		log.Errorf("Failed to complete batch update log: %v\n", err)
 	}
 
 	log.Printf("✓ Batch profile update complete: %d/%d symbols updated, %d marked as not found\n", updated, len(profiles), staleCount)
@@ -113,7 +114,7 @@ func UpdateProfilesBatch(ctx context.Context, log *Logger) error {
 }
 
 // convertProfilesToSymbols converts FMP profiles to Symbol types with currency conversion
-func convertProfilesToSymbols(profiles []*fmp.Profile, date time.Time, log *Logger) []types.Symbol {
+func convertProfilesToSymbols(profiles []*fmp.Profile, date time.Time, log *log.Logger) []types.Symbol {
 	var symbols []types.Symbol
 	conversionErrors := 0
 
@@ -175,7 +176,7 @@ func convertProfilesToSymbols(profiles []*fmp.Profile, date time.Time, log *Logg
 	}
 
 	if conversionErrors > 0 {
-		log.Printf("⚠️  %d currency conversion errors (logged to database)\n", conversionErrors)
+		log.Warnf("%d currency conversion errors (logged to database)\n", conversionErrors)
 	}
 
 	return symbols
@@ -183,11 +184,11 @@ func convertProfilesToSymbols(profiles []*fmp.Profile, date time.Time, log *Logg
 
 // updateProfilesInBatches updates profiles in the database
 // Batching is handled automatically by PutSymbols
-func updateProfilesInBatches(symbols []types.Symbol, log *Logger) (int, error) {
+func updateProfilesInBatches(symbols []types.Symbol, log *log.Logger) (int, error) {
 	log.Printf("  Updating %d symbols in database...\n", len(symbols))
 
 	if err := db.PutSymbols(symbols); err != nil {
-		log.Error("Failed to update symbols: %v\n", err)
+		log.Errorf("Failed to update symbols: %v\n", err)
 		return 0, fmt.Errorf("bulk update failed: %w", err)
 	}
 
@@ -196,7 +197,7 @@ func updateProfilesInBatches(symbols []types.Symbol, log *Logger) (int, error) {
 }
 
 // RunProfileBatchUpdater runs the batch profile updater in a loop
-func RunProfileBatchUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger) {
+func RunProfileBatchUpdater(ctx context.Context, wg *sync.WaitGroup, log *log.Logger) {
 	defer wg.Done()
 
 	// Singleton check
@@ -220,7 +221,7 @@ func RunProfileBatchUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger
 
 	// Run immediately on start
 	if err := UpdateProfilesBatch(ctx, log); err != nil {
-		log.Error("Profile batch update failed: %v\n", err)
+		log.Errorf("Profile batch update failed: %v\n", err)
 	}
 
 	for {
@@ -230,7 +231,7 @@ func RunProfileBatchUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger
 			return
 		case <-ticker.C:
 			if err := UpdateProfilesBatch(ctx, log); err != nil {
-				log.Error("Profile batch update failed: %v\n", err)
+				log.Errorf("Profile batch update failed: %v\n", err)
 			}
 		}
 	}

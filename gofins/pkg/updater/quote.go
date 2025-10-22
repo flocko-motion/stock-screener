@@ -10,6 +10,7 @@ import (
 	"github.com/flocko-motion/gofins/pkg/db"
 	"github.com/flocko-motion/gofins/pkg/fmp"
 	"github.com/flocko-motion/gofins/pkg/forex"
+	"github.com/flocko-motion/gofins/pkg/log"
 	"github.com/flocko-motion/gofins/pkg/types"
 )
 
@@ -24,13 +25,13 @@ var (
 )
 
 // UpdateQuotes fetches bulk EOD data and updates current prices for all symbols
-func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
+func UpdateQuotes(ctx context.Context, date time.Time, log *log.Logger) error {
 	log.Printf("Starting quote update for %s\n", date.Format("2006-01-02"))
 
 	// Get list of tickers that need quote updates (not from yesterday)
 	tickersNeedingUpdate, err := db.GetTickersNeedingQuoteUpdate()
 	if err != nil {
-		log.Error("Failed to get tickers needing update: %v\n", err)
+		log.Errorf("Failed to get tickers needing update: %v\n", err)
 		return fmt.Errorf("failed to get tickers needing update: %w", err)
 	}
 
@@ -44,7 +45,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 	// Start batch update log
 	logID, err := db.StartBatchUpdate("quote")
 	if err != nil {
-		log.Error("Failed to start batch update log: %v\n", err)
+		log.Errorf("Failed to start batch update log: %v\n", err)
 		return fmt.Errorf("failed to start batch update log: %w", err)
 	}
 
@@ -57,7 +58,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 		log.Printf("  Today is start of week/month - checking for incremental price updates\n")
 		weeklyUpdateMap, monthlyUpdateMap, err = getSymbolsNeedingIncrementalUpdate(date, log)
 		if err != nil {
-			log.Error("Failed to get incremental update candidates: %v\n", err)
+			log.Errorf("Failed to get incremental update candidates: %v\n", err)
 			// Continue anyway - not critical
 		} else {
 			total := len(weeklyUpdateMap) + len(monthlyUpdateMap)
@@ -71,7 +72,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 	// Fetch all symbol currencies from database
 	symbolCurrencies, err := db.GetAllSymbolCurrencies()
 	if err != nil {
-		log.Error("Failed to get symbol currencies: %v\n", err)
+		log.Errorf("Failed to get symbol currencies: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to get symbol currencies: %v", err))
 		return fmt.Errorf("failed to get symbol currencies: %w", err)
 	}
@@ -80,7 +81,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 	// Fetch bulk EOD data from FMP
 	bulkQuotes, err := fmp.GetBulkEOD(date)
 	if err != nil {
-		log.Error("Failed to fetch bulk EOD: %v\n", err)
+		log.Errorf("Failed to fetch bulk EOD: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to fetch bulk EOD: %v", err))
 		return fmt.Errorf("failed to fetch bulk EOD: %w", err)
 	}
@@ -113,7 +114,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 
 	// Update database (batching handled in db.UpdateQuotes)
 	if err := db.UpdateQuotes(quotes); err != nil {
-		log.Error("Failed to update quotes: %v\n", err)
+		log.Errorf("Failed to update quotes: %v\n", err)
 		_ = db.FailBatchUpdate(logID, fmt.Sprintf("Failed to update quotes: %v", err))
 		return fmt.Errorf("failed to update quotes: %w", err)
 	}
@@ -121,7 +122,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 
 	// Complete batch update log
 	if err := db.CompleteBatchUpdate(logID, len(bulkQuotes), updated); err != nil {
-		log.Error("Failed to complete batch update log: %v\n", err)
+		log.Errorf("Failed to complete batch update log: %v\n", err)
 	}
 
 	log.Printf("✓ Quote update complete: %d/%d symbols updated\n", updated, len(bulkQuotes))
@@ -129,7 +130,7 @@ func UpdateQuotes(ctx context.Context, date time.Time, log *Logger) error {
 }
 
 // convertQuotesToUSD converts quotes to USD based on symbol currencies
-func convertQuotesToUSD(bulkQuotes map[string]*types.PriceData, symbolCurrencies map[string]string, date time.Time, log *Logger) []types.Symbol {
+func convertQuotesToUSD(bulkQuotes map[string]*types.PriceData, symbolCurrencies map[string]string, date time.Time, log *log.Logger) []types.Symbol {
 	var quotes []types.Symbol
 	conversionErrors := 0
 
@@ -169,7 +170,7 @@ func convertQuotesToUSD(bulkQuotes map[string]*types.PriceData, symbolCurrencies
 	}
 
 	if conversionErrors > 0 {
-		log.Printf("⚠️  %d currency conversion errors (logged to database)\n", conversionErrors)
+		log.Warnf("%d currency conversion errors\n", conversionErrors)
 	}
 
 	return quotes
@@ -184,7 +185,7 @@ func UpdateQuotesOnce(ctx context.Context) error {
 
 // getSymbolsNeedingIncrementalUpdate returns two maps of symbols that need incremental updates
 // Returns weeklyMap[ticker]bool and monthlyMap[ticker]bool
-func getSymbolsNeedingIncrementalUpdate(date time.Time, log *Logger) (map[string]bool, map[string]bool, error) {
+func getSymbolsNeedingIncrementalUpdate(date time.Time, log *log.Logger) (map[string]bool, map[string]bool, error) {
 	weeklyMap := make(map[string]bool)
 	monthlyMap := make(map[string]bool)
 
@@ -227,7 +228,7 @@ func getSymbolsNeedingIncrementalUpdate(date time.Time, log *Logger) (map[string
 }
 
 // processIncrementalPriceUpdates appends price points for symbols in the weekly and monthly maps
-func processIncrementalPriceUpdates(quotes []types.Symbol, bulkQuotes map[string]*types.PriceData, weeklyMap, monthlyMap map[string]bool, date time.Time, log *Logger) int {
+func processIncrementalPriceUpdates(quotes []types.Symbol, bulkQuotes map[string]*types.PriceData, weeklyMap, monthlyMap map[string]bool, date time.Time, log *log.Logger) int {
 	updated := 0
 
 	weekStart := calculator.StartOfWeek(date)
@@ -243,7 +244,7 @@ func processIncrementalPriceUpdates(quotes []types.Symbol, bulkQuotes map[string
 		// Check if needs weekly update
 		if weeklyMap[quote.Ticker] {
 			if err := appendPricePoint(priceData, weekStart, types.IntervalWeekly); err != nil {
-				log.Error("Failed to append weekly price for %s: %v\n", quote.Ticker, err)
+				log.Errorf("Failed to append weekly price for %s: %v\n", quote.Ticker, err)
 			} else {
 				updated++
 			}
@@ -252,7 +253,7 @@ func processIncrementalPriceUpdates(quotes []types.Symbol, bulkQuotes map[string
 		// Check if needs monthly update
 		if monthlyMap[quote.Ticker] {
 			if err := appendPricePoint(priceData, monthStart, types.IntervalMonthly); err != nil {
-				log.Error("Failed to append monthly price for %s: %v\n", quote.Ticker, err)
+				log.Errorf("Failed to append monthly price for %s: %v\n", quote.Ticker, err)
 			} else {
 				updated++
 			}
@@ -277,7 +278,7 @@ func appendPricePoint(priceData *types.PriceData, periodStart time.Time, interva
 }
 
 // RunQuoteUpdater runs the quote updater in a loop
-func RunQuoteUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger) {
+func RunQuoteUpdater(ctx context.Context, wg *sync.WaitGroup, log *log.Logger) {
 	defer wg.Done()
 
 	// Singleton check
@@ -302,7 +303,7 @@ func RunQuoteUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger) {
 	// Run immediately on start
 	yesterday := time.Now().AddDate(0, 0, -1)
 	if err := UpdateQuotes(ctx, yesterday, log); err != nil {
-		log.Error("Quote update failed: %v\n", err)
+		log.Errorf("Quote update failed: %v\n", err)
 	}
 
 	for {
@@ -313,7 +314,7 @@ func RunQuoteUpdater(ctx context.Context, wg *sync.WaitGroup, log *Logger) {
 		case <-ticker.C:
 			yesterday := time.Now().AddDate(0, 0, -1)
 			if err := UpdateQuotes(ctx, yesterday, log); err != nil {
-				log.Error("Quote update failed: %v\n", err)
+				log.Errorf("Quote update failed: %v\n", err)
 			}
 		}
 	}
