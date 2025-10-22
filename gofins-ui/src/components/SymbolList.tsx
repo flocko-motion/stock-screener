@@ -35,9 +35,10 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
     const [symbols, setSymbols] = useState<Symbol[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    // Load filters from sessionStorage or use defaults
+    // Load filters from sessionStorage or use defaults (per endpoint)
+    const storageKey = `symbolListFilters_${endpoint}`;
     const getStoredFilters = () => {
-        const stored = sessionStorage.getItem('symbolListFilters');
+        const stored = sessionStorage.getItem(storageKey);
         return stored ? JSON.parse(stored) : {};
     };
 
@@ -54,23 +55,24 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
     const [oldestPriceMin, setOldestPriceMin] = useState(filters.oldestPriceMin || '');
     const [oldestPriceMax, setOldestPriceMax] = useState(filters.oldestPriceMax || '');
     const [favoritesOnly, setFavoritesOnly] = useState(filters.favoritesOnly ?? defaultFavoritesOnly);
+    const [ratedOnly, setRatedOnly] = useState(filters.ratedOnly || false);
     const [filtersExpanded, setFiltersExpanded] = useState(false);
     const [ratingMin, setRatingMin] = useState(filters.ratingMin || '');
     const [ratingMax, setRatingMax] = useState(filters.ratingMax || '');
-    const [sortColumn, setSortColumn] = useState<keyof Symbol>(filters.sortColumn || 'ticker');
+    const [sortColumn, setSortColumn] = useState<keyof Symbol | 'deltaAth'>(filters.sortColumn || 'ticker');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(filters.sortDirection || 'asc');
     const itemsPerPage = 100;
 
-    // Save filters to sessionStorage whenever they change
+    // Save filters to sessionStorage whenever they change (per endpoint)
     useEffect(() => {
-        sessionStorage.setItem('symbolListFilters', JSON.stringify({
+        sessionStorage.setItem(storageKey, JSON.stringify({
             searchTerm, exchangeFilter, countryFilter, sectorFilter,
             mcapMin, mcapMax, inceptionMin, inceptionMax,
-            oldestPriceMin, oldestPriceMax, favoritesOnly,
+            oldestPriceMin, oldestPriceMax, favoritesOnly, ratedOnly,
             ratingMin, ratingMax, sortColumn, sortDirection
         }));
-    }, [searchTerm, exchangeFilter, countryFilter, sectorFilter, mcapMin, mcapMax,
-        inceptionMin, inceptionMax, oldestPriceMin, oldestPriceMax, favoritesOnly,
+    }, [storageKey, searchTerm, exchangeFilter, countryFilter, sectorFilter, mcapMin, mcapMax,
+        inceptionMin, inceptionMax, oldestPriceMin, oldestPriceMax, favoritesOnly, ratedOnly,
         ratingMin, ratingMax, sortColumn, sortDirection]);
 
     const toggleFavorite = async (ticker: string, e: React.MouseEvent) => {
@@ -233,16 +235,33 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
         }
 
         if (favoritesOnly && !symbol.isFavorite) return false;
-        if (ratingMin && (!symbol.userRating || symbol.userRating < parseInt(ratingMin))) return false;
-        if (ratingMax && (!symbol.userRating || symbol.userRating > parseInt(ratingMax))) return false;
+        if (ratedOnly && symbol.userRating == null) return false;
+
+        // Rating filters: treat null/undefined as 0 when ratingMin is 0
+        const rating = symbol.userRating ?? 0;
+        if (ratingMin && rating < parseInt(ratingMin)) return false;
+        if (ratingMax && rating > parseInt(ratingMax)) return false;
 
         return true;
     });
 
     // Sort the filtered results
     const sortedSymbols = [...matchedSymbols].sort((a, b) => {
-        const aVal = a[sortColumn];
-        const bVal = b[sortColumn];
+        let aVal: any;
+        let bVal: any;
+
+        // Special handling for delta ATH (calculated field)
+        if (sortColumn === 'deltaAth') {
+            aVal = (a.currentPriceUsd != null && a.ath12m != null && a.ath12m > 0)
+                ? ((a.currentPriceUsd / a.ath12m - 1) * 100)
+                : null;
+            bVal = (b.currentPriceUsd != null && b.ath12m != null && b.ath12m > 0)
+                ? ((b.currentPriceUsd / b.ath12m - 1) * 100)
+                : null;
+        } else {
+            aVal = a[sortColumn];
+            bVal = b[sortColumn];
+        }
 
         // Handle null/undefined
         if (aVal == null && bVal == null) return 0;
@@ -269,7 +288,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
     const paginatedSymbols = sortedSymbols.slice(startIndex, endIndex);
 
     // Handle column header click for sorting
-    const handleSort = (column: keyof Symbol) => {
+    const handleSort = (column: keyof Symbol | 'deltaAth') => {
         if (sortColumn === column) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
@@ -403,8 +422,12 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                             ))}
                         </select>
                         <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
+                            <input type="checkbox" checked={ratedOnly} onChange={(e) => setRatedOnly(e.target.checked)} className="rounded" />
+                            <span>Rated</span>
+                        </label>
+                        <label className="flex items-center gap-2 text-sm px-2 py-1 border border-gray-300 rounded bg-white">
                             <input type="checkbox" checked={favoritesOnly} onChange={(e) => setFavoritesOnly(e.target.checked)} className="rounded" />
-                            <span>⭐ Favorites only</span>
+                            <span>Fav</span>
                         </label>
                         <button
                             onClick={() => {
@@ -419,6 +442,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                                 setOldestPriceMin('');
                                 setOldestPriceMax('');
                                 setFavoritesOnly(false);
+                                setRatedOnly(false);
                                 setRatingMin('');
                                 setRatingMax('');
                             }}
@@ -458,7 +482,7 @@ export default function SymbolList({ endpoint, description, onOpenSymbol, defaul
                                 <th onClick={() => handleSort('inception')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Incept {sortColumn === 'inception' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('oldestPrice')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">History {sortColumn === 'oldestPrice' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('currentPriceUsd')} className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">Price {sortColumn === 'currentPriceUsd' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
-                                <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16">ΔATH</th>
+                                <th onClick={() => handleSort('deltaAth')} className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">ΔATH {sortColumn === 'deltaAth' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                                 <th onClick={() => handleSort('marketCap')} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase w-16 cursor-pointer hover:bg-gray-100">MCap {sortColumn === 'marketCap' && (sortDirection === 'asc' ? '↑' : '↓')}</th>
                             </tr>
                         </thead>

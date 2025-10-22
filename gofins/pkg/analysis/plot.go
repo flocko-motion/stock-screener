@@ -575,7 +575,10 @@ func (l *logTickFormatter) Ticks(min, max float64) []plot.Tick {
 
 	// If too many ticks, only show labels for every nth tick
 	if len(ticks) > 15 {
-		step := len(ticks) / 20 // Show ~10 labels
+		step := len(ticks) / 20
+		if step == 0 {
+			step = 1
+		}
 		for i := range ticks {
 			if i%step != 0 {
 				ticks[i].Label = "" // Keep tick mark but remove label

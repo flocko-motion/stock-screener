@@ -115,13 +115,15 @@ func putSymbolsBatch(symbols []types.Symbol) error {
 func GetSymbol(ticker string) (*types.Symbol, error) {
 	db := Db()
 	query := `
-		SELECT ticker, exchange, last_price_update, last_profile_update,
-			   last_price_status, last_profile_status,
-			   name, type, currency, sector, industry, country,
-			   description, website, isin, cik, inception, oldest_price, is_actively_trading, market_cap, primary_listing,
-			   ath12m, current_price_usd, current_price_time
-		FROM symbols
-		WHERE ticker = $1
+		SELECT s.ticker, s.exchange, s.last_price_update, s.last_profile_update,
+			   s.last_price_status, s.last_profile_status,
+			   s.name, s.type, s.currency, s.sector, s.industry, s.country,
+			   s.description, s.website, s.isin, s.cik, s.inception, s.oldest_price, s.is_actively_trading, s.market_cap, s.primary_listing,
+			   s.ath12m, s.current_price_usd, s.current_price_time,
+			   COALESCE(f.ticker IS NOT NULL, false) as is_favorite
+		FROM symbols s
+		LEFT JOIN user_favorites f ON s.ticker = f.ticker
+		WHERE s.ticker = $1
 	`
 
 	s := &types.Symbol{}
@@ -131,6 +133,7 @@ func GetSymbol(ticker string) (*types.Symbol, error) {
 		&s.Name, &s.Type, &s.Currency, &s.Sector, &s.Industry, &s.Country,
 		&s.Description, &s.Website, &s.ISIN, &s.CIK, &s.Inception, &s.OldestPrice, &s.IsActivelyTrading, &s.MarketCap, &s.PrimaryListing,
 		&s.Ath12M, &s.CurrentPriceUsd, &s.CurrentPriceTime,
+		&s.IsFavorite,
 	)
 
 	if err == sql.ErrNoRows {

@@ -11,7 +11,7 @@ func TestPlot(t *testing.T) {
 	to := time.Now()
 	from := time.Date(2009, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	const symbol = "AAPL"
+	const symbol = "BAH"
 
 	prices, err := db.GetWeeklyPrices(symbol, from, to)
 	if err != nil {
